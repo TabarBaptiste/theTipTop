@@ -1,0 +1,268 @@
+// ===========================================
+// Service Participations
+// ===========================================
+
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
+import { TicketsService, PRIZE_LABELS } from '../tickets/tickets.service';
+import { Participation, PrizeType } from '@prisma/client';
+
+@Injectable()
+export class ParticipationsService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly ticketsService: TicketsService,
+  ) {}
+
+  /**
+   * Créer une participation (utiliser un code)
+   */
+  async participate(userId: string, code: string) {
+    const normalizedCode = code.toUpperCase().trim();
+
+    // Vérifier le code
+    const verification = await this.ticketsService.verifyCode(normalizedCode);
+    if (!verification.isValid || !verification.ticket) {
+      throw new BadRequestException(verification.error || 'Code invalide');
+    }
+
+    const ticket = verification.ticket;
+
+    // Transaction pour éviter les race conditions
+    const participation = await this.prisma.$transaction(async (tx) => {
+      // Double vérification dans la transaction
+      const ticketCheck = await tx.ticket.findUnique({
+        where: { code: normalizedCode },
+        include: { participation: true },
+      });
+
+      if (!ticketCheck) {
+        throw new NotFoundException('Ticket non trouvé');
+      }
+
+      if (ticketCheck.isUsed || ticketCheck.participation) {
+        throw new ConflictException('Ce code a déjà été utilisé');
+      }
+
+      // Marquer le ticket comme utilisé
+      await tx.ticket.update({
+        where: { id: ticketCheck.id },
+        data: {
+          isUsed: true,
+          usedAt: new Date(),
+        },
+      });
+
+      // Créer la participation
+      return tx.participation.create({
+        data: {
+          userId,
+          ticketId: ticketCheck.id,
+        },
+        include: {
+          ticket: true,
+          user: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      });
+    });
+
+    return {
+      id: participation.id,
+      code: normalizedCode,
+      prizeType: ticket.prizeType,
+      prize: PRIZE_LABELS[ticket.prizeType],
+      participatedAt: participation.createdAt,
+      prizeDelivered: participation.prizeDelivered,
+    };
+  }
+
+  /**
+   * Récupère les participations d'un utilisateur
+   */
+  async findByUser(userId: string) {
+    const participations = await this.prisma.participation.findMany({
+      where: { userId },
+      include: {
+        ticket: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return participations.map((p) => ({
+      id: p.id,
+      code: p.ticket.code,
+      prizeType: p.ticket.prizeType,
+      prize: PRIZE_LABELS[p.ticket.prizeType],
+      participatedAt: p.createdAt,
+      prizeDelivered: p.prizeDelivered,
+      prizeDeliveredAt: p.prizeDeliveredAt,
+      deliveryMethod: p.deliveryMethod,
+    }));
+  }
+
+  /**
+   * Récupère une participation par ID
+   */
+  async findById(id: string) {
+    const participation = await this.prisma.participation.findUnique({
+      where: { id },
+      include: {
+        ticket: true,
+        user: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+    });
+
+    if (!participation) {
+      throw new NotFoundException('Participation non trouvée');
+    }
+
+    return {
+      ...participation,
+      prize: PRIZE_LABELS[participation.ticket.prizeType],
+    };
+  }
+
+  /**
+   * Recherche une participation par code ticket
+   */
+  async findByCode(code: string) {
+    const normalizedCode = code.toUpperCase().trim();
+
+    const ticket = await this.prisma.ticket.findUnique({
+      where: { code: normalizedCode },
+      include: {
+        participation: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!ticket) {
+      throw new NotFoundException('Ticket non trouvé');
+    }
+
+    if (!ticket.participation) {
+      return {
+        ticket: {
+          code: ticket.code,
+          prizeType: ticket.prizeType,
+          prize: PRIZE_LABELS[ticket.prizeType],
+          isUsed: ticket.isUsed,
+        },
+        participation: null,
+      };
+    }
+
+    return {
+      ticket: {
+        code: ticket.code,
+        prizeType: ticket.prizeType,
+        prize: PRIZE_LABELS[ticket.prizeType],
+        isUsed: ticket.isUsed,
+      },
+      participation: {
+        id: ticket.participation.id,
+        user: ticket.participation.user,
+        participatedAt: ticket.participation.createdAt,
+        prizeDelivered: ticket.participation.prizeDelivered,
+        prizeDeliveredAt: ticket.participation.prizeDeliveredAt,
+        deliveryMethod: ticket.participation.deliveryMethod,
+      },
+    };
+  }
+
+  /**
+   * Liste toutes les participations (admin)
+   */
+  async findAll(options: {
+    page?: number;
+    limit?: number;
+    prizeDelivered?: boolean;
+  }) {
+    const { page = 1, limit = 20, prizeDelivered } = options;
+    const skip = (page - 1) * limit;
+
+    const where: any = {};
+    if (prizeDelivered !== undefined) {
+      where.prizeDelivered = prizeDelivered;
+    }
+
+    const [participations, total] = await Promise.all([
+      this.prisma.participation.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          ticket: true,
+          user: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      }),
+      this.prisma.participation.count({ where }),
+    ]);
+
+    return {
+      data: participations.map((p) => ({
+        id: p.id,
+        code: p.ticket.code,
+        prizeType: p.ticket.prizeType,
+        prize: PRIZE_LABELS[p.ticket.prizeType],
+        user: p.user,
+        participatedAt: p.createdAt,
+        prizeDelivered: p.prizeDelivered,
+        prizeDeliveredAt: p.prizeDeliveredAt,
+      })),
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  /**
+   * Compte le nombre de participants uniques
+   */
+  async countUniqueParticipants(): Promise<number> {
+    const result = await this.prisma.participation.groupBy({
+      by: ['userId'],
+    });
+    return result.length;
+  }
+}

@@ -1,0 +1,197 @@
+// ===========================================
+// Schéma Prisma - Thé Tip Top
+// ===========================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===========================================
+// UTILISATEURS
+// ===========================================
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  password      String?   // Null si connexion OAuth uniquement
+  firstName     String
+  lastName      String
+  birthDate     DateTime?
+  gender        Gender?
+  phone         String?
+
+  // OAuth providers
+  googleId      String?   @unique
+  facebookId    String?   @unique
+
+  // Rôle
+  role          Role      @default(CLIENT)
+
+  // RGPD - Consentements
+  consentEmail  Boolean   @default(false)
+  consentData   Boolean   @default(false)
+
+  // Relations
+  participations Participation[]
+
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime? // Soft delete pour RGPD
+
+  @@index([email])
+  @@index([googleId])
+  @@index([facebookId])
+  @@map("users")
+}
+
+enum Role {
+  CLIENT
+  EMPLOYEE
+  ADMIN
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+// ===========================================
+// TICKETS (500 000 codes pré-générés)
+// ===========================================
+model Ticket {
+  id            String    @id @default(uuid())
+  code          String    @unique @db.VarChar(10)
+
+  // Gain associé (pré-attribué à la génération)
+  prizeType     PrizeType
+
+  // Statut
+  isUsed        Boolean   @default(false)      // Code utilisé par un client
+  isDistributed Boolean   @default(false)      // Ticket imprimé/donné en magasin
+
+  // Relation avec participation
+  participation Participation?
+
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  usedAt        DateTime?
+
+  @@index([code])
+  @@index([isUsed])
+  @@index([isDistributed])
+  @@index([prizeType])
+  @@map("tickets")
+}
+
+enum PrizeType {
+  INFUSER       // 60% - Infuseur à thé
+  TEA_DETOX     // 20% - Boite 100g thé détox ou infusion
+  TEA_SIGNATURE // 10% - Boite 100g thé signature
+  GIFT_BOX_39   // 6%  - Coffret découverte 39€
+  GIFT_BOX_69   // 4%  - Coffret découverte 69€
+}
+
+// ===========================================
+// PARTICIPATIONS (lien User <-> Ticket)
+// ===========================================
+model Participation {
+  id            String    @id @default(uuid())
+
+  // Relations
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ticketId      String    @unique
+  ticket        Ticket    @relation(fields: [ticketId], references: [id])
+
+  // Remise du lot
+  prizeDelivered     Boolean   @default(false)
+  prizeDeliveredAt   DateTime?
+  prizeDeliveredBy   String?   // ID de l'employé qui a remis le lot
+  deliveryMethod     DeliveryMethod?
+
+  // Timestamps
+  createdAt     DateTime  @default(now())
+
+  @@index([userId])
+  @@index([prizeDelivered])
+  @@index([createdAt])
+  @@map("participations")
+}
+
+enum DeliveryMethod {
+  IN_STORE  // Remis en boutique
+  ONLINE    // Envoyé (futur site e-commerce)
+}
+
+// ===========================================
+// CONFIGURATION DU JEU-CONCOURS
+// ===========================================
+model GameConfig {
+  id            String    @id @default(uuid())
+
+  // Dates du jeu
+  startDate     DateTime                    // Début du jeu
+  endDate       DateTime                    // Fin distribution tickets (30 jours)
+  claimEndDate  DateTime                    // Fin réclamation lots (+30 jours)
+
+  // Limites
+  maxTickets    Int       @default(500000)
+
+  // Grand Prix
+  grandPrizeDrawn     Boolean   @default(false)
+  grandPrizeWinnerId  String?
+  grandPrizeDrawnAt   DateTime?
+
+  // Status
+  isActive      Boolean   @default(true)
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("game_configs")
+}
+
+// ===========================================
+// LOGS D'AUDIT (RGPD)
+// ===========================================
+model AuditLog {
+  id            String    @id @default(uuid())
+  userId        String?
+  action        String    // CREATE, UPDATE, DELETE, LOGIN, etc.
+  entity        String    // User, Ticket, Participation, etc.
+  entityId      String?
+  oldValue      Json?
+  newValue      Json?
+  ipAddress     String?
+  userAgent     String?
+  createdAt     DateTime  @default(now())
+
+  @@index([userId])
+  @@index([entity, entityId])
+  @@index([createdAt])
+  @@index([action])
+  @@map("audit_logs")
+}
+
+// ===========================================
+// REFRESH TOKENS
+// ===========================================
+model RefreshToken {
+  id            String    @id @default(uuid())
+  token         String    @unique
+  userId        String
+  expiresAt     DateTime
+  createdAt     DateTime  @default(now())
+  revokedAt     DateTime?
+
+  @@index([userId])
+  @@index([token])
+  @@map("refresh_tokens")
+}

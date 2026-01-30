@@ -1,0 +1,18 @@
+# Fichiers et dossiers à ignorer par Docker
+node_modules
+npm-debug.log
+.next
+out
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+coverage
+*.md
+!README.md
+.vscode
+.idea
+*.log
+cypress/videos
+cypress/screenshots

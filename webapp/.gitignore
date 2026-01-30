@@ -1,0 +1,38 @@
+# Dépendances
+node_modules/
+.pnp/
+.pnp.js
+
+# Build
+.next/
+out/
+build/
+dist/
+
+# Environnement
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Tests
+coverage/
+cypress/videos/
+cypress/screenshots/
+
+# Misc
+*.tsbuildinfo
+next-env.d.ts

@@ -1,0 +1,140 @@
+// ===========================================
+// Tests unitaires - Auth Service
+// ===========================================
+
+import { Test, TestingModule } from '@nestjs/testing';
+import { AuthService } from './auth.service';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { PrismaService } from '../../prisma/prisma.service';
+import { UnauthorizedException, ConflictException } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
+
+describe('AuthService', () => {
+  let service: AuthService;
+  let prismaService: PrismaService;
+  let jwtService: JwtService;
+
+  const mockPrismaService = {
+    user: {
+      findUnique: jest.fn(),
+      create: jest.fn(),
+    },
+    refreshToken: {
+      create: jest.fn(),
+      findFirst: jest.fn(),
+      delete: jest.fn(),
+      deleteMany: jest.fn(),
+    },
+  };
+
+  const mockJwtService = {
+    sign: jest.fn(),
+    verify: jest.fn(),
+  };
+
+  const mockConfigService = {
+    get: jest.fn((key: string) => {
+      const config: Record<string, string> = {
+        JWT_SECRET: 'test-secret',
+        JWT_REFRESH_SECRET: 'test-refresh-secret',
+        JWT_EXPIRATION: '15m',
+        JWT_REFRESH_EXPIRATION: '7d',
+        FRONTEND_URL: 'http://localhost:3000',
+      };
+      return config[key];
+    }),
+  };
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        AuthService,
+        { provide: PrismaService, useValue: mockPrismaService },
+        { provide: JwtService, useValue: mockJwtService },
+        { provide: ConfigService, useValue: mockConfigService },
+      ],
+    }).compile();
+
+    service = module.get<AuthService>(AuthService);
+    prismaService = module.get<PrismaService>(PrismaService);
+    jwtService = module.get<JwtService>(JwtService);
+
+    jest.clearAllMocks();
+  });
+
+  it('should be defined', () => {
+    expect(service).toBeDefined();
+  });
+
+  describe('validateUser', () => {
+    const mockUser = {
+      id: '1',
+      email: 'test@example.com',
+      password: bcrypt.hashSync('password123', 10),
+      firstName: 'Test',
+      lastName: 'User',
+      role: 'CLIENT',
+    };
+
+    it('should return user if credentials are valid', async () => {
+      mockPrismaService.user.findUnique.mockResolvedValue(mockUser);
+
+      const result = await service.validateUser('test@example.com', 'password123');
+
+      expect(result).toBeDefined();
+      expect(result?.email).toBe(mockUser.email);
+      expect(result).not.toHaveProperty('password');
+    });
+
+    it('should throw UnauthorizedException if user not found', async () => {
+      mockPrismaService.user.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.validateUser('notfound@example.com', 'password'),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should throw UnauthorizedException if password is invalid', async () => {
+      mockPrismaService.user.findUnique.mockResolvedValue(mockUser);
+
+      await expect(
+        service.validateUser('test@example.com', 'wrongpassword'),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+  });
+
+  describe('register', () => {
+    const registerDto = {
+      email: 'new@example.com',
+      password: 'Password123',
+      firstName: 'New',
+      lastName: 'User',
+      rgpdConsent: true,
+      consentData: true,
+    };
+
+    it('should create a new user', async () => {
+      mockPrismaService.user.findUnique.mockResolvedValue(null);
+      mockPrismaService.user.create.mockResolvedValue({
+        id: '2',
+        ...registerDto,
+        role: 'CLIENT',
+      });
+      mockJwtService.sign.mockReturnValue('mock-token');
+      mockPrismaService.refreshToken.create.mockResolvedValue({});
+
+      const result = await service.register(registerDto);
+
+      expect(result).toHaveProperty('user');
+      expect(result).toHaveProperty('accessToken');
+      expect(result).toHaveProperty('refreshToken');
+    });
+
+    it('should throw ConflictException if email already exists', async () => {
+      mockPrismaService.user.findUnique.mockResolvedValue({ id: '1' });
+
+      await expect(service.register(registerDto)).rejects.toThrow(ConflictException);
+    });
+  });
+});

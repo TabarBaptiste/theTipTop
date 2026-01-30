@@ -1,0 +1,116 @@
+# ===========================================
+# Docker Compose - Thé Tip Top (Développement)
+# ===========================================
+# Usage: docker-compose up -d
+
+services:
+  # --- Base de données PostgreSQL ---
+  postgres:
+    image: postgres:16-alpine
+    container_name: thetiptop-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: thetiptop
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-thetiptop_dev}
+      POSTGRES_DB: thetiptop
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U thetiptop -d thetiptop"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - thetiptop-network
+
+  # --- Redis (Cache & Sessions) ---
+  redis:
+    image: redis:7-alpine
+    container_name: thetiptop-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - thetiptop-network
+
+  # --- API NestJS ---
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+      target: development
+    container_name: thetiptop-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://thetiptop:${DB_PASSWORD:-thetiptop_dev}@postgres:5432/thetiptop?schema=public
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET:-dev-jwt-secret-change-in-production}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev-refresh-secret-change-in-production}
+      FRONTEND_URL: http://localhost:3000
+      PORT: 3001
+    volumes:
+      - ./api:/app
+      - /app/node_modules
+    ports:
+      - "3001:3001"
+    networks:
+      - thetiptop-network
+
+  # --- Frontend Next.js ---
+  webapp:
+    build:
+      context: ./webapp
+      dockerfile: Dockerfile
+      target: development
+    container_name: thetiptop-webapp
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: http://localhost:3001/api/v1
+    volumes:
+      - ./webapp:/app
+      - /app/node_modules
+      - /app/.next
+    ports:
+      - "3000:3000"
+    networks:
+      - thetiptop-network
+
+  # --- Adminer (Interface DB pour dev) ---
+  adminer:
+    image: adminer:latest
+    container_name: thetiptop-adminer
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    ports:
+      - "8080:8080"
+    networks:
+      - thetiptop-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  thetiptop-network:
+    driver: bridge

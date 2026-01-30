@@ -1,0 +1,137 @@
+# ===========================================
+# Docker Compose - Thé Tip Top (Production)
+# ===========================================
+# Usage: docker-compose -f docker-compose.prod.yml up -d
+
+services:
+  # --- Base de données PostgreSQL ---
+  postgres:
+    image: postgres:16-alpine
+    container_name: thetiptop-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: thetiptop
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: thetiptop
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U thetiptop -d thetiptop"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - thetiptop-internal
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # --- Redis (Cache & Sessions) ---
+  redis:
+    image: redis:7-alpine
+    container_name: thetiptop-redis
+    restart: always
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - thetiptop-internal
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  # --- API NestJS ---
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+      target: production
+    container_name: thetiptop-api
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://thetiptop:${DB_PASSWORD}@postgres:5432/thetiptop?schema=public
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL}
+      FACEBOOK_APP_ID: ${FACEBOOK_APP_ID}
+      FACEBOOK_APP_SECRET: ${FACEBOOK_APP_SECRET}
+      FACEBOOK_CALLBACK_URL: ${FACEBOOK_CALLBACK_URL}
+      FRONTEND_URL: ${FRONTEND_URL}
+      PORT: 3001
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.thetiptop-api.rule=Host(`api.thetiptop.dsp5-archi-o23-15m-g5.fr`)"
+      - "traefik.http.routers.thetiptop-api.entrypoints=websecure"
+      - "traefik.http.routers.thetiptop-api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.thetiptop-api.loadbalancer.server.port=3001"
+    networks:
+      - thetiptop-internal
+      - thetiptop-public
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # --- Frontend Next.js ---
+  webapp:
+    build:
+      context: ./webapp
+      dockerfile: Dockerfile
+      target: production
+    container_name: thetiptop-webapp
+    restart: always
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.thetiptop-webapp.rule=Host(`www.thetiptop.dsp5-archi-o23-15m-g5.fr`) || Host(`thetiptop.dsp5-archi-o23-15m-g5.fr`)"
+      - "traefik.http.routers.thetiptop-webapp.entrypoints=websecure"
+      - "traefik.http.routers.thetiptop-webapp.tls.certresolver=letsencrypt"
+      - "traefik.http.services.thetiptop-webapp.loadbalancer.server.port=3000"
+      # Redirection www vers non-www
+      - "traefik.http.middlewares.thetiptop-redirect.redirectregex.regex=^https://www\\.thetiptop\\.dsp5-archi-o23-15m-g5\\.fr/(.*)"
+      - "traefik.http.middlewares.thetiptop-redirect.redirectregex.replacement=https://thetiptop.dsp5-archi-o23-15m-g5.fr/$${1}"
+    networks:
+      - thetiptop-internal
+      - thetiptop-public
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  thetiptop-internal:
+    driver: bridge
+  thetiptop-public:
+    external: true
+    name: traefik_network
