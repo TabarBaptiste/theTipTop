@@ -102,24 +102,9 @@ Enfin, votre agence devra prendre en compte que dans sa démarche éco-responsab
 
 # Travail demandé
 
-## Phase 1 : Workflow de production
+## Site du jeu-concours
 
-Il vous est donc demandé de réaliser dans un premier temps le cahier des spécifications techniques pour le workflow et le workflow en lui-même pour l'agence.
-
-### Contraintes et demandes
-
-- Préconisations techniques avec justification des choix techniques des différentes briques logicielles (serveur CI, SCM, metrics, reverse proxy…)
-- Diagramme d'infrastructure complet du workflow
-- Diagrammes UML et BPNM afin de présenter les procédures mises en place avec le workflow
-- Détermination des facteurs-risques
-- Une estimation des coûts d'études, de développement et de suivis
-- Les différentes procédures rédigées pour les utilisateurs
-- Une fiche de poste pour le recrutement d'une ressource pour la gestion et maintenance du workflow ainsi qu'une proposition de formation
-- Une présentation type PowerPoint
-
-## Phase 2 : Site du jeu-concours
-
-Dans un second temps, vous devrez réaliser le cahier des charges et le site internet du jeu-concours pour le client Thé Tip Top.
+Vous devrez réaliser le cahier des charges et le site internet du jeu-concours pour le client Thé Tip Top.
 
 ### Contraintes et demandes
 
