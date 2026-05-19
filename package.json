@@ -8,7 +8,6 @@
         "webapp"
     ],
     "scripts": {
-        "install": "npm install",
         "build": "npm run build --workspaces",
         "test": "npm test --workspaces",
         "lint": "npm run lint --workspaces"
