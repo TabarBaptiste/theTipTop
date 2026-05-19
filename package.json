@@ -1,0 +1,16 @@
+{
+    "name": "thetiptop",
+    "version": "1.0.0",
+    "description": "TheTipTop - Promotional Contest Platform",
+    "private": true,
+    "workspaces": [
+        "api",
+        "webapp"
+    ],
+    "scripts": {
+        "install": "npm install",
+        "build": "npm run build --workspaces",
+        "test": "npm test --workspaces",
+        "lint": "npm run lint --workspaces"
+    }
+}
