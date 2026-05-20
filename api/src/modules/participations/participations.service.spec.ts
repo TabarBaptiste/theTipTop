@@ -41,7 +41,6 @@ describe('ParticipationsService', () => {
     }).compile();
 
     service = module.get<ParticipationsService>(ParticipationsService);
-    _prismaService = module.get<PrismaService>(PrismaService);
 
     jest.clearAllMocks();
   });

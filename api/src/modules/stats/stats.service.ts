@@ -46,7 +46,6 @@ export class StatsService {
     if (gameConfig) {
       const now = new Date();
       if (now < gameConfig.startDate) {
-        gamePhase = 'not_started';
         daysRemaining = Math.ceil(
           (gameConfig.endDate.getTime() - gameConfig.startDate.getTime()) / (1000 * 60 * 60 * 24),
         );

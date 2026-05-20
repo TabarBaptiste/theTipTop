@@ -4,7 +4,7 @@
 
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import * as crypto from 'crypto';
+import { randomInt } from 'node:crypto';
 
 @Injectable()
 export class GrandPrizeService {
@@ -82,7 +82,7 @@ export class GrandPrizeService {
     }
 
     // Tirage au sort cryptographiquement sécurisé
-    const randomIndex = crypto.randomInt(0, participantIds.length);
+    const randomIndex = randomInt(0, participantIds.length);
     const winnerId = participantIds[randomIndex].userId;
 
     // Récupérer les infos du gagnant
@@ -162,8 +162,22 @@ export class GrandPrizeService {
     }
 
     // Récupérer le gagnant
+    const winnerId = gameConfig.grandPrizeWinnerId;
+    if (!winnerId) {
+      return {
+        drawn: true,
+        drawnAt: gameConfig.grandPrizeDrawnAt,
+        winner: null,
+        totalParticipants: (await this.prisma.participation.groupBy({ by: ['userId'] })).length,
+        prize: {
+          name: 'Un an de thé',
+          value: '360€',
+        },
+      };
+    }
+
     const winner = await this.prisma.user.findUnique({
-      where: { id: gameConfig.grandPrizeWinnerId! },
+      where: { id: winnerId },
       select: {
         id: true,
         email: true,
@@ -182,7 +196,7 @@ export class GrandPrizeService {
         ? {
             id: winner.id,
             firstName: winner.firstName,
-            lastName: winner.lastName?.charAt(0) + '.',
+            lastName: `${winner.lastName?.slice(0, 1) ?? ''}.`,
             email: this.maskEmail(winner.email),
           }
         : null,
@@ -201,9 +215,7 @@ export class GrandPrizeService {
     const [local, domain] = email.split('@');
     if (!local || !domain) return '***@***.***';
     const maskedLocal =
-      local.length > 2
-        ? local.charAt(0) + '*'.repeat(local.length - 2) + local.charAt(local.length - 1)
-        : '**';
+      local.length > 2 ? local.slice(0, 1) + '*'.repeat(local.length - 2) + local.slice(-1) : '**';
     return `${maskedLocal}@${domain}`;
   }
 }

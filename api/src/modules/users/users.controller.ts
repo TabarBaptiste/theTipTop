@@ -81,7 +81,6 @@ export class UsersController {
     // Un client ne peut modifier que son propre profil
     const targetId = currentUser.role === 'CLIENT' ? currentUser.id : id;
     const { password: _password, ...user } = await this.usersService.update(targetId, dto);
-    void _password;
     return user;
   }
 
@@ -119,7 +118,6 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'Rôle mis à jour' })
   async changeRole(@Param('id') id: string, @Body('role') role: Role) {
     const { password: _password, ...user } = await this.usersService.changeRole(id, role);
-    void _password;
     return user;
   }
 }

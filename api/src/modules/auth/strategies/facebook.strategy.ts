@@ -11,16 +11,16 @@ import { AuthService } from '../auth.service';
 @Injectable()
 export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
   constructor(
-    private configService: ConfigService,
-    private authService: AuthService,
+    private readonly configService: ConfigService,
+    private readonly authService: AuthService,
   ) {
     super({
-      clientID: configService.get<string>('FACEBOOK_APP_ID'),
-      clientSecret: configService.get<string>('FACEBOOK_APP_SECRET'),
-      callbackURL: configService.get<string>('FACEBOOK_CALLBACK_URL'),
+      clientID: configService.getOrThrow<string>('FACEBOOK_APP_ID'),
+      clientSecret: configService.getOrThrow<string>('FACEBOOK_APP_SECRET'),
+      callbackURL: configService.getOrThrow<string>('FACEBOOK_CALLBACK_URL'),
       scope: ['email'],
       profileFields: ['id', 'emails', 'name', 'photos'],
-    });
+    } as any);
   }
 
   async validate(

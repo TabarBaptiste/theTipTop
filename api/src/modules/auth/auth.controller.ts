@@ -129,7 +129,6 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   async getProfile(@CurrentUser() user: User) {
     const { password: _password, ...userWithoutPassword } = user;
-    void _password;
     return userWithoutPassword;
   }
 
@@ -151,12 +150,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Callback Google OAuth' })
   async googleAuthCallback(@Req() req: any, @Res() res: Response) {
     const tokens = await this.authService.login(req.user);
-
-    // Rediriger vers le frontend avec les tokens
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    const redirectUrl = `${frontendUrl}/auth/callback?accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}`;
-
-    return res.redirect(redirectUrl);
+    return this.redirectToFrontend(res, tokens.accessToken, tokens.refreshToken);
   }
 
   // ===========================================
@@ -177,10 +171,15 @@ export class AuthController {
   @ApiOperation({ summary: 'Callback Facebook OAuth' })
   async facebookAuthCallback(@Req() req: any, @Res() res: Response) {
     const tokens = await this.authService.login(req.user);
-
-    // Rediriger vers le frontend avec les tokens
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     const redirectUrl = `${frontendUrl}/auth/callback?accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}`;
+
+    return res.redirect(redirectUrl);
+  }
+
+  private redirectToFrontend(res: Response, accessToken: string, refreshToken: string) {
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const redirectUrl = `${frontendUrl}/auth/callback?accessToken=${accessToken}&refreshToken=${refreshToken}`;
 
     return res.redirect(redirectUrl);
   }

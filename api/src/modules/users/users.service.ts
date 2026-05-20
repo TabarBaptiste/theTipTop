@@ -188,7 +188,6 @@ export class UsersService {
     }
 
     const { password: _password, ...userData } = user;
-    void _password;
     return userData;
   }
 

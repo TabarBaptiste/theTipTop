@@ -62,8 +62,6 @@ describe('AuthService', () => {
     }).compile();
 
     service = module.get<AuthService>(AuthService);
-    _prismaService = module.get<PrismaService>(PrismaService);
-    _jwtService = module.get<JwtService>(JwtService);
 
     jest.clearAllMocks();
   });

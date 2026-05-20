@@ -41,7 +41,7 @@ export class AuthService {
   async validateUser(email: string, password: string): Promise<User | null> {
     const user = await this.usersService.findByEmail(email);
 
-    if (!user || !user.password) {
+    if (!user?.password) {
       return null;
     }
 
@@ -51,7 +51,6 @@ export class AuthService {
     }
 
     const { password: _pw, ...safeUser } = user as any;
-    void _pw;
     return safeUser as User;
   }
 
@@ -88,7 +87,6 @@ export class AuthService {
 
     const tokens = await this.generateTokens(user);
     const { password: _pw, ...safeUser } = user as any;
-    void _pw;
     return {
       user: safeUser,
       ...tokens,
