@@ -74,7 +74,8 @@ export class StatsService {
         used: usedTickets,
         distributed: distributedTickets,
         available: totalTickets - distributedTickets,
-        usageRate: distributedTickets > 0 ? ((usedTickets / distributedTickets) * 100).toFixed(1) : 0,
+        usageRate:
+          distributedTickets > 0 ? ((usedTickets / distributedTickets) * 100).toFixed(1) : 0,
       },
       users: {
         total: totalUsers,
@@ -83,12 +84,14 @@ export class StatsService {
       },
       participations: {
         total: totalParticipations,
-        averagePerUser: uniqueParticipants > 0 ? (totalParticipations / uniqueParticipants).toFixed(1) : 0,
+        averagePerUser:
+          uniqueParticipants > 0 ? (totalParticipations / uniqueParticipants).toFixed(1) : 0,
       },
       prizes: {
         delivered: deliveredPrizes,
         pending: totalParticipations - deliveredPrizes,
-        deliveryRate: totalParticipations > 0 ? ((deliveredPrizes / totalParticipations) * 100).toFixed(1) : 0,
+        deliveryRate:
+          totalParticipations > 0 ? ((deliveredPrizes / totalParticipations) * 100).toFixed(1) : 0,
       },
       game: {
         phase: gamePhase,
@@ -221,11 +224,14 @@ export class StatsService {
     });
 
     // Grouper par jour
-    const byDay = participations.reduce((acc, p) => {
-      const day = p.createdAt.toISOString().split('T')[0];
-      acc[day] = (acc[day] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const byDay = participations.reduce(
+      (acc, p) => {
+        const day = p.createdAt.toISOString().split('T')[0];
+        acc[day] = (acc[day] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
     // Compléter les jours sans participation
     const timeline: { date: string; count: number }[] = [];
@@ -251,10 +257,7 @@ export class StatsService {
   /**
    * Données pour export (emailing)
    */
-  async getEmailingData(options: {
-    consentEmail?: boolean;
-    hasParticipated?: boolean;
-  }) {
+  async getEmailingData(options: { consentEmail?: boolean; hasParticipated?: boolean }) {
     const where: any = {
       role: 'CLIENT',
       deletedAt: null,

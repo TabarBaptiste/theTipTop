@@ -7,13 +7,12 @@ import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
-import { UnauthorizedException, ConflictException } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
+import { ConflictException } from '@nestjs/common';
+import * as bcrypt from 'bcryptjs';
+import { UsersService } from '../users/users.service';
 
 describe('AuthService', () => {
   let service: AuthService;
-  let prismaService: PrismaService;
-  let jwtService: JwtService;
 
   const mockPrismaService = {
     user: {
@@ -31,6 +30,11 @@ describe('AuthService', () => {
   const mockJwtService = {
     sign: jest.fn(),
     verify: jest.fn(),
+  };
+
+  const mockUsersService = {
+    findByEmail: jest.fn(),
+    findById: jest.fn(),
   };
 
   const mockConfigService = {
@@ -51,14 +55,15 @@ describe('AuthService', () => {
       providers: [
         AuthService,
         { provide: PrismaService, useValue: mockPrismaService },
+        { provide: UsersService, useValue: mockUsersService },
         { provide: JwtService, useValue: mockJwtService },
         { provide: ConfigService, useValue: mockConfigService },
       ],
     }).compile();
 
     service = module.get<AuthService>(AuthService);
-    prismaService = module.get<PrismaService>(PrismaService);
-    jwtService = module.get<JwtService>(JwtService);
+    _prismaService = module.get<PrismaService>(PrismaService);
+    _jwtService = module.get<JwtService>(JwtService);
 
     jest.clearAllMocks();
   });
@@ -78,7 +83,7 @@ describe('AuthService', () => {
     };
 
     it('should return user if credentials are valid', async () => {
-      mockPrismaService.user.findUnique.mockResolvedValue(mockUser);
+      mockUsersService.findByEmail.mockResolvedValue(mockUser);
 
       const result = await service.validateUser('test@example.com', 'password123');
 
@@ -88,19 +93,17 @@ describe('AuthService', () => {
     });
 
     it('should throw UnauthorizedException if user not found', async () => {
-      mockPrismaService.user.findUnique.mockResolvedValue(null);
+      mockUsersService.findByEmail.mockResolvedValue(null);
 
-      await expect(
-        service.validateUser('notfound@example.com', 'password'),
-      ).rejects.toThrow(UnauthorizedException);
+      const result = await service.validateUser('notfound@example.com', 'password');
+      expect(result).toBeNull();
     });
 
     it('should throw UnauthorizedException if password is invalid', async () => {
-      mockPrismaService.user.findUnique.mockResolvedValue(mockUser);
+      mockUsersService.findByEmail.mockResolvedValue(mockUser);
 
-      await expect(
-        service.validateUser('test@example.com', 'wrongpassword'),
-      ).rejects.toThrow(UnauthorizedException);
+      const result = await service.validateUser('test@example.com', 'wrongpassword');
+      expect(result).toBeNull();
     });
   });
 
@@ -115,7 +118,7 @@ describe('AuthService', () => {
     };
 
     it('should create a new user', async () => {
-      mockPrismaService.user.findUnique.mockResolvedValue(null);
+      mockUsersService.findByEmail.mockResolvedValue(null);
       mockPrismaService.user.create.mockResolvedValue({
         id: '2',
         ...registerDto,
@@ -132,7 +135,7 @@ describe('AuthService', () => {
     });
 
     it('should throw ConflictException if email already exists', async () => {
-      mockPrismaService.user.findUnique.mockResolvedValue({ id: '1' });
+      mockUsersService.findByEmail.mockResolvedValue({ id: '1' });
 
       await expect(service.register(registerDto)).rejects.toThrow(ConflictException);
     });

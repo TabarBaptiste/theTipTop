@@ -46,7 +46,8 @@ async function bootstrap() {
   // Documentation Swagger
   const config = new DocumentBuilder()
     .setTitle('Thé Tip Top API')
-    .setDescription(`
+    .setDescription(
+      `
       API pour le jeu-concours Thé Tip Top.
       
       ## Fonctionnalités
@@ -62,7 +63,8 @@ async function bootstrap() {
       - **CLIENT** : Peut participer et voir ses gains
       - **EMPLOYEE** : Peut valider et remettre les lots en boutique
       - **ADMIN** : Accès complet aux statistiques et fonctionnalités admin
-    `)
+    `,
+    )
     .setVersion('1.0')
     .addTag('auth', 'Authentification et gestion des comptes')
     .addTag('users', 'Gestion des utilisateurs')

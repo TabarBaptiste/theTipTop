@@ -13,13 +13,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiBody,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { Response } from 'express';
 
 import { AuthService } from './auth.service';
@@ -49,7 +43,7 @@ export class AuthController {
   // ===========================================
   @Public()
   @Post('register')
-  @ApiOperation({ summary: 'Inscription d\'un nouvel utilisateur' })
+  @ApiOperation({ summary: "Inscription d'un nouvel utilisateur" })
   @ApiResponse({
     status: 201,
     description: 'Utilisateur créé avec succès',
@@ -99,17 +93,14 @@ export class AuthController {
   @UseGuards(JwtRefreshGuard)
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Rafraîchir le token d\'accès' })
+  @ApiOperation({ summary: "Rafraîchir le token d'accès" })
   @ApiBody({ type: RefreshTokenDto })
   @ApiResponse({
     status: 200,
     description: 'Token rafraîchi',
   })
   @ApiResponse({ status: 401, description: 'Refresh token invalide' })
-  async refreshToken(
-    @CurrentUser() user: User,
-    @Body() dto: RefreshTokenDto,
-  ) {
+  async refreshToken(@CurrentUser() user: User, @Body() dto: RefreshTokenDto) {
     return this.authService.refreshToken(user.id, dto.refreshToken);
   }
 
@@ -122,10 +113,7 @@ export class AuthController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Déconnexion' })
   @ApiResponse({ status: 200, description: 'Déconnexion réussie' })
-  async logout(
-    @CurrentUser() user: User,
-    @Body() dto: RefreshTokenDto,
-  ) {
+  async logout(@CurrentUser() user: User, @Body() dto: RefreshTokenDto) {
     await this.authService.logout(user.id, dto.refreshToken);
     return { message: 'Déconnexion réussie' };
   }
@@ -136,11 +124,12 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get('me')
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Obtenir le profil de l\'utilisateur connecté' })
+  @ApiOperation({ summary: "Obtenir le profil de l'utilisateur connecté" })
   @ApiResponse({ status: 200, description: 'Profil utilisateur' })
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   async getProfile(@CurrentUser() user: User) {
-    const { password, ...userWithoutPassword } = user;
+    const { password: _password, ...userWithoutPassword } = user;
+    void _password;
     return userWithoutPassword;
   }
 
@@ -162,11 +151,11 @@ export class AuthController {
   @ApiOperation({ summary: 'Callback Google OAuth' })
   async googleAuthCallback(@Req() req: any, @Res() res: Response) {
     const tokens = await this.authService.login(req.user);
-    
+
     // Rediriger vers le frontend avec les tokens
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     const redirectUrl = `${frontendUrl}/auth/callback?accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}`;
-    
+
     return res.redirect(redirectUrl);
   }
 
@@ -188,11 +177,11 @@ export class AuthController {
   @ApiOperation({ summary: 'Callback Facebook OAuth' })
   async facebookAuthCallback(@Req() req: any, @Res() res: Response) {
     const tokens = await this.authService.login(req.user);
-    
+
     // Rediriger vers le frontend avec les tokens
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     const redirectUrl = `${frontendUrl}/auth/callback?accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}`;
-    
+
     return res.redirect(redirectUrl);
   }
 }

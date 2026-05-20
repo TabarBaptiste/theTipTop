@@ -10,7 +10,6 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TicketsService, PRIZE_LABELS } from '../tickets/tickets.service';
-import { Participation, PrizeType } from '@prisma/client';
 
 @Injectable()
 export class ParticipationsService {
@@ -202,11 +201,7 @@ export class ParticipationsService {
   /**
    * Liste toutes les participations (admin)
    */
-  async findAll(options: {
-    page?: number;
-    limit?: number;
-    prizeDelivered?: boolean;
-  }) {
+  async findAll(options: { page?: number; limit?: number; prizeDelivered?: boolean }) {
     const { page = 1, limit = 20, prizeDelivered } = options;
     const skip = (page - 1) * limit;
 

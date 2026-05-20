@@ -31,13 +31,10 @@ export class RegisterDto {
   @IsString()
   @MinLength(8, { message: 'Le mot de passe doit contenir au moins 8 caractères' })
   @MaxLength(50)
-  @Matches(
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
-    {
-      message:
-        'Le mot de passe doit contenir au moins une majuscule, une minuscule, un chiffre et un caractère spécial',
-    },
-  )
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, {
+    message:
+      'Le mot de passe doit contenir au moins une majuscule, une minuscule, un chiffre et un caractère spécial',
+  })
   password: string;
 
   @ApiProperty({

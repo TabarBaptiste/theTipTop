@@ -2,22 +2,8 @@
 // Contrôleur Participations
 // ===========================================
 
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 
 import { ParticipationsService } from './participations.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -61,10 +47,7 @@ export class ParticipationsController {
     },
   })
   @ApiResponse({ status: 400, description: 'Code invalide ou déjà utilisé' })
-  async participate(
-    @CurrentUser() user: User,
-    @Body() dto: CreateParticipationDto,
-  ) {
+  async participate(@CurrentUser() user: User, @Body() dto: CreateParticipationDto) {
     return this.participationsService.participate(user.id, dto.code);
   }
 
@@ -114,7 +97,7 @@ export class ParticipationsController {
   // DÉTAIL D'UNE PARTICIPATION
   // ===========================================
   @Get(':id')
-  @ApiOperation({ summary: 'Détail d\'une participation' })
+  @ApiOperation({ summary: "Détail d'une participation" })
   @ApiResponse({ status: 200, description: 'Détails de la participation' })
   @ApiResponse({ status: 404, description: 'Participation non trouvée' })
   async findOne(@Param('id') id: string) {

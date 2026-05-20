@@ -35,11 +35,12 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
    */
   async cleanDatabase() {
     if (process.env.NODE_ENV !== 'test') {
-      throw new Error('cleanDatabase ne peut être utilisé qu\'en environnement de test');
+      throw new Error("cleanDatabase ne peut être utilisé qu'en environnement de test");
     }
 
     const models = Reflect.ownKeys(this).filter(
-      (key): key is string => typeof key === 'string' && !key.startsWith('_') && !key.startsWith('$'),
+      (key): key is string =>
+        typeof key === 'string' && !key.startsWith('_') && !key.startsWith('$'),
     );
     return Promise.all(
       models.map((modelKey) => {

@@ -2,15 +2,10 @@
 // Service d'Authentification
 // ===========================================
 
-import {
-  Injectable,
-  UnauthorizedException,
-  ConflictException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 import { PrismaService } from '../../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
@@ -55,7 +50,9 @@ export class AuthService {
       return null;
     }
 
-    return user;
+    const { password: _pw, ...safeUser } = user as any;
+    void _pw;
+    return safeUser as User;
   }
 
   /**
@@ -89,7 +86,13 @@ export class AuthService {
 
     this.logger.log(`Nouvel utilisateur inscrit: ${user.email}`);
 
-    return this.generateTokens(user);
+    const tokens = await this.generateTokens(user);
+    const { password: _pw, ...safeUser } = user as any;
+    void _pw;
+    return {
+      user: safeUser,
+      ...tokens,
+    } as any;
   }
 
   /**

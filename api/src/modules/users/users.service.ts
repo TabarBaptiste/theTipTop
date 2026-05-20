@@ -6,7 +6,7 @@ import { Injectable, NotFoundException, ConflictException } from '@nestjs/common
 import { PrismaService } from '../../prisma/prisma.service';
 import { User, Role } from '@prisma/client';
 import { UpdateUserDto } from './dto/update-user.dto';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class UsersService {
@@ -51,12 +51,7 @@ export class UsersService {
   /**
    * Liste tous les utilisateurs (admin)
    */
-  async findAll(options: {
-    page?: number;
-    limit?: number;
-    role?: Role;
-    search?: string;
-  }) {
+  async findAll(options: { page?: number; limit?: number; role?: Role; search?: string }) {
     const { page = 1, limit = 20, role, search } = options;
     const skip = (page - 1) * limit;
 
@@ -192,7 +187,8 @@ export class UsersService {
       throw new NotFoundException('Utilisateur non trouvé');
     }
 
-    const { password, ...userData } = user;
+    const { password: _password, ...userData } = user;
+    void _password;
     return userData;
   }
 

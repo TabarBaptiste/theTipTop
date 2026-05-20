@@ -2,11 +2,7 @@
 // Service Grand Prize (Tirage au sort)
 // ===========================================
 
-import {
-  Injectable,
-  BadRequestException,
-  ConflictException,
-} from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import * as crypto from 'crypto';
 
@@ -44,7 +40,7 @@ export class GrandPrizeService {
     if (now < gameConfig.endDate) {
       return {
         canDraw: false,
-        reason: 'Le jeu-concours n\'est pas encore terminé',
+        reason: "Le jeu-concours n'est pas encore terminé",
       };
     }
 
@@ -135,7 +131,7 @@ export class GrandPrizeService {
       prize: {
         name: 'Un an de thé',
         value: '360€',
-        description: '1 an de thé Thé Tip Top d\'une valeur de 360€',
+        description: "1 an de thé Thé Tip Top d'une valeur de 360€",
       },
     };
   }
@@ -177,9 +173,7 @@ export class GrandPrizeService {
     });
 
     // Compter les participants
-    const participantsCount = (
-      await this.prisma.participation.groupBy({ by: ['userId'] })
-    ).length;
+    const participantsCount = (await this.prisma.participation.groupBy({ by: ['userId'] })).length;
 
     return {
       drawn: true,

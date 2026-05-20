@@ -7,33 +7,34 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { Ticket, PrizeType } from '@prisma/client';
 
 // Labels des gains en français
-export const PRIZE_LABELS: Record<PrizeType, { name: string; description: string; value: string }> = {
-  INFUSER: {
-    name: 'Infuseur à thé',
-    description: 'Un élégant infuseur à thé en inox',
-    value: '12€',
-  },
-  TEA_DETOX: {
-    name: 'Thé Détox / Infusion',
-    description: 'Une boite de 100g de thé détox ou infusion bio',
-    value: '15€',
-  },
-  TEA_SIGNATURE: {
-    name: 'Thé Signature',
-    description: 'Une boite de 100g de thé signature Thé Tip Top',
-    value: '20€',
-  },
-  GIFT_BOX_39: {
-    name: 'Coffret Découverte',
-    description: 'Un coffret découverte avec une sélection de thés',
-    value: '39€',
-  },
-  GIFT_BOX_69: {
-    name: 'Coffret Découverte Premium',
-    description: 'Un coffret découverte premium avec notre sélection exclusive',
-    value: '69€',
-  },
-};
+export const PRIZE_LABELS: Record<PrizeType, { name: string; description: string; value: string }> =
+  {
+    INFUSER: {
+      name: 'Infuseur à thé',
+      description: 'Un élégant infuseur à thé en inox',
+      value: '12€',
+    },
+    TEA_DETOX: {
+      name: 'Thé Détox / Infusion',
+      description: 'Une boite de 100g de thé détox ou infusion bio',
+      value: '15€',
+    },
+    TEA_SIGNATURE: {
+      name: 'Thé Signature',
+      description: 'Une boite de 100g de thé signature Thé Tip Top',
+      value: '20€',
+    },
+    GIFT_BOX_39: {
+      name: 'Coffret Découverte',
+      description: 'Un coffret découverte avec une sélection de thés',
+      value: '39€',
+    },
+    GIFT_BOX_69: {
+      name: 'Coffret Découverte Premium',
+      description: 'Un coffret découverte premium avec notre sélection exclusive',
+      value: '69€',
+    },
+  };
 
 @Injectable()
 export class TicketsService {
@@ -44,7 +45,7 @@ export class TicketsService {
    */
   async verifyCode(code: string): Promise<{
     isValid: boolean;
-    ticket?: Ticket & { prize: typeof PRIZE_LABELS[PrizeType] };
+    ticket?: Ticket & { prize: (typeof PRIZE_LABELS)[PrizeType] };
     error?: string;
   }> {
     const normalizedCode = code.toUpperCase().trim();
@@ -67,7 +68,7 @@ export class TicketsService {
     if (!ticket) {
       return {
         isValid: false,
-        error: 'Ce code n\'existe pas.',
+        error: "Ce code n'existe pas.",
       };
     }
 
@@ -86,7 +87,7 @@ export class TicketsService {
     if (!gameConfig) {
       return {
         isValid: false,
-        error: 'Le jeu-concours n\'est pas actif.',
+        error: "Le jeu-concours n'est pas actif.",
       };
     }
 
@@ -183,13 +184,16 @@ export class TicketsService {
       }),
     ]);
 
-    const prizeStats = byPrize.reduce((acc, item) => {
-      acc[item.prizeType] = {
-        count: item._count,
-        label: PRIZE_LABELS[item.prizeType].name,
-      };
-      return acc;
-    }, {} as Record<string, { count: number; label: string }>);
+    const prizeStats = byPrize.reduce(
+      (acc, item) => {
+        acc[item.prizeType] = {
+          count: item._count,
+          label: PRIZE_LABELS[item.prizeType].name,
+        };
+        return acc;
+      },
+      {} as Record<string, { count: number; label: string }>,
+    );
 
     return {
       total,

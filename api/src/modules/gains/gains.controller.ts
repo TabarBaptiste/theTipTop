@@ -2,22 +2,8 @@
 // Contrôleur Gains
 // ===========================================
 
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 
 import { GainsService } from './gains.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -77,10 +63,7 @@ export class GainsController {
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiResponse({ status: 200, description: 'Liste des lots en attente' })
-  async getPendingDeliveries(
-    @Query('page') page?: number,
-    @Query('limit') limit?: number,
-  ) {
+  async getPendingDeliveries(@Query('page') page?: number, @Query('limit') limit?: number) {
     return this.gainsService.getPendingDeliveries({ page, limit });
   }
 

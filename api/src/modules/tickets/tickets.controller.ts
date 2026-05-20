@@ -13,13 +13,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 
 import { TicketsService, PRIZE_LABELS } from './tickets.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -104,7 +98,12 @@ export class TicketsController {
   @Roles('EMPLOYEE', 'ADMIN')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Récupérer des codes disponibles (API Caisses)' })
-  @ApiQuery({ name: 'count', required: false, type: Number, description: 'Nombre de codes (max 100)' })
+  @ApiQuery({
+    name: 'count',
+    required: false,
+    type: Number,
+    description: 'Nombre de codes (max 100)',
+  })
   @ApiResponse({ status: 200, description: 'Codes disponibles' })
   async getAvailableCodes(@Query('count') count?: number) {
     const codes = await this.ticketsService.getAvailableCodes(count);

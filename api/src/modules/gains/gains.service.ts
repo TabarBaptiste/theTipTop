@@ -2,11 +2,7 @@
 // Service Gains
 // ===========================================
 
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { PRIZE_LABELS } from '../tickets/tickets.service';
 import { DeliveryMethod } from '@prisma/client';
@@ -18,11 +14,7 @@ export class GainsService {
   /**
    * Marquer un gain comme remis
    */
-  async deliverPrize(
-    participationId: string,
-    employeeId: string,
-    deliveryMethod: DeliveryMethod,
-  ) {
+  async deliverPrize(participationId: string, employeeId: string, deliveryMethod: DeliveryMethod) {
     const participation = await this.prisma.participation.findUnique({
       where: { id: participationId },
       include: {
@@ -82,11 +74,7 @@ export class GainsService {
   /**
    * Marquer un gain comme remis par code
    */
-  async deliverPrizeByCode(
-    code: string,
-    employeeId: string,
-    deliveryMethod: DeliveryMethod,
-  ) {
+  async deliverPrizeByCode(code: string, employeeId: string, deliveryMethod: DeliveryMethod) {
     const normalizedCode = code.toUpperCase().trim();
 
     const ticket = await this.prisma.ticket.findUnique({
@@ -101,7 +89,7 @@ export class GainsService {
     }
 
     if (!ticket.participation) {
-      throw new BadRequestException('Ce code n\'a pas encore été utilisé par un client');
+      throw new BadRequestException("Ce code n'a pas encore été utilisé par un client");
     }
 
     return this.deliverPrize(ticket.participation.id, employeeId, deliveryMethod);
@@ -110,10 +98,7 @@ export class GainsService {
   /**
    * Gains en attente de remise
    */
-  async getPendingDeliveries(options: {
-    page?: number;
-    limit?: number;
-  }) {
+  async getPendingDeliveries(options: { page?: number; limit?: number }) {
     const { page = 1, limit = 20 } = options;
     const skip = (page - 1) * limit;
 
@@ -164,11 +149,7 @@ export class GainsService {
   /**
    * Historique des remises
    */
-  async getDeliveryHistory(options: {
-    page?: number;
-    limit?: number;
-    employeeId?: string;
-  }) {
+  async getDeliveryHistory(options: { page?: number; limit?: number; employeeId?: string }) {
     const { page = 1, limit = 20, employeeId } = options;
     const skip = (page - 1) * limit;
 
@@ -250,19 +231,25 @@ export class GainsService {
       delivered,
       pending,
       deliveryRate: total > 0 ? ((delivered / total) * 100).toFixed(1) : 0,
-      byMethod: byMethod.reduce((acc, item) => {
-        if (item.deliveryMethod) {
-          acc[item.deliveryMethod] = item._count;
-        }
-        return acc;
-      }, {} as Record<string, number>),
-      byPrize: byPrize.reduce((acc, item) => {
-        acc[item.prizeType] = {
-          count: item._count,
-          label: PRIZE_LABELS[item.prizeType].name,
-        };
-        return acc;
-      }, {} as Record<string, { count: number; label: string }>),
+      byMethod: byMethod.reduce(
+        (acc, item) => {
+          if (item.deliveryMethod) {
+            acc[item.deliveryMethod] = item._count;
+          }
+          return acc;
+        },
+        {} as Record<string, number>,
+      ),
+      byPrize: byPrize.reduce(
+        (acc, item) => {
+          acc[item.prizeType] = {
+            count: item._count,
+            label: PRIZE_LABELS[item.prizeType].name,
+          };
+          return acc;
+        },
+        {} as Record<string, { count: number; label: string }>,
+      ),
     };
   }
 }

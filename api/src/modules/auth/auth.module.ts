@@ -26,7 +26,7 @@ const GoogleStrategyFactory = {
   useFactory: (configService: ConfigService, authService: AuthService) => {
     const clientId = configService.get<string>('GOOGLE_CLIENT_ID');
     const clientSecret = configService.get<string>('GOOGLE_CLIENT_SECRET');
-    
+
     if (clientId && clientSecret && !clientId.includes('your-google')) {
       logger.log('Google OAuth strategy enabled');
       return new GoogleStrategy(configService, authService);
@@ -43,7 +43,7 @@ const FacebookStrategyFactory = {
   useFactory: (configService: ConfigService, authService: AuthService) => {
     const appId = configService.get<string>('FACEBOOK_APP_ID');
     const appSecret = configService.get<string>('FACEBOOK_APP_SECRET');
-    
+
     if (appId && appSecret && !appId.includes('your-facebook')) {
       logger.log('Facebook OAuth strategy enabled');
       return new FacebookStrategy(configService, authService);

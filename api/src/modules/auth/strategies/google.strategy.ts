@@ -35,7 +35,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       return done(new Error('Email non fourni par Google'), false);
     }
 
-    const result = await this.authService.validateOAuthUser({
+    await this.authService.validateOAuthUser({
       provider: 'google',
       providerId: id,
       email,

@@ -3,13 +3,7 @@
 // ===========================================
 
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 
 import { StatsService } from './stats.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -59,7 +53,12 @@ export class StatsController {
   // ===========================================
   @Get('timeline')
   @ApiOperation({ summary: 'Évolution des participations dans le temps' })
-  @ApiQuery({ name: 'days', required: false, type: Number, description: 'Nombre de jours (défaut: 30)' })
+  @ApiQuery({
+    name: 'days',
+    required: false,
+    type: Number,
+    description: 'Nombre de jours (défaut: 30)',
+  })
   @ApiResponse({ status: 200, description: 'Statistiques temporelles' })
   async getTimelineStats(@Query('days') days?: number) {
     return this.statsService.getTimelineStats(days);
