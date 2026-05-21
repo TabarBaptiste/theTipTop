@@ -3,9 +3,31 @@
 // ===========================================
 
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ParticipationsService } from '../participations/participations.service';
 import { PRIZE_LABELS } from '../tickets/tickets.service';
+
+type PrizeStat = {
+  prizeType: keyof typeof PRIZE_LABELS;
+  _count: { _all: number };
+};
+
+type GenderGroup = {
+  gender: string | null;
+  _count: number;
+};
+
+type TimelineParticipation = {
+  createdAt: Date;
+};
+
+type EmailingUser = {
+  email: string;
+  firstName: string;
+  lastName: string;
+  _count: { participations: number };
+};
 
 @Injectable()
 export class StatsService {
@@ -38,7 +60,6 @@ export class StatsService {
 
     const uniqueParticipants = await this.participationsService.countUniqueParticipants();
 
-    // Calcul du temps restant
     let daysRemaining = 0;
     let claimDaysRemaining = 0;
     let gamePhase = 'not_started';
@@ -120,8 +141,7 @@ export class StatsService {
       where: { prizeDelivered: true },
     });
 
-    // Statistiques par type de gain
-    const byType = prizeStats.map((stat) => ({
+    const byType = prizeStats.map((stat: PrizeStat) => ({
       type: stat.prizeType,
       label: PRIZE_LABELS[stat.prizeType].name,
       value: PRIZE_LABELS[stat.prizeType].value,
@@ -135,15 +155,12 @@ export class StatsService {
     };
   }
 
-
-    type PrizeStat = (typeof prizeStats)[number];
   /**
    * Statistiques démographiques des participants
    */
   async getDemographicStats() {
-    // Par genre
     const byGender = await this.prisma.user.groupBy({
-    const byType = prizeStats.map((stat: PrizeStat) => ({
+      by: ['gender'],
       _count: true,
       where: {
         role: 'CLIENT',
@@ -152,11 +169,8 @@ export class StatsService {
           some: {},
         },
       },
-      total: prizeStats.reduce((sum: number, stat: PrizeStat) => sum + stat._count._all, 0),
+    });
 
-    type GenderGroup = (typeof byGender)[number];
-
-    // Par tranche d'âge
     const users = await this.prisma.user.findMany({
       where: {
         role: 'CLIENT',
@@ -171,8 +185,6 @@ export class StatsService {
       },
     });
 
-    type DemographicUser = (typeof users)[number];
-
     const now = new Date();
     const ageGroups = {
       '18-25': 0,
@@ -182,7 +194,7 @@ export class StatsService {
       '56+': 0,
     };
 
-    users.forEach((user: DemographicUser) => {
+    users.forEach((user) => {
       if (user.birthDate) {
         const age = Math.floor(
           (now.getTime() - user.birthDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25),
@@ -196,8 +208,6 @@ export class StatsService {
     });
 
     return {
-
-        type GenderGroup = (typeof byGender)[number];
       byGender: byGender.map((g: GenderGroup) => ({
         gender: g.gender || 'NON_RENSEIGNE',
         count: g._count,
@@ -213,8 +223,6 @@ export class StatsService {
    * Statistiques temporelles (participations par jour)
    */
   async getTimelineStats(days: number = 30) {
-
-        type DemographicUser = (typeof users)[number];
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
@@ -232,19 +240,12 @@ export class StatsService {
       },
     });
 
-    type TimelineParticipation = (typeof participations)[number];
+    const byDay = participations.reduce((acc: Record<string, number>, p: TimelineParticipation) => {
+      const day = p.createdAt.toISOString().split('T')[0];
+      acc[day] = (acc[day] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
 
-    // Grouper par jour
-    const byDay = participations.reduce(
-      (acc: Record<string, number>, p: TimelineParticipation) => {
-        const day = p.createdAt.toISOString().split('T')[0];
-        acc[day] = (acc[day] || 0) + 1;
-          byGender: byGender.map((g: GenderGroup) => ({
-      },
-      {} as Record<string, number>,
-    );
-
-    // Compléter les jours sans participation
     const timeline: { date: string; count: number }[] = [];
     const current = new Date(startDate);
     const now = new Date();
@@ -269,7 +270,7 @@ export class StatsService {
    * Données pour export (emailing)
    */
   async getEmailingData(options: { consentEmail?: boolean; hasParticipated?: boolean }) {
-    const where: any = {
+    const where: Prisma.UserWhereInput = {
       role: 'CLIENT',
       deletedAt: null,
     };
@@ -279,11 +280,7 @@ export class StatsService {
     }
 
     if (options.hasParticipated !== undefined) {
-      if (options.hasParticipated) {
-        where.participations = { some: {} };
-      } else {
-        where.participations = { none: {} };
-      }
+      where.participations = options.hasParticipated ? { some: {} } : { none: {} };
     }
 
     const users = await this.prisma.user.findMany({
@@ -299,8 +296,6 @@ export class StatsService {
         },
       },
     });
-
-    type EmailingUser = (typeof users)[number];
 
     return {
       count: users.length,
