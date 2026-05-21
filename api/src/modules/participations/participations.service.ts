@@ -8,8 +8,25 @@ import {
   NotFoundException,
   ConflictException,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TicketsService, PRIZE_LABELS } from '../tickets/tickets.service';
+
+type ParticipationWithTicket = Prisma.ParticipationGetPayload<{ include: { ticket: true } }>;
+
+type ParticipationWithTicketAndUser = Prisma.ParticipationGetPayload<{
+  include: {
+    ticket: true;
+    user: {
+      select: {
+        id: true;
+        email: true;
+        firstName: true;
+        lastName: true;
+      };
+    };
+  };
+}>;
 
 @Injectable()
 export class ParticipationsService {
@@ -33,7 +50,7 @@ export class ParticipationsService {
     const ticket = verification.ticket;
 
     // Transaction pour éviter les race conditions
-    const participation = await this.prisma.$transaction(async (tx) => {
+    const participation = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // Double vérification dans la transaction
       const ticketCheck = await tx.ticket.findUnique({
         where: { code: normalizedCode },
@@ -100,7 +117,9 @@ export class ParticipationsService {
     });
 
     return participations.map((p) => ({
-      id: p.id,
+    type ParticipationWithTicket = (typeof participations)[number];
+
+    return participations.map((p: ParticipationWithTicket) => ({
       code: p.ticket.code,
       prizeType: p.ticket.prizeType,
       prize: PRIZE_LABELS[p.ticket.prizeType],
@@ -111,10 +130,7 @@ export class ParticipationsService {
     }));
   }
 
-  /**
-   * Récupère une participation par ID
-   */
-  async findById(id: string) {
+    return participations.map((p: ParticipationWithTicket) => ({
     const participation = await this.prisma.participation.findUnique({
       where: { id },
       include: {
@@ -232,7 +248,7 @@ export class ParticipationsService {
     ]);
 
     return {
-      data: participations.map((p) => ({
+      data: participations.map((p: ParticipationWithTicketAndUser) => ({
         id: p.id,
         code: p.ticket.code,
         prizeType: p.ticket.prizeType,

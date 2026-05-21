@@ -3,9 +3,11 @@
 // ===========================================
 
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { DeliveryMethod, type PrismaClient } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { PRIZE_LABELS } from '../tickets/tickets.service';
-import { DeliveryMethod } from '@prisma/client';
+
+type TransactionClient = Parameters<Parameters<PrismaClient['$transaction']>[0]>[0];
 
 @Injectable()
 export class GainsService {
@@ -128,8 +130,10 @@ export class GainsService {
       }),
     ]);
 
+    type PendingParticipation = (typeof participations)[number];
+
     return {
-      data: participations.map((p) => ({
+      data: participations.map((p: PendingParticipation) => ({
         id: p.id,
         code: p.ticket.code,
         prizeType: p.ticket.prizeType,
@@ -182,8 +186,10 @@ export class GainsService {
       this.prisma.participation.count({ where }),
     ]);
 
+    type DeliveryHistoryParticipation = (typeof participations)[number];
+
     return {
-      data: participations.map((p) => ({
+      data: participations.map((p: DeliveryHistoryParticipation) => ({
         id: p.id,
         code: p.ticket.code,
         prizeType: p.ticket.prizeType,
@@ -226,13 +232,16 @@ export class GainsService {
       }),
     ]);
 
+    type DeliveryMethodGroup = (typeof byMethod)[number];
+    type PrizeGroup = (typeof byPrize)[number];
+
     return {
       total,
       delivered,
       pending,
       deliveryRate: total > 0 ? ((delivered / total) * 100).toFixed(1) : 0,
       byMethod: byMethod.reduce(
-        (acc, item) => {
+        (acc: Record<string, number>, item: DeliveryMethodGroup) => {
           if (item.deliveryMethod) {
             acc[item.deliveryMethod] = item._count;
           }
@@ -241,7 +250,7 @@ export class GainsService {
         {} as Record<string, number>,
       ),
       byPrize: byPrize.reduce(
-        (acc, item) => {
+        (acc: Record<string, { count: number; label: string }>, item: PrizeGroup) => {
           acc[item.prizeType] = {
             count: item._count,
             label: PRIZE_LABELS[item.prizeType].name,

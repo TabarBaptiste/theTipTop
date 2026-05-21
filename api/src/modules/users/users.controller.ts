@@ -15,7 +15,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
-import { Role } from '@prisma/client';
+import { Role, User } from '@prisma/client';
 
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -58,7 +58,7 @@ export class UsersController {
   @ApiOperation({ summary: "Détail d'un utilisateur" })
   @ApiResponse({ status: 200, description: 'Utilisateur trouvé' })
   @ApiResponse({ status: 404, description: 'Utilisateur non trouvé' })
-  async findOne(@Param('id') id: string, @CurrentUser() currentUser: any) {
+  async findOne(@Param('id') id: string, @CurrentUser() currentUser: User) {
     // Un client ne peut voir que son propre profil
     if (currentUser.role === 'CLIENT' && currentUser.id !== id) {
       return this.usersService.findById(currentUser.id);
@@ -76,7 +76,7 @@ export class UsersController {
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateUserDto,
-    @CurrentUser() currentUser: any,
+    @CurrentUser() currentUser: User,
   ) {
     // Un client ne peut modifier que son propre profil
     const targetId = currentUser.role === 'CLIENT' ? currentUser.id : id;
@@ -92,7 +92,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Supprimer un utilisateur (anonymisation RGPD)' })
   @ApiResponse({ status: 204, description: 'Utilisateur supprimé' })
   @ApiResponse({ status: 404, description: 'Utilisateur non trouvé' })
-  async delete(@Param('id') id: string, @CurrentUser() currentUser: any) {
+  async delete(@Param('id') id: string, @CurrentUser() currentUser: User) {
     // Un client ne peut supprimer que son propre compte
     const targetId = currentUser.role === 'CLIENT' ? currentUser.id : id;
     await this.usersService.delete(targetId);
@@ -104,7 +104,7 @@ export class UsersController {
   @Get(':id/export')
   @ApiOperation({ summary: 'Exporter les données personnelles (RGPD)' })
   @ApiResponse({ status: 200, description: 'Données exportées' })
-  async exportData(@Param('id') id: string, @CurrentUser() currentUser: any) {
+  async exportData(@Param('id') id: string, @CurrentUser() currentUser: User) {
     const targetId = currentUser.role === 'CLIENT' ? currentUser.id : id;
     return this.usersService.exportData(targetId);
   }

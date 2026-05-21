@@ -130,18 +130,20 @@ export class StatsService {
 
     return {
       byType,
-      total: prizeStats.reduce((sum, stat) => sum + stat._count._all, 0),
+      total: prizeStats.reduce((sum: number, stat: PrizeStat) => sum + stat._count._all, 0),
       delivered: deliveredCount,
     };
   }
 
+
+    type PrizeStat = (typeof prizeStats)[number];
   /**
    * Statistiques démographiques des participants
    */
   async getDemographicStats() {
     // Par genre
     const byGender = await this.prisma.user.groupBy({
-      by: ['gender'],
+    const byType = prizeStats.map((stat: PrizeStat) => ({
       _count: true,
       where: {
         role: 'CLIENT',
@@ -150,7 +152,9 @@ export class StatsService {
           some: {},
         },
       },
-    });
+      total: prizeStats.reduce((sum: number, stat: PrizeStat) => sum + stat._count._all, 0),
+
+    type GenderGroup = (typeof byGender)[number];
 
     // Par tranche d'âge
     const users = await this.prisma.user.findMany({
@@ -167,6 +171,8 @@ export class StatsService {
       },
     });
 
+    type DemographicUser = (typeof users)[number];
+
     const now = new Date();
     const ageGroups = {
       '18-25': 0,
@@ -176,7 +182,7 @@ export class StatsService {
       '56+': 0,
     };
 
-    users.forEach((user) => {
+    users.forEach((user: DemographicUser) => {
       if (user.birthDate) {
         const age = Math.floor(
           (now.getTime() - user.birthDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25),
@@ -190,7 +196,9 @@ export class StatsService {
     });
 
     return {
-      byGender: byGender.map((g) => ({
+
+        type GenderGroup = (typeof byGender)[number];
+      byGender: byGender.map((g: GenderGroup) => ({
         gender: g.gender || 'NON_RENSEIGNE',
         count: g._count,
       })),
@@ -205,6 +213,8 @@ export class StatsService {
    * Statistiques temporelles (participations par jour)
    */
   async getTimelineStats(days: number = 30) {
+
+        type DemographicUser = (typeof users)[number];
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
@@ -222,12 +232,14 @@ export class StatsService {
       },
     });
 
+    type TimelineParticipation = (typeof participations)[number];
+
     // Grouper par jour
     const byDay = participations.reduce(
-      (acc, p) => {
+      (acc: Record<string, number>, p: TimelineParticipation) => {
         const day = p.createdAt.toISOString().split('T')[0];
         acc[day] = (acc[day] || 0) + 1;
-        return acc;
+          byGender: byGender.map((g: GenderGroup) => ({
       },
       {} as Record<string, number>,
     );
@@ -288,9 +300,11 @@ export class StatsService {
       },
     });
 
+    type EmailingUser = (typeof users)[number];
+
     return {
       count: users.length,
-      users: users.map((u) => ({
+      users: users.map((u: EmailingUser) => ({
         email: u.email,
         firstName: u.firstName,
         lastName: u.lastName,

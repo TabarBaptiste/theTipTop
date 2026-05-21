@@ -158,15 +158,17 @@ export class TicketsService {
       select: { code: true },
     });
 
+    type AvailableTicket = (typeof tickets)[number];
+
     // Marquer comme distribués
     await this.prisma.ticket.updateMany({
       where: {
-        code: { in: tickets.map((t) => t.code) },
+        code: { in: tickets.map((t: AvailableTicket) => t.code) },
       },
       data: { isDistributed: true },
     });
 
-    return tickets.map((t) => t.code);
+    return tickets.map((t: AvailableTicket) => t.code);
   }
 
   /**
@@ -184,8 +186,10 @@ export class TicketsService {
       }),
     ]);
 
+    type PrizeGroup = (typeof byPrize)[number];
+
     const prizeStats = byPrize.reduce(
-      (acc, item) => {
+      (acc: Record<string, { count: number; label: string }>, item: PrizeGroup) => {
         acc[item.prizeType] = {
           count: item._count,
           label: PRIZE_LABELS[item.prizeType].name,

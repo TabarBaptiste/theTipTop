@@ -14,7 +14,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
-import { Response } from 'express';
+import { type Request, type Response } from 'express';
 
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
@@ -32,6 +32,8 @@ import { FacebookAuthGuard } from './guards/facebook-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { Public } from './decorators/public.decorator';
 import { User } from '@prisma/client';
+
+type OAuthRequest = Request & { user: User };
 
 @ApiTags('auth')
 @Controller('auth')
@@ -148,7 +150,7 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
   @ApiOperation({ summary: 'Callback Google OAuth' })
-  async googleAuthCallback(@Req() req: any, @Res() res: Response) {
+  async googleAuthCallback(@Req() req: OAuthRequest, @Res() res: Response) {
     const tokens = await this.authService.login(req.user);
     return this.redirectToFrontend(res, tokens.accessToken, tokens.refreshToken);
   }
@@ -169,7 +171,7 @@ export class AuthController {
   @Get('facebook/callback')
   @UseGuards(FacebookAuthGuard)
   @ApiOperation({ summary: 'Callback Facebook OAuth' })
-  async facebookAuthCallback(@Req() req: any, @Res() res: Response) {
+  async facebookAuthCallback(@Req() req: OAuthRequest, @Res() res: Response) {
     const tokens = await this.authService.login(req.user);
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     const redirectUrl = `${frontendUrl}/auth/callback?accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}`;
