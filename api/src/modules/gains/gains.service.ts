@@ -3,11 +3,9 @@
 // ===========================================
 
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { DeliveryMethod, type PrismaClient } from '@prisma/client';
+import { DeliveryMethod } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { PRIZE_LABELS } from '../tickets/tickets.service';
-
-type TransactionClient = Parameters<Parameters<PrismaClient['$transaction']>[0]>[0];
 
 @Injectable()
 export class GainsService {

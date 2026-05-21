@@ -240,11 +240,14 @@ export class StatsService {
       },
     });
 
-    const byDay = participations.reduce((acc: Record<string, number>, p: TimelineParticipation) => {
-      const day = p.createdAt.toISOString().split('T')[0];
-      acc[day] = (acc[day] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const byDay = participations.reduce(
+      (acc: Record<string, number>, p: TimelineParticipation) => {
+        const day = p.createdAt.toISOString().split('T')[0];
+        acc[day] = (acc[day] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
     const timeline: { date: string; count: number }[] = [];
     const current = new Date(startDate);

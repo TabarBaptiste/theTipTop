@@ -41,7 +41,6 @@ export class ParticipationsService {
   async participate(userId: string, code: string) {
     const normalizedCode = code.toUpperCase().trim();
 
-    // Vérifier le code
     const verification = await this.ticketsService.verifyCode(normalizedCode);
     if (!verification.isValid || !verification.ticket) {
       throw new BadRequestException(verification.error || 'Code invalide');
@@ -49,9 +48,7 @@ export class ParticipationsService {
 
     const ticket = verification.ticket;
 
-    // Transaction pour éviter les race conditions
     const participation = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-      // Double vérification dans la transaction
       const ticketCheck = await tx.ticket.findUnique({
         where: { code: normalizedCode },
         include: { participation: true },
@@ -65,7 +62,6 @@ export class ParticipationsService {
         throw new ConflictException('Ce code a déjà été utilisé');
       }
 
-      // Marquer le ticket comme utilisé
       await tx.ticket.update({
         where: { id: ticketCheck.id },
         data: {
@@ -74,7 +70,6 @@ export class ParticipationsService {
         },
       });
 
-      // Créer la participation
       return tx.participation.create({
         data: {
           userId,
@@ -116,10 +111,8 @@ export class ParticipationsService {
       orderBy: { createdAt: 'desc' },
     });
 
-    return participations.map((p) => ({
-    type ParticipationWithTicket = (typeof participations)[number];
-
     return participations.map((p: ParticipationWithTicket) => ({
+      id: p.id,
       code: p.ticket.code,
       prizeType: p.ticket.prizeType,
       prize: PRIZE_LABELS[p.ticket.prizeType],
@@ -130,7 +123,10 @@ export class ParticipationsService {
     }));
   }
 
-    return participations.map((p: ParticipationWithTicket) => ({
+  /**
+   * Récupère une participation par ID
+   */
+  async findById(id: string) {
     const participation = await this.prisma.participation.findUnique({
       where: { id },
       include: {
@@ -221,7 +217,7 @@ export class ParticipationsService {
     const { page = 1, limit = 20, prizeDelivered } = options;
     const skip = (page - 1) * limit;
 
-    const where: any = {};
+    const where: Prisma.ParticipationWhereInput = {};
     if (prizeDelivered !== undefined) {
       where.prizeDelivered = prizeDelivered;
     }
