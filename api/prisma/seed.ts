@@ -6,6 +6,8 @@
 
 import { PrismaClient, PrizeType } from '@prisma/client';
 import * as crypto from 'crypto';
+import * as readline from 'readline';
+import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -105,7 +107,6 @@ async function main() {
   const existingCount = await prisma.ticket.count();
   if (existingCount > 0) {
     console.log(`⚠️  ${existingCount} tickets existent déjà en base.`);
-    const readline = require('readline');
     const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
@@ -157,13 +158,16 @@ async function main() {
   console.log('✅ Distribution créée et mélangée.\n');
 
   // Afficher la répartition
-  const distribution = prizes.reduce((acc, prize) => {
-    acc[prize] = (acc[prize] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const distribution: Record<PrizeType, number> = prizes.reduce(
+    (acc, prize) => {
+      acc[prize] = (acc[prize] || 0) + 1;
+      return acc;
+    },
+    {} as Record<PrizeType, number>,
+  );
 
   console.log('📊 Répartition des gains:');
-  Object.entries(distribution).forEach(([type, count]) => {
+  Object.entries(distribution).forEach(([type, count]: [string, number]) => {
     const percentage = ((count / TOTAL_TICKETS) * 100).toFixed(2);
     console.log(`   - ${type}: ${count.toLocaleString('fr-FR')} (${percentage}%)`);
   });
@@ -206,7 +210,6 @@ async function main() {
   // Créer des utilisateurs de test
   console.log('👥 Création des utilisateurs de test...');
 
-  const bcrypt = require('bcrypt');
   const hashedPassword = await bcrypt.hash('Test1234!', 12);
 
   await prisma.user.upsert({
