@@ -7,7 +7,7 @@
 import { PrismaClient, PrizeType } from '@prisma/client';
 import * as crypto from 'crypto';
 import * as readline from 'readline';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -19,17 +19,30 @@ const BATCH_SIZE = 10000; // Insertion par lots pour performance
 
 // Répartition des gains selon le cahier des charges
 const PRIZE_DISTRIBUTION: { type: PrizeType; percentage: number }[] = [
-  { type: 'INFUSER', percentage: 60 },       // 300 000 tickets
-  { type: 'TEA_DETOX', percentage: 20 },     // 100 000 tickets
+  { type: 'INFUSER', percentage: 60 }, // 300 000 tickets
+  { type: 'TEA_DETOX', percentage: 20 }, // 100 000 tickets
   { type: 'TEA_SIGNATURE', percentage: 10 }, // 50 000 tickets
-  { type: 'GIFT_BOX_39', percentage: 6 },    // 30 000 tickets
-  { type: 'GIFT_BOX_69', percentage: 4 },    // 20 000 tickets
+  { type: 'GIFT_BOX_39', percentage: 6 }, // 30 000 tickets
+  { type: 'GIFT_BOX_69', percentage: 4 }, // 20 000 tickets
 ];
 
 // Liste de mots à éviter dans les codes
 const FORBIDDEN_WORDS = [
-  'FUCK', 'SHIT', 'DAMN', 'HELL', 'CRAP', 'NAZI', 'SEXE', 'PORN',
-  'MERD', 'PUTE', 'BITE', 'CULS', 'NAZE', 'BETE', 'MORT',
+  'FUCK',
+  'SHIT',
+  'DAMN',
+  'HELL',
+  'CRAP',
+  'NAZI',
+  'SEXE',
+  'PORN',
+  'MERD',
+  'PUTE',
+  'BITE',
+  'CULS',
+  'NAZE',
+  'BETE',
+  'MORT',
 ];
 
 /**
@@ -200,12 +213,14 @@ async function main() {
     const progress = ((insertedCount / TOTAL_TICKETS) * 100).toFixed(1);
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
     process.stdout.write(
-      `\r   Progression: ${progress}% (${insertedCount.toLocaleString('fr-FR')}/${TOTAL_TICKETS.toLocaleString('fr-FR')}) - ${elapsed}s`
+      `\r   Progression: ${progress}% (${insertedCount.toLocaleString('fr-FR')}/${TOTAL_TICKETS.toLocaleString('fr-FR')}) - ${elapsed}s`,
     );
   }
 
   const totalTime = ((Date.now() - startTime) / 1000).toFixed(1);
-  console.log(`\n\n✅ ${insertedCount.toLocaleString('fr-FR')} tickets générés en ${totalTime} secondes!\n`);
+  console.log(
+    `\n\n✅ ${insertedCount.toLocaleString('fr-FR')} tickets générés en ${totalTime} secondes!\n`,
+  );
 
   // Créer des utilisateurs de test
   console.log('👥 Création des utilisateurs de test...');
