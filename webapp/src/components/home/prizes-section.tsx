@@ -1,4 +1,5 @@
 import { Leaf } from 'lucide-react';
+import { Tag } from '@/components/ui/tag';
 
 const prizes = [
   {
@@ -65,9 +66,7 @@ export function PrizesSection() {
                     Valeur : {prize.value}
                   </span>
                   {prize.probability !== '—' && (
-                    <span className="rounded-pill bg-terracotta-50 px-2 py-0.5 font-functional text-[10px] font-semibold text-terracotta-deep">
-                      {prize.probability}
-                    </span>
+                    <Tag variant="new">{prize.probability}</Tag>
                   )}
                 </div>
               </div>

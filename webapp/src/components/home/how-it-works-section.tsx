@@ -39,12 +39,12 @@ export function HowItWorksSection() {
                 {step.number}
               </span>
               <div className="mt-3 flex items-center gap-3">
-                <h3 className="font-display text-lg font-semibold not-italic text-noir">
-                  {step.title}
-                </h3>
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-terracotta-50">
                   <step.icon className="h-5 w-5 text-terracotta-deep" strokeWidth={1.5} />
                 </div>
+                <h3 className="font-display text-lg font-semibold not-italic text-noir">
+                  {step.title}
+                </h3>
               </div>
               <p className="mt-3 text-sm leading-relaxed text-stone-grey">
                 {step.description}

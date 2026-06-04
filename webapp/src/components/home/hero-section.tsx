@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Leaf, Award, ShieldCheck } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Leaf, Ticket, ShieldCheck } from 'lucide-react';
 
 export function HeroSection() {
   return (
@@ -26,20 +27,19 @@ export function HeroSection() {
               nombreux lots. 100% des tickets sont gagnants !
             </p>
 
-            {/* Tags */}
             <div className="mt-6 flex flex-wrap gap-3">
-              <span className="inline-flex items-center gap-1.5 rounded-pill border border-moss px-3 py-1 font-functional text-[10px] font-semibold uppercase tracking-[2px] text-moss">
-                <Leaf className="h-3 w-3" strokeWidth={2} />
+              <Badge variant="bio">
+                <Leaf className="h-4 w-4" strokeWidth={1.5} />
                 Bio certifie
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-pill border border-gold-500 px-3 py-1 font-functional text-[10px] font-semibold uppercase tracking-[2px] text-gold-500">
-                <Award className="h-3 w-3" strokeWidth={2} />
-                Artisanal
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-pill border border-terracotta-deep px-3 py-1 font-functional text-[10px] font-semibold uppercase tracking-[2px] text-terracotta-deep">
-                <ShieldCheck className="h-3 w-3" strokeWidth={2} />
+              </Badge>
+              <Badge variant="location">
+                <Ticket className="h-4 w-4" strokeWidth={1.5} />
+                500 Tickets
+              </Badge>
+              <Badge variant="handmade">
+                <ShieldCheck className="h-4 w-4" strokeWidth={1.5} />
                 100% gagnant
-              </span>
+              </Badge>
             </div>
 
             <div className="mt-8 flex flex-col gap-4 sm:flex-row">
