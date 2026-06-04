@@ -1,7 +1,9 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Leaf, Ticket, ShieldCheck } from 'lucide-react';
+import tassesHeroImg from '@/img/tasses_hero.avif';
 
 export function HeroSection() {
   return (
@@ -56,18 +58,17 @@ export function HeroSection() {
             </div>
           </div>
 
-          {/* Image placeholder */}
+          {/* Hero image */}
           <div className="relative mx-auto aspect-[4/3] w-full max-w-lg overflow-hidden rounded-card lg:max-w-none">
-            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-terracotta-100 to-warm-beige">
-              <div className="text-center">
-                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-terracotta-deep/10">
-                  <Leaf className="h-10 w-10 text-terracotta-deep" strokeWidth={1.5} />
-                </div>
-                <p className="mt-4 font-display text-lg font-semibold text-terracotta-700">
-                  Photo a venir
-                </p>
-              </div>
-            </div>
+            <Image
+              src={tassesHeroImg}
+              alt="Tasses de thé Tip Top"
+              fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover"
+              priority
+              quality={90}
+            />
           </div>
         </div>
       </div>
