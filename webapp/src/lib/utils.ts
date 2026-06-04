@@ -1,5 +1,18 @@
 import { type ClassValue, clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import { extendTailwindMerge } from 'tailwind-merge';
+
+// On enregistre les tokens de taille de police personnalises (DESIGN.md) aupres
+// de tailwind-merge afin qu'ils soient classes comme "font-size" et n'entrent pas
+// en conflit avec les classes de couleur de texte (ex: text-white vs text-ui).
+const twMerge = extendTailwindMerge({
+  extend: {
+    classGroups: {
+      'font-size': [
+        { text: ['h1', 'h2', 'h3', 'body', 'ui', 'caption'] },
+      ],
+    },
+  },
+});
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

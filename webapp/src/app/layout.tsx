@@ -1,53 +1,58 @@
 import type { Metadata } from 'next';
-import { Inter, Playfair_Display } from 'next/font/google';
+import { Montserrat, Playfair_Display } from 'next/font/google';
 import './globals.css';
 import { Toaster } from 'sonner';
 import { Providers } from '@/components/providers';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 
-const inter = Inter({
+const montserrat = Montserrat({
   subsets: ['latin'],
-  variable: '--font-inter',
+  variable: '--font-montserrat',
+  weight: ['400', '600', '700'],
+  display: 'swap',
 });
 
 const playfair = Playfair_Display({
   subsets: ['latin'],
   variable: '--font-playfair',
+  weight: ['400', '500', '600', '700'],
+  style: ['normal', 'italic'],
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
   title: {
-    default: 'Thé Tip Top - Jeu Concours',
-    template: '%s | Thé Tip Top',
+    default: 'The Tip Top - Jeu Concours',
+    template: '%s | The Tip Top',
   },
   description:
-    'Participez au grand jeu-concours Thé Tip Top ! 100% des tickets sont gagnants. Tentez de remporter un an de thé gratuit !',
-  keywords: ['thé', 'jeu concours', 'loterie', 'bio', 'fait main', 'Nice'],
-  authors: [{ name: 'Thé Tip Top' }],
-  creator: 'Thé Tip Top',
+    'Participez au grand jeu-concours The Tip Top ! 100% des tickets sont gagnants. Tentez de remporter un an de the gratuit !',
+  keywords: ['the', 'jeu concours', 'bio', 'fait main', 'Nice', 'artisanal', 'mediterraneen'],
+  authors: [{ name: 'The Tip Top' }],
+  creator: 'The Tip Top',
   openGraph: {
     type: 'website',
     locale: 'fr_FR',
     url: 'https://thetiptop.dsp5-archi-o23-15m-g5.fr',
-    siteName: 'Thé Tip Top',
-    title: 'Thé Tip Top - Jeu Concours',
+    siteName: 'The Tip Top',
+    title: 'The Tip Top - Jeu Concours',
     description:
-      'Participez au grand jeu-concours Thé Tip Top ! 100% des tickets sont gagnants.',
+      'Participez au grand jeu-concours The Tip Top ! 100% des tickets sont gagnants.',
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Thé Tip Top Jeu Concours',
+        alt: 'The Tip Top Jeu Concours',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Thé Tip Top - Jeu Concours',
+    title: 'The Tip Top - Jeu Concours',
     description:
-      'Participez au grand jeu-concours Thé Tip Top ! 100% des tickets sont gagnants.',
+      'Participez au grand jeu-concours The Tip Top ! 100% des tickets sont gagnants.',
     images: ['/og-image.png'],
   },
   robots: {
@@ -63,7 +68,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr" suppressHydrationWarning>
-      <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
+      <body className={`${montserrat.variable} ${playfair.variable} font-sans antialiased`}>
         <Providers>
           <div className="flex min-h-screen flex-col">
             <Header />
