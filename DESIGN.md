@@ -201,9 +201,11 @@ Unité de base : **4px**
 }
 ```
 
-### Tags & Badges
+### Tags
 
-Style linéaire épuré, UPPERCASE, letter-spacing généreux.
+Petit, très arrondi (pill shape), UPPERCASE, pour labels rapides.
+
+**Classe de base**
 ```css
 .tag {
   font-family: var(--font-functional);
@@ -216,11 +218,86 @@ Style linéaire épuré, UPPERCASE, letter-spacing généreux.
   border: 1px solid currentColor;
   display: inline-flex;
   align-items: center;
+  gap: var(--space-xs);
 }
-.tag-bio     { color: var(--color-moss-green); border-color: var(--color-moss-green); }
-.tag-premium { color: var(--color-gold);       border-color: var(--color-gold); }
-.tag-new     { background: var(--color-terracotta-deep); color: var(--color-white); border: none; }
 ```
+
+**Règle** : fond = couleur du texte avec opacité réduite. Pas de bordure. Coins en capsule (pill).
+
+**Variantes**
+```css
+/* fond = même couleur que le texte, opacité réduite */
+.tag-bio          { background: #5C6B3A40; color: #5C6B3A; } /* vert mousse 40% */
+.tag-detox        { background: #5C6B3A4D; color: #5C6B3A; } /* vert mousse 30% */
+.tag-handmade     { background: #BA690566; color: #BA6905; } /* terracotta 40% */
+.tag-premium      { background: #C9A96E4D; color: #C9A96E; } /* or 30% */
+.tag-neutral      { background: #8A83784D; color: #8A8378; } /* gris pierre 30% */
+.tag-mediteraneen { background: #C76C3A66; color: #C76C3A; } /* terracotta chaud 40% */
+.tag-season       { background: #E8D5B01A; color: #E8D5B0; } /* beige chaud 10% */
+```
+
+| Variante | Texte | Fond | Opacité | Exemple |
+|----------|-------|------|---------|---------|
+| `bio` | #5C6B3A | #5C6B3A | 40% | 100% BIO |
+| `detox` | #5C6B3A | #5C6B3A | 30% | DÉTOX |
+| `handmade` / `new` | #BA6905 | #BA6905 | 40% | HANDMADE |
+| `premium` | #C9A96E | #C9A96E | 30% | PREMIUM |
+| `neutral` | #8A8378 | #8A8378 | 30% | NOUVEAU |
+| `mediteraneen` | #C76C3A | #C76C3A | 40% | MÉDITERRANÉEN |
+| `season` | #E8D5B0 | #E8D5B0 | 10% | SAISON |
+
+---
+
+### Badges
+
+Plus gros, rectangulaire avec coins arrondis, avec icônes optionnelles.
+
+**Classe de base**
+```css
+.badge {
+  font-family: var(--font-functional);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 10px 16px;
+  border-radius: var(--radius-soft);
+  border: 1.5px solid currentColor;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  background-color: var(--color-white);
+}
+```
+
+**Règle** : fond = couleur du texte/bordure à 40% d'opacité. Bordure unie de la même couleur. Coins légèrement arrondis (soft 4px).
+
+**Variantes**
+```css
+/* fond = même couleur que bordure/texte, opacité 40% */
+.badge-bio       { border: 1.5px solid #5C6B3A; background: #5C6B3A66; color: #5C6B3A; }
+.badge-handmade  { border: 1.5px solid #BA6905; background: #BA690566; color: #BA6905; }
+.badge-location  { border: 1.5px solid #C9A96E; background: #C9A96E66; color: #C9A96E; }
+.badge-certified { border: 1.5px solid #C76C3A; background: #C76C3A66; color: #C76C3A; }
+```
+
+| Variante | Couleur | Exemple |
+|----------|---------|---------|
+| `bio` | #5C6B3A vert mousse | 100% BIO |
+| `handmade` | #BA6905 terracotta | HANDMADE |
+| `location` | #C9A96E or | NICE · 10E BOUTIQUE |
+| `certified` | #C76C3A terracotta chaud | ORIGINE CERTIFIÉE |
+
+---
+
+**Différences clés**
+| | Tags | Badges |
+|---|---|---|
+| Taille | 10px | 12px |
+| Padding | 4px / 10px | 10px / 16px |
+| Border-radius | pill (999px) | soft (4px) |
+| Icônes | Non | Oui (optionnelles) |
+| Usage | Petites étiquettes rapides | Blocs d'information |
 
 ### Cards produit
 
