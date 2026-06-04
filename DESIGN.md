@@ -23,7 +23,7 @@ Thé Tip Top est **L'Artisan Méditerranéen**. La marque ne vend pas du thé - 
 | Nom | Hex | RGB | Usage |
 |-----|-----|-----|-------|
 | Terracotta Profond | `#BA6905` | 186 / 105 / 5 | Couleur signature - identité de marque |
-| Terracotta Lumineux | `#C76C3A` | 199 / 108 / 58 | Accents, CTA, hover states |
+| Terracotta Intermédiaire | `#C25F1F` | 194 / 95 / 31 | Hover states boutons |
 | Noir Institutionnel | `#1A1A1A` | 26 / 26 / 26 | Texte principal, fonds sombres |
 | Blanc Pur | `#FFFFFF` | 255 / 255 / 255 | Fond, respiration visuelle |
 | Crème Naturelle | `#FAF6EF` | 250 / 246 / 239 | Fond éditorial, fond de page principal |
@@ -44,7 +44,7 @@ Thé Tip Top est **L'Artisan Méditerranéen**. La marque ne vend pas du thé - 
 :root {
   /* Primaires */
   --color-terracotta-deep:    #BA6905;
-  --color-terracotta-bright:  #C76C3A;
+  --color-terracotta-hover:   #C25F1F;
   --color-black:              #1A1A1A;
   --color-white:              #FFFFFF;
   --color-cream:              #FAF6EF;
@@ -62,7 +62,7 @@ Thé Tip Top est **L'Artisan Méditerranéen**. La marque ne vend pas du thé - 
   --color-text-primary:       var(--color-black);
   --color-text-secondary:     var(--color-stone-grey);
   --color-cta:                var(--color-terracotta-bright);
-  --color-cta-hover:          var(--color-terracotta-deep);
+  --color-cta-hover:          var(--color-terracotta-hover);
   --color-accent:             var(--color-gold);
   --color-success:            var(--color-moss-green);
 }
