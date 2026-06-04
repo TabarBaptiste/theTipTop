@@ -1,15 +1,20 @@
 {
-    "name": "thetiptop",
-    "version": "1.0.0",
-    "description": "TheTipTop - Promotional Contest Platform",
-    "private": true,
-    "workspaces": [
-        "api",
-        "webapp"
-    ],
-    "scripts": {
-        "build": "npm run build --workspaces",
-        "test": "npm test --workspaces",
-        "lint": "npm run lint --workspaces"
-    }
+  "name": "thetiptop",
+  "version": "1.0.0",
+  "description": "TheTipTop - Promotional Contest Platform",
+  "private": true,
+  "workspaces": [
+    "api",
+    "webapp"
+  ],
+  "scripts": {
+    "build":   "npm run build --workspaces",
+    "test":    "npm test --workspaces",
+    "lint":    "npm run lint --workspaces",
+
+    "check-updates":      "echo '--- webapp ---' && npx npm-check-updates --packageFile webapp/package.json --format group && echo '' && echo '--- api ---' && npx npm-check-updates --packageFile api/package.json --format group",
+    "check-updates:json": "npx npm-check-updates --packageFile webapp/package.json --jsonAll && npx npm-check-updates --packageFile api/package.json --jsonAll",
+    "upgrade:patch":      "npx npm-check-updates --packageFile webapp/package.json --target patch -u && npx npm-check-updates --packageFile api/package.json --target patch -u",
+    "upgrade:minor":      "npx npm-check-updates --packageFile webapp/package.json --target minor -u && npx npm-check-updates --packageFile api/package.json --target minor -u"
+  }
 }
