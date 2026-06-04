@@ -299,21 +299,111 @@ Plus gros, rectangulaire avec coins arrondis, avec icônes optionnelles.
 | Icônes | Non | Oui (optionnelles) |
 | Usage | Petites étiquettes rapides | Blocs d'information |
 
-### Cards produit
+### Cards produit (lots à gagner)
 
+Grille **3 colonnes** sur desktop. **Pas de bordure ni de fond de card** : tout est posé
+directement sur le fond de page. Seule l'**image** porte un radius (sur ses 4 coins) ; le
+reste n'est que de la typographie. La catégorie est un **label terracotta nu**, jamais un tag à fond.
+
+**Structure HTML de référence** (ordre impératif : image → catégorie → titre → footer)
+```html
+<article class="card">
+  <div class="card-image">
+    <img src="..." alt="..." />
+  </div>
+  <p class="card-category">Thé Signature</p>
+  <h3 class="card-title">Boîte 100g Thé Oolong</h3>
+  <div class="card-footer">
+    <span class="card-value">Valeur 39€</span>
+    <span class="card-odds">1 chance sur 3</span>
+  </div>
+</article>
+```
+
+**CSS**
 ```css
+/* Card sans bordure ni fond — pose directe sur le fond de page */
 .card {
-  background-color: var(--color-bg-card);
-  border-radius: var(--radius-card);
-  padding: var(--space-lg);
-  border: 1px solid var(--color-warm-beige);
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  display: flex;
+  flex-direction: column;
 }
-.card:hover {
-  box-shadow: 0 8px 24px rgba(186, 105, 5, 0.12);
-  transform: translateY(-2px);
+
+/* Image : radius sur les 4 coins, ratio fixe, léger zoom au survol */
+.card-image {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+.card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+.card:hover .card-image img { transform: scale(1.04); }
+
+/* Catégorie : label terracotta UPPERCASE, SANS background ni bordure */
+.card-category {
+  font-family: var(--font-functional);
+  font-size: var(--text-ui);          /* 11px */
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--color-terracotta-deep);
+  margin: var(--space-md) 0 0;
+}
+
+/* Titre en italique éditorial */
+.card-title {
+  font-family: var(--font-editorial);
+  font-size: var(--text-h3);
+  font-style: italic;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin: var(--space-2xs) 0 0;
+}
+
+/* Footer : valeur (gauche) + pourcentage (droite), séparés par un filet */
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--space-md);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--color-warm-beige);
+}
+.card-value {
+  font-family: var(--font-functional);
+  font-size: var(--text-small);
+  color: var(--color-text-secondary);
+}
+.card-odds {
+  font-family: var(--font-functional);
+  font-size: var(--text-small);
+  font-weight: 600;
+  color: var(--color-terracotta-deep);
 }
 ```
+
+**Catégorie de lot** — simple label terracotta en capitales. Le libellé varie, la couleur
+reste terracotta deep. Jamais de fond, jamais de bordure, jamais un tag.
+
+| `category` | Libellé affiché | Cas d'usage |
+|-----------|-----------------|-------------|
+| `signature` | THÉ SIGNATURE | Thés signature |
+| `accessoire` | ACCESSOIRE | Infuseurs, théières, tasses |
+| `grandprix` | GRAND PRIX | Week-end, grand lot |
+
+**Règles**
+- Pas de bordure ni de fond de card. Seule l'image a un radius (ses 4 coins).
+- Catégorie = texte terracotta UPPERCASE sans background. Jamais de pill ici.
+- Pourcentage (`card-odds`) en bas à **droite** du footer, en vis-à-vis de la valeur.
+  Jamais dans la catégorie, jamais au-dessus du titre.
+
+**Composant React**
+`PrizeCard` dans `components/ui/card.tsx` — props : `image`, `imageAlt`, `category`, `title`, `value`, `odds`.
 
 ### Formulaire (jeu-concours)
 
