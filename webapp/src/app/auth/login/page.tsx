@@ -39,8 +39,16 @@ export default function LoginPage() {
       await login(data.email, data.password);
       toast.success('Connexion reussie !');
       router.push('/dashboard');
-    } catch {
-      toast.error('Erreur lors de la connexion');
+    } catch (error: any) {
+      const status = error?.response?.status;
+      if (status === 401 || status === 403) {
+        // Message générique : on ne précise pas si c'est l'email ou le mot de passe
+        toast.error('Email ou mot de passe incorrect');
+      } else if (status === 429) {
+        toast.error('Trop de tentatives. Reessayez dans quelques instants.');
+      } else {
+        toast.error('Erreur lors de la connexion. Reessayez plus tard.');
+      }
     } finally {
       setIsLoading(false);
     }

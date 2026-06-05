@@ -12,7 +12,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { api } from '@/lib/api';
-import { getPrizeName, getPrizeValue } from '@/lib/utils';
 
 const participateSchema = z.object({
   code: z
@@ -23,14 +22,18 @@ const participateSchema = z.object({
 
 type ParticipateFormData = z.infer<typeof participateSchema>;
 
+// Aligné sur la réponse réelle de POST /participations (structure plate)
 interface ParticipationResult {
-  participation: {
-    id: string;
-    ticket: {
-      code: string;
-      prizeType: string;
-    };
+  id: string;
+  code: string;
+  prizeType: string;
+  prize: {
+    name: string;
+    description: string;
+    value: string;
   };
+  participatedAt: string;
+  prizeDelivered: boolean;
 }
 
 const prizes = [
@@ -86,7 +89,6 @@ export default function ParticipatePage() {
   };
 
   if (result) {
-    const prizeType = result.participation.ticket.prizeType;
     return (
       <div className="min-h-[calc(100vh-4rem)] bg-cream py-12">
         <div className="container mx-auto max-w-xl px-6">
@@ -101,16 +103,16 @@ export default function ParticipatePage() {
             <div className="mt-6 rounded-card bg-terracotta-50 p-6">
               <Gift className="mx-auto h-10 w-10 text-terracotta-deep" strokeWidth={1.5} />
               <h2 className="mt-3 font-display text-xl font-bold text-noir">
-                {getPrizeName(prizeType)}
+                {result.prize.name}
               </h2>
               <p className="mt-1 font-functional text-lg font-bold text-terracotta-deep">
-                Valeur : {getPrizeValue(prizeType)}
+                Valeur : {result.prize.value}
               </p>
             </div>
 
             <div className="mt-6 rounded-soft bg-cream p-4 text-left">
               <p className="text-xs text-stone-grey">
-                <strong>Code utilise :</strong> {result.participation.ticket.code}
+                <strong>Code utilise :</strong> {result.code}
               </p>
               <p className="mt-2 text-xs text-stone-grey">
                 <Sparkles className="mr-1 inline h-3 w-3 text-gold-500" />
