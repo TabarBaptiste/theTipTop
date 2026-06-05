@@ -2,7 +2,7 @@
 // Guard - JWT
 // ===========================================
 
-import { ExecutionContext, Injectable } from '@nestjs/common';
+import { ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
@@ -24,5 +24,16 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     }
 
     return super.canActivate(context);
+  }
+
+  /**
+   * Conformément aux specs projet : un token absent ou invalide doit
+   * renvoyer HTTP 403 (Forbidden) et non 401 (Unauthorized).
+   */
+  handleRequest<TUser = any>(err: any, user: any, _info: any, _context: ExecutionContext): TUser {
+    if (err || !user) {
+      throw new ForbiddenException('Accès refusé : token absent ou invalide');
+    }
+    return user as TUser;
   }
 }

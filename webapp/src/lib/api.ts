@@ -25,14 +25,30 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Routes d'authentification : un 401/403 y est une réponse métier
+// (mauvais identifiants, etc.), surtout PAS une session expirée.
+// On ne doit donc ni tenter de refresh, ni rediriger.
+const AUTH_ENDPOINTS = ['/auth/login', '/auth/register', '/auth/refresh'];
+
 // Interceptor pour gérer le refresh token
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const requestUrl: string = originalRequest?.url || '';
+    const isAuthEndpoint = AUTH_ENDPOINTS.some((path) => requestUrl.includes(path));
 
-    // Si erreur 401 et pas déjà un retry
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Le back-end envoie 403 (et non 401) quand le token est absent ou invalide
+    // (cf. JwtAuthGuard.handleRequest — specs projet).
+    // On détecte ce cas précis via le message pour ne pas confondre avec un
+    // vrai 403 de rôle (ex : ADMIN tentant une route EMPLOYEE-only).
+    const isTokenError =
+      error.response?.status === 401 ||
+      (error.response?.status === 403 &&
+        error.response?.data?.message?.includes('token absent ou invalide'));
+
+    // Si token invalide/expiré, pas déjà un retry, et hors routes d'auth
+    if (isTokenError && !originalRequest._retry && !isAuthEndpoint) {
       originalRequest._retry = true;
 
       try {
