@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { differenceInDays, differenceInHours, differenceInMinutes, differenceInSeconds } from 'date-fns';
 import { Button } from '@/components/ui/button';
 
-const GAME_END_DATE = new Date(process.env.NEXT_PUBLIC_GAME_END_DATE || '2026-10-30T23:59:59.999Z');
+const GAME_END_DATE = new Date(process.env.NEXT_PUBLIC_GAME_END_DATE || '2026-09-30T23:59:59.999Z');
 
 export function CountdownSection() {
   const [timeLeft, setTimeLeft] = useState({
