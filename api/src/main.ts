@@ -108,7 +108,7 @@ async function bootstrap() {
     customSiteTitle: 'Thé Tip Top - API Documentation',
   });
 
-  const port = process.env.PORT || 4000;
+  const port = process.env.PORT || 3001;
   await app.listen(port);
 
   console.log(`
