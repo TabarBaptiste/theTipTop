@@ -14,7 +14,7 @@
     "test:ci": "jest --ci --coverage",
     "test:e2e": "cypress run",
     "test:e2e:open": "cypress open",
-    "test:e2e:staging": "cypress run --config baseUrl=https://staging.thetiptop.dsp5-archi-o23-15m-g5.fr"
+    "test:e2e:staging": "cypress run --config baseUrl=https://staging.thetiptop.dsp5-archi-o24a-4-5-g5.fr"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

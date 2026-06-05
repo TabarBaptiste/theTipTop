@@ -82,7 +82,7 @@ services:
       retries: 3
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.thetiptop-api.rule=Host(`api.thetiptop.dsp5-archi-o23-15m-g5.fr`)"
+      - "traefik.http.routers.thetiptop-api.rule=Host(`api.thetiptop.dsp5-archi-o24a-4-5-g5.fr`)"
       - "traefik.http.routers.thetiptop-api.entrypoints=websecure"
       - "traefik.http.routers.thetiptop-api.tls.certresolver=letsencrypt"
       - "traefik.http.services.thetiptop-api.loadbalancer.server.port=3001"
@@ -110,13 +110,13 @@ services:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.thetiptop-webapp.rule=Host(`www.thetiptop.dsp5-archi-o23-15m-g5.fr`) || Host(`thetiptop.dsp5-archi-o23-15m-g5.fr`)"
+      - "traefik.http.routers.thetiptop-webapp.rule=Host(`www.thetiptop.dsp5-archi-o24a-4-5-g5.fr`) || Host(`thetiptop.dsp5-archi-o24a-4-5-g5.fr`)"
       - "traefik.http.routers.thetiptop-webapp.entrypoints=websecure"
       - "traefik.http.routers.thetiptop-webapp.tls.certresolver=letsencrypt"
       - "traefik.http.services.thetiptop-webapp.loadbalancer.server.port=3000"
       # Redirection www vers non-www
       - "traefik.http.middlewares.thetiptop-redirect.redirectregex.regex=^https://www\\.thetiptop\\.dsp5-archi-o23-15m-g5\\.fr/(.*)"
-      - "traefik.http.middlewares.thetiptop-redirect.redirectregex.replacement=https://thetiptop.dsp5-archi-o23-15m-g5.fr/$${1}"
+      - "traefik.http.middlewares.thetiptop-redirect.redirectregex.replacement=https://thetiptop.dsp5-archi-o24a-4-5-g5.fr/$${1}"
     networks:
       - thetiptop-internal
       - thetiptop-public

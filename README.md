@@ -151,9 +151,9 @@ npm run dev
 
 | Service | URL (Dev) | URL (Prod) |
 |---------|-----------|------------|
-| WebApp | http://localhost:3000 | https://thetiptop.dsp5-archi-o23-15m-g5.fr |
-| API | http://localhost:3001 | https://api.thetiptop.dsp5-archi-o23-15m-g5.fr |
-| API Docs | http://localhost:3001/api/docs | https://api.thetiptop.dsp5-archi-o23-15m-g5.fr/api/docs |
+| WebApp | http://localhost:3000 | https://thetiptop.dsp5-archi-o24a-4-5-g5.fr |
+| API | http://localhost:3001 | https://api.thetiptop.dsp5-archi-o24a-4-5-g5.fr |
+| API Docs | http://localhost:3001/api/docs | https://api.thetiptop.dsp5-archi-o24a-4-5-g5.fr/api/docs |
 | Adminer | http://localhost:8080 | - |
 
 ## 🔐 Comptes de test

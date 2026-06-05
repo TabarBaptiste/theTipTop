@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'fr_FR',
-    url: 'https://thetiptop.dsp5-archi-o23-15m-g5.fr',
+    url: 'https://thetiptop.dsp5-archi-o24a-4-5-g5.fr',
     siteName: 'The Tip Top',
     title: 'The Tip Top - Jeu Concours',
     description:
