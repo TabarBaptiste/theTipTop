@@ -36,22 +36,21 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
       return done(new Error('Email non fourni par Facebook'), null);
     }
 
-    await this.authService.validateOAuthUser({
-      provider: 'facebook',
-      providerId: id,
-      email,
-      firstName: name?.givenName || 'Utilisateur',
-      lastName: name?.familyName || 'Facebook',
-      picture: photos?.[0]?.value,
-    });
+    try {
+      // Trouve ou crée l'utilisateur, puis le rattache à req.user.
+      // Les tokens seront générés par le controller via authService.login().
+      const user = await this.authService.validateOAuthUser({
+        provider: 'facebook',
+        providerId: id,
+        email,
+        firstName: name?.givenName || 'Utilisateur',
+        lastName: name?.familyName || 'Facebook',
+        picture: photos?.[0]?.value,
+      });
 
-    // Pour le callback, on retourne l'utilisateur trouvé/créé
-    const user = await this.authService.validateJwtPayload({
-      sub: '',
-      email,
-      role: 'CLIENT',
-    });
-
-    done(null, user);
+      done(null, user);
+    } catch (error) {
+      done(error, null);
+    }
   }
 }

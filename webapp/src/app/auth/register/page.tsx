@@ -20,15 +20,16 @@ const registerSchema = z.object({
     .min(8, 'Le mot de passe doit faire au moins 8 caracteres')
     .regex(/[A-Z]/, 'Le mot de passe doit contenir au moins une majuscule')
     .regex(/[a-z]/, 'Le mot de passe doit contenir au moins une minuscule')
-    .regex(/[0-9]/, 'Le mot de passe doit contenir au moins un chiffre'),
+    .regex(/[0-9]/, 'Le mot de passe doit contenir au moins un chiffre')
+    .regex(/[@$!%*?&]/, 'Le mot de passe doit contenir au moins un caractere special (@$!%*?&)'),
   confirmPassword: z.string(),
   firstName: z.string().min(2, 'Le prenom doit faire au moins 2 caracteres'),
   lastName: z.string().min(2, 'Le nom doit faire au moins 2 caracteres'),
   phone: z.string().optional(),
   birthDate: z.string().optional(),
-  gender: z.enum(['male', 'female', 'other']).optional(),
-  newsletterOptIn: z.boolean().default(false),
-  rgpdConsent: z.literal(true, {
+  gender: z.enum(['MALE', 'FEMALE', 'OTHER', 'PREFER_NOT_TO_SAY']).optional(),
+  consentEmail: z.boolean().default(false),
+  consentData: z.literal(true, {
     errorMap: () => ({ message: 'Vous devez accepter les conditions' }),
   }),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -50,19 +51,31 @@ export default function RegisterPage() {
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      newsletterOptIn: false,
+      consentEmail: false,
     },
   });
 
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
     try {
-      const { confirmPassword, ...registerData } = data;
-      await registerUser(registerData);
+      const { confirmPassword, ...rest } = data;
+      // On évite d'envoyer des champs optionnels vides (sinon échec IsDateString, etc.)
+      await registerUser({
+        ...rest,
+        phone: rest.phone || undefined,
+        birthDate: rest.birthDate || undefined,
+      });
       toast.success('Inscription reussie ! Bienvenue !');
       router.push('/dashboard');
-    } catch {
-      toast.error('Erreur lors de l\'inscription');
+    } catch (error: any) {
+      const status = error?.response?.status;
+      if (status === 409) {
+        toast.error('Un compte existe deja avec cet email');
+      } else if (status === 400 || status === 422) {
+        toast.error('Donnees invalides. Verifiez le formulaire.');
+      } else {
+        toast.error("Erreur lors de l'inscription");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -165,11 +178,11 @@ export default function RegisterPage() {
             <div className="flex items-start gap-3">
               <input
                 type="checkbox"
-                id="rgpdConsent"
+                id="consentData"
                 className="mt-1 h-4 w-4 rounded-sharp border-warm-beige text-terracotta-deep accent-terracotta-deep"
-                {...register('rgpdConsent')}
+                {...register('consentData')}
               />
-              <label htmlFor="rgpdConsent" className="text-xs leading-relaxed text-stone-grey">
+              <label htmlFor="consentData" className="text-xs leading-relaxed text-stone-grey">
                 J&apos;accepte les{' '}
                 <Link href="/cgu" className="text-terracotta-deep hover:underline">
                   conditions generales
@@ -181,18 +194,18 @@ export default function RegisterPage() {
                 *
               </label>
             </div>
-            {errors.rgpdConsent && (
-              <p className="text-xs text-red-600">{errors.rgpdConsent.message}</p>
+            {errors.consentData && (
+              <p className="text-xs text-red-600">{errors.consentData.message}</p>
             )}
 
             <div className="flex items-start gap-3">
               <input
                 type="checkbox"
-                id="newsletterOptIn"
+                id="consentEmail"
                 className="mt-1 h-4 w-4 rounded-sharp border-warm-beige text-terracotta-deep accent-terracotta-deep"
-                {...register('newsletterOptIn')}
+                {...register('consentEmail')}
               />
-              <label htmlFor="newsletterOptIn" className="text-xs leading-relaxed text-stone-grey">
+              <label htmlFor="consentEmail" className="text-xs leading-relaxed text-stone-grey">
                 Je souhaite recevoir les offres et nouveautes de The Tip Top
               </label>
             </div>
