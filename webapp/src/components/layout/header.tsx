@@ -87,55 +87,58 @@ export function Header() {
       </nav>
 
       {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className="border-t border-warm-beige bg-white md:hidden">
-          <div className="space-y-1 px-6 pb-6 pt-4">
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={cn(
-                  'block rounded-soft px-3 py-2 font-functional text-sm font-semibold',
-                  pathname === item.href
-                    ? 'bg-terracotta-50 text-terracotta-deep'
-                    : 'text-noir hover:bg-cream'
-                )}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {item.name}
-              </Link>
-            ))}
-            <div className="mt-4 flex flex-col gap-2 border-t border-warm-beige pt-4">
-              {isAuthenticated ? (
-                <>
-                  <Button asChild variant="outline" className="w-full">
-                    <Link href="/dashboard">Mon compte</Link>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="w-full"
-                    onClick={() => {
-                      logout();
-                      setMobileMenuOpen(false);
-                    }}
-                  >
-                    Deconnexion
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button asChild className="w-full">
-                    <Link href="/auth/login">Connexion</Link>
-                  </Button>
-                  <Button asChild variant="outline" className="w-full">
-                    <Link href="/auth/register">Inscription</Link>
-                  </Button>
-                </>
+      <div
+        className={cn(
+          'overflow-hidden border-t border-warm-beige bg-white transition-all duration-300 ease-in-out md:hidden',
+          mobileMenuOpen ? 'max-h-96' : 'max-h-0'
+        )}
+      >
+        <div className="space-y-1 px-6 pb-6 pt-4">
+          {navigation.map((item) => (
+            <Link
+              key={item.name}
+              href={item.href}
+              className={cn(
+                'block rounded-soft px-3 py-2 font-functional text-sm font-semibold',
+                pathname === item.href
+                  ? 'bg-terracotta-50 text-terracotta-deep'
+                  : 'text-noir hover:bg-cream'
               )}
-            </div>
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {item.name}
+            </Link>
+          ))}
+          <div className="mt-4 flex flex-col gap-2 border-t border-warm-beige pt-4">
+            {isAuthenticated ? (
+              <>
+                <Button asChild variant="outline" className="w-full">
+                  <Link href="/dashboard">Mon compte</Link>
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full"
+                  onClick={() => {
+                    logout();
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  Deconnexion
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button asChild className="w-full">
+                  <Link href="/auth/login">Connexion</Link>
+                </Button>
+                <Button asChild variant="outline" className="w-full">
+                  <Link href="/auth/register">Inscription</Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
-      )}
+      </div>
     </header>
   );
 }

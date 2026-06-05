@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
   :root {
     /* === DESIGN.md — Palette primaire === */
     --color-terracotta-deep: #BA6905;
