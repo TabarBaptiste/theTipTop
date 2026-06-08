@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Leaf, Ticket, ShieldCheck } from 'lucide-react';
-import tassesHeroImg from '@/img/tasses_hero.avif';
+import tassesHeroImg from '@/img/tasses_hero.webp';
 
 export function HeroSection() {
   return (
