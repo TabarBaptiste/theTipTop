@@ -5,26 +5,14 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { DeliveryMethod } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
-
-type PrizeLabel = { name: string; description: string; value: string | null };
+import { TicketsService } from '../tickets/tickets.service';
 
 @Injectable()
 export class GainsService {
-  constructor(private readonly prisma: PrismaService) {}
-
-  /**
-   * Charge les métadonnées des lots depuis la DB et retourne une map code → label
-   */
-  private async loadPrizesMap(): Promise<Record<string, PrizeLabel>> {
-    const prizes = await this.prisma.prize.findMany();
-    return prizes.reduce(
-      (acc, p) => {
-        acc[p.code] = { name: p.name, description: p.description, value: p.value };
-        return acc;
-      },
-      {} as Record<string, PrizeLabel>,
-    );
-  }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly ticketsService: TicketsService,
+  ) {}
 
   /**
    * Marquer un gain comme remis
@@ -74,7 +62,7 @@ export class GainsService {
           },
         },
       }),
-      this.loadPrizesMap(),
+      this.ticketsService.getPrizesMap(),
     ]);
 
     return {
@@ -140,7 +128,7 @@ export class GainsService {
         }),
         this.prisma.participation.count({ where: { prizeDelivered: false } }),
       ]),
-      this.loadPrizesMap(),
+      this.ticketsService.getPrizesMap(),
     ]);
 
     type PendingParticipation = (typeof participations)[number];
@@ -196,7 +184,7 @@ export class GainsService {
         }),
         this.prisma.participation.count({ where }),
       ]),
-      this.loadPrizesMap(),
+      this.ticketsService.getPrizesMap(),
     ]);
 
     type DeliveryHistoryParticipation = (typeof participations)[number];
@@ -239,7 +227,7 @@ export class GainsService {
         _count: true,
         where: { participation: { prizeDelivered: true } },
       }),
-      this.loadPrizesMap(),
+      this.ticketsService.getPrizesMap(),
     ]);
 
     type DeliveryMethodGroup = (typeof byMethod)[number];

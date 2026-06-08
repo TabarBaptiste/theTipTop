@@ -84,12 +84,19 @@ export class TicketsService {
     }
 
     const prizesMap = await this.getPrizesMap();
+    const prizeLabel = prizesMap[ticket.prizeType];
+
+    if (!prizeLabel) {
+      throw new NotFoundException(
+        `Lot introuvable pour le type : ${ticket.prizeType}. Vérifiez que la base est correctement seedée.`,
+      );
+    }
 
     return {
       isValid: true,
       ticket: {
         ...ticket,
-        prize: prizesMap[ticket.prizeType],
+        prize: prizeLabel,
       },
     };
   }
