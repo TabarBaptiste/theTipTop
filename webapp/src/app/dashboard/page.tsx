@@ -9,16 +9,22 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { api } from '@/lib/api';
-import { getPrizeName, getPrizeValue, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
 
+// Aligné sur la réponse réelle de GET /participations/me (structure plate)
 interface Participation {
   id: string;
-  ticket: {
-    code: string;
-    prizeType: string;
+  code: string;
+  prizeType: string;
+  prize: {
+    name: string;
+    description: string;
+    value: string;
   };
-  deliveredAt: string | null;
-  createdAt: string;
+  participatedAt: string;
+  prizeDelivered: boolean;
+  prizeDeliveredAt: string | null;
+  deliveryMethod: string | null;
 }
 
 export default function DashboardPage() {
@@ -36,7 +42,7 @@ export default function DashboardPage() {
   const { data: participations, isLoading } = useQuery<Participation[]>({
     queryKey: ['participations'],
     queryFn: async () => {
-      const response = await api.get('/participations/my');
+      const response = await api.get('/participations/me');
       return response.data;
     },
     enabled: isAuthenticated,
@@ -51,8 +57,8 @@ export default function DashboardPage() {
   }
 
   const totalParticipations = participations?.length || 0;
-  const pendingPrizes = participations?.filter((p) => !p.deliveredAt).length || 0;
-  const deliveredPrizes = participations?.filter((p) => p.deliveredAt).length || 0;
+  const pendingPrizes = participations?.filter((p) => !p.prizeDelivered).length || 0;
+  const deliveredPrizes = participations?.filter((p) => p.prizeDelivered).length || 0;
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-gray-50 py-8">
@@ -149,14 +155,14 @@ export default function DashboardPage() {
                     <div className="flex items-center gap-4">
                       <div
                         className={`rounded-lg p-2 ${
-                          participation.deliveredAt
+                          participation.prizeDelivered
                             ? 'bg-emerald-100'
                             : 'bg-amber-100'
                         }`}
                       >
                         <Gift
                           className={`h-5 w-5 ${
-                            participation.deliveredAt
+                            participation.prizeDelivered
                               ? 'text-emerald-600'
                               : 'text-amber-600'
                           }`}
@@ -164,21 +170,21 @@ export default function DashboardPage() {
                       </div>
                       <div>
                         <p className="font-medium text-gray-900">
-                          {getPrizeName(participation.ticket.prizeType)}
+                          {participation.prize.name}
                         </p>
                         <p className="text-sm text-gray-500">
-                          Code : {participation.ticket.code}
+                          Code : {participation.code}
                         </p>
                       </div>
                     </div>
                     <div className="text-right">
                       <p className="font-medium text-tea-600">
-                        {getPrizeValue(participation.ticket.prizeType)}
+                        {participation.prize.value}
                       </p>
                       <p className="text-sm text-gray-500">
-                        {participation.deliveredAt ? (
+                        {participation.prizeDelivered ? (
                           <span className="text-emerald-600">
-                            ✓ Récupéré le {formatDate(participation.deliveredAt)}
+                            ✓ Récupéré le {formatDate(participation.prizeDeliveredAt!)}
                           </span>
                         ) : (
                           <span className="text-amber-600">
