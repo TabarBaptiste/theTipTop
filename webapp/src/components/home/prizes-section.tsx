@@ -11,14 +11,12 @@ import { PrizeCard, type PrizeCategory } from '@/components/ui/card';
 import { api } from '@/lib/api';
 
 interface PrizeApi {
-  id: string;
   code: string;
   name: string;
   description: string;
   imageUrl: string | null;
-  value: string;
+  value: string | null;
   percentage: number;
-  totalCount: number;
   displayOrder: number;
 }
 
@@ -70,7 +68,7 @@ export function PrizesSection() {
 
             return (
               <PrizeCard
-                key={prize.id} // Utilisation de l'id unique de la BDD plutôt que le code pour la clé React
+                key={prize.code}
                 image={imageSrc}
                 imageAlt={imageAlt}
                 category={imgConfig?.category ?? 'signature'}
