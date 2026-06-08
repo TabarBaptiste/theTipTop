@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Gift, Loader2, PartyPopper, Sparkles, Leaf, ShieldCheck, Heart, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -36,14 +36,13 @@ interface ParticipationResult {
   prizeDelivered: boolean;
 }
 
-const prizes = [
-  { name: 'Lot 1', description: 'Infuseur a the', probability: '60%', value: '15€' },
-  { name: 'Lot 2', description: 'The detox 100g', probability: '20%', value: '20€' },
-  { name: 'Lot 3', description: 'The signature 100g', probability: '10%', value: '25€' },
-  { name: 'Lot 4', description: 'Coffret decouverte', probability: '6%', value: '39€' },
-  { name: 'Lot 5', description: 'Coffret premium', probability: '4%', value: '69€' },
-  { name: 'Lot 6', description: 'Grand prix - 1 an de the', probability: 'Tirage', value: '360€' },
-];
+interface PrizeApi {
+  code: string;
+  name: string;
+  description: string;
+  value: string;
+  percentage: number;
+}
 
 const rules = [
   { color: 'bg-moss', text: 'Le jeu-concours est ouvert a toute personne ayant effectue un achat superieur a 49€ en magasin.' },
@@ -54,6 +53,16 @@ const rules = [
 export default function ParticipatePage() {
   const queryClient = useQueryClient();
   const [result, setResult] = useState<ParticipationResult | null>(null);
+
+  // Chargement des lots depuis l'API (source de vérité en DB)
+  const { data: prizes } = useQuery<PrizeApi[]>({
+    queryKey: ['prizes'],
+    queryFn: async () => {
+      const response = await api.get('/tickets/prizes');
+      return response.data;
+    },
+    staleTime: Infinity,
+  });
 
   const {
     register,
@@ -213,9 +222,9 @@ export default function ParticipatePage() {
           </p>
 
           <div className="mt-8 grid gap-4 sm:grid-cols-2">
-            {prizes.map((prize) => (
+            {prizes?.map((prize) => (
               <div
-                key={prize.name}
+                key={prize.code}
                 className="rounded-card border border-warm-beige bg-white p-5 transition-all duration-200 hover:shadow-[0_8px_24px_rgba(186,105,5,0.12)]"
               >
                 <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-deep">
@@ -225,7 +234,7 @@ export default function ParticipatePage() {
                   {prize.description}
                 </p>
                 <div className="mt-2 flex items-center justify-between">
-                  <span className="text-xs text-stone-grey">Chance : {prize.probability}</span>
+                  <span className="text-xs text-stone-grey">Chance : {prize.percentage}%</span>
                   <span className="font-functional text-sm font-bold text-terracotta-deep">
                     {prize.value}
                   </span>
