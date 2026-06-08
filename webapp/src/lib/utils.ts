@@ -43,31 +43,29 @@ export function formatDateTime(date: Date | string): string {
 }
 
 /**
- * Retourne le nom du lot en français
+ * Retourne le nom du lot en français (fallback statique – préférer l'API /tickets/prizes)
  */
 export function getPrizeName(prizeType: string): string {
   const prizes: Record<string, string> = {
-    INFUSER: 'Infuseur à thé',
-    TEA_DETOX: 'Thé détox ou infusion 100g',
-    TEA_SIGNATURE: 'Thé signature 100g',
-    GIFT_BOX_39: 'Coffret découverte 39€',
-    GIFT_BOX_69: 'Coffret découverte 69€',
-    GRAND_PRIZE: '1 an de thé d\'une valeur de 360€',
+    INFUSER:       'Infuseur à thé',
+    TEA_DETOX:     'Thé Détox / Infusion',
+    TEA_SIGNATURE: 'Thé Signature',
+    GIFT_BOX_39:   'Coffret Découverte',
+    GIFT_BOX_69:   'Coffret Découverte Premium',
   };
   return prizes[prizeType] || prizeType;
 }
 
 /**
- * Retourne la valeur du lot
+ * Retourne la valeur du lot (fallback statique – préférer l'API /tickets/prizes)
  */
-export function getPrizeValue(prizeType: string): string {
-  const values: Record<string, string> = {
-    INFUSER: '15€',
-    TEA_DETOX: '20€',
-    TEA_SIGNATURE: '25€',
-    GIFT_BOX_39: '39€',
-    GIFT_BOX_69: '69€',
-    GRAND_PRIZE: '360€',
-  };
-  return values[prizeType] || '0€';
-}
+// export function getPrizeValue(prizeType: string): string {
+//   const values: Record<string, string> = {
+//     INFUSER:       '12€',
+//     TEA_DETOX:     '15€',
+//     TEA_SIGNATURE: '20€',
+//     GIFT_BOX_39:   '39€',
+//     GIFT_BOX_69:   '69€',
+//   };
+//   return values[prizeType] || '—';
+// }
