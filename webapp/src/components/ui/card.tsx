@@ -80,9 +80,9 @@ CardFooter.displayName = 'CardFooter';
 type PrizeCategory = 'signature' | 'accessoire' | 'grandprix';
 
 const CATEGORY_LABELS: Record<PrizeCategory, string> = {
-  signature:  'Thé Signature',
+  signature: 'Thé Signature',
   accessoire: 'Accessoire',
-  grandprix:  'Grand Prix',
+  grandprix: 'Grand Prix',
 };
 
 interface PrizeCardProps {
@@ -91,7 +91,7 @@ interface PrizeCardProps {
   imageAlt?: string;
   category: PrizeCategory;
   title: string;
-  value: string;  // ex: "39€"
+  value: string | null;  // ex: "39€" ou null si pas de valeur associée
   odds: string;   // ex: "1 chance sur 3" ou "33%"
   className?: string;
 }
@@ -124,8 +124,8 @@ function PrizeCard({ image, imageAlt = '', category, title, value, odds, classNa
       <h3 className="mt-2xs font-editorial text-h3 italic text-noir">{title}</h3>
 
       {/* Footer : valeur (gauche) + pourcentage (droite), séparés par un filet */}
-      <div className="mt-md flex items-center justify-between border-t border-warm-beige pt-sm">
-        <span className="font-functional text-caption text-stone">Valeur {value}</span>
+      <div className={cn('mt-md flex items-center border-t border-warm-beige pt-sm', value ? 'justify-between' : 'justify-end')}>
+        {value && <span className="font-functional text-caption text-stone">Valeur {value}</span>}
         <span className="font-functional text-caption font-semibold text-terracotta-deep">{odds}</span>
       </div>
     </article>
