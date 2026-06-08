@@ -1,70 +1,54 @@
+'use client';
+
+import { useQuery } from '@tanstack/react-query';
+import { StaticImageData } from 'next/image';
 import boite100gImg from '@/img/boite_100g.jpeg';
 import infuseurPremiumImg from '@/img/Infuseur_premium.jpg';
 import coffret5thesImg from '@/img/coffret_5_thes.jpg';
 import theiereImg from '@/img/theiere.jpeg';
 import boiteMatchaImg from '@/img/boite_matcha.webp';
-import weekEndSalon from '@/img/week-end_salon.avif';
 import { PrizeCard, type PrizeCategory } from '@/components/ui/card';
+import { api } from '@/lib/api';
 
-const prizes: Array<{
+interface PrizeApi {
+  id: string;
+  code: string;
   name: string;
+  description: string;
+  imageUrl: string | null;
   value: string;
-  probability: string;
+  percentage: number;
+  totalCount: number;
+  displayOrder: number;
+}
+
+// Interface pour typer proprement la configuration locale d'une image
+interface PrizeImageConfig {
+  src: StaticImageData | string;
+  alt: string;
   category: PrizeCategory;
-  image?: string | { src: string };
-  imageAlt?: string;
-}> = [
-  {
-    name: 'Boite 100g Thé Détox',
-    value: '20€',
-    probability: '20%',
-    category: 'signature',
-    image: boite100gImg,
-    imageAlt: 'Boîte 100g Thé',
-  },
-  {
-    name: 'Infuseur premium',
-    value: '15€',
-    probability: '60%',
-    category: 'accessoire',
-    image: infuseurPremiumImg,
-    imageAlt: 'Infuseur à thé',
-  },
-  {
-    name: 'Coffret découverte',
-    value: '39€',
-    probability: '6%',
-    category: 'signature',
-    image: coffret5thesImg,
-    imageAlt: 'Coffret 5 thés',
-  },
-  {
-    name: 'Tasse + coffret de thé',
-    value: '25€',
-    probability: '10%',
-    category: 'accessoire',
-    image: weekEndSalon,
-    imageAlt: 'Week-end salon de thé',
-  },
-  {
-    name: 'Théière japonaise',
-    value: '69€',
-    probability: '4%',
-    category: 'accessoire',
-    image: theiereImg,
-    imageAlt: 'Théière japonaise',
-  },
-  {
-    name: 'Boite Matcha premium',
-    value: '30€',
-    probability: '—',
-    category: 'signature',
-    image: boiteMatchaImg,
-    imageAlt: 'Boîte Matcha premium',
-  },
-];
+}
+
+// Images locales par code de lot (optimisation Next.js)
+// La table Prize expose `imageUrl` pour un futur CDN ; en attendant, on mappe ici.
+const PRIZE_IMAGES: Record<string, PrizeImageConfig> = {
+  INFUSER:       { src: infuseurPremiumImg, alt: 'Infuseur à thé',              category: 'accessoire' },
+  TEA_DETOX:     { src: boite100gImg,       alt: 'Boîte 100g thé détox',        category: 'signature'  },
+  TEA_SIGNATURE: { src: boiteMatchaImg,     alt: 'Boîte 100g thé signature',    category: 'signature'  },
+  GIFT_BOX_39:   { src: coffret5thesImg,    alt: 'Coffret découverte',          category: 'signature'  },
+  GIFT_BOX_69:   { src: theiereImg,         alt: 'Coffret découverte premium',  category: 'accessoire' },
+};
 
 export function PrizesSection() {
+  const { data: prizes } = useQuery<PrizeApi[]>({
+    queryKey: ['prizes'],
+    queryFn: async () => {
+      const response = await api.get('/tickets/prizes');
+      return response.data;
+    },
+    staleTime: Infinity, // Les lots ne changent pas en cours de session
+  });
+
   return (
     <section id="prizes" className="bg-white py-16 md:py-20">
       <div className="container mx-auto px-6">
@@ -76,17 +60,26 @@ export function PrizesSection() {
         </p>
 
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {prizes.map((prize) => (
-            <PrizeCard
-              key={prize.name}
-              image={prize.image}
-              imageAlt={prize.imageAlt}
-              category={prize.category}
-              title={prize.name}
-              value={prize.value}
-              odds={prize.probability}
-            />
-          ))}
+          {prizes?.map((prize) => {
+            const imgConfig = PRIZE_IMAGES[prize.code];
+
+            // Sécurité : Si le code API n'existe pas localement, on évite le crash en utilisant
+            // l'imageUrl de l'API (si disponible) ou un fallback vide.
+            const imageSrc = imgConfig?.src ?? prize.imageUrl ?? '';
+            const imageAlt = imgConfig?.alt ?? prize.name;
+
+            return (
+              <PrizeCard
+                key={prize.id} // Utilisation de l'id unique de la BDD plutôt que le code pour la clé React
+                image={imageSrc}
+                imageAlt={imageAlt}
+                category={imgConfig?.category ?? 'signature'}
+                title={prize.name}
+                value={prize.value}
+                odds={`${prize.percentage}%`}
+              />
+            );
+          })}
         </div>
       </div>
     </section>
