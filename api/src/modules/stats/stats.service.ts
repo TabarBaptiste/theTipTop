@@ -6,10 +6,9 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ParticipationsService } from '../participations/participations.service';
-import { PRIZE_LABELS } from '../tickets/tickets.service';
 
 type PrizeStat = {
-  prizeType: keyof typeof PRIZE_LABELS;
+  prizeType: string;
   _count: { _all: number };
 };
 
@@ -141,10 +140,19 @@ export class StatsService {
       where: { prizeDelivered: true },
     });
 
+    const prizes = await this.prisma.prize.findMany();
+    const prizesMap = prizes.reduce(
+      (acc, p) => {
+        acc[p.code] = { name: p.name, value: p.value };
+        return acc;
+      },
+      {} as Record<string, { name: string; value: string | null }>,
+    );
+
     const byType = prizeStats.map((stat: PrizeStat) => ({
       type: stat.prizeType,
-      label: PRIZE_LABELS[stat.prizeType].name,
-      value: PRIZE_LABELS[stat.prizeType].value,
+      label: (prizesMap[stat.prizeType] ?? { name: stat.prizeType }).name,
+      value: (prizesMap[stat.prizeType] ?? { value: '' }).value,
       count: stat._count._all,
     }));
 

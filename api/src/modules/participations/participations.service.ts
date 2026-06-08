@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
-import { TicketsService, PRIZE_LABELS } from '../tickets/tickets.service';
+import { TicketsService } from '../tickets/tickets.service';
 
 type ParticipationWithTicket = Prisma.ParticipationGetPayload<{ include: { ticket: true } }>;
 
@@ -47,6 +47,7 @@ export class ParticipationsService {
     }
 
     const ticket = verification.ticket;
+    const prizesMap = await this.ticketsService.getPrizesMap();
 
     const participation = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const ticketCheck = await tx.ticket.findUnique({
@@ -93,7 +94,7 @@ export class ParticipationsService {
       id: participation.id,
       code: normalizedCode,
       prizeType: ticket.prizeType,
-      prize: PRIZE_LABELS[ticket.prizeType],
+      prize: prizesMap[ticket.prizeType],
       participatedAt: participation.createdAt,
       prizeDelivered: participation.prizeDelivered,
     };
@@ -103,19 +104,20 @@ export class ParticipationsService {
    * Récupère les participations d'un utilisateur
    */
   async findByUser(userId: string) {
-    const participations = await this.prisma.participation.findMany({
-      where: { userId },
-      include: {
-        ticket: true,
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+    const [participations, prizesMap] = await Promise.all([
+      this.prisma.participation.findMany({
+        where: { userId },
+        include: { ticket: true },
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.ticketsService.getPrizesMap(),
+    ]);
 
     return participations.map((p: ParticipationWithTicket) => ({
       id: p.id,
       code: p.ticket.code,
       prizeType: p.ticket.prizeType,
-      prize: PRIZE_LABELS[p.ticket.prizeType],
+      prize: prizesMap[p.ticket.prizeType],
       participatedAt: p.createdAt,
       prizeDelivered: p.prizeDelivered,
       prizeDeliveredAt: p.prizeDeliveredAt,
@@ -146,9 +148,11 @@ export class ParticipationsService {
       throw new NotFoundException('Participation non trouvée');
     }
 
+    const prizesMap = await this.ticketsService.getPrizesMap();
+
     return {
       ...participation,
-      prize: PRIZE_LABELS[participation.ticket.prizeType],
+      prize: prizesMap[participation.ticket.prizeType],
     };
   }
 
@@ -180,12 +184,14 @@ export class ParticipationsService {
       throw new NotFoundException('Ticket non trouvé');
     }
 
+    const prizesMap = await this.ticketsService.getPrizesMap();
+
     if (!ticket.participation) {
       return {
         ticket: {
           code: ticket.code,
           prizeType: ticket.prizeType,
-          prize: PRIZE_LABELS[ticket.prizeType],
+          prize: prizesMap[ticket.prizeType],
           isUsed: ticket.isUsed,
         },
         participation: null,
@@ -196,7 +202,7 @@ export class ParticipationsService {
       ticket: {
         code: ticket.code,
         prizeType: ticket.prizeType,
-        prize: PRIZE_LABELS[ticket.prizeType],
+        prize: prizesMap[ticket.prizeType],
         isUsed: ticket.isUsed,
       },
       participation: {
@@ -243,12 +249,14 @@ export class ParticipationsService {
       this.prisma.participation.count({ where }),
     ]);
 
+    const prizesMap = await this.ticketsService.getPrizesMap();
+
     return {
       data: participations.map((p: ParticipationWithTicketAndUser) => ({
         id: p.id,
         code: p.ticket.code,
         prizeType: p.ticket.prizeType,
-        prize: PRIZE_LABELS[p.ticket.prizeType],
+        prize: prizesMap[p.ticket.prizeType],
         user: p.user,
         participatedAt: p.createdAt,
         prizeDelivered: p.prizeDelivered,

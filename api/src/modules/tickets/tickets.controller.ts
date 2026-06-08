@@ -15,7 +15,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 
-import { TicketsService, PRIZE_LABELS } from './tickets.service';
+import { TicketsService } from './tickets.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -71,10 +71,7 @@ export class TicketsController {
   @ApiOperation({ summary: 'Liste des lots à gagner' })
   @ApiResponse({ status: 200, description: 'Liste des lots' })
   async getPrizes() {
-    return Object.entries(PRIZE_LABELS).map(([type, info]) => ({
-      type,
-      ...info,
-    }));
+    return this.ticketsService.findAllPrizes();
   }
 
   // ===========================================
