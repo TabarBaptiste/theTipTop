@@ -261,7 +261,7 @@ export default function ParticipatePage() {
               prizes?.map((prize) => (
                 <div
                   key={prize.code}
-                  className="rounded-card border border-warm-beige bg-white p-5 transition-all duration-200 hover:shadow-[0_8px_24px_rgba(186,105,5,0.12)]"
+                  className="rounded-card border border-warm-beige bg-white p-5"
                 >
                   <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-deep">
                     {prize.name}
