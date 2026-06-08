@@ -17,6 +17,7 @@ import { GainsModule } from './modules/gains/gains.module';
 import { StatsModule } from './modules/stats/stats.module';
 import { GrandPrizeModule } from './modules/grand-prize/grand-prize.module';
 import { AuditModule } from './modules/audit/audit.module';
+import { GameConfigModule } from './modules/game-config/game-config.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { AuditModule } from './modules/audit/audit.module';
     StatsModule,
     GrandPrizeModule,
     AuditModule,
+    GameConfigModule,
   ],
   providers: [
     // Rate limiting global

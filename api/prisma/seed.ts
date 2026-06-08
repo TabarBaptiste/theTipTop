@@ -211,11 +211,19 @@ async function main() {
   // Créer la configuration du jeu si elle n'existe pas
   const existingConfig = await prisma.gameConfig.findFirst();
   if (!existingConfig) {
-    const startDate = new Date();
-    const endDate = new Date(startDate);
-    endDate.setDate(endDate.getDate() + 30);
-    const claimEndDate = new Date(endDate);
-    claimEndDate.setDate(claimEndDate.getDate() + 30);
+    // Lire les dates depuis les variables d'environnement (définis dans api/.env)
+    // Fallback : début aujourd'hui, fin dans 30 jours, réclamation dans 60 jours
+    const startDate = process.env.GAME_START_DATE
+      ? new Date(process.env.GAME_START_DATE)
+      : new Date();
+
+    const endDate = process.env.GAME_END_DATE
+      ? new Date(process.env.GAME_END_DATE)
+      : new Date(startDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+    const claimEndDate = process.env.CLAIM_END_DATE
+      ? new Date(process.env.CLAIM_END_DATE)
+      : new Date(endDate.getTime() + 30 * 24 * 60 * 60 * 1000);
 
     await prisma.gameConfig.create({
       data: {
@@ -229,7 +237,12 @@ async function main() {
     console.log('📅 Configuration du jeu créée:');
     console.log(`   - Début: ${startDate.toLocaleDateString('fr-FR')}`);
     console.log(`   - Fin distribution: ${endDate.toLocaleDateString('fr-FR')}`);
-    console.log(`   - Fin réclamation: ${claimEndDate.toLocaleDateString('fr-FR')}\n`);
+    console.log(`   - Fin réclamation: ${claimEndDate.toLocaleDateString('fr-FR')}`);
+    console.log(
+      process.env.GAME_START_DATE
+        ? '   (dates lues depuis les variables d\'environnement)\n'
+        : '   ⚠️  GAME_START_DATE non défini — dates calculées depuis maintenant\n',
+    );
   }
 
   // Générer les gains mélangés
