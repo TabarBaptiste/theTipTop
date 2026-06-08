@@ -55,7 +55,12 @@ export default function ParticipatePage() {
   const [result, setResult] = useState<ParticipationResult | null>(null);
 
   // Chargement des lots depuis l'API (source de vérité en DB)
-  const { data: prizes } = useQuery<PrizeApi[]>({
+  const {
+    data: prizes,
+    isLoading: prizesLoading,
+    isError: prizesError,
+    refetch: refetchPrizes,
+  } = useQuery<PrizeApi[]>({
     queryKey: ['prizes'],
     queryFn: async () => {
       const response = await api.get('/tickets/prizes');
@@ -222,25 +227,58 @@ export default function ParticipatePage() {
           </p>
 
           <div className="mt-8 grid gap-4 sm:grid-cols-2">
-            {prizes?.map((prize) => (
-              <div
-                key={prize.code}
-                className="rounded-card border border-warm-beige bg-white p-5 transition-all duration-200 hover:shadow-[0_8px_24px_rgba(186,105,5,0.12)]"
-              >
-                <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-deep">
-                  {prize.name}
-                </p>
-                <p className="mt-2 font-functional text-sm font-semibold text-noir">
-                  {prize.description}
-                </p>
-                <div className="mt-2 flex items-center justify-between">
-                  <span className="text-xs text-stone-grey">Chance : {prize.percentage}%</span>
-                  <span className="font-functional text-sm font-bold text-terracotta-deep">
-                    {prize.value}
-                  </span>
+            {prizesLoading &&
+              Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="rounded-card border border-warm-beige bg-white p-5 animate-pulse"
+                >
+                  <div className="h-3 w-2/3 rounded bg-warm-beige" />
+                  <div className="mt-3 h-4 w-full rounded bg-warm-beige" />
+                  <div className="mt-3 flex items-center justify-between">
+                    <div className="h-3 w-1/3 rounded bg-warm-beige" />
+                    <div className="h-3 w-1/4 rounded bg-warm-beige" />
+                  </div>
                 </div>
+              ))}
+
+            {prizesError && (
+              <div className="col-span-2 flex flex-col items-center gap-3 rounded-card border border-red-200 bg-red-50 p-6 text-center">
+                <p className="text-sm font-semibold text-red-600">
+                  Impossible de charger les lots
+                </p>
+                <p className="text-xs text-stone-grey">
+                  Une erreur est survenue. Veuillez réessayer.
+                </p>
+                <Button variant="outline" size="sm" onClick={() => refetchPrizes()}>
+                  Réessayer
+                </Button>
               </div>
-            ))}
+            )}
+
+            {!prizesLoading &&
+              !prizesError &&
+              prizes?.map((prize) => (
+                <div
+                  key={prize.code}
+                  className="rounded-card border border-warm-beige bg-white p-5 transition-all duration-200 hover:shadow-[0_8px_24px_rgba(186,105,5,0.12)]"
+                >
+                  <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-deep">
+                    {prize.name}
+                  </p>
+                  <p className="mt-2 font-functional text-sm font-semibold text-noir">
+                    {prize.description}
+                  </p>
+                  <div className="mt-2 flex items-center justify-between">
+                    <span className="text-xs text-stone-grey">Chance : {prize.percentage}%</span>
+                    {prize.value && (
+                      <span className="font-functional text-sm font-bold text-terracotta-deep">
+                        {prize.value}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
           </div>
         </section>
 
