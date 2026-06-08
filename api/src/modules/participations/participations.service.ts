@@ -46,8 +46,8 @@ export class ParticipationsService {
       throw new BadRequestException(verification.error || 'Code invalide');
     }
 
+    // ticket.prize est déjà enrichi par verifyCode() — pas besoin de recharger la map
     const ticket = verification.ticket;
-    const prizesMap = await this.ticketsService.getPrizesMap();
 
     const participation = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const ticketCheck = await tx.ticket.findUnique({
@@ -94,7 +94,7 @@ export class ParticipationsService {
       id: participation.id,
       code: normalizedCode,
       prizeType: ticket.prizeType,
-      prize: prizesMap[ticket.prizeType],
+      prize: ticket.prize,
       participatedAt: participation.createdAt,
       prizeDelivered: participation.prizeDelivered,
     };
