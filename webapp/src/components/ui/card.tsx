@@ -75,7 +75,7 @@ const CardFooter = React.forwardRef<
 ));
 CardFooter.displayName = 'CardFooter';
 
-// --- PrizeCard — lots à gagner ---
+// --- PrizeCard - lots à gagner ---
 
 type PrizeCategory = 'signature' | 'accessoire' | 'grandprix';
 
@@ -100,7 +100,7 @@ function PrizeCard({ image, imageAlt = '', category, title, value, odds, classNa
   const imgSrc = typeof image === 'string' ? image : image?.src;
 
   return (
-    // Pas de bordure ni de fond — la card est posée directement sur le fond de page
+    // Pas de bordure ni de fond - la card est posée directement sur le fond de page
     <article className={cn('group flex flex-col', className)}>
       {/* Image : radius sur les 4 coins */}
       <div className="aspect-[4/3] w-full overflow-hidden rounded-card">

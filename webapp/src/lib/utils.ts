@@ -67,5 +67,5 @@ export function getPrizeName(prizeType: string): string {
 //     GIFT_BOX_39:   '39€',
 //     GIFT_BOX_69:   '69€',
 //   };
-//   return values[prizeType] || '—';
+//   return values[prizeType] || '-';
 // }

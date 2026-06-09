@@ -322,7 +322,7 @@ reste n'est que de la typographie. La catégorie est un **label terracotta nu**,
 
 **CSS**
 ```css
-/* Card sans bordure ni fond — pose directe sur le fond de page */
+/* Card sans bordure ni fond - pose directe sur le fond de page */
 .card {
   display: flex;
   flex-direction: column;
@@ -387,7 +387,7 @@ reste n'est que de la typographie. La catégorie est un **label terracotta nu**,
 }
 ```
 
-**Catégorie de lot** — simple label terracotta en capitales. Le libellé varie, la couleur
+**Catégorie de lot** - simple label terracotta en capitales. Le libellé varie, la couleur
 reste terracotta deep. Jamais de fond, jamais de bordure, jamais un tag.
 
 | `category` | Libellé affiché | Cas d'usage |
@@ -403,7 +403,7 @@ reste terracotta deep. Jamais de fond, jamais de bordure, jamais un tag.
   Jamais dans la catégorie, jamais au-dessus du titre.
 
 **Composant React**
-`PrizeCard` dans `components/ui/card.tsx` — props : `image`, `imageAlt`, `category`, `title`, `value`, `odds`.
+`PrizeCard` dans `components/ui/card.tsx` - props : `image`, `imageAlt`, `category`, `title`, `value`, `odds`.
 
 ### Formulaire (jeu-concours)
 

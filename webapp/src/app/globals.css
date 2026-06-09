@@ -8,14 +8,14 @@
   }
 
   :root {
-    /* === DESIGN.md — Palette primaire === */
+    /* === DESIGN.md - Palette primaire === */
     --color-terracotta-deep: #BA6905;
     --color-terracotta-hover: #C25F1F;
     --color-black: #1A1A1A;
     --color-white: #FFFFFF;
     --color-cream: #FAF6EF;
 
-    /* === DESIGN.md — Palette secondaire === */
+    /* === DESIGN.md - Palette secondaire === */
     --color-moss-green: #5C6B3A;
     --color-warm-beige: #E8D5B0;
     --color-gold: #C9A96E;
@@ -23,7 +23,7 @@
     --color-terracotta-warm: #C76C3A;
     --color-stone-grey: #8A8378;
 
-    /* === DESIGN.md — Semantiques === */
+    /* === DESIGN.md - Semantiques === */
     --color-bg: var(--color-cream);
     --color-bg-card: var(--color-terracotta-pale);
     --color-text-primary: var(--color-black);
@@ -33,7 +33,7 @@
     --color-accent: var(--color-gold);
     --color-success: var(--color-moss-green);
 
-    /* === DESIGN.md — Typographie === */
+    /* === DESIGN.md - Typographie === */
     --font-editorial: 'Playfair Display', Georgia, serif;
     --font-functional: 'Montserrat', system-ui, sans-serif;
 
@@ -44,7 +44,7 @@
     --text-small: 11px;
     --text-ui: 11px;
 
-    /* === DESIGN.md — Espacement === */
+    /* === DESIGN.md - Espacement === */
     --space-2xs: 4px;
     --space-xs: 8px;
     --space-sm: 12px;
@@ -54,7 +54,7 @@
     --space-2xl: 48px;
     --space-3xl: 64px;
 
-    /* === DESIGN.md — Rayons de bordure === */
+    /* === DESIGN.md - Rayons de bordure === */
     --radius-sharp: 2px;
     --radius-soft: 4px;
     --radius-card: 8px;

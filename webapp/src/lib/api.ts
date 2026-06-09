@@ -39,7 +39,7 @@ api.interceptors.response.use(
     const isAuthEndpoint = AUTH_ENDPOINTS.some((path) => requestUrl.includes(path));
 
     // Le back-end envoie 403 (et non 401) quand le token est absent ou invalide
-    // (cf. JwtAuthGuard.handleRequest — specs projet).
+    // (cf. JwtAuthGuard.handleRequest - specs projet).
     // On détecte ce cas précis via le message pour ne pas confondre avec un
     // vrai 403 de rôle (ex : ADMIN tentant une route EMPLOYEE-only).
     const isTokenError =

@@ -6,7 +6,7 @@
 import { sendGAEvent } from '@next/third-parties/google';
 
 // -----------------------------------------------
-// Auth — Connexion
+// Auth - Connexion
 // -----------------------------------------------
 
 export function trackLoginSuccess(method: 'email' | 'google' | 'facebook') {
@@ -18,7 +18,7 @@ export function trackLoginFailure(method: 'email' | 'google' | 'facebook', reaso
 }
 
 // -----------------------------------------------
-// Auth — Inscription
+// Auth - Inscription
 // -----------------------------------------------
 
 export function trackRegisterSuccess(method: 'email' | 'google' | 'facebook') {
@@ -30,7 +30,7 @@ export function trackRegisterFailure(method: 'email' | 'google' | 'facebook', re
 }
 
 // -----------------------------------------------
-// Jeu — Participation
+// Jeu - Participation
 // -----------------------------------------------
 
 export function trackParticipateSubmit() {
@@ -49,7 +49,7 @@ export function trackParticipateFailure(reason: string) {
 }
 
 // -----------------------------------------------
-// CTA — Clics sur les boutons d'action
+// CTA - Clics sur les boutons d'action
 // -----------------------------------------------
 
 export function trackCTAClick(label: string, location: string) {

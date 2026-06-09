@@ -241,7 +241,7 @@ async function main() {
     console.log(
       process.env.GAME_START_DATE
         ? '   (dates lues depuis les variables d\'environnement)\n'
-        : '   ⚠️  GAME_START_DATE non défini — dates calculées depuis maintenant\n',
+        : '   ⚠️  GAME_START_DATE non défini - dates calculées depuis maintenant\n',
     );
   }
 

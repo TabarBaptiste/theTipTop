@@ -79,7 +79,7 @@ export function CountdownSection() {
         </p>
 
         <div className="flex items-center gap-3">
-          {/* Avant que la config arrive, les valeurs sont à 0 — flash imperceptible */}
+          {/* Avant que la config arrive, les valeurs sont à 0 - flash imperceptible */}
           <TimeBlock value={timeLeft.days}    label="Jours" />
           <Separator />
           <TimeBlock value={timeLeft.hours}   label="Heures" />

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # =============================================================================
-# check-versions.sh — Diagnostic complet versions & compatibilités
-# Furious Ducks — Projet thetiptop_v0
+# check-versions.sh - Diagnostic complet versions & compatibilités
+# Furious Ducks - Projet thetiptop_v0
 # Usage: bash check-versions.sh [--json] [--path /chemin/vers/projet]
 # =============================================================================
 
@@ -106,7 +106,7 @@ version_status() {
 print_header() {
   echo ""
   echo -e "${BOLD}${BLUE}╔══════════════════════════════════════════════════════════════════╗${RESET}"
-  echo -e "${BOLD}${BLUE}║   🦆 Furious Ducks — Diagnostic Versions & Compatibilités       ║${RESET}"
+  echo -e "${BOLD}${BLUE}║   🦆 Furious Ducks - Diagnostic Versions & Compatibilités       ║${RESET}"
   echo -e "${BOLD}${BLUE}╚══════════════════════════════════════════════════════════════════╝${RESET}"
   echo -e "${DIM}   $(date '+%Y-%m-%d %H:%M:%S')  |  $(uname -s) $(uname -m)${RESET}"
   echo ""
@@ -153,7 +153,7 @@ print(json.dumps(d, indent=2))
 }
 
 # =============================================================================
-# SECTION 1 — Environnement Système
+# SECTION 1 - Environnement Système
 # =============================================================================
 check_system() {
   print_section "Système & Runtime"
@@ -203,32 +203,32 @@ check_system() {
   local git_current
   if command_exists git; then
     git_current=$(git --version | awk '{print $3}')
-    print_row "INFO" "Git" "$git_current" "—" "$(git --version)"
+    print_row "INFO" "Git" "$git_current" "-" "$(git --version)"
     json_add "system" "git" "$git_current" "" "INFO" ""
   else
-    print_row "MISSING" "Git" "not found" "—" ""
+    print_row "MISSING" "Git" "not found" "-" ""
   fi
 
   # ── Docker ────────────────────────────────────────────────────────────────
   local docker_current
   if command_exists docker; then
     docker_current=$(docker --version | awk '{print $3}' | tr -d ',')
-    print_row "INFO" "Docker" "$docker_current" "—" "$(docker --version | cut -d' ' -f1-3)"
+    print_row "INFO" "Docker" "$docker_current" "-" "$(docker --version | cut -d' ' -f1-3)"
     json_add "system" "docker" "$docker_current" "" "INFO" ""
   else
-    print_row "INFO" "Docker" "not found" "—" "${DIM}Non requis en local${RESET}"
+    print_row "INFO" "Docker" "not found" "-" "${DIM}Non requis en local${RESET}"
   fi
 
   # ── Python (requis par certains scripts CI) ───────────────────────────────
   local py_current
   if command_exists python3; then
     py_current=$(python3 --version | awk '{print $2}')
-    print_row "INFO" "Python3" "$py_current" "—" ""
+    print_row "INFO" "Python3" "$py_current" "-" ""
   fi
 }
 
 # =============================================================================
-# SECTION 2 — TypeScript & Outils de build
+# SECTION 2 - TypeScript & Outils de build
 # =============================================================================
 check_build_tools() {
   print_section "TypeScript & Build Tools"
@@ -277,10 +277,10 @@ except: pass
 }
 
 # =============================================================================
-# SECTION 3 — Backend : NestJS stack
+# SECTION 3 - Backend : NestJS stack
 # =============================================================================
 check_nestjs() {
-  print_section "Backend — NestJS Stack"
+  print_section "Backend - NestJS Stack"
 
   local NEST_LATEST="11.1.24"
   declare -A NEST_PKGS=(
@@ -300,7 +300,7 @@ check_nestjs() {
   [ -f "$api_pkg" ] && has_api=true
 
   if ! $has_api; then
-    echo -e "  ${DIM}  ⚠  Fichier api/package.json non trouvé — analyse registry uniquement${RESET}"
+    echo -e "  ${DIM}  ⚠  Fichier api/package.json non trouvé - analyse registry uniquement${RESET}"
   fi
 
   for pkg in "${!NEST_PKGS[@]}"; do
@@ -319,7 +319,7 @@ except Exception as e:
   print('not found')
 " 2>/dev/null)
     else
-      current="—"
+      current="-"
     fi
 
     status=$(version_status "$current" "$latest")
@@ -332,10 +332,10 @@ except Exception as e:
 }
 
 # =============================================================================
-# SECTION 4 — Frontend : Next.js stack
+# SECTION 4 - Frontend : Next.js stack
 # =============================================================================
 check_nextjs() {
-  print_section "Frontend — Next.js Stack"
+  print_section "Frontend - Next.js Stack"
 
   declare -A NEXT_PKGS=(
     ["next"]="15.3.3"
@@ -356,7 +356,7 @@ check_nextjs() {
   [ -f "$webapp_pkg" ] && has_webapp=true
 
   if ! $has_webapp; then
-    echo -e "  ${DIM}  ⚠  Fichier webapp/package.json non trouvé — analyse registry uniquement${RESET}"
+    echo -e "  ${DIM}  ⚠  Fichier webapp/package.json non trouvé - analyse registry uniquement${RESET}"
   fi
 
   for pkg in "${!NEXT_PKGS[@]}"; do
@@ -376,7 +376,7 @@ except:
   print('not found')
 " 2>/dev/null)
     else
-      current="—"
+      current="-"
     fi
 
     status=$(version_status "$current" "$latest")
@@ -393,7 +393,7 @@ except:
 }
 
 # =============================================================================
-# SECTION 5 — ORM & Base de données
+# SECTION 5 - ORM & Base de données
 # =============================================================================
 check_database() {
   print_section "ORM & Base de données"
@@ -429,7 +429,7 @@ except:
   print('not found')
 " 2>/dev/null)
     else
-      current="—"
+      current="-"
     fi
 
     status=$(version_status "$current" "$latest")
@@ -445,7 +445,7 @@ except:
 }
 
 # =============================================================================
-# SECTION 6 — Tests
+# SECTION 6 - Tests
 # =============================================================================
 check_testing() {
   print_section "Testing"
@@ -504,7 +504,7 @@ except:
 }
 
 # =============================================================================
-# SECTION 7 — Qualité & Sécurité
+# SECTION 7 - Qualité & Sécurité
 # =============================================================================
 check_quality() {
   print_section "Qualité & Sécurité"
@@ -554,7 +554,7 @@ except:
 }
 
 # =============================================================================
-# SECTION 8 — Matrice de compatibilité Node.js
+# SECTION 8 - Matrice de compatibilité Node.js
 # =============================================================================
 check_compatibility_matrix() {
   print_section "Matrice de Compatibilité Node.js"
@@ -563,7 +563,7 @@ check_compatibility_matrix() {
   if command_exists node; then
     node_major=$(node --version | tr -d 'v' | cut -d'.' -f1)
   else
-    echo -e "  ${RED}Node.js non installé — impossible de vérifier la compatibilité${RESET}"
+    echo -e "  ${RED}Node.js non installé - impossible de vérifier la compatibilité${RESET}"
     return
   fi
 
@@ -619,7 +619,7 @@ print('no')
 }
 
 # =============================================================================
-# SECTION 9 — Analyse package.json (si trouvé)
+# SECTION 9 - Analyse package.json (si trouvé)
 # =============================================================================
 check_lockfiles() {
   print_section "Fichiers de Projet"
@@ -651,11 +651,11 @@ check_lockfiles() {
         found=true
         local size
         size=$(du -h "$f" 2>/dev/null | cut -f1 || echo "?")
-        print_row "UP_TO_DATE" "$item" "présent" "—" "${DIM}${size}${RESET}"
+        print_row "UP_TO_DATE" "$item" "présent" "-" "${DIM}${size}${RESET}"
       fi
     done
     if [ "$found" = "false" ]; then
-      print_row "INFO" "$item" "absent" "—" ""
+      print_row "INFO" "$item" "absent" "-" ""
     fi
   done
 
@@ -678,7 +678,7 @@ check_lockfiles() {
 }
 
 # =============================================================================
-# SECTION 10 — Recommandations finales
+# SECTION 10 - Recommandations finales
 # =============================================================================
 print_recommendations() {
   local node_major=""
@@ -693,18 +693,18 @@ print_recommendations() {
   # Recommandation Node
   if [ -n "$node_major" ]; then
     if [ "$node_major" -lt 20 ] 2>/dev/null; then
-      echo -e "  ${ERR}  ${RED}${BOLD}CRITIQUE — Node.js doit être mis à jour vers v22.x LTS${RESET}"
+      echo -e "  ${ERR}  ${RED}${BOLD}CRITIQUE - Node.js doit être mis à jour vers v22.x LTS${RESET}"
       echo -e "      NestJS 11, Prisma 6/7, Next.js 15 requièrent tous Node >=20"
       echo -e "      ${DIM}nvm install 22 && nvm alias default 22${RESET}"
     elif [ "$node_major" -eq 20 ] 2>/dev/null; then
-      echo -e "  ${WARN}  ${YELLOW}${BOLD}Node 20 LTS — Migration vers Node 22 recommandée${RESET}"
+      echo -e "  ${WARN}  ${YELLOW}${BOLD}Node 20 LTS - Migration vers Node 22 recommandée${RESET}"
       echo -e "      Node 20 = EOL Octobre 2026. Prisma 7 nécessite Node ^20.19+"
       echo -e "      ${DIM}nvm install 22 && nvm alias default 22${RESET}"
     elif [ "$node_major" -eq 22 ] 2>/dev/null; then
-      echo -e "  ${OK}  ${GREEN}${BOLD}Node 22 LTS — Configuration optimale${RESET}"
+      echo -e "  ${OK}  ${GREEN}${BOLD}Node 22 LTS - Configuration optimale${RESET}"
       echo -e "      Compatibilité: NestJS 11 ✅  Next.js 15 ✅  Prisma 6 ✅  Jest 29 ✅"
     elif [ "$node_major" -ge 24 ] 2>/dev/null; then
-      echo -e "  ${OK}  ${GREEN}${BOLD}Node 24 — Dernière version stable${RESET}"
+      echo -e "  ${OK}  ${GREEN}${BOLD}Node 24 - Dernière version stable${RESET}"
       echo -e "      Compatibilité: NestJS 11 ✅  Next.js 15 ✅  Prisma 7 ✅  Jest 29 ✅"
       echo -e "      ${DIM}Note: Node 24 n'est pas encore LTS (LTS en Oct 2025)${RESET}"
     fi
