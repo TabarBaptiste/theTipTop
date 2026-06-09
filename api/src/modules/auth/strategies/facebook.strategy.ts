@@ -19,7 +19,7 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
       clientSecret: configService.getOrThrow<string>('FACEBOOK_APP_SECRET'),
       callbackURL: configService.getOrThrow<string>('FACEBOOK_CALLBACK_URL'),
       scope: ['email'],
-      profileFields: ['id', 'emails', 'name', 'photos'],
+      profileFields: ['id', 'email', 'name', 'picture'],
     } as any);
   }
 
@@ -31,9 +31,18 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
   ): Promise<any> {
     const { id, name, emails, photos } = profile;
 
-    const email = emails?.[0]?.value;
-    if (!email) {
-      return done(new Error('Email non fourni par Facebook'), null);
+    // L'email peut être absent si le compte Facebook est un compte de test
+    // sans email configuré, ou si l'utilisateur a une confidentialité stricte.
+    // Dans ce cas on génère un email de substitution basé sur le Facebook ID.
+    const email =
+      emails?.[0]?.value ??
+      (profile as any)._json?.email ??
+      `fb_${id}@facebook-noreply.local`;
+
+    if (!emails?.[0]?.value && !(profile as any)._json?.email) {
+      console.warn(
+        `[FacebookStrategy] Aucun email reçu pour le compte Facebook ID ${id}. Email de substitution utilisé.`,
+      );
     }
 
     try {

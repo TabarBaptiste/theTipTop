@@ -172,11 +172,14 @@ export class AuthController {
   @UseGuards(FacebookAuthGuard)
   @ApiOperation({ summary: 'Callback Facebook OAuth' })
   async facebookAuthCallback(@Req() req: OAuthRequest, @Res() res: Response) {
+    if (!req.user) {
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      return res.redirect(
+        `${frontendUrl}/auth/login?error=facebook_no_email`,
+      );
+    }
     const tokens = await this.authService.login(req.user);
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    const redirectUrl = `${frontendUrl}/auth/callback?accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}`;
-
-    return res.redirect(redirectUrl);
+    return this.redirectToFrontend(res, tokens.accessToken, tokens.refreshToken);
   }
 
   private redirectToFrontend(res: Response, accessToken: string, refreshToken: string) {

@@ -24,7 +24,7 @@ const playfair = Playfair_Display({
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || 'https://thetiptop.dsp5-archi-o24a-4-5-g5.fr'
+    process.env.NEXT_PUBLIC_SITE_URL || 'https://thetiptop.dsp5-archi-o24a-4-5-g1.fr'
   ),
   title: {
     default: 'The Tip Top - Jeu Concours',
@@ -38,14 +38,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'fr_FR',
-    url: 'https://thetiptop.dsp5-archi-o24a-4-5-g5.fr',
+    url: 'https://thetiptop.dsp5-archi-o24a-4-5-g1.fr',
     siteName: 'The Tip Top',
     title: 'The Tip Top - Jeu Concours',
     description:
       'Participez au grand jeu-concours The Tip Top ! 100% des tickets sont gagnants.',
     images: [
       {
-        url: '/og-image.png', // Sera résolu automatiquement en https://thetiptop.dsp5-archi-o24a-4-5-g5.fr/og-image.png
+        url: '/og-image.png', // Sera résolu automatiquement en https://thetiptop.dsp5-archi-o24a-4-5-g1.fr/og-image.png
         width: 1200,
         height: 630,
         alt: 'The Tip Top Jeu Concours',
