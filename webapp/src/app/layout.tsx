@@ -5,6 +5,7 @@ import { Toaster } from 'sonner';
 import { Providers } from '@/components/providers';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
+import { GoogleAnalytics } from '@next/third-parties/google';
 
 const montserrat = Montserrat({
   subsets: ['latin'],
@@ -81,6 +82,9 @@ export default function RootLayout({
           <Toaster position="top-right" richColors />
         </Providers>
       </body>
+      {process.env.NEXT_PUBLIC_GA_ID && (
+        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
+      )}
     </html>
   );
 }
