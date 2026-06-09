@@ -21,7 +21,7 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
-// Composant isolé pour useSearchParams — Next.js exige un <Suspense> autour de tout
+// Composant isolé pour useSearchParams - Next.js exige un <Suspense> autour de tout
 // composant qui utilise ce hook lors du build (static rendering).
 function OAuthErrorHandler() {
   const searchParams = useSearchParams();
@@ -85,7 +85,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-cream px-4 py-12">
-      {/* Gestionnaire d'erreurs OAuth — doit etre dans un Suspense boundary */}
+      {/* Gestionnaire d'erreurs OAuth - doit etre dans un Suspense boundary */}
       <Suspense fallback={null}>
         <OAuthErrorHandler />
       </Suspense>
