@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { api } from '@/lib/api';
+import { trackParticipateSubmit, trackParticipateSuccess, trackParticipateFailure } from '@/lib/analytics';
 
 const participateSchema = z.object({
   code: z
@@ -80,15 +81,18 @@ export default function ParticipatePage() {
 
   const mutation = useMutation({
     mutationFn: async (data: ParticipateFormData) => {
+      trackParticipateSubmit();
       const response = await api.post('/participations', { code: data.code });
       return response.data as ParticipationResult;
     },
     onSuccess: (data) => {
+      trackParticipateSuccess(data.prizeType, data.prize.value);
       setResult(data);
       queryClient.invalidateQueries({ queryKey: ['participations'] });
       toast.success('Felicitations ! Vous avez gagne !');
     },
     onError: () => {
+      trackParticipateFailure('invalid_or_used_code');
       toast.error('Code invalide ou deja utilise');
     },
   });

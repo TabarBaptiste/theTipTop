@@ -1,9 +1,8 @@
-import Link from 'next/link';
 import Image from 'next/image';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Leaf, Ticket, ShieldCheck } from 'lucide-react';
 import tassesHeroImg from '@/img/tasses_hero.webp';
+import { HeroCTAButtons } from '@/components/home/hero-cta-buttons';
 
 export function HeroSection() {
   return (
@@ -44,18 +43,7 @@ export function HeroSection() {
               </Badge>
             </div>
 
-            <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-              <Button asChild size="lg">
-                <Link href="/auth/register">
-                  Participer maintenant
-                </Link>
-              </Button>
-              <Button asChild size="lg" variant="outline">
-                <Link href="/#how-it-works">
-                  Comment ca marche ?
-                </Link>
-              </Button>
-            </div>
+            <HeroCTAButtons />
           </div>
 
           {/* Hero image */}

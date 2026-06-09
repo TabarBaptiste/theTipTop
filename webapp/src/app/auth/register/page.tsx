@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuthStore } from '@/lib/stores/auth-store';
+import { trackRegisterSuccess, trackRegisterFailure, trackCTAClick } from '@/lib/analytics';
 
 const registerSchema = z.object({
   email: z.string().email('Email invalide'),
@@ -65,15 +66,19 @@ export default function RegisterPage() {
         phone: rest.phone || undefined,
         birthDate: rest.birthDate || undefined,
       });
+      trackRegisterSuccess('email');
       toast.success('Inscription reussie ! Bienvenue !');
       router.push('/dashboard');
     } catch (error: any) {
       const status = error?.response?.status;
       if (status === 409) {
+        trackRegisterFailure('email', 'email_already_exists');
         toast.error('Un compte existe deja avec cet email');
       } else if (status === 400 || status === 422) {
+        trackRegisterFailure('email', 'invalid_data');
         toast.error('Donnees invalides. Verifiez le formulaire.');
       } else {
+        trackRegisterFailure('email', 'server_error');
         toast.error("Erreur lors de l'inscription");
       }
     } finally {
@@ -82,6 +87,7 @@ export default function RegisterPage() {
   };
 
   const handleOAuthLogin = (provider: 'google' | 'facebook') => {
+    trackCTAClick(`S'inscrire avec ${provider}`, 'register_page');
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
     window.location.href = `${apiUrl}/auth/${provider}`;
   };

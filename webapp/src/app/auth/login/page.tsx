@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuthStore } from '@/lib/stores/auth-store';
+import { trackLoginSuccess, trackLoginFailure, trackCTAClick } from '@/lib/analytics';
 
 const loginSchema = z.object({
   email: z.string().email('Email invalide'),
@@ -37,16 +38,19 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await login(data.email, data.password);
+      trackLoginSuccess('email');
       toast.success('Connexion reussie !');
       router.push('/dashboard');
     } catch (error: any) {
       const status = error?.response?.status;
       if (status === 401 || status === 403) {
-        // Message générique : on ne précise pas si c'est l'email ou le mot de passe
+        trackLoginFailure('email', 'invalid_credentials');
         toast.error('Email ou mot de passe incorrect');
       } else if (status === 429) {
+        trackLoginFailure('email', 'rate_limited');
         toast.error('Trop de tentatives. Reessayez dans quelques instants.');
       } else {
+        trackLoginFailure('email', 'server_error');
         toast.error('Erreur lors de la connexion. Reessayez plus tard.');
       }
     } finally {
@@ -55,6 +59,7 @@ export default function LoginPage() {
   };
 
   const handleOAuthLogin = (provider: 'google' | 'facebook') => {
+    trackCTAClick(`Se connecter avec ${provider}`, 'login_page');
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
     window.location.href = `${apiUrl}/auth/${provider}`;
   };
