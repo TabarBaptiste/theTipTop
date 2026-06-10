@@ -62,4 +62,53 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ---
 
+## 5. Project Context — Thé Tip Top
+
+### Stack
+- **Backend**: NestJS 10, strict TypeScript, Passport.js (JWT + OAuth2)
+- **Frontend**: Next.js 14 App Router, TailwindCSS, Shadcn/ui, Zustand, React Query, React Hook Form + Zod
+- **ORM**: Prisma — never suggest TypeORM or Sequelize
+- **Database**: PostgreSQL 16 — never suggest MongoDB, MySQL or any other
+- **Cache / Sessions / Queue**: Redis (ioredis)
+- **Runtime**: Node.js 22
+
+### Monorepo architecture
+
+```
+thetiptop_v0/
+├── api/       → NestJS (src/, prisma/, Dockerfile, jest.config.js)
+└── webapp/    → Next.js (src/, Dockerfile)
+````
+
+Never create files at the monorepo root. Dockerfiles live in `api/` and `webapp/`, not at the root.
+
+### Critical conventions
+- **HTTP 403** on all protected routes — never 401. Non-negotiable project convention.
+- **Swagger required** on every API endpoint.
+- **No hardcoded secrets** — always via environment variables.
+- **Conventional Commits** enforced: `feat`, `fix`, `test`, `docs`, `refactor`, `chore`, `ci`
+
+### Local ports
+| Service    | Port |
+|------------|------|
+| WebApp     | 3000 |
+| API        | 3001 |
+| PostgreSQL | 5432 |
+| Redis      | 6379 |
+| Adminer    | 8080 |
+
+### CI/CD — rules that fail the pipeline
+- ESLint errors (blocking)
+- Failing Jest tests
+- Code coverage **< 80%** (hard Jenkins threshold)
+- Critical Trivy vulnerabilities on Docker images
+
+Never write code that would drop coverage below 80%.
+
+### Claude Code workflow
+Always follow: **audit → validation → implementation**.  
+Never proceed to implementation without explicit sign-off.
+
+---
+
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
