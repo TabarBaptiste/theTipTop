@@ -65,9 +65,14 @@ export function Header() {
               </Button>
             </>
           ) : (
-            <Button asChild size="sm">
-              <Link href="/auth/login">Connexion</Link>
-            </Button>
+            <>
+              <Button asChild variant="outline" size="sm">
+                <Link href="/auth/register">Inscription</Link>
+              </Button>
+              <Button asChild size="sm">
+                <Link href="/auth/login">Connexion</Link>
+              </Button>
+            </>
           )}
         </div>
 
