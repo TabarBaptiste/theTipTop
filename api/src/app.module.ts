@@ -9,6 +9,7 @@ import { APP_GUARD } from '@nestjs/core';
 
 // Modules internes
 import { PrismaModule } from './prisma/prisma.module';
+import { RedisModule } from './redis/redis.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { TicketsModule } from './modules/tickets/tickets.module';
@@ -48,6 +49,9 @@ import { GameConfigModule } from './modules/game-config/game-config.module';
 
     // Database
     PrismaModule,
+
+    // Cache
+    RedisModule,
 
     // Features
     AuthModule,

@@ -6,6 +6,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ParticipationsService } from './participations.service';
 import { TicketsService } from '../tickets/tickets.service';
 import { PrismaService } from '../../prisma/prisma.service';
+import { RedisService } from '../../redis/redis.service';
 import { BadRequestException } from '@nestjs/common';
 
 describe('ParticipationsService', () => {
@@ -31,12 +32,21 @@ describe('ParticipationsService', () => {
     verifyCode: jest.fn(),
   };
 
+  const mockRedisService = {
+    incr: jest.fn().mockResolvedValue(1),
+    expire: jest.fn(),
+    del: jest.fn(),
+    delByPattern: jest.fn(),
+    getOrSet: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ParticipationsService,
         { provide: PrismaService, useValue: mockPrismaService },
         { provide: TicketsService, useValue: mockTicketsService },
+        { provide: RedisService, useValue: mockRedisService },
       ],
     }).compile();
 

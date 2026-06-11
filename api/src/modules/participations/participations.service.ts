@@ -7,10 +7,14 @@ import {
   BadRequestException,
   NotFoundException,
   ConflictException,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TicketsService } from '../tickets/tickets.service';
+import { RedisService } from '../../redis/redis.service';
+import { PRIZES_MAP_CACHE_KEY, STATS_CACHE_PATTERN } from '../../redis/cache-keys';
 
 type ParticipationWithTicket = Prisma.ParticipationGetPayload<{ include: { ticket: true } }>;
 
@@ -33,12 +37,15 @@ export class ParticipationsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly ticketsService: TicketsService,
+    private readonly redis: RedisService,
   ) {}
 
   /**
    * Créer une participation (utiliser un code)
    */
   async participate(userId: string, code: string) {
+    await this.checkSubmitRateLimit(userId);
+
     const normalizedCode = code.toUpperCase().trim();
 
     const verification = await this.ticketsService.verifyCode(normalizedCode);
@@ -90,6 +97,8 @@ export class ParticipationsService {
       });
     });
 
+    await this.invalidateCachesAfterParticipation();
+
     return {
       id: participation.id,
       code: normalizedCode,
@@ -98,6 +107,35 @@ export class ParticipationsService {
       participatedAt: participation.createdAt,
       prizeDelivered: participation.prizeDelivered,
     };
+  }
+
+  /**
+   * Limite les soumissions de code à 10 par heure et par utilisateur (anti brute-force).
+   * Si Redis est indisponible, INCR retourne 0 et la limite n'est pas appliquée.
+   */
+  private async checkSubmitRateLimit(userId: string): Promise<void> {
+    const hour = new Date().toISOString().slice(0, 13); // YYYY-MM-DDTHH
+    const key = `ratelimit:${userId}:submit:${hour}`;
+
+    const count = await this.redis.incr(key);
+    if (count === 1) {
+      await this.redis.expire(key, 3600);
+    }
+
+    if (count > 10) {
+      throw new HttpException(
+        'Trop de tentatives, veuillez réessayer plus tard.',
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+  }
+
+  /**
+   * Invalide les caches impactés par une nouvelle participation
+   * (les compteurs de stats changent, et la map des lots est revérifiée par précaution).
+   */
+  private async invalidateCachesAfterParticipation(): Promise<void> {
+    await Promise.all([this.redis.delByPattern(STATS_CACHE_PATTERN), this.redis.del(PRIZES_MAP_CACHE_KEY)]);
   }
 
   /**

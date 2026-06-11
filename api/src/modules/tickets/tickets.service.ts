@@ -4,6 +4,8 @@
 
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { RedisService } from '../../redis/redis.service';
+import { PRIZES_MAP_CACHE_KEY, PRIZES_MAP_TTL } from '../../redis/cache-keys';
 import { Ticket, PrizeType, Prize } from '@prisma/client';
 
 /** Shape réduite retournée dans les réponses API */
@@ -11,7 +13,10 @@ export type PrizeLabel = { name: string; description: string; value: string | nu
 
 @Injectable()
 export class TicketsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly redis: RedisService,
+  ) {}
 
   // ===========================================
   // LOTS (source de vérité en DB)
@@ -28,14 +33,16 @@ export class TicketsService {
    * Retourne une map PrizeType → { name, description, value } pour les réponses API
    */
   async getPrizesMap(): Promise<Record<string, PrizeLabel>> {
-    const prizes = await this.findAllPrizes();
-    return prizes.reduce(
-      (acc, p) => {
-        acc[p.code] = { name: p.name, description: p.description, value: p.value };
-        return acc;
-      },
-      {} as Record<string, PrizeLabel>,
-    );
+    return this.redis.getOrSet(PRIZES_MAP_CACHE_KEY, PRIZES_MAP_TTL, async () => {
+      const prizes = await this.findAllPrizes();
+      return prizes.reduce(
+        (acc, p) => {
+          acc[p.code] = { name: p.name, description: p.description, value: p.value };
+          return acc;
+        },
+        {} as Record<string, PrizeLabel>,
+      );
+    });
   }
 
   // ===========================================

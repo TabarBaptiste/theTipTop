@@ -8436,6 +8436,7 @@ thenify-all@^1.0.0:
   resolved "file:webapp"
   dependencies:
     "@hookform/resolvers" "^3.10.0"
+    "@next/third-parties" "^16.2.7"
     "@radix-ui/react-accordion" "^1.2.12"
     "@radix-ui/react-alert-dialog" "^1.1.15"
     "@radix-ui/react-avatar" "^1.1.11"

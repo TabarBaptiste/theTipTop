@@ -27,10 +27,9 @@ services:
 
   # --- Redis (Cache & Sessions) ---
   redis:
-    image: redis:7-alpine
+    image: redis:8-alpine
     container_name: thetiptop-redis
     restart: unless-stopped
-    command: redis-server --appendonly yes
     volumes:
       - redis_data:/data
     ports:
@@ -106,6 +105,20 @@ services:
       - "8080:8080"
     volumes:
       - ./adminer.css:/var/www/html/adminer.css
+    networks:
+      - thetiptop-network
+
+  # --- Redis (Interface web pour dev) ---
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: thetiptop-redis-commander
+    restart: unless-stopped
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
     networks:
       - thetiptop-network
 
