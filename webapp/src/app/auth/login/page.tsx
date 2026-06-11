@@ -90,7 +90,7 @@ export default function LoginPage() {
         <OAuthErrorHandler />
       </Suspense>
 
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-lg sm:rounded-card sm:border sm:border-warm-beige sm:bg-white sm:p-8 sm:shadow-sm">
         <h1 className="font-display text-h2 text-noir">Se connecter</h1>
         <p className="mt-2 text-sm text-stone-grey">
           Connectez-vous pour participer au jeu-concours

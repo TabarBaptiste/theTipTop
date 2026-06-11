@@ -94,7 +94,7 @@ export default function RegisterPage() {
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-cream px-4 py-12">
-      <div className="w-full max-w-lg">
+      <div className="w-full max-w-xl sm:rounded-card sm:border sm:border-warm-beige sm:bg-white sm:p-8 sm:shadow-sm">
         <h1 className="font-display text-h2 text-noir">Creer votre compte</h1>
         <p className="mt-2 text-sm text-stone-grey">
           Inscrivez-vous pour participer au jeu-concours
