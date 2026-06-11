@@ -38,7 +38,7 @@ const PRIZE_IMAGES: Record<string, PrizeImageConfig> = {
 };
 
 export function PrizesSection() {
-  const { data: prizes } = useQuery<PrizeApi[]>({
+  const { data: prizes, isLoading } = useQuery<PrizeApi[]>({
     queryKey: ['prizes'],
     queryFn: async () => {
       const response = await api.get('/tickets/prizes');
@@ -58,6 +58,19 @@ export function PrizesSection() {
         </p>
 
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {isLoading &&
+            Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="flex animate-pulse flex-col">
+                <div className="aspect-[4/3] w-full rounded-card bg-warm-beige" />
+                <div className="mt-md h-3 w-1/3 rounded bg-warm-beige" />
+                <div className="mt-2xs h-5 w-2/3 rounded bg-warm-beige" />
+                <div className="mt-md flex items-center justify-between border-t border-warm-beige pt-sm">
+                  <div className="h-3 w-1/4 rounded bg-warm-beige" />
+                  <div className="h-3 w-1/5 rounded bg-warm-beige" />
+                </div>
+              </div>
+            ))}
+
           {prizes?.map((prize) => {
             const imgConfig = PRIZE_IMAGES[prize.code];
 
