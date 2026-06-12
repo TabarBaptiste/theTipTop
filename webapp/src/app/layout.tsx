@@ -71,7 +71,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr" suppressHydrationWarning>
+    <html lang="fr" suppressHydrationWarning data-scroll-behavior="smooth">
       <body className={`${montserrat.variable} ${playfair.variable} font-sans antialiased`}>
         <Providers>
           <div className="flex min-h-screen flex-col">
