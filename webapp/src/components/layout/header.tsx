@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Menu, X, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/lib/stores/auth-store';
@@ -19,7 +19,12 @@ const navigation = [
 export function Header() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
   const { user, isAuthenticated, logout } = useAuthStore();
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-warm-beige bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
@@ -50,31 +55,33 @@ export function Header() {
         </div>
 
         {/* Auth Buttons */}
-        <div className="hidden items-center gap-3 md:flex">
-          {isAuthenticated ? (
-            <>
-              <Link
-                href="/dashboard"
-                className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-deep"
-              >
-                <User className="h-4 w-4" strokeWidth={1.5} />
-                {user?.firstName || 'Mon compte'}
-              </Link>
-              <Button variant="outline" size="sm" onClick={logout}>
-                Deconnexion
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button asChild variant="outline" size="sm">
-                <Link href="/auth/register">Inscription</Link>
-              </Button>
-              <Button asChild size="sm">
-                <Link href="/auth/login">Connexion</Link>
-              </Button>
-            </>
-          )}
-        </div>
+        {isHydrated && (
+          <div className="hidden items-center gap-3 md:flex">
+            {isAuthenticated ? (
+              <>
+                <Link
+                  href="/dashboard"
+                  className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-deep"
+                >
+                  <User className="h-4 w-4" strokeWidth={1.5} />
+                  {user?.firstName || 'Mon compte'}
+                </Link>
+                <Button variant="outline" size="sm" onClick={logout}>
+                  Deconnexion
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button asChild variant="outline" size="sm">
+                  <Link href="/auth/register">Inscription</Link>
+                </Button>
+                <Button asChild size="sm">
+                  <Link href="/auth/login">Connexion</Link>
+                </Button>
+              </>
+            )}
+          </div>
+        )}
 
         {/* Mobile Menu Button */}
         <button
@@ -114,34 +121,36 @@ export function Header() {
               {item.name}
             </Link>
           ))}
-          <div className="mt-4 flex flex-col gap-2 border-t border-warm-beige pt-4">
-            {isAuthenticated ? (
-              <>
-                <Button asChild variant="outline" className="w-full">
-                  <Link href="/dashboard">Mon compte</Link>
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full"
-                  onClick={() => {
-                    logout();
-                    setMobileMenuOpen(false);
-                  }}
-                >
-                  Deconnexion
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button asChild className="w-full">
-                  <Link href="/auth/login">Connexion</Link>
-                </Button>
-                <Button asChild variant="outline" className="w-full">
-                  <Link href="/auth/register">Inscription</Link>
-                </Button>
-              </>
-            )}
-          </div>
+          {isHydrated && (
+            <div className="mt-4 flex flex-col gap-2 border-t border-warm-beige pt-4">
+              {isAuthenticated ? (
+                <>
+                  <Button asChild variant="outline" className="w-full">
+                    <Link href="/dashboard">Mon compte</Link>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full"
+                    onClick={() => {
+                      logout();
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    Deconnexion
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button asChild className="w-full">
+                    <Link href="/auth/login">Connexion</Link>
+                  </Button>
+                  <Button asChild variant="outline" className="w-full">
+                    <Link href="/auth/register">Inscription</Link>
+                  </Button>
+                </>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </header>
