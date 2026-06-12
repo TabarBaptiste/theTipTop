@@ -97,15 +97,21 @@ export class GrandPrizeService {
       },
     });
 
-    // Mettre à jour la config du jeu
-    await this.prisma.gameConfig.updateMany({
-      where: { isActive: true },
+    // Mettre à jour la config du jeu.
+    // La condition `grandPrizeDrawn: false` rend l'opération idempotente :
+    // deux tirages simultanés ne peuvent pas écraser le même gagnant.
+    const updated = await this.prisma.gameConfig.updateMany({
+      where: { isActive: true, grandPrizeDrawn: false },
       data: {
         grandPrizeDrawn: true,
         grandPrizeWinnerId: winnerId,
         grandPrizeDrawnAt: new Date(),
       },
     });
+
+    if (updated.count === 0) {
+      throw new BadRequestException('Le tirage au sort a déjà été effectué');
+    }
 
     // Log d'audit
     await this.prisma.auditLog.create({

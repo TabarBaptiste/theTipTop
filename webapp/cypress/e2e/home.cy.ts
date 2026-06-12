@@ -8,43 +8,48 @@ describe('Page d\'accueil', () => {
   });
 
   it('affiche le titre principal', () => {
-    cy.contains('Grand Jeu Concours').should('be.visible');
-    cy.contains('Thé Tip Top').should('be.visible');
+    cy.contains('Bienvenue au jeu-concours').should('be.visible');
+    cy.contains('The Tip Top').should('be.visible');
   });
 
-  it('affiche le compte à rebours', () => {
-    cy.get('[class*="countdown"]').should('exist');
+  it('affiche le bandeau de temps restant (ou de fin de jeu)', () => {
+    cy.contains(/Temps restant pour participer|jeu-concours est termine/).should('exist');
   });
 
-  it('affiche les lots à gagner', () => {
+  it('affiche la section des lots à gagner', () => {
     cy.contains('Les lots à gagner').should('be.visible');
-    cy.contains('Infuseur à thé').should('be.visible');
-    cy.contains('Thé détox').should('be.visible');
-    cy.contains('1 an de thé gratuit').should('be.visible');
+    cy.contains('100% des tickets sont gagnants').should('be.visible');
   });
 
   it('affiche les étapes de participation', () => {
-    cy.contains('Comment participer').should('be.visible');
-    cy.contains('Achetez pour 49€').should('be.visible');
-    cy.contains('Recevez votre ticket').should('be.visible');
+    cy.contains('Comment participer ?').should('be.visible');
+    cy.contains('Faites vos achats').should('be.visible');
+    cy.contains('Entrez votre code').should('be.visible');
+    cy.contains('Recuperez votre lot').should('be.visible');
   });
 
   it('contient les liens de navigation', () => {
     cy.get('header').within(() => {
-      cy.contains('Accueil').should('be.visible');
-      cy.contains('Comment jouer').should('be.visible');
-      cy.contains('Les lots').should('be.visible');
-      cy.contains('Règlement').should('be.visible');
+      cy.contains('Le jeu').should('be.visible');
+      cy.contains('Lots').should('be.visible');
+      cy.contains('FAQ').should('be.visible');
     });
   });
 
-  it('affiche les boutons d\'inscription', () => {
-    cy.contains('Créer un compte').should('be.visible');
-    cy.contains('Participer maintenant').should('be.visible');
+  it('affiche les boutons d\'authentification', () => {
+    cy.get('header').contains('Inscription').should('be.visible');
+    cy.get('header').contains('Connexion').should('be.visible');
   });
 
-  it('redirige vers la page d\'inscription', () => {
-    cy.contains('Créer un compte').click();
+  it('redirige vers la page d\'inscription depuis le CTA du hero', () => {
+    cy.contains('Participer maintenant').first().click();
     cy.url().should('include', '/auth/register');
+  });
+
+  it('affiche le footer avec les liens légaux', () => {
+    cy.get('footer').within(() => {
+      cy.contains('Reglement du jeu').should('have.attr', 'href', '/reglement');
+      cy.contains('Mentions legales').should('have.attr', 'href', '/mentions-legales');
+    });
   });
 });

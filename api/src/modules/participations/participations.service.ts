@@ -135,7 +135,10 @@ export class ParticipationsService {
    * (les compteurs de stats changent, et la map des lots est revérifiée par précaution).
    */
   private async invalidateCachesAfterParticipation(): Promise<void> {
-    await Promise.all([this.redis.delByPattern(STATS_CACHE_PATTERN), this.redis.del(PRIZES_MAP_CACHE_KEY)]);
+    await Promise.all([
+      this.redis.delByPattern(STATS_CACHE_PATTERN),
+      this.redis.del(PRIZES_MAP_CACHE_KEY),
+    ]);
   }
 
   /**

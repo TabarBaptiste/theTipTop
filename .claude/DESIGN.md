@@ -61,7 +61,7 @@ Thé Tip Top est **L'Artisan Méditerranéen**. La marque ne vend pas du thé - 
   --color-bg-card:            var(--color-terracotta-pale);
   --color-text-primary:       var(--color-black);
   --color-text-secondary:     var(--color-stone-grey);
-  --color-cta:                var(--color-terracotta-bright);
+  --color-cta:                var(--color-terracotta-deep);
   --color-cta-hover:          var(--color-terracotta-hover);
   --color-accent:             var(--color-gold);
   --color-success:            var(--color-moss-green);
@@ -421,7 +421,7 @@ reste terracotta deep. Jamais de fond, jamais de bordure, jamais un tag.
 }
 .form-input:focus {
   outline: none;
-  border-color: var(--color-terracotta-bright);
+  border-color: var(--color-terracotta-deep);
 }
 .form-label {
   font-family: var(--font-functional);

@@ -10,7 +10,6 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { UsersService } from '../users/users.service';
-import { describe, beforeEach, it } from 'node:test';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -250,9 +249,7 @@ describe('AuthService', () => {
     it('should throw UnauthorizedException if the refresh token is unknown/expired', async () => {
       mockPrismaService.refreshToken.findFirst.mockResolvedValue(null);
 
-      await expect(service.refreshToken('1', 'bad-token')).rejects.toThrow(
-        UnauthorizedException,
-      );
+      await expect(service.refreshToken('1', 'bad-token')).rejects.toThrow(UnauthorizedException);
     });
   });
 

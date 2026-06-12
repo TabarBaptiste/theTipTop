@@ -113,12 +113,13 @@ export default function LoginPage() {
           <div>
             <div className="flex items-center justify-between">
               <Label htmlFor="password">Mot de passe</Label>
-              <Link
-                href="/auth/forgot-password"
+              {/* Pas de flux "mot de passe oublié" côté API : on oriente vers le support */}
+              <a
+                href="mailto:contact@thetiptop.fr?subject=Mot%20de%20passe%20oubli%C3%A9"
                 className="text-xs text-terracotta-deep hover:underline"
               >
                 Mot de passe oublie ?
-              </Link>
+              </a>
             </div>
             <Input
               id="password"

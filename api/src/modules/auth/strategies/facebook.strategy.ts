@@ -35,9 +35,7 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
     // sans email configuré, ou si l'utilisateur a une confidentialité stricte.
     // Dans ce cas on génère un email de substitution basé sur le Facebook ID.
     const email =
-      emails?.[0]?.value ??
-      (profile as any)._json?.email ??
-      `fb_${id}@facebook-noreply.local`;
+      emails?.[0]?.value ?? (profile as any)._json?.email ?? `fb_${id}@facebook-noreply.local`;
 
     if (!emails?.[0]?.value && !(profile as any)._json?.email) {
       console.warn(

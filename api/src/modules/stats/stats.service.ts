@@ -48,7 +48,9 @@ export class StatsService {
    * Statistiques globales du jeu-concours
    */
   async getGlobalStats() {
-    return this.redis.getOrSet('stats:overview', STATS_OVERVIEW_TTL, () => this.computeGlobalStats());
+    return this.redis.getOrSet('stats:overview', STATS_OVERVIEW_TTL, () =>
+      this.computeGlobalStats(),
+    );
   }
 
   private async computeGlobalStats() {
@@ -254,8 +256,11 @@ export class StatsService {
    * Statistiques temporelles (participations par jour)
    */
   async getTimelineStats(days: number = 30) {
-    return this.redis.getOrSet(`stats:timeline:${days}`, STATS_TIMELINE_TTL, () =>
-      this.computeTimelineStats(days),
+    // Borne la fenêtre (1-365 jours) : la boucle de construction de la
+    // timeline itère `days` fois, une valeur arbitraire serait un vecteur DoS.
+    const safeDays = Number.isFinite(days) ? Math.min(Math.max(Math.trunc(days), 1), 365) : 30;
+    return this.redis.getOrSet(`stats:timeline:${safeDays}`, STATS_TIMELINE_TTL, () =>
+      this.computeTimelineStats(safeDays),
     );
   }
 
@@ -311,10 +316,15 @@ export class StatsService {
    */
   async getEmailingData(options: { consentEmail?: boolean; hasParticipated?: boolean }) {
     const cacheKey = `stats:emailing:${options.consentEmail ?? 'all'}:${options.hasParticipated ?? 'all'}`;
-    return this.redis.getOrSet(cacheKey, STATS_EMAILING_TTL, () => this.computeEmailingData(options));
+    return this.redis.getOrSet(cacheKey, STATS_EMAILING_TTL, () =>
+      this.computeEmailingData(options),
+    );
   }
 
-  private async computeEmailingData(options: { consentEmail?: boolean; hasParticipated?: boolean }) {
+  private async computeEmailingData(options: {
+    consentEmail?: boolean;
+    hasParticipated?: boolean;
+  }) {
     const where: Prisma.UserWhereInput = {
       role: 'CLIENT',
       deletedAt: null,

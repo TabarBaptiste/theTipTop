@@ -6,7 +6,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { PRIZES_MAP_CACHE_KEY, PRIZES_MAP_TTL } from '../../redis/cache-keys';
-import { Ticket, PrizeType, Prize } from '@prisma/client';
+import { Ticket, Prize } from '@prisma/client';
 
 /** Shape réduite retournée dans les réponses API */
 export type PrizeLabel = { name: string; description: string; value: string | null };

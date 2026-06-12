@@ -24,10 +24,10 @@ export class GameConfigController {
     description: 'Configuration du jeu actif',
     schema: {
       properties: {
-        startDate:    { type: 'string', format: 'date-time' },
-        endDate:      { type: 'string', format: 'date-time' },
+        startDate: { type: 'string', format: 'date-time' },
+        endDate: { type: 'string', format: 'date-time' },
         claimEndDate: { type: 'string', format: 'date-time' },
-        isActive:     { type: 'boolean' },
+        isActive: { type: 'boolean' },
         phase: {
           type: 'string',
           enum: ['not_started', 'active', 'claim_only', 'ended'],

@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { Leaf, Ticket, ShieldCheck } from 'lucide-react';
-import tassesHeroImg from '@/img/tasses_hero.webp';
+import tassesHeroImg from '@/img/tasses_hero.jpg';
 import { HeroCTAButtons } from '@/components/home/hero-cta-buttons';
 
 export function HeroSection() {
@@ -35,7 +35,7 @@ export function HeroSection() {
               </Badge>
               <Badge variant="location">
                 <Ticket className="h-4 w-4" strokeWidth={1.5} />
-                500 Tickets
+                500 000 tickets
               </Badge>
               <Badge variant="handmade">
                 <ShieldCheck className="h-4 w-4" strokeWidth={1.5} />

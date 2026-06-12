@@ -174,9 +174,7 @@ export class AuthController {
   async facebookAuthCallback(@Req() req: OAuthRequest, @Res() res: Response) {
     if (!req.user) {
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-      return res.redirect(
-        `${frontendUrl}/auth/login?error=facebook_no_email`,
-      );
+      return res.redirect(`${frontendUrl}/auth/login?error=facebook_no_email`);
     }
     const tokens = await this.authService.login(req.user);
     return this.redirectToFrontend(res, tokens.accessToken, tokens.refreshToken);

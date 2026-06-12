@@ -217,9 +217,11 @@ export default function ParticipatePage() {
           <p className="mt-2 text-xs text-stone-grey">
             Code perdu ou illisible ? Contactez notre service client.
           </p>
-          <Button variant="secondary" size="sm" className="mt-4 w-full">
-            <RotateCcw className="mr-2 h-4 w-4" strokeWidth={1.5} />
-            Contacter le support
+          <Button asChild variant="secondary" size="sm" className="mt-4 w-full">
+            <a href="mailto:contact@thetiptop.fr?subject=Code%20perdu%20ou%20illisible">
+              <RotateCcw className="mr-2 h-4 w-4" strokeWidth={1.5} />
+              Contacter le support
+            </a>
           </Button>
         </section>
 

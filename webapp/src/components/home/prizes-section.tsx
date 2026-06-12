@@ -6,7 +6,7 @@ import boite100gImg from '@/img/boite_100g.jpeg';
 import infuseurPremiumImg from '@/img/Infuseur_premium.jpg';
 import coffret5thesImg from '@/img/coffret_5_thes.jpg';
 import theiereImg from '@/img/theiere.jpeg';
-import boiteMatchaImg from '@/img/boite_matcha.webp';
+import boiteMatchaImg from '@/img/boite_matcha.jpg';
 import { PrizeCard, type PrizeCategory } from '@/components/ui/card';
 import { api } from '@/lib/api';
 

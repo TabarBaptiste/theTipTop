@@ -65,8 +65,8 @@ Des critères de succès forts vous permettent de boucler indépendamment. Des c
 ## 5. Contexte du projet — Thé Tip Top
 
 ### Stack
-- **Backend** : NestJS 10, TypeScript strict, Passport.js (JWT + OAuth2)
-- **Frontend** : Next.js 14 App Router, TailwindCSS, Shadcn/ui, Zustand, React Query, React Hook Form + Zod
+- **Backend** : NestJS 11, TypeScript strict, Passport.js (JWT + OAuth2)
+- **Frontend** : Next.js 16 App Router, TailwindCSS, Shadcn/ui, Zustand, React Query, React Hook Form + Zod
 - **ORM** : Prisma — ne jamais suggérer TypeORM ou Sequelize
 - **Base de données** : PostgreSQL 16 — ne jamais suggérer MongoDB, MySQL ou toute autre
 - **Cache / Sessions / Queue** : Redis (ioredis)
