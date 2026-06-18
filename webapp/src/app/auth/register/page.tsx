@@ -28,7 +28,10 @@ const registerSchema = z.object({
   lastName: z.string().min(2, 'Le nom doit faire au moins 2 caracteres'),
   phone: z.string().optional(),
   birthDate: z.string().optional(),
-  gender: z.enum(['MALE', 'FEMALE', 'OTHER', 'PREFER_NOT_TO_SAY']).optional(),
+  gender: z.preprocess(
+    (val) => (val === '' ? undefined : val),
+    z.enum(['MALE', 'FEMALE', 'OTHER', 'PREFER_NOT_TO_SAY']).optional(),
+  ),
   consentEmail: z.boolean().default(false),
   consentData: z.literal(true, {
     errorMap: () => ({ message: 'Vous devez accepter les conditions' }),
@@ -169,15 +172,35 @@ export default function RegisterPage() {
             )}
           </div>
 
-          {/* Date de naissance */}
-          <div>
-            <Label htmlFor="birthDate">Date de naissance</Label>
-            <Input
-              id="birthDate"
-              type="date"
-              {...register('birthDate')}
-            />
+          {/* Date de naissance / Genre */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <Label htmlFor="birthDate">Date de naissance</Label>
+              <Input
+                id="birthDate"
+                type="date"
+                {...register('birthDate')}
+              />
+            </div>
+            <div>
+              <Label htmlFor="gender">Genre</Label>
+              <select
+                id="gender"
+                className="flex h-10 w-full rounded-soft border border-warm-beige bg-white px-3 text-sm text-noir focus:outline-none focus:ring-2 focus:ring-terracotta-deep"
+                defaultValue=""
+                {...register('gender')}
+              >
+                <option value="FEMALE">Femme</option>                
+                <option value="MALE">Homme</option>
+                <option value="OTHER">Autre</option>
+                <option value="PREFER_NOT_TO_SAY">Préfère ne pas le dire</option>
+              </select>
+            </div>
           </div>
+          <p className="text-xs text-stone-grey">
+            Champs facultatifs collectés uniquement à des fins statistiques pour le
+            jeu-concours. En les renseignant, vous consentez à cet usage.
+          </p>
 
           {/* RGPD */}
           <div className="space-y-3">
