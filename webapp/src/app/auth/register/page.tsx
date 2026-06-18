@@ -14,6 +14,19 @@ import { Label } from '@/components/ui/label';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { trackRegisterSuccess, trackRegisterFailure, trackCTAClick } from '@/lib/analytics';
 
+const MIN_AGE = 18;
+const MAX_AGE = 120;
+
+function getAge(birthDate: Date): number {
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const beforeBirthdayThisYear =
+    today.getMonth() < birthDate.getMonth() ||
+    (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate());
+  if (beforeBirthdayThisYear) age--;
+  return age;
+}
+
 const registerSchema = z.object({
   email: z.string().email('Email invalide'),
   password: z
@@ -27,7 +40,28 @@ const registerSchema = z.object({
   firstName: z.string().min(2, 'Le prenom doit faire au moins 2 caracteres'),
   lastName: z.string().min(2, 'Le nom doit faire au moins 2 caracteres'),
   phone: z.string().optional(),
-  birthDate: z.string().optional(),
+  birthDate: z
+    .string()
+    .optional()
+    .refine((val) => !val || /^\d{4}-\d{2}-\d{2}$/.test(val), {
+      message: 'Date invalide (format AAAA-MM-JJ, année sur 4 chiffres)',
+    })
+    .refine(
+      (val) => {
+        if (!val) return true;
+        const age = getAge(new Date(val));
+        return age >= MIN_AGE;
+      },
+      { message: 'Vous devez être majeur (18 ans minimum) pour vous inscrire' },
+    )
+    .refine(
+      (val) => {
+        if (!val) return true;
+        const age = getAge(new Date(val));
+        return age <= MAX_AGE;
+      },
+      { message: 'Date de naissance invalide' },
+    ),
   gender: z.preprocess(
     (val) => (val === '' ? undefined : val),
     z.enum(['MALE', 'FEMALE', 'OTHER', 'PREFER_NOT_TO_SAY']).optional(),
@@ -88,6 +122,14 @@ export default function RegisterPage() {
       setIsLoading(false);
     }
   };
+
+  const today = new Date();
+  const maxBirthDate = new Date(today.getFullYear() - MIN_AGE, today.getMonth(), today.getDate())
+    .toISOString()
+    .split('T')[0];
+  const minBirthDate = new Date(today.getFullYear() - MAX_AGE, today.getMonth(), today.getDate())
+    .toISOString()
+    .split('T')[0];
 
   const handleOAuthLogin = (provider: 'google' | 'facebook') => {
     trackCTAClick(`S'inscrire avec ${provider}`, 'register_page');
@@ -179,8 +221,13 @@ export default function RegisterPage() {
               <Input
                 id="birthDate"
                 type="date"
+                min={minBirthDate}
+                max={maxBirthDate}
                 {...register('birthDate')}
               />
+              {errors.birthDate && (
+                <p className="mt-1 text-xs text-red-600">{errors.birthDate.message}</p>
+              )}
             </div>
             <div>
               <Label htmlFor="gender">Genre</Label>

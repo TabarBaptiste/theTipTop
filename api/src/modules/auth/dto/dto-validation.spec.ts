@@ -58,6 +58,28 @@ describe('RegisterDto', () => {
     expect(errors.some((e) => e.property === 'gender')).toBe(true);
   });
 
+  it('should accept a valid adult birth date', async () => {
+    const errors = await validateDto(RegisterDto, { ...validPayload, birthDate: '1990-05-15' });
+    expect(errors.some((e) => e.property === 'birthDate')).toBe(false);
+  });
+
+  it('should reject a birth date corresponding to a minor', async () => {
+    const today = new Date();
+    const minorBirthDate = `${today.getFullYear() - 17}-01-01`;
+    const errors = await validateDto(RegisterDto, { ...validPayload, birthDate: minorBirthDate });
+    expect(errors.some((e) => e.property === 'birthDate')).toBe(true);
+  });
+
+  it('should reject a birth date with a year that is not 4 digits', async () => {
+    const errors = await validateDto(RegisterDto, { ...validPayload, birthDate: '90-05-15' });
+    expect(errors.some((e) => e.property === 'birthDate')).toBe(true);
+  });
+
+  it('should reject an unrealistically old birth date', async () => {
+    const errors = await validateDto(RegisterDto, { ...validPayload, birthDate: '1850-01-01' });
+    expect(errors.some((e) => e.property === 'birthDate')).toBe(true);
+  });
+
   it('should require the data consent flag (RGPD)', async () => {
     const { consentData: _omitted, ...withoutConsent } = validPayload;
     const errors = await validateDto(RegisterDto, withoutConsent);
@@ -122,6 +144,13 @@ describe('UpdateUserDto', () => {
 
   it('should reject an invalid birth date', async () => {
     const errors = await validateDto(UpdateUserDto, { birthDate: 'pas-une-date' });
+    expect(errors.some((e) => e.property === 'birthDate')).toBe(true);
+  });
+
+  it('should reject a birth date corresponding to a minor', async () => {
+    const today = new Date();
+    const minorBirthDate = `${today.getFullYear() - 17}-01-01`;
+    const errors = await validateDto(UpdateUserDto, { birthDate: minorBirthDate });
     expect(errors.some((e) => e.property === 'birthDate')).toBe(true);
   });
 
