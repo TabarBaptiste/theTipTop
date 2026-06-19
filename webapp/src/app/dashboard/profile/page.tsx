@@ -88,7 +88,9 @@ export default function ProfilePage() {
       if (error?.response?.status === 409) {
         toast.error('Cet email est deja utilise');
       } else {
-        toast.error('Erreur lors de la mise a jour');
+        const apiMessage = error?.response?.data?.message;
+        const detail = Array.isArray(apiMessage) ? apiMessage[0] : apiMessage;
+        toast.error(detail || 'Erreur lors de la mise a jour');
       }
     } finally {
       setIsUpdating(false);
