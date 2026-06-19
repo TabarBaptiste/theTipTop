@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { Ticket, Gift, Trophy, ChevronRight } from 'lucide-react';
+import { Ticket, Gift, Trophy, ChevronRight, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuthStore } from '@/lib/stores/auth-store';
@@ -126,13 +126,21 @@ export default function DashboardPage() {
     <div className="min-h-[calc(100vh-4rem)] bg-gray-50 py-8">
       <div className="container mx-auto px-4">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Bonjour, {user?.firstName} ! 👋
-          </h1>
-          <p className="mt-2 text-gray-600">
-            Bienvenue dans votre espace personnel Thé Tip Top
-          </p>
+        <div className="mb-8 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Bonjour, {user?.firstName} !
+            </h1>
+            <p className="mt-2 text-gray-600">
+              Bienvenue dans votre espace personnel Thé Tip Top
+            </p>
+          </div>
+          <Button asChild variant="outline" size="sm" className="shrink-0">
+            <Link href="/dashboard/profile">
+              <User className="mr-2 h-4 w-4" />
+              Mon profil
+            </Link>
+          </Button>
         </div>
 
         {/* Stats Cards */}
