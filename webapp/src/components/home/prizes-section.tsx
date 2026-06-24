@@ -8,6 +8,7 @@ import coffret5thesImg from '@/img/coffret_5_thes.jpg';
 import theiereImg from '@/img/theiere.jpeg';
 import boiteMatchaImg from '@/img/boite_matcha.jpg';
 import { PrizeCard, type PrizeCategory } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { api } from '@/lib/api';
 
 interface PrizeApi {
@@ -60,13 +61,13 @@ export function PrizesSection() {
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {isLoading &&
             Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="flex animate-pulse flex-col">
-                <div className="aspect-[4/3] w-full rounded-card bg-warm-beige" />
-                <div className="mt-md h-3 w-1/3 rounded bg-warm-beige" />
-                <div className="mt-2xs h-5 w-2/3 rounded bg-warm-beige" />
+              <div key={i} className="flex flex-col">
+                <Skeleton className="aspect-[4/3] w-full rounded-card" />
+                <Skeleton className="mt-md h-3 w-1/3" />
+                <Skeleton className="mt-2xs h-5 w-2/3" />
                 <div className="mt-md flex items-center justify-between border-t border-warm-beige pt-sm">
-                  <div className="h-3 w-1/4 rounded bg-warm-beige" />
-                  <div className="h-3 w-1/5 rounded bg-warm-beige" />
+                  <Skeleton className="h-3 w-1/4" />
+                  <Skeleton className="h-3 w-1/5" />
                 </div>
               </div>
             ))}

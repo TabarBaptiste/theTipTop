@@ -435,6 +435,34 @@ reste terracotta deep. Jamais de fond, jamais de bordure, jamais un tag.
 }
 ```
 
+### Loaders & états de chargement
+
+**Règle** : jamais de spinner pour un contenu en cours de chargement (page, liste, carte). Utiliser un **skeleton loader** qui reproduit la structure réelle du contenu final (mêmes dimensions, mêmes radius).
+
+```tsx
+import { Skeleton } from '@/components/ui/skeleton';
+
+<Skeleton className="h-10 w-full" />   {/* ex: placeholder d'un input */}
+<Skeleton className="h-8 w-64" />      {/* ex: placeholder d'un titre */}
+```
+
+```css
+/* components/ui/skeleton.tsx */
+.skeleton {
+  animation: pulse 2s ease-in-out infinite;
+  border-radius: var(--radius-soft);
+  background-color: var(--color-warm-beige);
+  opacity: 0.5;
+}
+```
+
+**Exception** : le spinner (`Loader2` de Lucide, `animate-spin`) reste autorisé uniquement pour le **feedback d'une action déjà déclenchée** par l'utilisateur (clic sur un bouton "Envoyer", "Supprimer", etc.), jamais pour un chargement de page ou de données au montage d'un composant.
+
+| ✅ Do | ❌ Don't |
+|-------|---------|
+| Skeleton aux dimensions du contenu final pendant un chargement de page/données | Spinner plein écran ou centré pour un chargement de contenu |
+| Spinner inline dans un bouton pendant le traitement d'une action cliquée | Spinner comme seul retour visuel d'un chargement de liste/formulaire |
+
 ---
 
 ## Iconographie

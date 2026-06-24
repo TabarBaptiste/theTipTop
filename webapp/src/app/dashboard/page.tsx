@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Ticket, Gift, Trophy, ChevronRight, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { api } from '@/lib/api';
 import { formatDate } from '@/lib/utils';
@@ -53,20 +54,20 @@ export default function DashboardPage() {
       <div className="min-h-[calc(100vh-4rem)] bg-gray-50 py-8">
         <div className="container mx-auto px-4">
           {/* Header */}
-          <div className="mb-8 animate-pulse">
-            <div className="h-8 w-64 rounded bg-gray-200" />
-            <div className="mt-2 h-4 w-80 rounded bg-gray-200" />
+          <div className="mb-8">
+            <Skeleton className="h-8 w-64" />
+            <Skeleton className="mt-2 h-4 w-80" />
           </div>
 
           {/* Stats Cards */}
           <div className="mb-8 grid gap-4 md:grid-cols-3">
             {Array.from({ length: 3 }).map((_, i) => (
               <Card key={i}>
-                <CardContent className="flex animate-pulse items-center gap-4 p-6">
-                  <div className="h-12 w-12 rounded-xl bg-gray-200" />
+                <CardContent className="flex items-center gap-4 p-6">
+                  <Skeleton className="h-12 w-12 rounded-xl" />
                   <div>
-                    <div className="h-3 w-24 rounded bg-gray-200" />
-                    <div className="mt-2 h-6 w-10 rounded bg-gray-200" />
+                    <Skeleton className="h-3 w-24" />
+                    <Skeleton className="mt-2 h-6 w-10" />
                   </div>
                 </CardContent>
               </Card>
@@ -75,38 +76,38 @@ export default function DashboardPage() {
 
           {/* CTA to participate */}
           <Card className="mb-8 border-tea-200 bg-gradient-to-r from-tea-50 to-emerald-50">
-            <CardContent className="flex animate-pulse flex-col items-center justify-between gap-4 p-6 sm:flex-row">
+            <CardContent className="flex flex-col items-center justify-between gap-4 p-6 sm:flex-row">
               <div>
-                <div className="h-6 w-64 rounded bg-gray-200" />
-                <div className="mt-2 h-4 w-48 rounded bg-gray-200" />
+                <Skeleton className="h-6 w-64" />
+                <Skeleton className="mt-2 h-4 w-48" />
               </div>
-              <div className="h-10 w-32 rounded-lg bg-gray-200" />
+              <Skeleton className="h-10 w-32 rounded-lg" />
             </CardContent>
           </Card>
 
           {/* Participations List */}
           <Card>
-            <CardHeader className="animate-pulse">
-              <div className="h-5 w-40 rounded bg-gray-200" />
-              <div className="mt-2 h-4 w-72 rounded bg-gray-200" />
+            <CardHeader>
+              <Skeleton className="h-5 w-40" />
+              <Skeleton className="mt-2 h-4 w-72" />
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {Array.from({ length: 3 }).map((_, i) => (
                   <div
                     key={i}
-                    className="flex animate-pulse items-center justify-between rounded-lg border p-4"
+                    className="flex items-center justify-between rounded-lg border p-4"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="h-9 w-9 rounded-lg bg-gray-200" />
+                      <Skeleton className="h-9 w-9 rounded-lg" />
                       <div>
-                        <div className="h-4 w-32 rounded bg-gray-200" />
-                        <div className="mt-2 h-3 w-24 rounded bg-gray-200" />
+                        <Skeleton className="h-4 w-32" />
+                        <Skeleton className="mt-2 h-3 w-24" />
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="ml-auto h-4 w-12 rounded bg-gray-200" />
-                      <div className="ml-auto mt-2 h-3 w-28 rounded bg-gray-200" />
+                      <Skeleton className="ml-auto h-4 w-12" />
+                      <Skeleton className="ml-auto mt-2 h-3 w-28" />
                     </div>
                   </div>
                 ))}
@@ -216,18 +217,18 @@ export default function DashboardPage() {
                 {Array.from({ length: 3 }).map((_, i) => (
                   <div
                     key={i}
-                    className="flex animate-pulse items-center justify-between rounded-lg border p-4"
+                    className="flex items-center justify-between rounded-lg border p-4"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="h-9 w-9 rounded-lg bg-gray-200" />
+                      <Skeleton className="h-9 w-9 rounded-lg" />
                       <div>
-                        <div className="h-4 w-32 rounded bg-gray-200" />
-                        <div className="mt-2 h-3 w-24 rounded bg-gray-200" />
+                        <Skeleton className="h-4 w-32" />
+                        <Skeleton className="mt-2 h-3 w-24" />
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="ml-auto h-4 w-12 rounded bg-gray-200" />
-                      <div className="ml-auto mt-2 h-3 w-28 rounded bg-gray-200" />
+                      <Skeleton className="ml-auto h-4 w-12" />
+                      <Skeleton className="ml-auto mt-2 h-3 w-28" />
                     </div>
                   </div>
                 ))}

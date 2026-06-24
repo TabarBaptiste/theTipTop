@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { api } from '@/lib/api';
 import { cn } from '@/lib/utils';
@@ -119,8 +120,36 @@ export default function ProfilePage() {
 
   if (authLoading || !isAuthenticated) {
     return (
-      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-terracotta-deep" />
+      <div className="min-h-[calc(100vh-4rem)] bg-cream py-8">
+        <div className="container mx-auto px-6">
+          <div className="grid gap-8 lg:grid-cols-[240px_1fr]">
+            {/* Sidebar skeleton */}
+            <aside className="space-y-1">
+              <Skeleton className="h-11 w-full" />
+              <Skeleton className="h-11 w-full" />
+              <Skeleton className="h-11 w-full" />
+            </aside>
+
+            {/* Main content skeleton */}
+            <main>
+              <Skeleton className="h-8 w-64" />
+
+              <div className="mt-8 space-y-6">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+                <Skeleton className="h-10 w-full" />
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-11 w-40" />
+              </div>
+            </main>
+          </div>
+        </div>
       </div>
     );
   }
