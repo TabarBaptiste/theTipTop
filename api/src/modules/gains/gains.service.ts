@@ -5,11 +5,14 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { DeliveryMethod } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
-import { PRIZE_LABELS } from '../tickets/tickets.service';
+import { TicketsService } from '../tickets/tickets.service';
 
 @Injectable()
 export class GainsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly ticketsService: TicketsService,
+  ) {}
 
   /**
    * Marquer un gain comme remis
@@ -38,32 +41,35 @@ export class GainsService {
       throw new BadRequestException('Ce lot a déjà été remis');
     }
 
-    const updated = await this.prisma.participation.update({
-      where: { id: participationId },
-      data: {
-        prizeDelivered: true,
-        prizeDeliveredAt: new Date(),
-        prizeDeliveredBy: employeeId,
-        deliveryMethod,
-      },
-      include: {
-        ticket: true,
-        user: {
-          select: {
-            id: true,
-            email: true,
-            firstName: true,
-            lastName: true,
+    const [updated, prizesMap] = await Promise.all([
+      this.prisma.participation.update({
+        where: { id: participationId },
+        data: {
+          prizeDelivered: true,
+          prizeDeliveredAt: new Date(),
+          prizeDeliveredBy: employeeId,
+          deliveryMethod,
+        },
+        include: {
+          ticket: true,
+          user: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+            },
           },
         },
-      },
-    });
+      }),
+      this.ticketsService.getPrizesMap(),
+    ]);
 
     return {
       id: updated.id,
       code: updated.ticket.code,
       prizeType: updated.ticket.prizeType,
-      prize: PRIZE_LABELS[updated.ticket.prizeType],
+      prize: prizesMap[updated.ticket.prizeType],
       user: updated.user,
       prizeDelivered: updated.prizeDelivered,
       prizeDeliveredAt: updated.prizeDeliveredAt,
@@ -79,9 +85,7 @@ export class GainsService {
 
     const ticket = await this.prisma.ticket.findUnique({
       where: { code: normalizedCode },
-      include: {
-        participation: true,
-      },
+      include: { participation: true },
     });
 
     if (!ticket) {
@@ -102,30 +106,29 @@ export class GainsService {
     const { page = 1, limit = 20 } = options;
     const skip = (page - 1) * limit;
 
-    const [participations, total] = await Promise.all([
-      this.prisma.participation.findMany({
-        where: {
-          prizeDelivered: false,
-        },
-        skip,
-        take: limit,
-        orderBy: { createdAt: 'asc' },
-        include: {
-          ticket: true,
-          user: {
-            select: {
-              id: true,
-              email: true,
-              firstName: true,
-              lastName: true,
-              phone: true,
+    const [[participations, total], prizesMap] = await Promise.all([
+      Promise.all([
+        this.prisma.participation.findMany({
+          where: { prizeDelivered: false },
+          skip,
+          take: limit,
+          orderBy: { createdAt: 'asc' },
+          include: {
+            ticket: true,
+            user: {
+              select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                phone: true,
+              },
             },
           },
-        },
-      }),
-      this.prisma.participation.count({
-        where: { prizeDelivered: false },
-      }),
+        }),
+        this.prisma.participation.count({ where: { prizeDelivered: false } }),
+      ]),
+      this.ticketsService.getPrizesMap(),
     ]);
 
     type PendingParticipation = (typeof participations)[number];
@@ -135,7 +138,7 @@ export class GainsService {
         id: p.id,
         code: p.ticket.code,
         prizeType: p.ticket.prizeType,
-        prize: PRIZE_LABELS[p.ticket.prizeType],
+        prize: prizesMap[p.ticket.prizeType],
         user: p.user,
         participatedAt: p.createdAt,
       })),
@@ -155,33 +158,33 @@ export class GainsService {
     const { page = 1, limit = 20, employeeId } = options;
     const skip = (page - 1) * limit;
 
-    const where: any = {
-      prizeDelivered: true,
-    };
-
+    const where: any = { prizeDelivered: true };
     if (employeeId) {
       where.prizeDeliveredBy = employeeId;
     }
 
-    const [participations, total] = await Promise.all([
-      this.prisma.participation.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { prizeDeliveredAt: 'desc' },
-        include: {
-          ticket: true,
-          user: {
-            select: {
-              id: true,
-              email: true,
-              firstName: true,
-              lastName: true,
+    const [[participations, total], prizesMap] = await Promise.all([
+      Promise.all([
+        this.prisma.participation.findMany({
+          where,
+          skip,
+          take: limit,
+          orderBy: { prizeDeliveredAt: 'desc' },
+          include: {
+            ticket: true,
+            user: {
+              select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+              },
             },
           },
-        },
-      }),
-      this.prisma.participation.count({ where }),
+        }),
+        this.prisma.participation.count({ where }),
+      ]),
+      this.ticketsService.getPrizesMap(),
     ]);
 
     type DeliveryHistoryParticipation = (typeof participations)[number];
@@ -191,7 +194,7 @@ export class GainsService {
         id: p.id,
         code: p.ticket.code,
         prizeType: p.ticket.prizeType,
-        prize: PRIZE_LABELS[p.ticket.prizeType],
+        prize: prizesMap[p.ticket.prizeType],
         user: p.user,
         prizeDeliveredAt: p.prizeDeliveredAt,
         prizeDeliveredBy: p.prizeDeliveredBy,
@@ -210,7 +213,7 @@ export class GainsService {
    * Statistiques des remises
    */
   async getDeliveryStats() {
-    const [total, delivered, pending, byMethod, byPrize] = await Promise.all([
+    const [total, delivered, pending, byMethod, byPrize, prizesMap] = await Promise.all([
       this.prisma.participation.count(),
       this.prisma.participation.count({ where: { prizeDelivered: true } }),
       this.prisma.participation.count({ where: { prizeDelivered: false } }),
@@ -222,12 +225,9 @@ export class GainsService {
       this.prisma.ticket.groupBy({
         by: ['prizeType'],
         _count: true,
-        where: {
-          participation: {
-            prizeDelivered: true,
-          },
-        },
+        where: { participation: { prizeDelivered: true } },
       }),
+      this.ticketsService.getPrizesMap(),
     ]);
 
     type DeliveryMethodGroup = (typeof byMethod)[number];
@@ -251,7 +251,7 @@ export class GainsService {
         (acc: Record<string, { count: number; label: string }>, item: PrizeGroup) => {
           acc[item.prizeType] = {
             count: item._count,
-            label: PRIZE_LABELS[item.prizeType].name,
+            label: (prizesMap[item.prizeType] ?? { name: item.prizeType }).name,
           };
           return acc;
         },

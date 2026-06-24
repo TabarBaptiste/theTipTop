@@ -45,9 +45,9 @@ docker compose version
 ```
 
 ### Domaines requis
-- `thetiptop.dsp5-archi-o23-15m-g5.fr` - Application web
-- `api.thetiptop.dsp5-archi-o23-15m-g5.fr` - API Backend
-- `staging.thetiptop.dsp5-archi-o23-15m-g5.fr` - Environnement staging
+- `thetiptop.dsp5-archi-o24a-4-5-g1.fr` - Application web
+- `api.thetiptop.dsp5-archi-o24a-4-5-g1.fr` - API Backend
+- `staging.thetiptop.dsp5-archi-o24a-4-5-g1.fr` - Environnement staging
 
 ---
 
@@ -93,7 +93,7 @@ docker compose version
 | A | www.thetiptop | IP_SERVEUR | 3600 |
 | A | api.thetiptop | IP_SERVEUR | 3600 |
 | A | staging.thetiptop | IP_SERVEUR | 3600 |
-| CNAME | www | thetiptop.dsp5-archi-o23-15m-g5.fr | 3600 |
+| CNAME | www | thetiptop.dsp5-archi-o24a-4-5-g1.fr | 3600 |
 
 ### Configuration Cloudflare (recommandé)
 1. Activer le proxy Cloudflare (orange cloud)
@@ -140,17 +140,17 @@ JWT_REFRESH_EXPIRATION=7d
 # OAuth2 Google
 GOOGLE_CLIENT_ID=xxx.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=xxx
-GOOGLE_CALLBACK_URL=https://api.thetiptop.dsp5-archi-o23-15m-g5.fr/api/v1/auth/google/callback
+GOOGLE_CALLBACK_URL=https://api.thetiptop.dsp5-archi-o24a-4-5-g1.fr/api/v1/auth/google/callback
 
 # OAuth2 Facebook
 FACEBOOK_APP_ID=xxx
 FACEBOOK_APP_SECRET=xxx
-FACEBOOK_CALLBACK_URL=https://api.thetiptop.dsp5-archi-o23-15m-g5.fr/api/v1/auth/facebook/callback
+FACEBOOK_CALLBACK_URL=https://api.thetiptop.dsp5-archi-o24a-4-5-g1.fr/api/v1/auth/facebook/callback
 
 # Application
 NODE_ENV=production
 PORT=3001
-FRONTEND_URL=https://thetiptop.dsp5-archi-o23-15m-g5.fr
+FRONTEND_URL=https://thetiptop.dsp5-archi-o24a-4-5-g1.fr
 ```
 
 ### 4. Générer des secrets sécurisés
@@ -224,9 +224,9 @@ certificatesResolvers:
 3. APIs & Services > Credentials > Create Credentials > OAuth 2.0 Client IDs
 4. Application type: Web application
 5. Authorized JavaScript origins:
-   - `https://thetiptop.dsp5-archi-o23-15m-g5.fr`
+   - `https://thetiptop.dsp5-archi-o24a-4-5-g1.fr`
 6. Authorized redirect URIs:
-   - `https://api.thetiptop.dsp5-archi-o23-15m-g5.fr/api/v1/auth/google/callback`
+   - `https://api.thetiptop.dsp5-archi-o24a-4-5-g1.fr/api/v1/auth/google/callback`
 
 ### Facebook Developers
 
@@ -236,7 +236,7 @@ certificatesResolvers:
 4. Settings > Basic : récupérer App ID et App Secret
 5. Facebook Login > Settings:
    - Valid OAuth Redirect URIs:
-     - `https://api.thetiptop.dsp5-archi-o23-15m-g5.fr/api/v1/auth/facebook/callback`
+     - `https://api.thetiptop.dsp5-archi-o24a-4-5-g1.fr/api/v1/auth/facebook/callback`
 
 ---
 

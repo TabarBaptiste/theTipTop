@@ -12,6 +12,20 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuthStore } from '@/lib/stores/auth-store';
+import { trackRegisterSuccess, trackRegisterFailure, trackCTAClick } from '@/lib/analytics';
+
+const MIN_AGE = 18;
+const MAX_AGE = 120;
+
+function getAge(birthDate: Date): number {
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const beforeBirthdayThisYear =
+    today.getMonth() < birthDate.getMonth() ||
+    (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate());
+  if (beforeBirthdayThisYear) age--;
+  return age;
+}
 
 const registerSchema = z.object({
   email: z.string().email('Email invalide'),
@@ -20,15 +34,40 @@ const registerSchema = z.object({
     .min(8, 'Le mot de passe doit faire au moins 8 caracteres')
     .regex(/[A-Z]/, 'Le mot de passe doit contenir au moins une majuscule')
     .regex(/[a-z]/, 'Le mot de passe doit contenir au moins une minuscule')
-    .regex(/[0-9]/, 'Le mot de passe doit contenir au moins un chiffre'),
+    .regex(/[0-9]/, 'Le mot de passe doit contenir au moins un chiffre')
+    .regex(/[@$!%*?&]/, 'Le mot de passe doit contenir au moins un caractere special (@$!%*?&)'),
   confirmPassword: z.string(),
   firstName: z.string().min(2, 'Le prenom doit faire au moins 2 caracteres'),
   lastName: z.string().min(2, 'Le nom doit faire au moins 2 caracteres'),
   phone: z.string().optional(),
-  birthDate: z.string().optional(),
-  gender: z.enum(['male', 'female', 'other']).optional(),
-  newsletterOptIn: z.boolean().default(false),
-  rgpdConsent: z.literal(true, {
+  birthDate: z
+    .string()
+    .optional()
+    .refine((val) => !val || /^\d{4}-\d{2}-\d{2}$/.test(val), {
+      message: 'Date invalide (format AAAA-MM-JJ, année sur 4 chiffres)',
+    })
+    .refine(
+      (val) => {
+        if (!val) return true;
+        const age = getAge(new Date(val));
+        return age >= MIN_AGE;
+      },
+      { message: 'Vous devez être majeur (18 ans minimum) pour vous inscrire' },
+    )
+    .refine(
+      (val) => {
+        if (!val) return true;
+        const age = getAge(new Date(val));
+        return age <= MAX_AGE;
+      },
+      { message: 'Date de naissance invalide' },
+    ),
+  gender: z.preprocess(
+    (val) => (val === '' ? undefined : val),
+    z.enum(['MALE', 'FEMALE', 'OTHER', 'PREFER_NOT_TO_SAY']).optional(),
+  ),
+  consentEmail: z.boolean().default(false),
+  consentData: z.literal(true, {
     errorMap: () => ({ message: 'Vous devez accepter les conditions' }),
   }),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -50,32 +89,57 @@ export default function RegisterPage() {
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      newsletterOptIn: false,
+      consentEmail: false,
     },
   });
 
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
     try {
-      const { confirmPassword, ...registerData } = data;
-      await registerUser(registerData);
+      const { confirmPassword, ...rest } = data;
+      // On évite d'envoyer des champs optionnels vides (sinon échec IsDateString, etc.)
+      await registerUser({
+        ...rest,
+        phone: rest.phone || undefined,
+        birthDate: rest.birthDate || undefined,
+      });
+      trackRegisterSuccess('email');
       toast.success('Inscription reussie ! Bienvenue !');
       router.push('/dashboard');
-    } catch {
-      toast.error('Erreur lors de l\'inscription');
+    } catch (error: any) {
+      const status = error?.response?.status;
+      if (status === 409) {
+        trackRegisterFailure('email', 'email_already_exists');
+        toast.error('Un compte existe deja avec cet email');
+      } else if (status === 400 || status === 422) {
+        trackRegisterFailure('email', 'invalid_data');
+        toast.error('Donnees invalides. Verifiez le formulaire.');
+      } else {
+        trackRegisterFailure('email', 'server_error');
+        toast.error("Erreur lors de l'inscription");
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
+  const today = new Date();
+  const maxBirthDate = new Date(today.getFullYear() - MIN_AGE, today.getMonth(), today.getDate())
+    .toISOString()
+    .split('T')[0];
+  const minBirthDate = new Date(today.getFullYear() - MAX_AGE, today.getMonth(), today.getDate())
+    .toISOString()
+    .split('T')[0];
+
   const handleOAuthLogin = (provider: 'google' | 'facebook') => {
+    trackCTAClick(`S'inscrire avec ${provider}`, 'register_page');
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
     window.location.href = `${apiUrl}/auth/${provider}`;
   };
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-cream px-4 py-12">
-      <div className="w-full max-w-lg">
+      <div className="w-full max-w-xl sm:rounded-card sm:border sm:border-warm-beige sm:bg-white sm:p-8 sm:shadow-sm">
         <h1 className="font-display text-h2 text-noir">Creer votre compte</h1>
         <p className="mt-2 text-sm text-stone-grey">
           Inscrivez-vous pour participer au jeu-concours
@@ -150,26 +214,51 @@ export default function RegisterPage() {
             )}
           </div>
 
-          {/* Date de naissance */}
-          <div>
-            <Label htmlFor="birthDate">Date de naissance</Label>
-            <Input
-              id="birthDate"
-              type="date"
-              {...register('birthDate')}
-            />
+          {/* Date de naissance / Genre */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <Label htmlFor="birthDate">Date de naissance</Label>
+              <Input
+                id="birthDate"
+                type="date"
+                min={minBirthDate}
+                max={maxBirthDate}
+                {...register('birthDate')}
+              />
+              {errors.birthDate && (
+                <p className="mt-1 text-xs text-red-600">{errors.birthDate.message}</p>
+              )}
+            </div>
+            <div>
+              <Label htmlFor="gender">Genre</Label>
+              <select
+                id="gender"
+                className="flex h-10 w-full rounded-soft border border-warm-beige bg-white px-3 text-sm text-noir focus:outline-none focus:ring-2 focus:ring-terracotta-deep"
+                defaultValue=""
+                {...register('gender')}
+              >
+                <option value="FEMALE">Femme</option>                
+                <option value="MALE">Homme</option>
+                <option value="OTHER">Autre</option>
+                <option value="PREFER_NOT_TO_SAY">Préfère ne pas le dire</option>
+              </select>
+            </div>
           </div>
+          <p className="text-xs text-stone-grey">
+            Champs facultatifs collectés uniquement à des fins statistiques pour le
+            jeu-concours. En les renseignant, vous consentez à cet usage.
+          </p>
 
           {/* RGPD */}
           <div className="space-y-3">
             <div className="flex items-start gap-3">
               <input
                 type="checkbox"
-                id="rgpdConsent"
+                id="consentData"
                 className="mt-1 h-4 w-4 rounded-sharp border-warm-beige text-terracotta-deep accent-terracotta-deep"
-                {...register('rgpdConsent')}
+                {...register('consentData')}
               />
-              <label htmlFor="rgpdConsent" className="text-xs leading-relaxed text-stone-grey">
+              <label htmlFor="consentData" className="text-xs leading-relaxed text-stone-grey">
                 J&apos;accepte les{' '}
                 <Link href="/cgu" className="text-terracotta-deep hover:underline">
                   conditions generales
@@ -181,18 +270,18 @@ export default function RegisterPage() {
                 *
               </label>
             </div>
-            {errors.rgpdConsent && (
-              <p className="text-xs text-red-600">{errors.rgpdConsent.message}</p>
+            {errors.consentData && (
+              <p className="text-xs text-red-600">{errors.consentData.message}</p>
             )}
 
             <div className="flex items-start gap-3">
               <input
                 type="checkbox"
-                id="newsletterOptIn"
+                id="consentEmail"
                 className="mt-1 h-4 w-4 rounded-sharp border-warm-beige text-terracotta-deep accent-terracotta-deep"
-                {...register('newsletterOptIn')}
+                {...register('consentEmail')}
               />
-              <label htmlFor="newsletterOptIn" className="text-xs leading-relaxed text-stone-grey">
+              <label htmlFor="consentEmail" className="text-xs leading-relaxed text-stone-grey">
                 Je souhaite recevoir les offres et nouveautes de The Tip Top
               </label>
             </div>
@@ -211,11 +300,11 @@ export default function RegisterPage() {
         </form>
 
         {/* OAuth */}
-        <div className="mt-6">
+        <div className="mt-6 space-y-3">
           <button
             type="button"
             onClick={() => handleOAuthLogin('google')}
-            className="flex w-full items-center gap-3 rounded-soft border border-warm-beige bg-white px-4 py-3 text-sm font-medium text-noir transition-colors hover:bg-cream"
+            className="flex w-full items-center justify-center gap-3 rounded-soft border border-warm-beige bg-white px-4 py-3 text-sm font-medium text-noir transition-colors hover:bg-cream"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -223,7 +312,18 @@ export default function RegisterPage() {
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
             </svg>
-            Se connecter avec SSO
+            S&apos;inscrire avec Google
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleOAuthLogin('facebook')}
+            className="flex w-full items-center justify-center gap-3 rounded-soft border border-warm-beige bg-white px-4 py-3 text-sm font-medium text-noir transition-colors hover:bg-cream"
+          >
+            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="#1877F2">
+              <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.886v2.267h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z" />
+            </svg>
+            S&apos;inscrire avec Facebook
           </button>
         </div>
 

@@ -9,6 +9,7 @@ import { APP_GUARD } from '@nestjs/core';
 
 // Modules internes
 import { PrismaModule } from './prisma/prisma.module';
+import { RedisModule } from './redis/redis.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { TicketsModule } from './modules/tickets/tickets.module';
@@ -17,6 +18,7 @@ import { GainsModule } from './modules/gains/gains.module';
 import { StatsModule } from './modules/stats/stats.module';
 import { GrandPrizeModule } from './modules/grand-prize/grand-prize.module';
 import { AuditModule } from './modules/audit/audit.module';
+import { GameConfigModule } from './modules/game-config/game-config.module';
 
 @Module({
   imports: [
@@ -48,6 +50,9 @@ import { AuditModule } from './modules/audit/audit.module';
     // Database
     PrismaModule,
 
+    // Cache
+    RedisModule,
+
     // Features
     AuthModule,
     UsersModule,
@@ -57,6 +62,7 @@ import { AuditModule } from './modules/audit/audit.module';
     StatsModule,
     GrandPrizeModule,
     AuditModule,
+    GameConfigModule,
   ],
   providers: [
     // Rate limiting global

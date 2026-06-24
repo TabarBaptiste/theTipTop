@@ -61,7 +61,7 @@ Thé Tip Top est **L'Artisan Méditerranéen**. La marque ne vend pas du thé - 
   --color-bg-card:            var(--color-terracotta-pale);
   --color-text-primary:       var(--color-black);
   --color-text-secondary:     var(--color-stone-grey);
-  --color-cta:                var(--color-terracotta-bright);
+  --color-cta:                var(--color-terracotta-deep);
   --color-cta-hover:          var(--color-terracotta-hover);
   --color-accent:             var(--color-gold);
   --color-success:            var(--color-moss-green);
@@ -299,21 +299,111 @@ Plus gros, rectangulaire avec coins arrondis, avec icônes optionnelles.
 | Icônes | Non | Oui (optionnelles) |
 | Usage | Petites étiquettes rapides | Blocs d'information |
 
-### Cards produit
+### Cards produit (lots à gagner)
 
+Grille **3 colonnes** sur desktop. **Pas de bordure ni de fond de card** : tout est posé
+directement sur le fond de page. Seule l'**image** porte un radius (sur ses 4 coins) ; le
+reste n'est que de la typographie. La catégorie est un **label terracotta nu**, jamais un tag à fond.
+
+**Structure HTML de référence** (ordre impératif : image → catégorie → titre → footer)
+```html
+<article class="card">
+  <div class="card-image">
+    <img src="..." alt="..." />
+  </div>
+  <p class="card-category">Thé Signature</p>
+  <h3 class="card-title">Boîte 100g Thé Oolong</h3>
+  <div class="card-footer">
+    <span class="card-value">Valeur 39€</span>
+    <span class="card-odds">1 chance sur 3</span>
+  </div>
+</article>
+```
+
+**CSS**
 ```css
+/* Card sans bordure ni fond - pose directe sur le fond de page */
 .card {
-  background-color: var(--color-bg-card);
-  border-radius: var(--radius-card);
-  padding: var(--space-lg);
-  border: 1px solid var(--color-warm-beige);
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  display: flex;
+  flex-direction: column;
 }
-.card:hover {
-  box-shadow: 0 8px 24px rgba(186, 105, 5, 0.12);
-  transform: translateY(-2px);
+
+/* Image : radius sur les 4 coins, ratio fixe, léger zoom au survol */
+.card-image {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+.card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+.card:hover .card-image img { transform: scale(1.04); }
+
+/* Catégorie : label terracotta UPPERCASE, SANS background ni bordure */
+.card-category {
+  font-family: var(--font-functional);
+  font-size: var(--text-ui);          /* 11px */
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--color-terracotta-deep);
+  margin: var(--space-md) 0 0;
+}
+
+/* Titre en italique éditorial */
+.card-title {
+  font-family: var(--font-editorial);
+  font-size: var(--text-h3);
+  font-style: italic;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin: var(--space-2xs) 0 0;
+}
+
+/* Footer : valeur (gauche) + pourcentage (droite), séparés par un filet */
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--space-md);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--color-warm-beige);
+}
+.card-value {
+  font-family: var(--font-functional);
+  font-size: var(--text-small);
+  color: var(--color-text-secondary);
+}
+.card-odds {
+  font-family: var(--font-functional);
+  font-size: var(--text-small);
+  font-weight: 600;
+  color: var(--color-terracotta-deep);
 }
 ```
+
+**Catégorie de lot** - simple label terracotta en capitales. Le libellé varie, la couleur
+reste terracotta deep. Jamais de fond, jamais de bordure, jamais un tag.
+
+| `category` | Libellé affiché | Cas d'usage |
+|-----------|-----------------|-------------|
+| `signature` | THÉ SIGNATURE | Thés signature |
+| `accessoire` | ACCESSOIRE | Infuseurs, théières, tasses |
+| `grandprix` | GRAND PRIX | Week-end, grand lot |
+
+**Règles**
+- Pas de bordure ni de fond de card. Seule l'image a un radius (ses 4 coins).
+- Catégorie = texte terracotta UPPERCASE sans background. Jamais de pill ici.
+- Pourcentage (`card-odds`) en bas à **droite** du footer, en vis-à-vis de la valeur.
+  Jamais dans la catégorie, jamais au-dessus du titre.
+
+**Composant React**
+`PrizeCard` dans `components/ui/card.tsx` - props : `image`, `imageAlt`, `category`, `title`, `value`, `odds`.
 
 ### Formulaire (jeu-concours)
 
@@ -331,7 +421,7 @@ Plus gros, rectangulaire avec coins arrondis, avec icônes optionnelles.
 }
 .form-input:focus {
   outline: none;
-  border-color: var(--color-terracotta-bright);
+  border-color: var(--color-terracotta-deep);
 }
 .form-label {
   font-family: var(--font-functional);
@@ -344,6 +434,34 @@ Plus gros, rectangulaire avec coins arrondis, avec icônes optionnelles.
   margin-bottom: var(--space-xs);
 }
 ```
+
+### Loaders & états de chargement
+
+**Règle** : jamais de spinner pour un contenu en cours de chargement (page, liste, carte). Utiliser un **skeleton loader** qui reproduit la structure réelle du contenu final (mêmes dimensions, mêmes radius).
+
+```tsx
+import { Skeleton } from '@/components/ui/skeleton';
+
+<Skeleton className="h-10 w-full" />   {/* ex: placeholder d'un input */}
+<Skeleton className="h-8 w-64" />      {/* ex: placeholder d'un titre */}
+```
+
+```css
+/* components/ui/skeleton.tsx */
+.skeleton {
+  animation: pulse 2s ease-in-out infinite;
+  border-radius: var(--radius-soft);
+  background-color: var(--color-warm-beige);
+  opacity: 0.5;
+}
+```
+
+**Exception** : le spinner (`Loader2` de Lucide, `animate-spin`) reste autorisé uniquement pour le **feedback d'une action déjà déclenchée** par l'utilisateur (clic sur un bouton "Envoyer", "Supprimer", etc.), jamais pour un chargement de page ou de données au montage d'un composant.
+
+| ✅ Do | ❌ Don't |
+|-------|---------|
+| Skeleton aux dimensions du contenu final pendant un chargement de page/données | Spinner plein écran ou centré pour un chargement de contenu |
+| Spinner inline dans un bouton pendant le traitement d'une action cliquée | Spinner comme seul retour visuel d'un chargement de liste/formulaire |
 
 ---
 

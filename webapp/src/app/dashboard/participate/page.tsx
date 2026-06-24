@@ -5,14 +5,14 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Gift, Loader2, PartyPopper, Sparkles, Leaf, ShieldCheck, Heart, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { api } from '@/lib/api';
-import { getPrizeName, getPrizeValue } from '@/lib/utils';
+import { trackParticipateSubmit, trackParticipateSuccess, trackParticipateFailure } from '@/lib/analytics';
 
 const participateSchema = z.object({
   code: z
@@ -23,24 +23,27 @@ const participateSchema = z.object({
 
 type ParticipateFormData = z.infer<typeof participateSchema>;
 
+// Aligné sur la réponse réelle de POST /participations (structure plate)
 interface ParticipationResult {
-  participation: {
-    id: string;
-    ticket: {
-      code: string;
-      prizeType: string;
-    };
+  id: string;
+  code: string;
+  prizeType: string;
+  prize: {
+    name: string;
+    description: string;
+    value: string;
   };
+  participatedAt: string;
+  prizeDelivered: boolean;
 }
 
-const prizes = [
-  { name: 'Lot 1', description: 'Infuseur a the', probability: '60%', value: '15€' },
-  { name: 'Lot 2', description: 'The detox 100g', probability: '20%', value: '20€' },
-  { name: 'Lot 3', description: 'The signature 100g', probability: '10%', value: '25€' },
-  { name: 'Lot 4', description: 'Coffret decouverte', probability: '6%', value: '39€' },
-  { name: 'Lot 5', description: 'Coffret premium', probability: '4%', value: '69€' },
-  { name: 'Lot 6', description: 'Grand prix - 1 an de the', probability: 'Tirage', value: '360€' },
-];
+interface PrizeApi {
+  code: string;
+  name: string;
+  description: string;
+  value: string;
+  percentage: number;
+}
 
 const rules = [
   { color: 'bg-moss', text: 'Le jeu-concours est ouvert a toute personne ayant effectue un achat superieur a 49€ en magasin.' },
@@ -51,6 +54,21 @@ const rules = [
 export default function ParticipatePage() {
   const queryClient = useQueryClient();
   const [result, setResult] = useState<ParticipationResult | null>(null);
+
+  // Chargement des lots depuis l'API (source de vérité en DB)
+  const {
+    data: prizes,
+    isLoading: prizesLoading,
+    isError: prizesError,
+    refetch: refetchPrizes,
+  } = useQuery<PrizeApi[]>({
+    queryKey: ['prizes'],
+    queryFn: async () => {
+      const response = await api.get('/tickets/prizes');
+      return response.data;
+    },
+    staleTime: Infinity,
+  });
 
   const {
     register,
@@ -63,15 +81,18 @@ export default function ParticipatePage() {
 
   const mutation = useMutation({
     mutationFn: async (data: ParticipateFormData) => {
+      trackParticipateSubmit();
       const response = await api.post('/participations', { code: data.code });
       return response.data as ParticipationResult;
     },
     onSuccess: (data) => {
+      trackParticipateSuccess(data.prizeType, data.prize.value);
       setResult(data);
       queryClient.invalidateQueries({ queryKey: ['participations'] });
       toast.success('Felicitations ! Vous avez gagne !');
     },
     onError: () => {
+      trackParticipateFailure('invalid_or_used_code');
       toast.error('Code invalide ou deja utilise');
     },
   });
@@ -86,7 +107,6 @@ export default function ParticipatePage() {
   };
 
   if (result) {
-    const prizeType = result.participation.ticket.prizeType;
     return (
       <div className="min-h-[calc(100vh-4rem)] bg-cream py-12">
         <div className="container mx-auto max-w-xl px-6">
@@ -101,16 +121,16 @@ export default function ParticipatePage() {
             <div className="mt-6 rounded-card bg-terracotta-50 p-6">
               <Gift className="mx-auto h-10 w-10 text-terracotta-deep" strokeWidth={1.5} />
               <h2 className="mt-3 font-display text-xl font-bold text-noir">
-                {getPrizeName(prizeType)}
+                {result.prize.name}
               </h2>
               <p className="mt-1 font-functional text-lg font-bold text-terracotta-deep">
-                Valeur : {getPrizeValue(prizeType)}
+                Valeur : {result.prize.value}
               </p>
             </div>
 
             <div className="mt-6 rounded-soft bg-cream p-4 text-left">
               <p className="text-xs text-stone-grey">
-                <strong>Code utilise :</strong> {result.participation.ticket.code}
+                <strong>Code utilise :</strong> {result.code}
               </p>
               <p className="mt-2 text-xs text-stone-grey">
                 <Sparkles className="mr-1 inline h-3 w-3 text-gold-500" />
@@ -197,9 +217,11 @@ export default function ParticipatePage() {
           <p className="mt-2 text-xs text-stone-grey">
             Code perdu ou illisible ? Contactez notre service client.
           </p>
-          <Button variant="secondary" size="sm" className="mt-4 w-full">
-            <RotateCcw className="mr-2 h-4 w-4" strokeWidth={1.5} />
-            Contacter le support
+          <Button asChild variant="secondary" size="sm" className="mt-4 w-full">
+            <a href="mailto:contact@thetiptop.fr?subject=Code%20perdu%20ou%20illisible">
+              <RotateCcw className="mr-2 h-4 w-4" strokeWidth={1.5} />
+              Contacter le support
+            </a>
           </Button>
         </section>
 
@@ -211,25 +233,58 @@ export default function ParticipatePage() {
           </p>
 
           <div className="mt-8 grid gap-4 sm:grid-cols-2">
-            {prizes.map((prize) => (
-              <div
-                key={prize.name}
-                className="rounded-card border border-warm-beige bg-white p-5 transition-all duration-200 hover:shadow-[0_8px_24px_rgba(186,105,5,0.12)]"
-              >
-                <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-deep">
-                  {prize.name}
-                </p>
-                <p className="mt-2 font-functional text-sm font-semibold text-noir">
-                  {prize.description}
-                </p>
-                <div className="mt-2 flex items-center justify-between">
-                  <span className="text-xs text-stone-grey">Chance : {prize.probability}</span>
-                  <span className="font-functional text-sm font-bold text-terracotta-deep">
-                    {prize.value}
-                  </span>
+            {prizesLoading &&
+              Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="rounded-card border border-warm-beige bg-white p-5 animate-pulse"
+                >
+                  <div className="h-3 w-2/3 rounded bg-warm-beige" />
+                  <div className="mt-3 h-4 w-full rounded bg-warm-beige" />
+                  <div className="mt-3 flex items-center justify-between">
+                    <div className="h-3 w-1/3 rounded bg-warm-beige" />
+                    <div className="h-3 w-1/4 rounded bg-warm-beige" />
+                  </div>
                 </div>
+              ))}
+
+            {prizesError && (
+              <div className="col-span-2 flex flex-col items-center gap-3 rounded-card border border-red-200 bg-red-50 p-6 text-center">
+                <p className="text-sm font-semibold text-red-600">
+                  Impossible de charger les lots
+                </p>
+                <p className="text-xs text-stone-grey">
+                  Une erreur est survenue. Veuillez réessayer.
+                </p>
+                <Button variant="outline" size="sm" onClick={() => refetchPrizes()}>
+                  Réessayer
+                </Button>
               </div>
-            ))}
+            )}
+
+            {!prizesLoading &&
+              !prizesError &&
+              prizes?.map((prize) => (
+                <div
+                  key={prize.code}
+                  className="rounded-card border border-warm-beige bg-white p-5"
+                >
+                  <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-deep">
+                    {prize.name}
+                  </p>
+                  <p className="mt-2 font-functional text-sm font-semibold text-noir">
+                    {prize.description}
+                  </p>
+                  <div className="mt-2 flex items-center justify-between">
+                    <span className="text-xs text-stone-grey">Chance : {prize.percentage}%</span>
+                    {prize.value && (
+                      <span className="font-functional text-sm font-bold text-terracotta-deep">
+                        {prize.value}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
           </div>
         </section>
 

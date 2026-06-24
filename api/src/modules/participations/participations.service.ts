@@ -7,10 +7,14 @@ import {
   BadRequestException,
   NotFoundException,
   ConflictException,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
-import { TicketsService, PRIZE_LABELS } from '../tickets/tickets.service';
+import { TicketsService } from '../tickets/tickets.service';
+import { RedisService } from '../../redis/redis.service';
+import { PRIZES_MAP_CACHE_KEY, STATS_CACHE_PATTERN } from '../../redis/cache-keys';
 
 type ParticipationWithTicket = Prisma.ParticipationGetPayload<{ include: { ticket: true } }>;
 
@@ -33,12 +37,15 @@ export class ParticipationsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly ticketsService: TicketsService,
+    private readonly redis: RedisService,
   ) {}
 
   /**
    * Créer une participation (utiliser un code)
    */
   async participate(userId: string, code: string) {
+    await this.checkSubmitRateLimit(userId);
+
     const normalizedCode = code.toUpperCase().trim();
 
     const verification = await this.ticketsService.verifyCode(normalizedCode);
@@ -46,6 +53,7 @@ export class ParticipationsService {
       throw new BadRequestException(verification.error || 'Code invalide');
     }
 
+    // ticket.prize est déjà enrichi par verifyCode() - pas besoin de recharger la map
     const ticket = verification.ticket;
 
     const participation = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
@@ -89,33 +97,68 @@ export class ParticipationsService {
       });
     });
 
+    await this.invalidateCachesAfterParticipation();
+
     return {
       id: participation.id,
       code: normalizedCode,
       prizeType: ticket.prizeType,
-      prize: PRIZE_LABELS[ticket.prizeType],
+      prize: ticket.prize,
       participatedAt: participation.createdAt,
       prizeDelivered: participation.prizeDelivered,
     };
   }
 
   /**
+   * Limite les soumissions de code à 10 par heure et par utilisateur (anti brute-force).
+   * Si Redis est indisponible, INCR retourne 0 et la limite n'est pas appliquée.
+   */
+  private async checkSubmitRateLimit(userId: string): Promise<void> {
+    const hour = new Date().toISOString().slice(0, 13); // YYYY-MM-DDTHH
+    const key = `ratelimit:${userId}:submit:${hour}`;
+
+    const count = await this.redis.incr(key);
+    if (count === 1) {
+      await this.redis.expire(key, 3600);
+    }
+
+    if (count > 10) {
+      throw new HttpException(
+        'Trop de tentatives, veuillez réessayer plus tard.',
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+  }
+
+  /**
+   * Invalide les caches impactés par une nouvelle participation
+   * (les compteurs de stats changent, et la map des lots est revérifiée par précaution).
+   */
+  private async invalidateCachesAfterParticipation(): Promise<void> {
+    await Promise.all([
+      this.redis.delByPattern(STATS_CACHE_PATTERN),
+      this.redis.del(PRIZES_MAP_CACHE_KEY),
+    ]);
+  }
+
+  /**
    * Récupère les participations d'un utilisateur
    */
   async findByUser(userId: string) {
-    const participations = await this.prisma.participation.findMany({
-      where: { userId },
-      include: {
-        ticket: true,
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+    const [participations, prizesMap] = await Promise.all([
+      this.prisma.participation.findMany({
+        where: { userId },
+        include: { ticket: true },
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.ticketsService.getPrizesMap(),
+    ]);
 
     return participations.map((p: ParticipationWithTicket) => ({
       id: p.id,
       code: p.ticket.code,
       prizeType: p.ticket.prizeType,
-      prize: PRIZE_LABELS[p.ticket.prizeType],
+      prize: prizesMap[p.ticket.prizeType],
       participatedAt: p.createdAt,
       prizeDelivered: p.prizeDelivered,
       prizeDeliveredAt: p.prizeDeliveredAt,
@@ -146,9 +189,11 @@ export class ParticipationsService {
       throw new NotFoundException('Participation non trouvée');
     }
 
+    const prizesMap = await this.ticketsService.getPrizesMap();
+
     return {
       ...participation,
-      prize: PRIZE_LABELS[participation.ticket.prizeType],
+      prize: prizesMap[participation.ticket.prizeType],
     };
   }
 
@@ -180,12 +225,14 @@ export class ParticipationsService {
       throw new NotFoundException('Ticket non trouvé');
     }
 
+    const prizesMap = await this.ticketsService.getPrizesMap();
+
     if (!ticket.participation) {
       return {
         ticket: {
           code: ticket.code,
           prizeType: ticket.prizeType,
-          prize: PRIZE_LABELS[ticket.prizeType],
+          prize: prizesMap[ticket.prizeType],
           isUsed: ticket.isUsed,
         },
         participation: null,
@@ -196,7 +243,7 @@ export class ParticipationsService {
       ticket: {
         code: ticket.code,
         prizeType: ticket.prizeType,
-        prize: PRIZE_LABELS[ticket.prizeType],
+        prize: prizesMap[ticket.prizeType],
         isUsed: ticket.isUsed,
       },
       participation: {
@@ -243,12 +290,14 @@ export class ParticipationsService {
       this.prisma.participation.count({ where }),
     ]);
 
+    const prizesMap = await this.ticketsService.getPrizesMap();
+
     return {
       data: participations.map((p: ParticipationWithTicketAndUser) => ({
         id: p.id,
         code: p.ticket.code,
         prizeType: p.ticket.prizeType,
-        prize: PRIZE_LABELS[p.ticket.prizeType],
+        prize: prizesMap[p.ticket.prizeType],
         user: p.user,
         participatedAt: p.createdAt,
         prizeDelivered: p.prizeDelivered,

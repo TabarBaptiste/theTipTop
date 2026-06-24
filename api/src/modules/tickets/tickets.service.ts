@@ -4,53 +4,61 @@
 
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { Ticket, PrizeType } from '@prisma/client';
+import { RedisService } from '../../redis/redis.service';
+import { PRIZES_MAP_CACHE_KEY, PRIZES_MAP_TTL } from '../../redis/cache-keys';
+import { Ticket, Prize } from '@prisma/client';
 
-// Labels des gains en français
-export const PRIZE_LABELS: Record<PrizeType, { name: string; description: string; value: string }> =
-  {
-    INFUSER: {
-      name: 'Infuseur à thé',
-      description: 'Un élégant infuseur à thé en inox',
-      value: '12€',
-    },
-    TEA_DETOX: {
-      name: 'Thé Détox / Infusion',
-      description: 'Une boite de 100g de thé détox ou infusion bio',
-      value: '15€',
-    },
-    TEA_SIGNATURE: {
-      name: 'Thé Signature',
-      description: 'Une boite de 100g de thé signature Thé Tip Top',
-      value: '20€',
-    },
-    GIFT_BOX_39: {
-      name: 'Coffret Découverte',
-      description: 'Un coffret découverte avec une sélection de thés',
-      value: '39€',
-    },
-    GIFT_BOX_69: {
-      name: 'Coffret Découverte Premium',
-      description: 'Un coffret découverte premium avec notre sélection exclusive',
-      value: '69€',
-    },
-  };
+/** Shape réduite retournée dans les réponses API */
+export type PrizeLabel = { name: string; description: string; value: string | null };
 
 @Injectable()
 export class TicketsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly redis: RedisService,
+  ) {}
+
+  // ===========================================
+  // LOTS (source de vérité en DB)
+  // ===========================================
 
   /**
-   * Vérifie si un code est valide et retourne le ticket
+   * Retourne tous les lots triés par displayOrder
+   */
+  async findAllPrizes(): Promise<Prize[]> {
+    return this.prisma.prize.findMany({ orderBy: { displayOrder: 'asc' } });
+  }
+
+  /**
+   * Retourne une map PrizeType → { name, description, value } pour les réponses API
+   */
+  async getPrizesMap(): Promise<Record<string, PrizeLabel>> {
+    return this.redis.getOrSet(PRIZES_MAP_CACHE_KEY, PRIZES_MAP_TTL, async () => {
+      const prizes = await this.findAllPrizes();
+      return prizes.reduce(
+        (acc, p) => {
+          acc[p.code] = { name: p.name, description: p.description, value: p.value };
+          return acc;
+        },
+        {} as Record<string, PrizeLabel>,
+      );
+    });
+  }
+
+  // ===========================================
+  // VÉRIFICATION DE CODE
+  // ===========================================
+
+  /**
+   * Vérifie si un code est valide et retourne le ticket enrichi avec les métadonnées du lot
    */
   async verifyCode(code: string): Promise<{
     isValid: boolean;
-    ticket?: Ticket & { prize: (typeof PRIZE_LABELS)[PrizeType] };
+    ticket?: Ticket & { prize: PrizeLabel };
     error?: string;
   }> {
     const normalizedCode = code.toUpperCase().trim();
 
-    // Vérifier le format du code (10 caractères alphanumériques)
     if (!/^[A-Z0-9]{10}$/.test(normalizedCode)) {
       return {
         isValid: false,
@@ -60,53 +68,49 @@ export class TicketsService {
 
     const ticket = await this.prisma.ticket.findUnique({
       where: { code: normalizedCode },
-      include: {
-        participation: true,
-      },
+      include: { participation: true },
     });
 
     if (!ticket) {
-      return {
-        isValid: false,
-        error: "Ce code n'existe pas.",
-      };
+      return { isValid: false, error: "Ce code n'existe pas." };
     }
 
     if (ticket.isUsed) {
-      return {
-        isValid: false,
-        error: 'Ce code a déjà été utilisé.',
-      };
+      return { isValid: false, error: 'Ce code a déjà été utilisé.' };
     }
 
-    // Vérifier que le jeu est en cours
-    const gameConfig = await this.prisma.gameConfig.findFirst({
-      where: { isActive: true },
-    });
+    const gameConfig = await this.prisma.gameConfig.findFirst({ where: { isActive: true } });
 
     if (!gameConfig) {
-      return {
-        isValid: false,
-        error: "Le jeu-concours n'est pas actif.",
-      };
+      return { isValid: false, error: "Le jeu-concours n'est pas actif." };
     }
 
     const now = new Date();
     if (now > gameConfig.claimEndDate) {
-      return {
-        isValid: false,
-        error: 'La période de réclamation des lots est terminée.',
-      };
+      return { isValid: false, error: 'La période de réclamation des lots est terminée.' };
+    }
+
+    const prizesMap = await this.getPrizesMap();
+    const prizeLabel = prizesMap[ticket.prizeType];
+
+    if (!prizeLabel) {
+      throw new NotFoundException(
+        `Lot introuvable pour le type : ${ticket.prizeType}. Vérifiez que la base est correctement seedée.`,
+      );
     }
 
     return {
       isValid: true,
       ticket: {
         ...ticket,
-        prize: PRIZE_LABELS[ticket.prizeType],
+        prize: prizeLabel,
       },
     };
   }
+
+  // ===========================================
+  // CRUD TICKETS
+  // ===========================================
 
   /**
    * Récupère un ticket par son code
@@ -121,9 +125,7 @@ export class TicketsService {
    * Récupère un ticket par son ID
    */
   async findById(id: string): Promise<Ticket | null> {
-    return this.prisma.ticket.findUnique({
-      where: { id },
-    });
+    return this.prisma.ticket.findUnique({ where: { id } });
   }
 
   /**
@@ -134,7 +136,6 @@ export class TicketsService {
     if (!ticket) {
       throw new NotFoundException('Ticket non trouvé');
     }
-
     return this.prisma.ticket.update({
       where: { id: ticket.id },
       data: { isDistributed: true },
@@ -150,21 +151,15 @@ export class TicketsService {
     }
 
     const tickets = await this.prisma.ticket.findMany({
-      where: {
-        isUsed: false,
-        isDistributed: false,
-      },
+      where: { isUsed: false, isDistributed: false },
       take: count,
       select: { code: true },
     });
 
     type AvailableTicket = (typeof tickets)[number];
 
-    // Marquer comme distribués
     await this.prisma.ticket.updateMany({
-      where: {
-        code: { in: tickets.map((t: AvailableTicket) => t.code) },
-      },
+      where: { code: { in: tickets.map((t: AvailableTicket) => t.code) } },
       data: { isDistributed: true },
     });
 
@@ -186,13 +181,15 @@ export class TicketsService {
       }),
     ]);
 
+    const prizesMap = await this.getPrizesMap();
+
     type PrizeGroup = (typeof byPrize)[number];
 
     const prizeStats = byPrize.reduce(
       (acc: Record<string, { count: number; label: string }>, item: PrizeGroup) => {
         acc[item.prizeType] = {
           count: item._count,
-          label: PRIZE_LABELS[item.prizeType].name,
+          label: (prizesMap[item.prizeType] ?? { name: item.prizeType }).name,
         };
         return acc;
       },

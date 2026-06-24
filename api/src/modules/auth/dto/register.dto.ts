@@ -15,6 +15,7 @@ import {
   IsEnum,
 } from 'class-validator';
 import { Gender } from '@prisma/client';
+import { IsAdult } from '../../../common/validators/is-adult.validator';
 
 export class RegisterDto {
   @ApiProperty({
@@ -57,10 +58,14 @@ export class RegisterDto {
 
   @ApiPropertyOptional({
     example: '1990-05-15',
-    description: 'Date de naissance (format ISO)',
+    description: 'Date de naissance (format AAAA-MM-JJ, majorité requise)',
   })
   @IsOptional()
   @IsDateString()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+    message: 'La date de naissance doit être au format AAAA-MM-JJ (année sur 4 chiffres)',
+  })
+  @IsAdult()
   birthDate?: string;
 
   @ApiPropertyOptional({

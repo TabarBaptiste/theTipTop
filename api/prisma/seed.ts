@@ -113,8 +113,75 @@ function createShuffledPrizes(): PrizeType[] {
   return prizes;
 }
 
+// Métadonnées des lots (source de vérité en DB, alignée avec le CDC)
+const PRIZE_METADATA = [
+  {
+    code: 'INFUSER' as PrizeType,
+    name: 'Infuseur à thé',
+    description: 'Un élégant infuseur à thé en inox de qualité',
+    value: null,
+    percentage: 60,
+    totalCount: 300000,
+    displayOrder: 1,
+  },
+  {
+    code: 'TEA_DETOX' as PrizeType,
+    name: 'Thé Détox / Infusion',
+    description: 'Une boîte de 100g de thé détox ou infusion bio',
+    value: null,
+    percentage: 20,
+    totalCount: 100000,
+    displayOrder: 2,
+  },
+  {
+    code: 'TEA_SIGNATURE' as PrizeType,
+    name: 'Thé Signature',
+    description: 'Une boîte de 100g de thé signature Thé Tip Top',
+    value: null,
+    percentage: 10,
+    totalCount: 50000,
+    displayOrder: 3,
+  },
+  {
+    code: 'GIFT_BOX_39' as PrizeType,
+    name: 'Coffret Découverte',
+    description: "Un coffret découverte avec une sélection de thés d'exception",
+    value: '39€',
+    percentage: 6,
+    totalCount: 30000,
+    displayOrder: 4,
+  },
+  {
+    code: 'GIFT_BOX_69' as PrizeType,
+    name: 'Coffret Découverte Premium',
+    description: 'Notre coffret premium avec une sélection exclusive de grands crus',
+    value: '69€',
+    percentage: 4,
+    totalCount: 20000,
+    displayOrder: 5,
+  },
+];
+
 async function main() {
   console.log('🍵 Démarrage de la génération des tickets Thé Tip Top...\n');
+
+  // ── Lots : créer / mettre à jour les métadonnées ──────────────────────────
+  console.log('🎁 Création des métadonnées des lots...');
+  for (const prize of PRIZE_METADATA) {
+    await prisma.prize.upsert({
+      where: { code: prize.code },
+      update: {
+        name: prize.name,
+        description: prize.description,
+        value: prize.value,
+        percentage: prize.percentage,
+        totalCount: prize.totalCount,
+        displayOrder: prize.displayOrder,
+      },
+      create: prize,
+    });
+  }
+  console.log('✅ 5 lots créés/mis à jour.\n');
 
   // Vérifier si des tickets existent déjà
   const existingCount = await prisma.ticket.count();
@@ -144,11 +211,19 @@ async function main() {
   // Créer la configuration du jeu si elle n'existe pas
   const existingConfig = await prisma.gameConfig.findFirst();
   if (!existingConfig) {
-    const startDate = new Date();
-    const endDate = new Date(startDate);
-    endDate.setDate(endDate.getDate() + 30);
-    const claimEndDate = new Date(endDate);
-    claimEndDate.setDate(claimEndDate.getDate() + 30);
+    // Lire les dates depuis les variables d'environnement (définis dans api/.env)
+    // Fallback : début aujourd'hui, fin dans 30 jours, réclamation dans 60 jours
+    const startDate = process.env.GAME_START_DATE
+      ? new Date(process.env.GAME_START_DATE)
+      : new Date();
+
+    const endDate = process.env.GAME_END_DATE
+      ? new Date(process.env.GAME_END_DATE)
+      : new Date(startDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+    const claimEndDate = process.env.CLAIM_END_DATE
+      ? new Date(process.env.CLAIM_END_DATE)
+      : new Date(endDate.getTime() + 30 * 24 * 60 * 60 * 1000);
 
     await prisma.gameConfig.create({
       data: {
@@ -162,7 +237,12 @@ async function main() {
     console.log('📅 Configuration du jeu créée:');
     console.log(`   - Début: ${startDate.toLocaleDateString('fr-FR')}`);
     console.log(`   - Fin distribution: ${endDate.toLocaleDateString('fr-FR')}`);
-    console.log(`   - Fin réclamation: ${claimEndDate.toLocaleDateString('fr-FR')}\n`);
+    console.log(`   - Fin réclamation: ${claimEndDate.toLocaleDateString('fr-FR')}`);
+    console.log(
+      process.env.GAME_START_DATE
+        ? '   (dates lues depuis les variables d\'environnement)\n'
+        : '   ⚠️  GAME_START_DATE non défini - dates calculées depuis maintenant\n',
+    );
   }
 
   // Générer les gains mélangés

@@ -2,7 +2,16 @@
 // Contrôleur Participations
 // ===========================================
 
-import { Controller, Get, Post, Body, Param, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  NotFoundException,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 
 import { ParticipationsService } from './participations.service';
@@ -100,7 +109,13 @@ export class ParticipationsController {
   @ApiOperation({ summary: "Détail d'une participation" })
   @ApiResponse({ status: 200, description: 'Détails de la participation' })
   @ApiResponse({ status: 404, description: 'Participation non trouvée' })
-  async findOne(@Param('id') id: string) {
-    return this.participationsService.findById(id);
+  async findOne(@Param('id') id: string, @CurrentUser() user: User) {
+    const participation = await this.participationsService.findById(id);
+    // Anti-IDOR : un client ne peut consulter que ses propres participations.
+    // 404 (et non 403) pour ne pas révéler l'existence de la ressource.
+    if (user.role === 'CLIENT' && participation.user.id !== user.id) {
+      throw new NotFoundException('Participation non trouvée');
+    }
+    return participation;
   }
 }

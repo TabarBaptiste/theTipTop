@@ -6,10 +6,17 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ParticipationsService } from '../participations/participations.service';
-import { PRIZE_LABELS } from '../tickets/tickets.service';
+import { RedisService } from '../../redis/redis.service';
+import {
+  STATS_OVERVIEW_TTL,
+  STATS_PRIZES_TTL,
+  STATS_DEMOGRAPHICS_TTL,
+  STATS_TIMELINE_TTL,
+  STATS_EMAILING_TTL,
+} from '../../redis/cache-keys';
 
 type PrizeStat = {
-  prizeType: keyof typeof PRIZE_LABELS;
+  prizeType: string;
   _count: { _all: number };
 };
 
@@ -34,12 +41,19 @@ export class StatsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly participationsService: ParticipationsService,
+    private readonly redis: RedisService,
   ) {}
 
   /**
    * Statistiques globales du jeu-concours
    */
   async getGlobalStats() {
+    return this.redis.getOrSet('stats:overview', STATS_OVERVIEW_TTL, () =>
+      this.computeGlobalStats(),
+    );
+  }
+
+  private async computeGlobalStats() {
     const [
       totalTickets,
       usedTickets,
@@ -129,6 +143,10 @@ export class StatsService {
    * Statistiques des gains par type
    */
   async getPrizeStats() {
+    return this.redis.getOrSet('stats:prizes', STATS_PRIZES_TTL, () => this.computePrizeStats());
+  }
+
+  private async computePrizeStats() {
     const prizeStats = await this.prisma.ticket.groupBy({
       by: ['prizeType'],
       _count: {
@@ -141,10 +159,19 @@ export class StatsService {
       where: { prizeDelivered: true },
     });
 
+    const prizes = await this.prisma.prize.findMany();
+    const prizesMap = prizes.reduce(
+      (acc, p) => {
+        acc[p.code] = { name: p.name, value: p.value };
+        return acc;
+      },
+      {} as Record<string, { name: string; value: string | null }>,
+    );
+
     const byType = prizeStats.map((stat: PrizeStat) => ({
       type: stat.prizeType,
-      label: PRIZE_LABELS[stat.prizeType].name,
-      value: PRIZE_LABELS[stat.prizeType].value,
+      label: (prizesMap[stat.prizeType] ?? { name: stat.prizeType }).name,
+      value: (prizesMap[stat.prizeType] ?? { value: '' }).value,
       count: stat._count._all,
     }));
 
@@ -159,6 +186,12 @@ export class StatsService {
    * Statistiques démographiques des participants
    */
   async getDemographicStats() {
+    return this.redis.getOrSet('stats:demographics', STATS_DEMOGRAPHICS_TTL, () =>
+      this.computeDemographicStats(),
+    );
+  }
+
+  private async computeDemographicStats() {
     const byGender = await this.prisma.user.groupBy({
       by: ['gender'],
       _count: true,
@@ -223,6 +256,15 @@ export class StatsService {
    * Statistiques temporelles (participations par jour)
    */
   async getTimelineStats(days: number = 30) {
+    // Borne la fenêtre (1-365 jours) : la boucle de construction de la
+    // timeline itère `days` fois, une valeur arbitraire serait un vecteur DoS.
+    const safeDays = Number.isFinite(days) ? Math.min(Math.max(Math.trunc(days), 1), 365) : 30;
+    return this.redis.getOrSet(`stats:timeline:${safeDays}`, STATS_TIMELINE_TTL, () =>
+      this.computeTimelineStats(safeDays),
+    );
+  }
+
+  private async computeTimelineStats(days: number) {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
@@ -273,6 +315,16 @@ export class StatsService {
    * Données pour export (emailing)
    */
   async getEmailingData(options: { consentEmail?: boolean; hasParticipated?: boolean }) {
+    const cacheKey = `stats:emailing:${options.consentEmail ?? 'all'}:${options.hasParticipated ?? 'all'}`;
+    return this.redis.getOrSet(cacheKey, STATS_EMAILING_TTL, () =>
+      this.computeEmailingData(options),
+    );
+  }
+
+  private async computeEmailingData(options: {
+    consentEmail?: boolean;
+    hasParticipated?: boolean;
+  }) {
     const where: Prisma.UserWhereInput = {
       role: 'CLIENT',
       deletedAt: null,

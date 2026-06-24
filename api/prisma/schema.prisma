@@ -99,6 +99,26 @@ enum PrizeType {
 }
 
 // ===========================================
+// LOTS DU CONCOURS (métadonnées gérées en DB)
+// ===========================================
+model Prize {
+  id           String    @id @default(uuid())
+  code         PrizeType @unique          // Identifiant technique du lot
+  name         String                     // "Infuseur à thé"
+  description  String                     // Description courte
+  imageUrl     String?                    // URL/chemin de l'image (optionnel)
+  value        String?                     // "12€"
+  percentage   Float                      // 60.0 (% des tickets)
+  totalCount   Int                        // 300000
+  displayOrder Int       @default(0)      // Ordre d'affichage
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("prizes")
+}
+
+// ===========================================
 // PARTICIPATIONS (lien User <-> Ticket)
 // ===========================================
 model Participation {

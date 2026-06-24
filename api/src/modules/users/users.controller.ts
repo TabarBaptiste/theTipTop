@@ -13,6 +13,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  NotFoundException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { Role, User } from '@prisma/client';
@@ -60,10 +61,14 @@ export class UsersController {
   @ApiResponse({ status: 404, description: 'Utilisateur non trouvé' })
   async findOne(@Param('id') id: string, @CurrentUser() currentUser: User) {
     // Un client ne peut voir que son propre profil
-    if (currentUser.role === 'CLIENT' && currentUser.id !== id) {
-      return this.usersService.findById(currentUser.id);
+    const targetId = currentUser.role === 'CLIENT' ? currentUser.id : id;
+    const user = await this.usersService.findById(targetId);
+    if (!user) {
+      throw new NotFoundException('Utilisateur non trouvé');
     }
-    return this.usersService.findById(id);
+    // Ne jamais exposer le hash du mot de passe
+    const { password: _password, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   }
 
   // ===========================================

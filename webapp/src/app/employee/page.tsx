@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { api } from '@/lib/api';
-import { getPrizeName, getPrizeValue, formatDateTime } from '@/lib/utils';
+import { formatDateTime } from '@/lib/utils';
 
 const searchSchema = z.object({
   code: z.string().length(10, 'Le code doit contenir 10 caractères'),
@@ -20,23 +20,46 @@ const searchSchema = z.object({
 
 type SearchFormData = z.infer<typeof searchSchema>;
 
+// Réponse de GET /gains/pending (structure plate)
 interface PendingDelivery {
   id: string;
+  code: string;
+  prizeType: string;
+  prize: {
+    name: string;
+    description: string;
+    value: string;
+  };
   user: {
     firstName: string;
     lastName: string;
     email: string;
+    phone?: string;
   };
+  participatedAt: string;
+}
+
+// Réponse de GET /participations/by-code/:code
+interface SearchResult {
   ticket: {
     code: string;
     prizeType: string;
+    prize: { name: string; description: string; value: string };
+    isUsed: boolean;
   };
-  createdAt: string;
+  participation: {
+    id: string;
+    user: { firstName: string; lastName: string; email: string };
+    participatedAt: string;
+    prizeDelivered: boolean;
+    prizeDeliveredAt: string | null;
+    deliveryMethod: string | null;
+  } | null;
 }
 
 export default function EmployeePage() {
   const queryClient = useQueryClient();
-  const [searchResult, setSearchResult] = useState<PendingDelivery | null>(null);
+  const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
 
   const {
     register,
@@ -47,24 +70,25 @@ export default function EmployeePage() {
     resolver: zodResolver(searchSchema),
   });
 
-  // Récupérer les lots en attente
+  // Récupérer les lots en attente (réponse paginée → on prend .data)
   const { data: pendingDeliveries, isLoading } = useQuery<PendingDelivery[]>({
     queryKey: ['pending-deliveries'],
     queryFn: async () => {
       const response = await api.get('/gains/pending');
-      return response.data;
+      // L'API retourne { data: [...], meta: {...} }
+      return response.data.data;
     },
   });
 
-  // Recherche par code
+  // Recherche par code → GET /participations/by-code/:code
   const searchMutation = useMutation({
     mutationFn: async (code: string) => {
-      const response = await api.get(`/gains/by-code/${code}`);
-      return response.data;
+      const response = await api.get(`/participations/by-code/${code}`);
+      return response.data as SearchResult;
     },
     onSuccess: (data) => {
       setSearchResult(data);
-      if (data.deliveredAt) {
+      if (data.participation?.prizeDelivered) {
         toast.info('Ce lot a déjà été remis');
       }
     },
@@ -77,7 +101,9 @@ export default function EmployeePage() {
   // Remettre le lot
   const deliverMutation = useMutation({
     mutationFn: async (participationId: string) => {
-      const response = await api.post(`/gains/${participationId}/deliver`);
+      const response = await api.post(`/gains/${participationId}/deliver`, {
+        deliveryMethod: 'IN_STORE',
+      });
       return response.data;
     },
     onSuccess: () => {
@@ -152,56 +178,80 @@ export default function EmployeePage() {
               {/* Résultat de recherche */}
               {searchResult && (
                 <div className="mt-6 rounded-lg border p-4">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-gray-400" />
-                        <span className="font-medium">
-                          {searchResult.user.firstName} {searchResult.user.lastName}
-                        </span>
+                  {searchResult.participation ? (
+                    <>
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4 text-gray-400" />
+                            <span className="font-medium">
+                              {searchResult.participation.user.firstName}{' '}
+                              {searchResult.participation.user.lastName}
+                            </span>
+                          </div>
+                          <p className="mt-1 text-sm text-gray-500">
+                            {searchResult.participation.user.email}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm text-gray-500">
+                            Code : {searchResult.ticket.code}
+                          </p>
+                          {searchResult.participation.prizeDelivered && (
+                            <p className="mt-1 text-xs text-emerald-600">
+                              ✓ Déjà remis le{' '}
+                              {formatDateTime(searchResult.participation.prizeDeliveredAt!)}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                      <p className="mt-1 text-sm text-gray-500">
-                        {searchResult.user.email}
-                      </p>
-                    </div>
-                    <div className="text-right">
+
+                      <div className="mt-4 rounded-lg bg-tea-50 p-4">
+                        <div className="flex items-center gap-3">
+                          <Gift className="h-8 w-8 text-tea-600" />
+                          <div>
+                            <p className="font-semibold text-tea-800">
+                              {searchResult.ticket.prize.name}
+                            </p>
+                            <p className="text-sm text-tea-600">
+                              Valeur : {searchResult.ticket.prize.value}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {!searchResult.participation.prizeDelivered && (
+                        <Button
+                          className="mt-4 w-full"
+                          onClick={() =>
+                            deliverMutation.mutate(searchResult.participation!.id)
+                          }
+                          disabled={deliverMutation.isPending}
+                        >
+                          {deliverMutation.isPending ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Remise en cours...
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle className="mr-2 h-4 w-4" />
+                              Confirmer la remise du lot
+                            </>
+                          )}
+                        </Button>
+                      )}
+                    </>
+                  ) : (
+                    <div className="py-4 text-center">
                       <p className="text-sm text-gray-500">
-                        Code: {searchResult.ticket.code}
+                        Ce code existe mais n&apos;a pas encore été utilisé par un client.
+                      </p>
+                      <p className="mt-1 text-sm font-medium text-tea-600">
+                        Lot associé : {searchResult.ticket.prize.name} ({searchResult.ticket.prize.value})
                       </p>
                     </div>
-                  </div>
-
-                  <div className="mt-4 rounded-lg bg-tea-50 p-4">
-                    <div className="flex items-center gap-3">
-                      <Gift className="h-8 w-8 text-tea-600" />
-                      <div>
-                        <p className="font-semibold text-tea-800">
-                          {getPrizeName(searchResult.ticket.prizeType)}
-                        </p>
-                        <p className="text-sm text-tea-600">
-                          Valeur: {getPrizeValue(searchResult.ticket.prizeType)}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <Button
-                    className="mt-4 w-full"
-                    onClick={() => deliverMutation.mutate(searchResult.id)}
-                    disabled={deliverMutation.isPending}
-                  >
-                    {deliverMutation.isPending ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Remise en cours...
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle className="mr-2 h-4 w-4" />
-                        Confirmer la remise du lot
-                      </>
-                    )}
-                  </Button>
+                  )}
                 </div>
               )}
             </CardContent>
@@ -235,12 +285,12 @@ export default function EmployeePage() {
                           {delivery.user.firstName} {delivery.user.lastName}
                         </p>
                         <p className="text-sm text-gray-500">
-                          {delivery.ticket.code}
+                          {delivery.code}
                         </p>
                       </div>
                       <div className="ml-4 text-right">
                         <p className="text-sm font-medium text-tea-600">
-                          {getPrizeName(delivery.ticket.prizeType)}
+                          {delivery.prize.name}
                         </p>
                         <Button
                           size="sm"

@@ -63,7 +63,7 @@ module.exports = {
           pale: '#F2E0D0',
           deep: '#BA6905',
           hover: '#C25F1F',
-          warm: '#C76C3A',  // Méditerranéen — variante chaude entre deep et hover
+          warm: '#C76C3A',  // Méditerranéen - variante chaude entre deep et hover
         },
         cream: '#FAF6EF',
         noir: '#1A1A1A',

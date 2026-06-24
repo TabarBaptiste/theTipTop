@@ -1,77 +1,97 @@
-import { Leaf } from 'lucide-react';
-import { Tag } from '@/components/ui/tag';
+'use client';
 
-const prizes = [
-  {
-    name: 'Boite 100g Thé Détox',
-    value: '20€',
-    probability: '20%',
-  },
-  {
-    name: 'Infuseur premium',
-    value: '15€',
-    probability: '60%',
-  },
-  {
-    name: 'Coffret decouverte',
-    value: '39€',
-    probability: '6%',
-  },
-  {
-    name: 'Tasse + coffret de the',
-    value: '25€',
-    probability: '10%',
-  },
-  {
-    name: 'Theiere japonaise',
-    value: '69€',
-    probability: '4%',
-  },
-  {
-    name: 'Boite Matcha premium',
-    value: '30€',
-    probability: '—',
-  },
-];
+import { useQuery } from '@tanstack/react-query';
+import { StaticImageData } from 'next/image';
+import boite100gImg from '@/img/boite_100g.jpeg';
+import infuseurPremiumImg from '@/img/Infuseur_premium.jpg';
+import coffret5thesImg from '@/img/coffret_5_thes.jpg';
+import theiereImg from '@/img/theiere.jpeg';
+import boiteMatchaImg from '@/img/boite_matcha.jpg';
+import { PrizeCard, type PrizeCategory } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { api } from '@/lib/api';
+
+interface PrizeApi {
+  code: string;
+  name: string;
+  description: string;
+  imageUrl: string | null;
+  value: string | null;
+  percentage: number;
+  displayOrder: number;
+}
+
+// Interface pour typer proprement la configuration locale d'une image
+interface PrizeImageConfig {
+  src: StaticImageData | string;
+  alt: string;
+  category: PrizeCategory;
+}
+
+// Images locales par code de lot (optimisation Next.js)
+// La table Prize expose `imageUrl` pour un futur CDN ; en attendant, on mappe ici.
+const PRIZE_IMAGES: Record<string, PrizeImageConfig> = {
+  INFUSER:       { src: infuseurPremiumImg, alt: 'Infuseur à thé',              category: 'accessoire' },
+  TEA_DETOX:     { src: boite100gImg,       alt: 'Boîte 100g thé détox',        category: 'signature'  },
+  TEA_SIGNATURE: { src: boiteMatchaImg,     alt: 'Boîte 100g thé signature',    category: 'signature'  },
+  GIFT_BOX_39:   { src: coffret5thesImg,    alt: 'Coffret découverte',          category: 'signature'  },
+  GIFT_BOX_69:   { src: theiereImg,         alt: 'Coffret découverte premium',  category: 'accessoire' },
+};
 
 export function PrizesSection() {
+  const { data: prizes, isLoading } = useQuery<PrizeApi[]>({
+    queryKey: ['prizes'],
+    queryFn: async () => {
+      const response = await api.get('/tickets/prizes');
+      return response.data;
+    },
+    staleTime: Infinity, // Les lots ne changent pas en cours de session
+  });
+
   return (
     <section id="prizes" className="bg-white py-16 md:py-20">
       <div className="container mx-auto px-6">
         <h2 className="font-display text-h2 text-noir">
-          Les lots a gagner
+          Les lots à gagner
         </h2>
-        <p className="mt-2 text-sm text-stone-grey">
+        <p className="mt-2 text-sm text-stone">
           100% des tickets sont gagnants
         </p>
 
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {prizes.map((prize) => (
-            <div
-              key={prize.name}
-              className="group overflow-hidden rounded-card border border-warm-beige transition-all duration-200 hover:shadow-[0_8px_24px_rgba(186,105,5,0.12)] hover:-translate-y-0.5"
-            >
-              {/* Image placeholder */}
-              <div className="flex aspect-[4/3] items-center justify-center bg-gradient-to-br from-terracotta-50 to-warm-beige/50">
-                <Leaf className="h-10 w-10 text-terracotta-300 transition-transform duration-200 group-hover:scale-110" strokeWidth={1.5} />
-              </div>
-
-              {/* Content */}
-              <div className="p-4">
-                <h3 className="font-functional text-sm font-semibold text-noir">
-                  {prize.name}
-                </h3>
-                <div className="mt-1 flex items-center justify-between">
-                  <span className="font-functional text-xs text-stone-grey">
-                    Valeur : {prize.value}
-                  </span>
-                  {prize.probability !== '—' && (
-                    <Tag variant="new">{prize.probability}</Tag>
-                  )}
+          {isLoading &&
+            Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="flex flex-col">
+                <Skeleton className="aspect-[4/3] w-full rounded-card" />
+                <Skeleton className="mt-md h-3 w-1/3" />
+                <Skeleton className="mt-2xs h-5 w-2/3" />
+                <div className="mt-md flex items-center justify-between border-t border-warm-beige pt-sm">
+                  <Skeleton className="h-3 w-1/4" />
+                  <Skeleton className="h-3 w-1/5" />
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+
+          {prizes?.map((prize) => {
+            const imgConfig = PRIZE_IMAGES[prize.code];
+
+            // Sécurité : Si le code API n'existe pas localement, on évite le crash en utilisant
+            // l'imageUrl de l'API (si disponible) ou un fallback vide.
+            const imageSrc = imgConfig?.src ?? prize.imageUrl ?? '';
+            const imageAlt = imgConfig?.alt ?? prize.name;
+
+            return (
+              <PrizeCard
+                key={prize.code}
+                image={imageSrc}
+                imageAlt={imageAlt}
+                category={imgConfig?.category ?? 'signature'}
+                title={prize.name}
+                value={prize.value}
+                odds={`${prize.percentage}%`}
+              />
+            );
+          })}
         </div>
       </div>
     </section>

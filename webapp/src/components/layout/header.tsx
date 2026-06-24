@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 import { Menu, X, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/lib/stores/auth-store';
@@ -11,14 +11,27 @@ import { cn } from '@/lib/utils';
 const navigation = [
   { name: 'Le jeu', href: '/#how-it-works' },
   { name: 'Lots', href: '/#prizes' },
-  { name: 'Mon concours', href: '/dashboard/participate' },
-  { name: 'Mon Compte', href: '/dashboard' },
+  { name: 'Mon concours', href: '/dashboard' },
+  // { name: 'Mon Compte', href: '/dashboard/profile' },
+  // { name: 'Participer', href: '/dashboard/participate' },
   { name: 'FAQ', href: '/faq' },
 ];
+
+// Détection d'hydratation sans setState dans un effect :
+// renvoie false côté serveur, true dès le premier rendu client.
+const emptySubscribe = () => () => { };
+function useIsHydrated() {
+  return useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  );
+}
 
 export function Header() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const isHydrated = useIsHydrated();
   const { user, isAuthenticated, logout } = useAuthStore();
 
   return (
@@ -51,23 +64,39 @@ export function Header() {
 
         {/* Auth Buttons */}
         <div className="hidden items-center gap-3 md:flex">
-          {isAuthenticated ? (
+          <Button asChild size="sm">
+            <Link href="/dashboard/participate">Participer</Link>
+          </Button>
+          {isHydrated && (
             <>
-              <Link
-                href="/dashboard"
-                className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-deep"
-              >
-                <User className="h-4 w-4" strokeWidth={1.5} />
-                {user?.firstName || 'Mon compte'}
-              </Link>
-              <Button variant="outline" size="sm" onClick={logout}>
-                Deconnexion
-              </Button>
+              {isAuthenticated ? (
+                <>
+                  <Button asChild variant="outline" size="sm">
+
+                    <Link
+                      href="/dashboard/profile"
+                      className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-deep"
+                    >
+
+                      <User className="h-4 w-4" strokeWidth={1.5} />
+                      {user?.firstName || 'Mon compte'}
+                    </Link>
+                  </Button>
+                  {/* <Button variant="outline" size="sm" onClick={logout}>
+                    Deconnexion
+                  </Button> */}
+                </>
+              ) : (
+                <>
+                  {/* <Button asChild variant="outline" size="sm">
+                    <Link href="/auth/register">Inscription</Link>
+                  </Button> */}
+                  <Button asChild variant="outline" size="sm">
+                    <Link href="/auth/login">Connexion</Link>
+                  </Button>
+                </>
+              )}
             </>
-          ) : (
-            <Button asChild size="sm">
-              <Link href="/auth/login">Connexion</Link>
-            </Button>
           )}
         </div>
 
@@ -87,55 +116,72 @@ export function Header() {
       </nav>
 
       {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className="border-t border-warm-beige bg-white md:hidden">
-          <div className="space-y-1 px-6 pb-6 pt-4">
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={cn(
-                  'block rounded-soft px-3 py-2 font-functional text-sm font-semibold',
-                  pathname === item.href
-                    ? 'bg-terracotta-50 text-terracotta-deep'
-                    : 'text-noir hover:bg-cream'
-                )}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {item.name}
-              </Link>
-            ))}
-            <div className="mt-4 flex flex-col gap-2 border-t border-warm-beige pt-4">
-              {isAuthenticated ? (
-                <>
-                  <Button asChild variant="outline" className="w-full">
-                    <Link href="/dashboard">Mon compte</Link>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="w-full"
-                    onClick={() => {
-                      logout();
-                      setMobileMenuOpen(false);
-                    }}
-                  >
-                    Deconnexion
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button asChild className="w-full">
-                    <Link href="/auth/login">Connexion</Link>
-                  </Button>
-                  <Button asChild variant="outline" className="w-full">
-                    <Link href="/auth/register">Inscription</Link>
-                  </Button>
-                </>
+      <div
+        className={cn(
+          'overflow-hidden border-t border-warm-beige bg-white transition-all duration-300 ease-in-out md:hidden',
+          mobileMenuOpen ? 'max-h-96' : 'max-h-0'
+        )}
+      >
+        <div className="space-y-1 px-6 pb-6 pt-4">
+          {navigation.map((item) => (
+            <Link
+              key={item.name}
+              href={item.href}
+              className={cn(
+                'block rounded-soft px-3 py-2 font-functional text-sm font-semibold',
+                pathname === item.href
+                  ? 'bg-terracotta-50 text-terracotta-deep'
+                  : 'text-noir hover:bg-cream'
               )}
-            </div>
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {item.name}
+            </Link>
+          ))}
+          <div className="mt-4 flex flex-col gap-2 border-t border-warm-beige pt-4">
+            <Button asChild className="w-full">
+              <Link href="/dashboard/participate" onClick={() => setMobileMenuOpen(false)}>
+                Participer
+              </Link>
+            </Button>
+            {isHydrated && (
+              <>
+                {isAuthenticated ? (
+                  <>
+                    <Link
+                      href="/dashboard/profile"
+                      className="flex items-center gap-2 px-3 py-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-deep"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <User className="h-4 w-4" strokeWidth={1.5} />
+                      {user?.firstName || 'Mon compte'}
+                    </Link>
+                    {/* <Button
+                      variant="ghost"
+                      className="w-full"
+                      onClick={() => {
+                        logout();
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      Deconnexion
+                    </Button> */}
+                  </>
+                ) : (
+                  <>
+                    <Button asChild variant="outline" className="w-full">
+                      <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)}>Connexion</Link>
+                    </Button>
+                    {/* <Button asChild variant="outline" className="w-full">
+                      <Link href="/auth/register" onClick={() => setMobileMenuOpen(false)}>Inscription</Link>
+                    </Button> */}
+                  </>
+                )}
+              </>
+            )}
           </div>
         </div>
-      )}
+      </div>
     </header>
   );
 }
