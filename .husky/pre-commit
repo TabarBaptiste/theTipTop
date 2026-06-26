@@ -7,4 +7,16 @@ if ! echo "$branch" | grep -Eq '^(main|develop)$|^(feature|release|hotfix)/[a-z0
   exit 1
 fi
 
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "Gitleaks n'est pas installé sur ce poste."
+  echo "Installation : scoop install gitleaks (Windows) / brew install gitleaks (Mac)"
+  exit 1
+fi
+
+gitleaks protect --staged --no-banner -v
+if [ $? -ne 0 ]; then
+  echo "Gitleaks a détecté un secret potentiel dans les fichiers stagés. Commit bloqué."
+  exit 1
+fi
+
 npx lint-staged
