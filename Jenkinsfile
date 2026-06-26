@@ -1,9 +1,12 @@
+/* groovylint-disable CompileStatic, NoDef, UnusedVariable, VariableName, VariableTypeRequired */
 @Library('furious-ducks-shared-library') _
 
+def projectName = 'thetiptop'
+
 ciPipeline(
-    projectName   : 'thetiptop',
+    projectName   : projectName,
     stack         : 'node',
-    sonarProject  : 'thetiptop',
+    sonarProject  : projectName,
 
     deployDev     : true,
     deployPreprod : true,
@@ -12,9 +15,9 @@ ciPipeline(
     runE2E        : true,
     runK6         : true,
 
-    devDomain     : 'thetiptop-dev.wk-archi-o24a-4-5-g1.fr',
-    preprodDomain : 'thetiptop-preprod.wk-archi-o24a-4-5-g1.fr',
-    prodDomain    : 'thetiptop.dsp5-archi-o24a-4-5-g1.fr',
+    devDomain     : "${projectName}-dev.wk-archi-o24a-4-5-g1.fr",
+    preprodDomain : "${projectName}-preprod.wk-archi-o24a-4-5-g1.fr",
+    prodDomain    : "${projectName}.dsp5-archi-o24a-4-5-g1.fr",
 
     appPort       : 3000
 )
