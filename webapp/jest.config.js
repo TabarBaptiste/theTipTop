@@ -26,7 +26,7 @@ const customJestConfig = {
     // Les pages App Router et le middleware sont couverts par les tests E2E Cypress,
     // pas par les tests unitaires Jest.
     '!src/app/**',
-    '!src/middleware.ts',
+    '!src/proxy.ts',
   ],
 }
 
