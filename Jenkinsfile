@@ -19,5 +19,8 @@ ciPipeline(
     preprodDomain : "${projectName}-preprod.wk-archi-o24a-4-5-g1.fr",
     prodDomain    : "${projectName}.dsp5-archi-o24a-4-5-g1.fr",
 
-    appPort       : 3000
+    appPort       : 3000,
+
+    // Chemin du Dockerfile (monorepo : l'app vit dans webapp/)
+    dockerfile    : 'webapp/Dockerfile'
 )
