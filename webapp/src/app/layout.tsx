@@ -79,7 +79,26 @@ export default function RootLayout({
             <main className="flex-1">{children}</main>
             <Footer />
           </div>
-          <Toaster position="top-right" richColors />
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              unstyled: true,
+              classNames: {
+                toast:
+                  'flex items-center gap-sm w-full rounded-soft border border-warm-beige bg-cream px-md py-sm font-sans text-body text-noir shadow-lg',
+                title: 'font-semibold',
+                description: 'text-stone',
+                success: 'border-moss text-moss',
+                error: 'border-terracotta-warm text-terracotta-warm',
+                warning: 'border-gold-600 text-gold-600',
+                info: 'border-terracotta-500 text-terracotta-500',
+                actionButton:
+                  'rounded-full bg-terracotta-500 px-sm py-2xs text-ui font-bold uppercase tracking-widest text-white',
+                cancelButton: 'rounded-full bg-warm-beige px-sm py-2xs text-ui font-bold uppercase tracking-widest text-noir',
+                closeButton: 'border-warm-beige text-stone',
+              },
+            }}
+          />
         </Providers>
         {process.env.NEXT_PUBLIC_GA_ID && (
           <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
