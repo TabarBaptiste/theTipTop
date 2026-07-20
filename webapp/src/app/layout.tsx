@@ -5,7 +5,8 @@ import { Toaster } from 'sonner';
 import { Providers } from '@/components/providers';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
-import { GoogleAnalytics } from '@next/third-parties/google';
+import { CookieConsentBanner } from '@/components/layout/cookie-consent-banner';
+import { ConditionalAnalytics } from '@/components/layout/conditional-analytics';
 
 const montserrat = Montserrat({
   subsets: ['latin'],
@@ -99,9 +100,10 @@ export default function RootLayout({
               },
             }}
           />
+          <CookieConsentBanner />
         </Providers>
         {process.env.NEXT_PUBLIC_GA_ID && (
-          <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
+          <ConditionalAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
         )}
       </body>
     </html>

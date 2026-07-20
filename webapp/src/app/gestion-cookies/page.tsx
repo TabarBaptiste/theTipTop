@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Lock, BarChart2, Megaphone } from 'lucide-react';
+import { Lock, BarChart2 } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Gestion des cookies',
   description:
-    'Politique de gestion des cookies du site Thé Tip Top — types de cookies utilisés, durée de conservation, gestion de vos préférences.',
+    'Politique de gestion des cookies du site Thé Tip Top - types de cookies utilisés, durée de conservation, gestion de vos préférences.',
 };
 
 const ARTICLES = [
@@ -26,24 +26,10 @@ const COOKIES_LIST = [
     headerClass: 'bg-moss-50 border-moss-100',
     items: [
       {
-        name: 'session_token',
+        name: 'refreshToken',
         emetteur: 'Thé Tip Top',
         finalite: 'Maintien de la session utilisateur authentifié',
-        duree: 'Durée de la session',
-        type: 'Session',
-      },
-      {
-        name: 'csrf_token',
-        emetteur: 'Thé Tip Top',
-        finalite: 'Protection contre les attaques CSRF',
-        duree: 'Durée de la session',
-        type: 'Session',
-      },
-      {
-        name: 'auth_state',
-        emetteur: 'Thé Tip Top',
-        finalite: "Maintien de l'état d'authentification OAuth",
-        duree: '1 heure',
+        duree: '7 jours',
         type: 'Fonctionnel',
       },
       {
@@ -94,37 +80,6 @@ const COOKIES_LIST = [
     ],
     description:
       "Ces cookies permettent de mesurer l'audience du site et d'analyser le comportement des visiteurs (pages consultées, durée de navigation, origine du trafic) afin d'améliorer nos services. Ils ne sont déposés que si vous donnez votre consentement.",
-  },
-  {
-    category: 'Cookies marketing et publicitaires',
-    badge: 'Soumis au consentement',
-    badgeClass: 'bg-terracotta-pale text-terracotta-deep',
-    headerClass: 'bg-terracotta-50 border-terracotta-100',
-    items: [
-      {
-        name: 'fr',
-        emetteur: 'Meta (Facebook)',
-        finalite: 'Mesure des publicités Facebook / Meta Pixel',
-        duree: '3 mois',
-        type: 'Marketing',
-      },
-      {
-        name: '_fbp',
-        emetteur: 'Meta (Facebook)',
-        finalite: 'Identification des navigateurs pour statistiques publicitaires',
-        duree: '3 mois',
-        type: 'Marketing',
-      },
-      {
-        name: 'G_AUTHUSER_H',
-        emetteur: 'Google',
-        finalite: 'Connexion via compte Google',
-        duree: 'Session',
-        type: 'Social',
-      },
-    ],
-    description:
-      "Ces cookies sont déposés par des services tiers (Meta, Google) lors de l'utilisation de fonctionnalités sociales ou de connexion. Ils permettent de mesurer l'efficacité des campagnes et de personnaliser des contenus. Ils ne sont déposés qu'avec votre consentement explicite.",
   },
 ];
 
@@ -217,7 +172,7 @@ export default function GestionCookiesPage() {
             {/* Article 1 */}
             <section id="definition" className="scroll-mt-24">
               <h2 className="font-display text-h2 text-noir">
-                Article 1 — Qu&apos;est-ce qu&apos;un cookie ?
+                Article 1 - Qu&apos;est-ce qu&apos;un cookie ?
               </h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
                 <p>
@@ -247,14 +202,14 @@ export default function GestionCookiesPage() {
             {/* Article 2 */}
             <section id="types" className="scroll-mt-24">
               <h2 className="font-display text-h2 text-noir">
-                Article 2 — Types de cookies utilisés
+                Article 2 - Types de cookies utilisés
               </h2>
               <div className="mt-4 space-y-4 text-body text-stone-grey">
                 <p>
-                  Le site Thé Tip Top utilise trois catégories de cookies selon leur finalité
+                  Le site Thé Tip Top utilise deux catégories de cookies selon leur finalité
                   et leur base légale :
                 </p>
-                <div className="grid gap-4 sm:grid-cols-3">
+                <div className="grid gap-4 sm:grid-cols-2">
                   <div className="rounded-card border border-moss-100 bg-moss-50 p-5">
                     <Lock
                       className="h-5 w-5 text-moss-500"
@@ -281,26 +236,18 @@ export default function GestionCookiesPage() {
                       consentement.
                     </p>
                   </div>
-                  <div className="rounded-card border border-terracotta-100 bg-terracotta-50 p-5">
-                    <Megaphone
-                      className="h-5 w-5 text-terracotta-deep"
-                      strokeWidth={1.5}
-                    />
-                    <p className="mt-3 font-functional text-ui uppercase tracking-[2px] text-terracotta-deep">
-                      Marketing
-                    </p>
-                    <p className="mt-2 text-sm text-stone-grey">
-                      Publicité ciblée via Meta Pixel. Activés avec votre consentement.
-                    </p>
-                  </div>
                 </div>
+                <p className="text-sm text-stone-grey/80">
+                  Aucun cookie marketing ou publicitaire (ex. Meta Pixel) n&apos;est déposé par le
+                  site à ce jour.
+                </p>
               </div>
             </section>
 
             {/* Article 3 */}
             <section id="liste" className="scroll-mt-24">
               <h2 className="font-display text-h2 text-noir">
-                Article 3 — Liste détaillée des cookies
+                Article 3 - Liste détaillée des cookies
               </h2>
               <div className="mt-4 space-y-6">
                 {COOKIES_LIST.map((cat) => (
@@ -371,30 +318,27 @@ export default function GestionCookiesPage() {
             {/* Article 4 */}
             <section id="consentement" className="scroll-mt-24">
               <h2 className="font-display text-h2 text-noir">
-                Article 4 — Gestion du consentement
+                Article 4 - Gestion du consentement
               </h2>
               <div className="mt-4 space-y-4 text-body text-stone-grey">
                 <p>
                   Lors de votre première visite sur le site, un bandeau de gestion des cookies
                   s&apos;affiche et vous permet de choisir vos préférences avant tout dépôt de
-                  cookie non essentiel.
+                  cookie non essentiel. Le site n&apos;utilisant qu&apos;une seule catégorie de
+                  cookie optionnelle (mesure d&apos;audience), le choix se limite à deux actions
+                  claires :
                 </p>
-                <div className="grid gap-3 sm:grid-cols-3">
+                <div className="grid gap-3 sm:grid-cols-2">
                   {[
                     {
                       action: 'Tout accepter',
-                      desc: 'Active tous les cookies : nécessaires, analytiques et marketing.',
+                      desc: 'Active tous les cookies : nécessaires et analytiques.',
                       style: 'border-moss-100 bg-moss-50',
                     },
                     {
                       action: 'Tout refuser',
                       desc: "N'active que les cookies strictement nécessaires au fonctionnement.",
                       style: 'border-warm-beige bg-cream',
-                    },
-                    {
-                      action: 'Personnaliser',
-                      desc: 'Choisissez catégorie par catégorie selon vos préférences.',
-                      style: 'border-gold-200 bg-gold-50',
                     },
                   ].map(({ action, desc, style }) => (
                     <div key={action} className={`rounded-card border p-4 ${style}`}>
@@ -412,7 +356,7 @@ export default function GestionCookiesPage() {
                   sollicité.
                 </p>
                 <div className="rounded-soft border border-warm-beige bg-white px-4 py-3 text-sm text-stone-grey">
-                  <strong>À noter :</strong> le refus des cookies analytiques et marketing
+                  <strong>À noter :</strong> le refus des cookies analytiques
                   n&apos;affecte pas votre accès au site ni votre participation au jeu-concours.
                   Seuls les cookies strictement nécessaires sont indispensables au bon
                   fonctionnement du service.
@@ -423,7 +367,7 @@ export default function GestionCookiesPage() {
             {/* Article 5 */}
             <section id="duree" className="scroll-mt-24">
               <h2 className="font-display text-h2 text-noir">
-                Article 5 — Durée de conservation
+                Article 5 - Durée de conservation
               </h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
                 <p>
@@ -449,24 +393,14 @@ export default function GestionCookiesPage() {
                     <tbody className="divide-y divide-warm-beige bg-white">
                       {[
                         [
-                          'Cookies de session',
-                          'Durée de la navigation',
-                          'Supprimés à la fermeture du navigateur',
-                        ],
-                        [
-                          'Cookies fonctionnels',
-                          "Jusqu'à 13 mois",
-                          'Prolongés au renouvellement du consentement',
+                          'Session (refreshToken)',
+                          '7 jours',
+                          'Renouvelé à chaque connexion, expire après inactivité',
                         ],
                         [
                           'Google Analytics',
                           '2 ans maximum',
-                          'Anonymisation IP activée — aucune donnée nominative transmise',
-                        ],
-                        [
-                          'Meta Pixel (_fbp, fr)',
-                          '3 mois',
-                          'Conformément à la politique Meta',
+                          'Anonymisation IP activée - aucune donnée nominative transmise',
                         ],
                         [
                           'Consentement enregistré',
@@ -489,7 +423,7 @@ export default function GestionCookiesPage() {
             {/* Article 6 */}
             <section id="navigateur" className="scroll-mt-24">
               <h2 className="font-display text-h2 text-noir">
-                Article 6 — Paramètres du navigateur
+                Article 6 - Paramètres du navigateur
               </h2>
               <div className="mt-4 space-y-4 text-body text-stone-grey">
                 <p>
@@ -527,7 +461,7 @@ export default function GestionCookiesPage() {
 
             {/* Article 7 */}
             <section id="contact" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">Article 7 — Contact</h2>
+              <h2 className="font-display text-h2 text-noir">Article 7 - Contact</h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
                 <p>
                   Pour toute question relative à l&apos;utilisation des cookies ou à la
@@ -542,7 +476,7 @@ export default function GestionCookiesPage() {
                         ['Adresse', '18 rue Léon Frot, 75011 Paris - France'],
                         ['Email RGPD', 'rgpd@thetiptop.fr'],
                         ['Email contact', 'contact@thetiptop.fr'],
-                        ['Autorité de contrôle', 'CNIL — www.cnil.fr'],
+                        ['Autorité de contrôle', 'CNIL - www.cnil.fr'],
                       ].map(([label, value]) => (
                         <tr key={label} className="even:bg-cream">
                           <td className="px-4 py-3 font-medium text-noir">{label}</td>

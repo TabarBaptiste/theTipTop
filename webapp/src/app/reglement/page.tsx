@@ -10,14 +10,14 @@ export const metadata: Metadata = {
 const ARTICLES = [
   {
     id: 'organisateur',
-    title: 'Article 1 — Organisateur',
+    title: 'Article 1 - Organisateur',
     content: `La société Thé Tip Top, SA au capital social de 150 000 €, dont le siège social est situé
       18 rue Léon Frot, 75011 Paris, représentée par son gérant M. Eric Bourdon, organise un
       jeu-concours avec obligation d'achat à l'occasion de l'ouverture de sa 10ème boutique à Nice.`,
   },
   {
     id: 'participation',
-    title: 'Article 2 — Conditions de participation',
+    title: 'Article 2 - Conditions de participation',
     content: `Le jeu-concours est ouvert à toute personne physique majeure ayant effectué un achat
       d'un montant supérieur à 49 € en boutique. Chaque ticket de caisse ou facture éligible comporte
       un code unique à 10 caractères (chiffres et lettres) permettant une participation sur le présent
@@ -25,7 +25,7 @@ const ARTICLES = [
   },
   {
     id: 'duree',
-    title: 'Article 3 — Durée du jeu',
+    title: 'Article 3 - Durée du jeu',
     content: `Le jeu-concours se déroule sur une période de 30 jours, durant laquelle un maximum de
       500 000 tickets pourra être distribué. Les participants disposent ensuite de 30 jours
       supplémentaires à compter de la date de clôture du jeu pour tester leur(s) code(s) sur le site
@@ -33,7 +33,7 @@ const ARTICLES = [
   },
   {
     id: 'lots',
-    title: 'Article 4 — Dotations',
+    title: 'Article 4 - Dotations',
     content: `100 % des tickets sont gagnants. La répartition des lots est la suivante :
       60 % des tickets offrent un infuseur à thé ; 20 % une boîte de 100 g d'un thé détox ou
       d'infusion ; 10 % une boîte de 100 g d'un thé signature ; 6 % un coffret découverte d'une
@@ -42,7 +42,7 @@ const ARTICLES = [
   },
   {
     id: 'grand-prix',
-    title: 'Article 5 — Grand prix',
+    title: 'Article 5 - Grand prix',
     content: `À l'issue du jeu-concours, un tirage au sort sera effectué parmi l'ensemble des
       participants afin de désigner le gagnant d'un an de thé d'une valeur de 360 €. Le nombre de
       participations d'un même client n'augmente pas ses chances de gagner : chaque participant ne
@@ -51,21 +51,21 @@ const ARTICLES = [
   },
   {
     id: 'remise',
-    title: 'Article 6 — Remise des lots',
+    title: 'Article 6 - Remise des lots',
     content: `Les lots sont à retirer en boutique sur présentation du code gagnant, ou peuvent être
       expédiés via le site de vente en ligne. Tout lot non réclamé dans le délai de 30 jours suivant
       la clôture du jeu sera définitivement perdu.`,
   },
   {
     id: 'depot',
-    title: 'Article 7 — Dépôt du règlement',
+    title: 'Article 7 - Dépôt du règlement',
     content: `Le présent règlement et les modalités complètes du jeu-concours sont déposés auprès de
       Maître Arnaud Rick, huissier de justice. Une copie est adressée gratuitement à toute personne
       qui en fait la demande écrite auprès de l'organisateur.`,
   },
   {
     id: 'donnees',
-    title: 'Article 8 — Données personnelles',
+    title: 'Article 8 - Données personnelles',
     content: `Les données collectées dans le cadre du jeu-concours sont traitées conformément au
       Règlement Général sur la Protection des Données (RGPD). Chaque participant dispose d'un droit
       d'accès, de rectification, d'export et de suppression de ses données depuis son espace
