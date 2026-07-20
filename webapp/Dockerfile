@@ -21,14 +21,7 @@ COPY . .
 EXPOSE 3000
 CMD ["npm", "run", "dev"]
 
-# --- Stage 3: Dependencies ---
-FROM base AS deps
-WORKDIR /app
-
-COPY package*.json ./
-RUN npm install --omit=dev
-
-# --- Stage 4: Build ---
+# --- Stage 3: Build ---
 FROM base AS builder
 WORKDIR /app
 
@@ -43,7 +36,7 @@ ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 
 RUN npm run build
 
-# --- Stage 5: Production ---
+# --- Stage 4: Production ---
 FROM base AS production
 WORKDIR /app
 ENV NODE_ENV=production
