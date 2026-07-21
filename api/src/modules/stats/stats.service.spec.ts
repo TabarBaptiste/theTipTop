@@ -209,7 +209,7 @@ describe('StatsService', () => {
         },
       ]);
 
-      const data = await service.getEmailingData({ consentEmail: true, hasParticipated: true });
+      const data = await service.getEmailingData({ hasParticipated: true });
 
       expect(data.count).toBe(1);
       expect(data.users[0]).toEqual({
@@ -221,6 +221,18 @@ describe('StatsService', () => {
       const where = mockPrismaService.user.findMany.mock.calls[0][0].where;
       expect(where.consentEmail).toBe(true);
       expect(where.participations).toEqual({ some: {} });
+    });
+
+    it('should always enforce consent even when no segment is requested (RGPD)', async () => {
+      mockPrismaService.user.findMany.mockResolvedValue([]);
+
+      await service.getEmailingData({});
+
+      const where = mockPrismaService.user.findMany.mock.calls[0][0].where;
+      expect(where.consentEmail).toBe(true);
+      // Aucun segment demandé : pas de filtre de participation, mais le
+      // consentement reste imposé.
+      expect(where.participations).toBeUndefined();
     });
   });
 });
