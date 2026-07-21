@@ -5,7 +5,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
-import { PRIZES_MAP_CACHE_KEY, PRIZES_MAP_TTL } from '../../redis/cache-keys';
+import { PRIZES_MAP_CACHE_KEY, PRIZES_MAP_TTL, STATS_CACHE_PATTERN } from '../../redis/cache-keys';
 import { Ticket, Prize } from '@prisma/client';
 
 /** Shape réduite retournée dans les réponses API */
@@ -136,10 +136,12 @@ export class TicketsService {
     if (!ticket) {
       throw new NotFoundException('Ticket non trouvé');
     }
-    return this.prisma.ticket.update({
+    const updated = await this.prisma.ticket.update({
       where: { id: ticket.id },
       data: { isDistributed: true },
     });
+    await this.redis.delByPattern(STATS_CACHE_PATTERN);
+    return updated;
   }
 
   /**
@@ -162,6 +164,10 @@ export class TicketsService {
       where: { code: { in: tickets.map((t: AvailableTicket) => t.code) } },
       data: { isDistributed: true },
     });
+
+    if (tickets.length > 0) {
+      await this.redis.delByPattern(STATS_CACHE_PATTERN);
+    }
 
     return tickets.map((t: AvailableTicket) => t.code);
   }

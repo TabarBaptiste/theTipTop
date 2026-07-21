@@ -32,6 +32,7 @@ describe('TicketsService', () => {
   const mockRedisService = {
     getOrSet: jest.fn((_key: string, _ttl: number, fn: () => Promise<unknown>) => fn()),
     del: jest.fn(),
+    delByPattern: jest.fn(),
   };
 
   const prizes = [
@@ -226,6 +227,7 @@ describe('TicketsService', () => {
         where: { id: 't1' },
         data: { isDistributed: true },
       });
+      expect(mockRedisService.delByPattern).toHaveBeenCalledWith('stats:*');
     });
   });
 
@@ -245,6 +247,17 @@ describe('TicketsService', () => {
         where: { code: { in: ['AAAA', 'BBBB'] } },
         data: { isDistributed: true },
       });
+      expect(mockRedisService.delByPattern).toHaveBeenCalledWith('stats:*');
+    });
+
+    it('should not touch the cache when no codes are available', async () => {
+      mockPrismaService.ticket.findMany.mockResolvedValue([]);
+      mockPrismaService.ticket.updateMany.mockResolvedValue({ count: 0 });
+
+      const codes = await service.getAvailableCodes(5);
+
+      expect(codes).toEqual([]);
+      expect(mockRedisService.delByPattern).not.toHaveBeenCalled();
     });
   });
 
