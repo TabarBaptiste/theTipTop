@@ -15,6 +15,7 @@ import { fr } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { TicketDistributionCard } from '@/components/tickets/ticket-distribution-card';
 import { api } from '@/lib/api';
 import { formatDate } from '@/lib/utils';
 
@@ -373,6 +374,9 @@ export default function AdminPage() {
         </Card>
 
         <div className="grid gap-8 lg:grid-cols-2">
+          {/* Distribution des tickets (simulation caisse) */}
+          <TicketDistributionCard />
+
           {/* Répartition des lots */}
           <Card>
             <CardHeader>
