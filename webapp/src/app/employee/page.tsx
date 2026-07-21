@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { TicketDistributionCard } from '@/components/tickets/ticket-distribution-card';
 import { api } from '@/lib/api';
 import { formatDateTime } from '@/lib/utils';
 
@@ -316,10 +315,6 @@ export default function EmployeePage() {
               )}
             </CardContent>
           </Card>
-        </div>
-
-        <div className="mt-8">
-          <TicketDistributionCard />
         </div>
       </div>
     </div>
