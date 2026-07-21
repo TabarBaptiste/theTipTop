@@ -13,11 +13,14 @@ describe('GameConfigService', () => {
   const mockPrismaService = {
     gameConfig: {
       findFirst: jest.fn(),
+      update: jest.fn(),
     },
   };
 
   const mockRedisService = {
     getOrSet: jest.fn((_key: string, _ttl: number, fn: () => Promise<unknown>) => fn()),
+    del: jest.fn(),
+    delByPattern: jest.fn(),
   };
 
   const DAY = 86400000;
@@ -33,6 +36,12 @@ describe('GameConfigService', () => {
 
     service = module.get<GameConfigService>(GameConfigService);
     jest.clearAllMocks();
+    // clearAllMocks() ne réinitialise pas les implémentations (seulement les
+    // appels) : on la restaure explicitement pour éviter qu'un test
+    // (ex: mockResolvedValue sur getOrSet) ne pollue les suivants.
+    mockRedisService.getOrSet.mockImplementation(
+      (_key: string, _ttl: number, fn: () => Promise<unknown>) => fn(),
+    );
   });
 
   it('should return null when no active config exists', async () => {
@@ -108,5 +117,54 @@ describe('GameConfigService', () => {
     expect(config?.startDate).toBe(startDate);
     expect(typeof config?.endDate).toBe('string');
     expect(config?.isActive).toBe(true);
+  });
+
+  describe('updateConfig', () => {
+    const makeCurrent = () => ({
+      id: 'cfg-1',
+      startDate: new Date(Date.now() - DAY),
+      endDate: new Date(Date.now() + 30 * DAY),
+      claimEndDate: new Date(Date.now() + 60 * DAY),
+      isActive: true,
+    });
+
+    it('should throw NotFoundException when no active config exists', async () => {
+      mockPrismaService.gameConfig.findFirst.mockResolvedValue(null);
+
+      await expect(service.updateConfig({})).rejects.toThrow('Aucune configuration de jeu active');
+    });
+
+    it('should reject non-chronological dates', async () => {
+      mockPrismaService.gameConfig.findFirst.mockResolvedValue(makeCurrent());
+
+      await expect(
+        service.updateConfig({ endDate: new Date(Date.now() - 2 * DAY).toISOString() }),
+      ).rejects.toThrow('Les dates doivent être chronologiques');
+      expect(mockPrismaService.gameConfig.update).not.toHaveBeenCalled();
+    });
+
+    it('should update the config and invalidate the cache', async () => {
+      // findFirst est appelé deux fois : une fois pour lire l'état courant,
+      // une fois via getPublicConfig() après l'update (cache invalidé).
+      // On simule la mutation en base en faisant muter l'objet partagé.
+      const current = makeCurrent();
+      mockPrismaService.gameConfig.findFirst.mockResolvedValue(current);
+      // Reste sous claimEndDate (+60j) pour respecter l'ordre chronologique
+      const newEndDate = new Date(Date.now() + 45 * DAY).toISOString();
+      mockPrismaService.gameConfig.update.mockImplementation(async ({ data }) => {
+        Object.assign(current, data);
+        return current;
+      });
+
+      const result = await service.updateConfig({ endDate: newEndDate });
+
+      expect(mockPrismaService.gameConfig.update).toHaveBeenCalledWith({
+        where: { id: 'cfg-1' },
+        data: expect.objectContaining({ endDate: new Date(newEndDate) }),
+      });
+      expect(mockRedisService.del).toHaveBeenCalledWith('game:config');
+      expect(mockRedisService.delByPattern).toHaveBeenCalledWith('stats:*');
+      expect(result.endDate).toBe(new Date(newEndDate).toISOString());
+    });
   });
 });

@@ -11,6 +11,7 @@ describe('GameConfigController', () => {
 
   const mockGameConfigService = {
     getPublicConfig: jest.fn(),
+    updateConfig: jest.fn(),
   };
 
   beforeEach(() => {
@@ -29,5 +30,16 @@ describe('GameConfigController', () => {
     mockGameConfigService.getPublicConfig.mockResolvedValue(null);
 
     await expect(controller.getConfig()).rejects.toThrow(NotFoundException);
+  });
+
+  it('should forward the update to the service', async () => {
+    const dto = { endDate: '2026-10-05T00:00:00.000Z' };
+    const updated = { phase: 'active', isActive: true };
+    mockGameConfigService.updateConfig.mockResolvedValue(updated);
+
+    const result = await controller.updateConfig(dto);
+
+    expect(mockGameConfigService.updateConfig).toHaveBeenCalledWith(dto);
+    expect(result).toBe(updated);
   });
 });
