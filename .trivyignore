@@ -1,0 +1,30 @@
+# Trivy ignore list - thetiptop_v0
+#
+# Chaque entrée ci-dessous correspond à une CVE CRITICAL bloquante que
+# l'équipe a examinée et jugée non actionnable côté application. Ne pas
+# ajouter de nouvelle entrée sans l'avoir d'abord vérifiée (npm audit,
+# npm ls, disponibilité d'un correctif upstream).
+
+# CVE-2026-59873 - tar (Denial of Service via crafted gzip bomb)
+# Ce "tar" n'est pas une dépendance du projet (absent de package.json et
+# package-lock.json, npm ls/npm audit ne le voient pas). Il s'agit d'une
+# copie vendorisée et minifiée livrée à l'intérieur du paquet next lui-même
+# (node_modules/next/dist/compiled/tar), sans champ "version" exploitable.
+# `overrides` dans package.json n'a aucune prise dessus. Correction possible
+# uniquement via une future release de Next.js embarquant un tar plus récent.
+CVE-2026-59873
+
+# CVE-2026-13221 / CVE-2026-42496 / CVE-2026-57433 / CVE-2026-8376 - perl-base
+# Paquet du système d'exploitation de l'image de base (node:22-bookworm-slim,
+# Debian 12.15), statut Trivy "fix_deferred" : aucun correctif Debian
+# disponible à ce jour. Non modifiable depuis le code applicatif.
+CVE-2026-13221
+CVE-2026-42496
+CVE-2026-57433
+CVE-2026-8376
+
+# CVE-2023-45853 - zlib1g
+# Paquet du système d'exploitation de l'image de base, statut Trivy
+# "will_not_fix" : Debian a explicitement annoncé ne jamais corriger cette
+# faille sur cette branche.
+CVE-2023-45853
