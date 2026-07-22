@@ -713,7 +713,7 @@ SonarQube reçoit les rapports d'analyse transmis par Jenkins et ses agents CI, 
 | Cible | Port | Métriques |
 | ----- | ----- | ----- |
 | Jenkins | 8080 | Endpoint de métriques  |
-| Harbor | 8080 | Métriques |
+| Harbor | 8081 | Métriques |
 | Node Exporter | 9100 | Métriques système |
 | cAdvisor | 8081 | Métriques conteneurs Docker |
 | PostgreSQL Exporter | 9187 | Métriques base de données |
@@ -734,7 +734,7 @@ Grafana s'appuie sur deux sources de données : Prometheus, interrogé en PromQL
 | HTTP | 3100 | HTTP | API ingestion & query |
 | gRPC | 9095 | gRPC | Communication interne |
 
-La collecte des logs repose sur Promtail, déployé en agent sur chaque serveur, et sur le driver de logging Docker natif. Le port gRPC (9095) n'est pas publié sur l'hôte, Loki reste accessible uniquement depuis le réseau Docker interne, par Promtail et Grafana.
+La collecte des logs repose sur Grafana Alloy, déployé en agent sur chaque serveur (successeur de Promtail, dont le support s'est arrêté), et sur l'API Docker native pour la découverte des conteneurs. Le port gRPC (9095) n'est pas publié sur l'hôte, Loki reste accessible uniquement depuis le réseau Docker interne, par Alloy et Grafana.
 
 #### **cAdvisor**
 
@@ -1735,6 +1735,8 @@ docker exec backup-manager restic stats
 | **Fichiers de configuration** | Montés en :ro | Restic → MinIO | Quotidien 02h | Critique |
 | **Certificats SSL Traefik** | traefik-certificates | Regénérés automatiquement | N/A | Faible |
 | **Images Docker critiques (registry Harbor)**  | /data/harbor (bind mount hôte)  | Restic → MinIO | Hebdomadaire (dimanche)  | Critique  |
+| **Configuration SonarQube** (extensions, plugins)  | sonarqube-data | Restic → MinIO | Quotidien 02h  | Important  |
+| **BDD SonarQube** (PostgreSQL) | via pg\_dump | Dump intégré → Restic → MinIO | Quotidien 02h  | Important  |
 
 ##### 
 
@@ -1750,7 +1752,6 @@ docker exec backup-manager restic stats
 | ----- | ----- | ----- |
 | **Logs Docker** | Volumétrie trop importante, rétention courte | Loki avec sa propre rétention |
 | **Certificats SSL** | Let's Encrypt les régénère automatiquement | Traefik redemande les certificats au démarrage |
-| **Données SonarQube** | Regénérables par ré-analyse du code | Relancer les analyses SonarQube |
 | **Données Portainer** | Configuration minimale | Reconfiguration rapide (\< 5 min) |
 
 #### **7\. Justifications des choix**
