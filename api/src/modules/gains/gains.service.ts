@@ -6,12 +6,15 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { DeliveryMethod } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TicketsService } from '../tickets/tickets.service';
+import { RedisService } from '../../redis/redis.service';
+import { STATS_CACHE_PATTERN } from '../../redis/cache-keys';
 
 @Injectable()
 export class GainsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly ticketsService: TicketsService,
+    private readonly redis: RedisService,
   ) {}
 
   /**
@@ -64,6 +67,8 @@ export class GainsService {
       }),
       this.ticketsService.getPrizesMap(),
     ]);
+
+    await this.redis.delByPattern(STATS_CACHE_PATTERN);
 
     return {
       id: updated.id,

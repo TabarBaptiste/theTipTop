@@ -7,6 +7,7 @@ import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { GainsService } from './gains.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TicketsService } from '../tickets/tickets.service';
+import { RedisService } from '../../redis/redis.service';
 
 describe('GainsService', () => {
   let service: GainsService;
@@ -31,6 +32,10 @@ describe('GainsService', () => {
     }),
   };
 
+  const mockRedisService = {
+    delByPattern: jest.fn(),
+  };
+
   const user = { id: 'u1', email: 'c@t.fr', firstName: 'C', lastName: 'T' };
 
   beforeEach(async () => {
@@ -39,6 +44,7 @@ describe('GainsService', () => {
         GainsService,
         { provide: PrismaService, useValue: mockPrismaService },
         { provide: TicketsService, useValue: mockTicketsService },
+        { provide: RedisService, useValue: mockRedisService },
       ],
     }).compile();
 
@@ -87,6 +93,7 @@ describe('GainsService', () => {
 
       expect(result.prizeDelivered).toBe(true);
       expect(result.prize.name).toBe('Infuseur à thé');
+      expect(mockRedisService.delByPattern).toHaveBeenCalledWith('stats:*');
       expect(mockPrismaService.participation.update).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: 'p1' },

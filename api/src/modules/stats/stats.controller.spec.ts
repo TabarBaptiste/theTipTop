@@ -47,13 +47,12 @@ describe('StatsController', () => {
     expect(mockStatsService.getTimelineStats).toHaveBeenCalledWith(7);
   });
 
-  it('getEmailingData should forward the filters', async () => {
+  it('getEmailingData should forward the participation segment', async () => {
     mockStatsService.getEmailingData.mockResolvedValue({ count: 0, users: [] });
 
-    await controller.getEmailingData(true, false);
+    await controller.getEmailingData(false);
 
     expect(mockStatsService.getEmailingData).toHaveBeenCalledWith({
-      consentEmail: true,
       hasParticipated: false,
     });
   });

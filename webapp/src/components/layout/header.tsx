@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useSyncExternalStore } from 'react';
-import { Menu, X, User } from 'lucide-react';
+import { Menu, X, User, ShieldCheck, Store } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { cn } from '@/lib/utils';
@@ -33,6 +33,10 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const isHydrated = useIsHydrated();
   const { user, isAuthenticated, logout } = useAuthStore();
+
+  const backofficeHref =
+    user?.role === 'ADMIN' ? '/admin' : user?.role === 'EMPLOYEE' ? '/employee' : null;
+  const BackofficeIcon = user?.role === 'ADMIN' ? ShieldCheck : Store;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-warm-beige bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
@@ -71,6 +75,17 @@ export function Header() {
             <>
               {isAuthenticated ? (
                 <>
+                  {backofficeHref && (
+                    <Button asChild variant="outline" size="sm">
+                      <Link
+                        href={backofficeHref}
+                        className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-deep"
+                      >
+                        <BackofficeIcon className="h-4 w-4" strokeWidth={1.5} />
+                        {user?.role === 'ADMIN' ? 'Admin' : 'Espace employé'}
+                      </Link>
+                    </Button>
+                  )}
                   <Button asChild variant="outline" size="sm">
 
                     <Link
@@ -148,6 +163,16 @@ export function Header() {
               <>
                 {isAuthenticated ? (
                   <>
+                    {backofficeHref && (
+                      <Link
+                        href={backofficeHref}
+                        className="flex items-center gap-2 px-3 py-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-deep"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <BackofficeIcon className="h-4 w-4" strokeWidth={1.5} />
+                        {user?.role === 'ADMIN' ? 'Admin' : 'Espace employé'}
+                      </Link>
+                    )}
                     <Link
                       href="/dashboard/profile"
                       className="flex items-center gap-2 px-3 py-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-deep"

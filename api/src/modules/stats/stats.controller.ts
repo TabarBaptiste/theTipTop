@@ -68,14 +68,14 @@ export class StatsController {
   // DONNÉES EMAILING
   // ===========================================
   @Get('emailing')
-  @ApiOperation({ summary: 'Données pour campagnes emailing' })
-  @ApiQuery({ name: 'consentEmail', required: false, type: Boolean })
+  @ApiOperation({
+    summary: 'Données pour campagnes emailing (contacts consentants uniquement)',
+    description:
+      'RGPD : seuls les contacts ayant explicitement consenti (consentEmail) sont retournés. Le segment optionnel hasParticipated affine le ciblage sans jamais lever cette contrainte.',
+  })
   @ApiQuery({ name: 'hasParticipated', required: false, type: Boolean })
   @ApiResponse({ status: 200, description: 'Données emailing' })
-  async getEmailingData(
-    @Query('consentEmail') consentEmail?: boolean,
-    @Query('hasParticipated') hasParticipated?: boolean,
-  ) {
-    return this.statsService.getEmailingData({ consentEmail, hasParticipated });
+  async getEmailingData(@Query('hasParticipated') hasParticipated?: boolean) {
+    return this.statsService.getEmailingData({ hasParticipated });
   }
 }

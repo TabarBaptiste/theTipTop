@@ -1,3 +1,7 @@
+---
+applyTo: "**"
+---
+
 # Instructions AI pour Furious Ducks CI/CD
 
 **Projet** : Furious Ducks  
