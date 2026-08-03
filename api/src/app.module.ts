@@ -19,6 +19,7 @@ import { StatsModule } from './modules/stats/stats.module';
 import { GrandPrizeModule } from './modules/grand-prize/grand-prize.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { GameConfigModule } from './modules/game-config/game-config.module';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
   imports: [
@@ -49,6 +50,9 @@ import { GameConfigModule } from './modules/game-config/game-config.module';
 
     // Database
     PrismaModule,
+
+    // Health check
+    HealthModule,
 
     // Cache
     RedisModule,
