@@ -22,5 +22,21 @@ ciPipeline(
     appPort       : 3000,
 
     // Chemin du Dockerfile (monorepo : l'app vit dans webapp/)
-    dockerfile    : 'webapp/Dockerfile'
+    dockerfile    : 'webapp/Dockerfile',
+
+    // Backend API (NestJS), déployé aux côtés du frontend.
+    // Câblé uniquement pour DEV pour l'instant.
+    apiDockerfile  : 'api/Dockerfile',
+    apiPort        : 3001,
+    apiHealthPath  : '/api/v1/health',
+    dbCredentialsId: 'thetiptop-db-credentials',
+    apiEnv         : [
+        FRONTEND_URL: "https://${projectName}-dev.wk-archi-o24a-4-5-g1.fr",
+        CORS_ORIGINS: "https://${projectName}-dev.wk-archi-o24a-4-5-g1.fr",
+        API_PREFIX  : 'api'
+    ],
+    apiSecretEnv   : [
+        [envVar: 'JWT_SECRET', credentialId: 'thetiptop-jwt-secret'],
+        [envVar: 'JWT_REFRESH_SECRET', credentialId: 'thetiptop-jwt-refresh-secret']
+    ]
 )
