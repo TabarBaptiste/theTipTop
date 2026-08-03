@@ -6,7 +6,7 @@
 # --- Stage 1: Base ---
 FROM node:22-alpine AS base
 WORKDIR /app
-RUN apk add --no-cache libc6-compat openssl curl
+RUN apk add --no-cache libc6-compat openssl
 RUN npm config set fetch-retry-mintimeout 20000 && npm config set fetch-retry-maxtimeout 120000 && npm config set fetch-retries 5
 
 # --- Stage 2: Development ---
