@@ -24,16 +24,19 @@ EXPOSE 3001
 CMD ["npm", "run", "start:dev"]
 
 # --- Stage 3: Build ---
+# Contexte de build : la RACINE du monorepo (npm workspaces), pas api/.
 FROM base AS builder
 WORKDIR /app
 
 COPY package*.json ./
-COPY prisma ./prisma
-RUN npm install
+COPY api/package.json ./api/
+COPY webapp/package.json ./webapp/
+COPY api/prisma ./api/prisma
 
-COPY . .
-RUN npx prisma generate
-RUN npm run build
+RUN npm ci --include-workspace-root --workspace api
+
+COPY api ./api
+RUN npm run build --workspace api
 
 # --- Stage 4: Production ---
 FROM base AS production
@@ -44,12 +47,14 @@ WORKDIR /app
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nestjs
 
-COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
 COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nestjs:nodejs /app/package*.json ./
-COPY --from=builder --chown=nestjs:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=nestjs:nodejs /app/api ./api
 
 USER nestjs
+WORKDIR /app/api
 
 EXPOSE 3001
-CMD ["node", "dist/main.js"]
+# prisma/seed.ts elargit le rootDir au dossier api/ : nest build emet donc
+# dist/src/main.js et non dist/main.js.
+CMD ["node", "dist/src/main.js"]

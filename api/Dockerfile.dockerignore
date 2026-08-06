@@ -1,0 +1,18 @@
+# Contexte de build de l'image API (contexte = racine du monorepo).
+# BuildKit lit ce fichier en priorite sur le .dockerignore racine : les
+# exclusions ci-dessous ne s'appliquent donc qu'au build de l'API.
+# Sans cela, les node_modules de l'hote Jenkins (glibc) seraient copies
+# dans l'image Alpine (musl) et les moteurs Prisma natifs seraient incompatibles.
+
+**/node_modules
+**/dist
+**/.next
+**/coverage
+**/junit.xml
+
+.git
+.github
+.husky
+.scannerwork
+docs
+cypress
