@@ -11,9 +11,8 @@ import { cn } from '@/lib/utils';
 const navigation = [
   { name: 'Le jeu', href: '/#how-it-works' },
   { name: 'Lots', href: '/#prizes' },
-  { name: 'Mon concours', href: '/dashboard' },
-  // { name: 'Mon Compte', href: '/dashboard/profile' },
-  // { name: 'Participer', href: '/dashboard/participate' },
+  { name: 'Règlement', href: '/reglement' },
+  { name: 'Boutiques', href: '/boutiques' },
   { name: 'FAQ', href: '/faq' },
 ];
 
@@ -42,10 +41,12 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-warm-beige bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
       <nav className="container mx-auto flex h-16 items-center justify-between px-6">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <span className="font-display text-xl font-bold text-noir">
-            The Tip Top
-          </span>
+        <Link href="/" className="flex items-center">
+          <img
+            src="/img/L_artisan_méditerranéen_horizontal_complet.svg"
+            alt="Thé Tip Top"
+            className="h-20 w-auto"
+          />
         </Link>
 
         {/* Desktop Navigation */}
@@ -68,46 +69,30 @@ export function Header() {
 
         {/* Auth Buttons */}
         <div className="hidden items-center gap-3 md:flex">
-          <Button asChild size="sm">
-            <Link href="/dashboard/participate">Participer</Link>
-          </Button>
           {isHydrated && (
             <>
               {isAuthenticated ? (
                 <>
-                  {backofficeHref && (
-                    <Button asChild variant="outline" size="sm">
-                      <Link
-                        href={backofficeHref}
-                        className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-deep"
-                      >
-                        <BackofficeIcon className="h-4 w-4" strokeWidth={1.5} />
-                        {user?.role === 'ADMIN' ? 'Admin' : 'Espace employé'}
-                      </Link>
-                    </Button>
-                  )}
                   <Button asChild variant="outline" size="sm">
-
                     <Link
                       href="/dashboard/profile"
                       className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-deep"
                     >
-
                       <User className="h-4 w-4" strokeWidth={1.5} />
                       {user?.firstName || 'Mon compte'}
                     </Link>
                   </Button>
-                  {/* <Button variant="outline" size="sm" onClick={logout}>
-                    Deconnexion
-                  </Button> */}
+                  <Button asChild size="sm">
+                    <Link href="/dashboard/participate">Jouer</Link>
+                  </Button>
                 </>
               ) : (
                 <>
-                  {/* <Button asChild variant="outline" size="sm">
-                    <Link href="/auth/register">Inscription</Link>
-                  </Button> */}
                   <Button asChild variant="outline" size="sm">
                     <Link href="/auth/login">Connexion</Link>
+                  </Button>
+                  <Button asChild size="sm">
+                    <Link href="/auth/login">Jouer</Link>
                   </Button>
                 </>
               )}
@@ -154,52 +139,34 @@ export function Header() {
             </Link>
           ))}
           <div className="mt-4 flex flex-col gap-2 border-t border-warm-beige pt-4">
-            <Button asChild className="w-full">
-              <Link href="/dashboard/participate" onClick={() => setMobileMenuOpen(false)}>
-                Participer
-              </Link>
-            </Button>
             {isHydrated && (
               <>
                 {isAuthenticated ? (
                   <>
-                    {backofficeHref && (
+                    <Button asChild variant="outline" className="w-full">
                       <Link
-                        href={backofficeHref}
-                        className="flex items-center gap-2 px-3 py-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-deep"
+                        href="/dashboard/profile"
+                        className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-deep"
                         onClick={() => setMobileMenuOpen(false)}
                       >
-                        <BackofficeIcon className="h-4 w-4" strokeWidth={1.5} />
-                        {user?.role === 'ADMIN' ? 'Admin' : 'Espace employé'}
+                        <User className="h-4 w-4" strokeWidth={1.5} />
+                        {user?.firstName || 'Mon compte'}
                       </Link>
-                    )}
-                    <Link
-                      href="/dashboard/profile"
-                      className="flex items-center gap-2 px-3 py-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-deep"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <User className="h-4 w-4" strokeWidth={1.5} />
-                      {user?.firstName || 'Mon compte'}
-                    </Link>
-                    {/* <Button
-                      variant="ghost"
-                      className="w-full"
-                      onClick={() => {
-                        logout();
-                        setMobileMenuOpen(false);
-                      }}
-                    >
-                      Deconnexion
-                    </Button> */}
+                    </Button>
+                    <Button asChild className="w-full">
+                      <Link href="/dashboard/participate" onClick={() => setMobileMenuOpen(false)}>
+                        Jouer
+                      </Link>
+                    </Button>
                   </>
                 ) : (
                   <>
                     <Button asChild variant="outline" className="w-full">
                       <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)}>Connexion</Link>
                     </Button>
-                    {/* <Button asChild variant="outline" className="w-full">
-                      <Link href="/auth/register" onClick={() => setMobileMenuOpen(false)}>Inscription</Link>
-                    </Button> */}
+                    <Button asChild className="w-full">
+                      <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)}>Jouer</Link>
+                    </Button>
                   </>
                 )}
               </>
