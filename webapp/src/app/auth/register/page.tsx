@@ -31,14 +31,14 @@ const registerSchema = z.object({
   email: z.string().email('Email invalide'),
   password: z
     .string()
-    .min(8, 'Le mot de passe doit faire au moins 8 caracteres')
+    .min(8, 'Le mot de passe doit faire au moins 8 caractères')
     .regex(/[A-Z]/, 'Le mot de passe doit contenir au moins une majuscule')
     .regex(/[a-z]/, 'Le mot de passe doit contenir au moins une minuscule')
     .regex(/[0-9]/, 'Le mot de passe doit contenir au moins un chiffre')
-    .regex(/[@$!%*?&]/, 'Le mot de passe doit contenir au moins un caractere special (@$!%*?&)'),
+    .regex(/[@$!%*?&]/, 'Le mot de passe doit contenir au moins un caractère spécial (@$!%*?&)'),
   confirmPassword: z.string(),
-  firstName: z.string().min(2, 'Le prenom doit faire au moins 2 caracteres'),
-  lastName: z.string().min(2, 'Le nom doit faire au moins 2 caracteres'),
+  firstName: z.string().min(2, 'Le prénom doit faire au moins 2 caractères'),
+  lastName: z.string().min(2, 'Le nom doit faire au moins 2 caractères'),
   phone: z.string().optional(),
   birthDate: z
     .string()
@@ -104,19 +104,19 @@ export default function RegisterPage() {
         birthDate: rest.birthDate || undefined,
       });
       trackRegisterSuccess('email');
-      toast.success('Inscription reussie ! Bienvenue !');
+      toast.success('Inscription réussie ! Bienvenue !');
       router.push('/dashboard');
     } catch (error: any) {
       const status = error?.response?.status;
       if (status === 409) {
         trackRegisterFailure('email', 'email_already_exists');
-        toast.error('Un compte existe deja avec cet email');
+        toast.error('Un compte existe déjà avec cet email');
       } else if (status === 400 || status === 422) {
         trackRegisterFailure('email', 'invalid_data');
-        toast.error('Donnees invalides. Verifiez le formulaire.');
+        toast.error('Données invalides. Vérifiez le formulaire.');
       } else {
-        trackRegisterFailure('email', 'server_error');
-        toast.error("Erreur lors de l'inscription");
+        trackRegisterFailure('email', 'Erreur lors de l\'inscription');
+        toast.error('Erreur lors de l\'inscription');
       }
     } finally {
       setIsLoading(false);
@@ -140,25 +140,14 @@ export default function RegisterPage() {
   return (
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-cream px-4 py-12">
       <div className="w-full max-w-xl sm:rounded-card sm:border sm:border-warm-beige sm:bg-white sm:p-8 sm:shadow-sm">
-        <h1 className="font-display text-h2 text-noir">Creer votre compte</h1>
+        <h1 className="font-display text-h2 text-noir">Créer votre compte</h1>
         <p className="mt-2 text-sm text-stone-grey">
           Inscrivez-vous pour participer au jeu-concours
         </p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
-          {/* Prenom / Nom */}
+          {/* Nom / Prenom */}
           <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="firstName">Prenom *</Label>
-              <Input
-                id="firstName"
-                placeholder="Jean"
-                {...register('firstName')}
-              />
-              {errors.firstName && (
-                <p className="mt-1 text-xs text-red-600">{errors.firstName.message}</p>
-              )}
-            </div>
             <div>
               <Label htmlFor="lastName">Nom *</Label>
               <Input
@@ -168,6 +157,17 @@ export default function RegisterPage() {
               />
               {errors.lastName && (
                 <p className="mt-1 text-xs text-red-600">{errors.lastName.message}</p>
+              )}
+            </div>
+            <div>
+              <Label htmlFor="firstName">Prénom *</Label>
+              <Input
+                id="firstName"
+                placeholder="Jean"
+                {...register('firstName')}
+              />
+              {errors.firstName && (
+                <p className="mt-1 text-xs text-red-600">{errors.firstName.message}</p>
               )}
             </div>
           </div>
@@ -192,21 +192,25 @@ export default function RegisterPage() {
             <Input
               id="password"
               type="password"
-              placeholder="Min. 8 caracteres"
+              placeholder="Min. 8 caractères"
               {...register('password')}
             />
-            {errors.password && (
+            {errors.password ? (
               <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>
+            ) : (
+              <p className="mt-1 text-xs text-stone-grey">
+                Min. 8 caractères, 1 majuscule, 1 chiffre, 1 caractère spécial
+              </p>
             )}
           </div>
 
-          {/* Confirm */}
+          {/* Confirmer mot de passe */}
           <div>
             <Label htmlFor="confirmPassword">Confirmer le mot de passe *</Label>
             <Input
               id="confirmPassword"
               type="password"
-              placeholder="Confirmez votre mot de passe"
+              placeholder="Retapez votre mot de passe"
               {...register('confirmPassword')}
             />
             {errors.confirmPassword && (
@@ -214,7 +218,10 @@ export default function RegisterPage() {
             )}
           </div>
 
-          {/* Date de naissance / Genre */}
+          {/* Divider optionnel */}
+          <div className="border-t border-warm-beige pt-4"></div>
+
+          {/* Date de naissance / Genre - Optionnel */}
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <Label htmlFor="birthDate">Date de naissance</Label>
@@ -237,7 +244,8 @@ export default function RegisterPage() {
                 defaultValue=""
                 {...register('gender')}
               >
-                <option value="FEMALE">Femme</option>                
+                <option value="">Sélectionner</option>
+                <option value="FEMALE">Femme</option>
                 <option value="MALE">Homme</option>
                 <option value="OTHER">Autre</option>
                 <option value="PREFER_NOT_TO_SAY">Préfère ne pas le dire</option>
@@ -245,9 +253,11 @@ export default function RegisterPage() {
             </div>
           </div>
           <p className="text-xs text-stone-grey">
-            Champs facultatifs collectés uniquement à des fins statistiques pour le
-            jeu-concours. En les renseignant, vous consentez à cet usage.
+            Champs facultatifs collectés uniquement à des fins statistiques pour le jeu-concours.
           </p>
+
+          {/* Divider avant RGPD */}
+          <div className="border-t border-warm-beige pt-4"></div>
 
           {/* RGPD */}
           <div className="space-y-3">
@@ -261,11 +271,11 @@ export default function RegisterPage() {
               <label htmlFor="consentData" className="text-xs leading-relaxed text-stone-grey">
                 J&apos;accepte les{' '}
                 <Link href="/cgu" className="text-terracotta-deep hover:underline">
-                  conditions generales
+                  Conditions d&apos;utilisation
                 </Link>{' '}
                 et la{' '}
                 <Link href="/politique-confidentialite" className="text-terracotta-deep hover:underline">
-                  politique de confidentialite
+                  Politique de confidentialité
                 </Link>{' '}
                 *
               </label>
@@ -294,7 +304,7 @@ export default function RegisterPage() {
                 Inscription...
               </>
             ) : (
-              'Creer mon compte'
+              'S\'inscrire'
             )}
           </Button>
         </form>
@@ -328,7 +338,7 @@ export default function RegisterPage() {
         </div>
 
         <p className="mt-8 text-center text-sm text-stone-grey">
-          Deja un compte ?{' '}
+          Déjà un compte ?{' '}
           <Link href="/auth/login" className="font-semibold text-terracotta-deep hover:underline">
             Se connecter
           </Link>
