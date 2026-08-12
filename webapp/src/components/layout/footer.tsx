@@ -1,69 +1,99 @@
+'use client';
+
 import Link from 'next/link';
-import { Mail, Phone, MapPin } from 'lucide-react';
+import { Mail, Instagram, Facebook, Twitter, Youtube, Linkedin, Music2 } from 'lucide-react';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 
 export function Footer() {
+  const [email, setEmail] = useState('');
+  const [subscribed, setSubscribed] = useState(false);
+
+  const handleNewsletterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (email) {
+      // TODO: Implement newsletter subscription API
+      setSubscribed(true);
+      setEmail('');
+      setTimeout(() => setSubscribed(false), 3000);
+    }
+  };
+
   return (
     <footer className="bg-noir text-white">
+      {/* Main Footer */}
       <div className="container mx-auto px-6 py-12">
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-          {/* Brand */}
-          <div className="space-y-4">
-            <Link href="/" className="inline-block">
-              <span className="font-display text-xl font-bold text-white">
-                The Tip Top
-              </span>
-            </Link>
-            <p className="text-sm leading-relaxed text-white/70">
-              The bio et fait main depuis 10 ans. Decouvrez nos creations uniques
-              dans notre boutique de Nice.
-            </p>
-          </div>
-
-          {/* Jeu Concours */}
+          {/* Produits */}
           <div>
             <h3 className="font-functional text-ui uppercase tracking-[2px] text-white">
-              Jeu Concours
+              Produits
             </h3>
             <ul className="mt-4 space-y-2">
               <li>
                 <Link
-                  href="/#how-it-works"
+                  href="/boutiques"
                   className="text-sm text-white/70 transition-colors hover:text-terracotta-300"
                 >
-                  Comment participer
+                  Nos thés
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/#prizes"
+                  href="/boutiques"
                   className="text-sm text-white/70 transition-colors hover:text-terracotta-300"
                 >
-                  Les lots a gagner
+                  Accessoires
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/reglement"
+                  href="/boutiques"
                   className="text-sm text-white/70 transition-colors hover:text-terracotta-300"
                 >
-                  Reglement du jeu
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/auth/register"
-                  className="text-sm text-white/70 transition-colors hover:text-terracotta-300"
-                >
-                  S&apos;inscrire
+                  Coffrets
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Legal */}
+          {/* Entreprise */}
           <div>
             <h3 className="font-functional text-ui uppercase tracking-[2px] text-white">
-              Informations legales
+              Entreprise
+            </h3>
+            <ul className="mt-4 space-y-2">
+              <li>
+                <Link
+                  href="/#why-us"
+                  className="text-sm text-white/70 transition-colors hover:text-terracotta-300"
+                >
+                  À propos
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/boutiques"
+                  className="text-sm text-white/70 transition-colors hover:text-terracotta-300"
+                >
+                  Nos boutiques
+                </Link>
+              </li>
+              <li>
+                <a
+                  href="mailto:contact@thetiptop.fr"
+                  className="text-sm text-white/70 transition-colors hover:text-terracotta-300"
+                >
+                  Contact
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Légal */}
+          <div>
+            <h3 className="font-functional text-ui uppercase tracking-[2px] text-white">
+              Légal
             </h3>
             <ul className="mt-4 space-y-2">
               <li>
@@ -71,15 +101,7 @@ export function Footer() {
                   href="/mentions-legales"
                   className="text-sm text-white/70 transition-colors hover:text-terracotta-300"
                 >
-                  Mentions legales
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/politique-confidentialite"
-                  className="text-sm text-white/70 transition-colors hover:text-terracotta-300"
-                >
-                  Politique de confidentialite
+                  Mentions légales
                 </Link>
               </li>
               <li>
@@ -92,52 +114,120 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/gestion-cookies"
+                  href="/politique-confidentialite"
                   className="text-sm text-white/70 transition-colors hover:text-terracotta-300"
                 >
-                  Gestion des cookies
+                  Politique de confidentialité
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Contact */}
+          {/* Newsletter */}
           <div>
             <h3 className="font-functional text-ui uppercase tracking-[2px] text-white">
-              Contact
+              Newsletter
             </h3>
-            <ul className="mt-4 space-y-3">
-              <li className="flex items-center gap-2 text-sm text-white/70">
-                <MapPin className="h-4 w-4 shrink-0 text-terracotta-300" strokeWidth={1.5} />
-                18 rue Leon Frot, 75011 Paris
-              </li>
-              <li className="flex items-center gap-2 text-sm text-white/70">
-                <Phone className="h-4 w-4 shrink-0 text-terracotta-300" strokeWidth={1.5} />
-                04 93 XX XX XX
-              </li>
-              <li className="flex items-center gap-2 text-sm text-white/70">
-                <Mail className="h-4 w-4 shrink-0 text-terracotta-300" strokeWidth={1.5} />
-                contact@thetiptop.fr
-              </li>
-            </ul>
+            <form onSubmit={handleNewsletterSubmit} className="mt-4 space-y-3">
+              <div className="flex gap-2">
+                <input
+                  type="email"
+                  placeholder="Votre email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="flex-1 rounded-soft border border-warm-beige bg-white/10 px-3 py-2 text-sm text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-terracotta-300"
+                  required
+                />
+                <button
+                  type="submit"
+                  className="rounded-soft bg-terracotta-300 px-3 py-2 text-white transition-colors hover:bg-terracotta-400"
+                  aria-label="S'abonner à la newsletter"
+                >
+                  →
+                </button>
+              </div>
+              <p className="text-xs text-white/70">
+                Nous respectons votre vie privée. Consultez notre{' '}
+                <Link
+                  href="/politique-confidentialite"
+                  className="text-terracotta-300 hover:underline"
+                >
+                  politique de confidentialité
+                </Link>
+                .
+              </p>
+              {subscribed && (
+                <p className="text-xs text-moss">Merci de votre inscription !</p>
+              )}
+            </form>
           </div>
         </div>
 
-        {/* Bottom bar */}
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 sm:flex-row">
+        {/* Divider */}
+        <div className="mt-12 border-t border-white/10"></div>
+
+        {/* Bottom Bar */}
+        <div className="mt-8 flex flex-col items-center justify-between gap-4 sm:flex-row">
           <p className="text-sm text-white/50">
-            &copy; {new Date().getFullYear()} The Tip Top. Tous droits reserves.
+            © {new Date().getFullYear()} Thé Tip Top. Tous droits réservés.
           </p>
           <div className="flex gap-4">
-            <Link href="/mentions-legales" className="text-xs text-white/50 hover:text-white/70">
-              Mentions
-            </Link>
-            <Link href="/politique-confidentialite" className="text-xs text-white/50 hover:text-white/70">
-              Confidentialite
-            </Link>
-            <Link href="/cgu" className="text-xs text-white/50 hover:text-white/70">
-              CGU
-            </Link>
+            <a
+              href="https://instagram.com/thetiptop"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white/70 transition-colors hover:text-terracotta-300"
+              aria-label="Instagram"
+            >
+              <Instagram className="h-4 w-4" strokeWidth={1.5} />
+            </a>
+            <a
+              href="https://tiktok.com/@thetiptop"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white/70 transition-colors hover:text-terracotta-300"
+              aria-label="TikTok"
+            >
+              <Music2 className="h-4 w-4" strokeWidth={1.5} />
+            </a>
+            <a
+              href="https://pinterest.com/thetiptop"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white/70 transition-colors hover:text-terracotta-300"
+              aria-label="Pinterest"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.223-.937 1.58-6.685 1.58-6.685s-.4-.8-.4-1.983c0-1.858 1.08-3.246 2.424-3.246 1.146 0 1.699.86 1.699 1.888 0 1.15-.732 2.869-1.104 4.462-.313 1.323.627 2.401 1.863 2.401 2.236 0 3.957-2.356 3.957-5.75 0-3.012-2.165-5.116-5.256-5.116-3.58 0-5.679 2.686-5.679 5.453 0 1.08.399 2.236.9 2.866.098.12.12.225.088.345l-.36 1.473c-.042.196-.145.242-.335.146-1.247-.581-2.027-2.41-2.027-3.868 0-3.996 2.904-7.677 8.388-7.677 4.41 0 7.84 3.14 7.84 7.333 0 4.37-2.759 7.878-6.593 7.878-1.286 0-2.496-.666-2.91-1.453l-.792 3.017c-.287 1.094-.85 2.47-1.262 3.31 3.767 1.16 8.018.686 10.519-3.437 1.385-2.26 2.216-6.031 2.216-9.73 0-6.627-5.373-12-12-12z"/>
+              </svg>
+            </a>
+            <a
+              href="https://facebook.com/thetiptop"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white/70 transition-colors hover:text-terracotta-300"
+              aria-label="Facebook"
+            >
+              <Facebook className="h-4 w-4" strokeWidth={1.5} />
+            </a>
+            <a
+              href="https://linkedin.com/company/thetiptop"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white/70 transition-colors hover:text-terracotta-300"
+              aria-label="LinkedIn"
+            >
+              <Linkedin className="h-4 w-4" strokeWidth={1.5} />
+            </a>
+            <a
+              href="https://youtube.com/@thetiptop"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white/70 transition-colors hover:text-terracotta-300"
+              aria-label="YouTube"
+            >
+              <Youtube className="h-4 w-4" strokeWidth={1.5} />
+            </a>
           </div>
         </div>
       </div>
