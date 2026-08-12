@@ -4,9 +4,10 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Users, Ticket, Gift, TrendingUp, Trophy,
-  Loader2, Calendar, Download, PieChart, BarChart3,
+  Calendar, Download, PieChart, BarChart3,
   Mail, ShieldCheck, Scale, RefreshCw,
 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
@@ -192,8 +193,16 @@ export default function AdminPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-cream">
-        <Loader2 className="h-8 w-8 animate-spin text-terracotta-deep" />
+      <div className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center gap-8 bg-cream px-6">
+        <div className="w-full max-w-4xl space-y-6">
+          <Skeleton className="h-12 w-1/3" />
+          <div className="grid gap-4 md:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-24 w-full" />
+            ))}
+          </div>
+          <Skeleton className="h-64 w-full" />
+        </div>
       </div>
     );
   }
