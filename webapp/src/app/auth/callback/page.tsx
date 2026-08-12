@@ -2,9 +2,9 @@
 
 import { Suspense, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/lib/stores/auth-store';
+import { Skeleton } from '@/components/ui/skeleton';
 
 /**
  * Point d'atterrissage après le flux OAuth (Google / Facebook).
@@ -45,8 +45,8 @@ function AuthCallbackHandler() {
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center gap-4 bg-cream">
-      <Loader2 className="h-8 w-8 animate-spin text-terracotta-deep" />
-      <p className="text-sm text-stone-grey">Connexion en cours...</p>
+      <Skeleton className="h-8 w-48" />
+      <Skeleton className="h-4 w-32" />
     </div>
   );
 }
@@ -55,8 +55,9 @@ export default function AuthCallbackPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-cream">
-          <Loader2 className="h-8 w-8 animate-spin text-terracotta-deep" />
+        <div className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center gap-4 bg-cream">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-4 w-32" />
         </div>
       }
     >
