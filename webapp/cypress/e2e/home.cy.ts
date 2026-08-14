@@ -32,13 +32,14 @@ describe('Page d\'accueil', () => {
     cy.get('header').within(() => {
       cy.contains('Le jeu').should('be.visible');
       cy.contains('Lots').should('be.visible');
+      cy.contains('Règlement').should('be.visible');
       cy.contains('FAQ').should('be.visible');
     });
   });
 
   it('affiche les boutons d\'authentification', () => {
-    cy.get('header').contains('Inscription').should('be.visible');
     cy.get('header').contains('Connexion').should('be.visible');
+    cy.get('header').contains('Jouer').should('be.visible');
   });
 
   it('redirige vers la page d\'inscription depuis le CTA du hero', () => {
@@ -48,8 +49,8 @@ describe('Page d\'accueil', () => {
 
   it('affiche le footer avec les liens légaux', () => {
     cy.get('footer').within(() => {
-      cy.contains('Reglement du jeu').should('have.attr', 'href', '/reglement');
-      cy.contains('Mentions legales').should('have.attr', 'href', '/mentions-legales');
+      cy.contains('Règlement du jeu').should('have.attr', 'href', '/reglement');
+      cy.contains('Mentions légales').should('have.attr', 'href', '/mentions-legales');
     });
   });
 });
