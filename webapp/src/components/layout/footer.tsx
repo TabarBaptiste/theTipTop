@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Mail, Instagram, Facebook, Twitter, Youtube, Linkedin, Music2 } from 'lucide-react';
+import { Mail, Instagram, Facebook, Youtube, Linkedin, Music2 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 
@@ -24,68 +24,71 @@ export function Footer() {
       {/* Main Footer */}
       <div className="container mx-auto px-6 py-12">
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-          {/* Produits */}
-          <div>
-            <h3 className="font-functional text-ui uppercase tracking-[2px] text-white">
-              Produits
-            </h3>
-            <ul className="mt-4 space-y-2">
-              <li>
-                <Link
-                  href="/boutiques"
-                  className="text-sm text-white/70 transition-colors hover:text-terracotta-300"
-                >
-                  Nos thés
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/boutiques"
-                  className="text-sm text-white/70 transition-colors hover:text-terracotta-300"
-                >
-                  Accessoires
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/boutiques"
-                  className="text-sm text-white/70 transition-colors hover:text-terracotta-300"
-                >
-                  Coffrets
-                </Link>
-              </li>
-            </ul>
+          {/* Marque */}
+          <div className="space-y-4">
+            <Link href="/" className="inline-block">
+              <span className="font-display text-xl font-bold text-white">
+                Thé Tip Top
+              </span>
+            </Link>
+            <p className="text-sm leading-relaxed text-white/70">
+              Thé bio et fait main depuis 10 ans. Découvrez nos créations uniques
+              dans notre boutique de Nice.
+            </p>
+            <div className="space-y-2">
+              <Link
+                href="/#why-us"
+                className="block text-sm text-white/70 transition-colors hover:text-terracotta-300"
+              >
+                À propos
+              </Link>
+              <a
+                href="mailto:contact@thetiptop.fr"
+                className="flex items-center gap-2 text-sm text-white/70 transition-colors hover:text-terracotta-300"
+              >
+                <Mail className="h-4 w-4 shrink-0 text-terracotta-300" strokeWidth={1.5} />
+                Contact
+              </a>
+            </div>
           </div>
 
-          {/* Entreprise */}
+          {/* Jeu Concours */}
           <div>
             <h3 className="font-functional text-ui uppercase tracking-[2px] text-white">
-              Entreprise
+              Jeu Concours
             </h3>
             <ul className="mt-4 space-y-2">
               <li>
                 <Link
-                  href="/#why-us"
+                  href="/#how-it-works"
                   className="text-sm text-white/70 transition-colors hover:text-terracotta-300"
                 >
-                  À propos
+                  Comment participer
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/boutiques"
+                  href="/#prizes"
                   className="text-sm text-white/70 transition-colors hover:text-terracotta-300"
                 >
-                  Nos boutiques
+                  Les lots à gagner
                 </Link>
               </li>
               <li>
-                <a
-                  href="mailto:contact@thetiptop.fr"
+                <Link
+                  href="/reglement"
                   className="text-sm text-white/70 transition-colors hover:text-terracotta-300"
                 >
-                  Contact
-                </a>
+                  Règlement du jeu
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/faq"
+                  className="text-sm text-white/70 transition-colors hover:text-terracotta-300"
+                >
+                  FAQ
+                </Link>
               </li>
             </ul>
           </div>
@@ -120,6 +123,14 @@ export function Footer() {
                   Politique de confidentialité
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/gestion-cookies"
+                  className="text-sm text-white/70 transition-colors hover:text-terracotta-300"
+                >
+                  Gestion des cookies
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -138,13 +149,14 @@ export function Footer() {
                   className="flex-1 rounded-soft border border-warm-beige bg-white/10 px-3 py-2 text-sm text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-terracotta-300"
                   required
                 />
-                <button
+                <Button
                   type="submit"
-                  className="rounded-soft bg-terracotta-300 px-3 py-2 text-white transition-colors hover:bg-terracotta-400"
+                  size="icon"
+                  className="shrink-0"
                   aria-label="S'abonner à la newsletter"
                 >
                   →
-                </button>
+                </Button>
               </div>
               <p className="text-xs text-white/70">
                 Nous respectons votre vie privée. Consultez notre{' '}

@@ -11,26 +11,25 @@ describe('Footer', () => {
   });
 
   it('renders the brand name', () => {
-    expect(screen.getByText('The Tip Top')).toBeInTheDocument();
+    expect(screen.getByText('Thé Tip Top')).toBeInTheDocument();
   });
 
   it('links to the contest rules page', () => {
-    expect(screen.getByRole('link', { name: 'Reglement du jeu' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Règlement du jeu' })).toHaveAttribute(
       'href',
       '/reglement'
     );
   });
 
   it('links to all the legal pages (RGPD)', () => {
-    expect(screen.getByRole('link', { name: 'Mentions legales' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Mentions légales' })).toHaveAttribute(
       'href',
       '/mentions-legales'
     );
-    expect(screen.getByRole('link', { name: 'Politique de confidentialite' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Politique de confidentialité' })).toHaveAttribute(
       'href',
       '/politique-confidentialite'
     );
-    // Le lien CGU apparaît dans la liste principale et dans la barre du bas
     screen.getAllByRole('link', { name: 'CGU' }).forEach((link) => {
       expect(link).toHaveAttribute('href', '/cgu');
     });
