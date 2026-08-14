@@ -8,11 +8,12 @@ import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { cn } from '@/lib/utils';
 
+// « Boutiques » retiré : la route /boutiques n'existe pas encore, le lien renvoyait un 404.
+// À remettre le jour où la page sera créée.
 const navigation = [
   { name: 'Le jeu', href: '/#how-it-works' },
   { name: 'Lots', href: '/#prizes' },
   { name: 'Règlement', href: '/reglement' },
-  { name: 'Boutiques', href: '/boutiques' },
   { name: 'FAQ', href: '/faq' },
 ];
 
@@ -73,6 +74,17 @@ export function Header() {
             <>
               {isAuthenticated ? (
                 <>
+                  {backofficeHref && (
+                    <Button asChild variant="outline" size="sm">
+                      <Link
+                        href={backofficeHref}
+                        className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-deep"
+                      >
+                        <BackofficeIcon className="h-4 w-4" strokeWidth={1.5} />
+                        {user?.role === 'ADMIN' ? 'Admin' : 'Espace employé'}
+                      </Link>
+                    </Button>
+                  )}
                   <Button asChild variant="outline" size="sm">
                     <Link
                       href="/dashboard/profile"
@@ -119,7 +131,8 @@ export function Header() {
       <div
         className={cn(
           'overflow-hidden border-t border-warm-beige bg-white transition-all duration-300 ease-in-out md:hidden',
-          mobileMenuOpen ? 'max-h-96' : 'max-h-0'
+          // Hauteur calée sur le cas le plus haut : nav + bouton backoffice + profil + Jouer
+          mobileMenuOpen ? 'max-h-[32rem]' : 'max-h-0'
         )}
       >
         <div className="space-y-1 px-6 pb-6 pt-4">
@@ -143,6 +156,18 @@ export function Header() {
               <>
                 {isAuthenticated ? (
                   <>
+                    {backofficeHref && (
+                      <Button asChild variant="outline" className="w-full">
+                        <Link
+                          href={backofficeHref}
+                          className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-deep"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          <BackofficeIcon className="h-4 w-4" strokeWidth={1.5} />
+                          {user?.role === 'ADMIN' ? 'Admin' : 'Espace employé'}
+                        </Link>
+                      </Button>
+                    )}
                     <Button asChild variant="outline" className="w-full">
                       <Link
                         href="/dashboard/profile"
