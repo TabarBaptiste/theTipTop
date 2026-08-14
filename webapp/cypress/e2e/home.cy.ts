@@ -23,9 +23,9 @@ describe('Page d\'accueil', () => {
 
   it('affiche les étapes de participation', () => {
     cy.contains('Comment participer ?').should('be.visible');
-    cy.contains('Faites vos achats').should('be.visible');
-    cy.contains('Entrez votre code').should('be.visible');
-    cy.contains('Recuperez votre lot').should('be.visible');
+    cy.contains('Trouve ton code').should('be.visible');
+    cy.contains('Saisis ton code').should('be.visible');
+    cy.contains('Récupère ton lot').should('be.visible');
   });
 
   it('contient les liens de navigation', () => {
