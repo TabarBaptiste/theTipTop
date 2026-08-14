@@ -23,7 +23,7 @@ export function HowItWorksSection() {
   return (
     <section id="how-it-works" className="bg-cream py-16 md:py-20">
       <div className="container mx-auto px-6">
-        <h2 className="font-display text-h2 text-noir pb-6" style={{ borderBottom: '1.17px solid #D9D9D9' }}>
+        <h2 className="border-b border-warm-beige pb-6 font-display text-h2 text-noir">
           Comment participer ?
         </h2>
 
@@ -33,6 +33,8 @@ export function HowItWorksSection() {
               <span className="font-functional text-ui uppercase tracking-[2px] text-terracotta-deep">
                 {step.number}
               </span>
+              {/* italic est volontaire : les titres d'etapes sont en italique
+                  sur la maquette Figma, contrairement au reste du site. */}
               <h3 className="mt-3 font-display text-lg font-semibold italic text-noir">
                 {step.title}
               </h3>

@@ -115,7 +115,7 @@ export default function RegisterPage() {
         trackRegisterFailure('email', 'invalid_data');
         toast.error('Données invalides. Vérifiez le formulaire.');
       } else {
-        trackRegisterFailure('email', 'Erreur lors de l\'inscription');
+        trackRegisterFailure('email', 'server_error');
         toast.error('Erreur lors de l\'inscription');
       }
     } finally {
