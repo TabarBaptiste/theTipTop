@@ -32,14 +32,14 @@ describe('Page d\'accueil', () => {
     cy.get('header').within(() => {
       cy.contains('Le jeu').should('be.visible');
       cy.contains('Lots').should('be.visible');
-      cy.contains('Règlement').should('be.visible');
+      cy.contains('Mon concours').should('be.visible');
       cy.contains('FAQ').should('be.visible');
     });
   });
 
   it('affiche les boutons d\'authentification', () => {
+    cy.get('header').contains('Participer').should('be.visible');
     cy.get('header').contains('Connexion').should('be.visible');
-    cy.get('header').contains('Jouer').should('be.visible');
   });
 
   it('redirige vers la page d\'inscription depuis le CTA du hero', () => {

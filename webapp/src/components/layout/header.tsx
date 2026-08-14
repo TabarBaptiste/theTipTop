@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useState, useSyncExternalStore } from 'react';
 import { Menu, X, User, ShieldCheck, Store } from 'lucide-react';
@@ -9,11 +10,11 @@ import { useAuthStore } from '@/lib/stores/auth-store';
 import { cn } from '@/lib/utils';
 
 // « Boutiques » retiré : la route /boutiques n'existe pas encore, le lien renvoyait un 404.
-// À remettre le jour où la page sera créée.
+// À remettre le jour où la page sera créée. Le règlement reste accessible via le footer.
 const navigation = [
   { name: 'Le jeu', href: '/#how-it-works' },
   { name: 'Lots', href: '/#prizes' },
-  { name: 'Règlement', href: '/reglement' },
+  { name: 'Mon concours', href: '/dashboard' },
   { name: 'FAQ', href: '/faq' },
 ];
 
@@ -43,10 +44,16 @@ export function Header() {
       <nav className="container mx-auto flex h-16 items-center justify-between px-6">
         {/* Logo */}
         <Link href="/" className="flex items-center">
-          <img
-            src="/img/L_artisan_méditerranéen_horizontal_complet.svg"
+          {/* unoptimized : l'optimiseur de Next refuse les SVG sans dangerouslyAllowSVG,
+              et un SVG n'a rien à y gagner. width/height = ratio intrinseque (3019x1270). */}
+          <Image
+            src="/img/logo-artisan-mediterraneen-horizontal.svg"
             alt="Thé Tip Top"
-            className="h-20 w-auto"
+            width={114}
+            height={48}
+            className="h-12 w-auto"
+            unoptimized
+            priority
           />
         </Link>
 
@@ -70,6 +77,9 @@ export function Header() {
 
         {/* Auth Buttons */}
         <div className="hidden items-center gap-3 md:flex">
+          <Button asChild size="sm">
+            <Link href="/dashboard/participate">Participer</Link>
+          </Button>
           {isHydrated && (
             <>
               {isAuthenticated ? (
@@ -94,19 +104,11 @@ export function Header() {
                       {user?.firstName || 'Mon compte'}
                     </Link>
                   </Button>
-                  <Button asChild size="sm">
-                    <Link href="/dashboard/participate">Jouer</Link>
-                  </Button>
                 </>
               ) : (
-                <>
-                  <Button asChild variant="outline" size="sm">
-                    <Link href="/auth/login">Connexion</Link>
-                  </Button>
-                  <Button asChild size="sm">
-                    <Link href="/auth/login">Jouer</Link>
-                  </Button>
-                </>
+                <Button asChild variant="outline" size="sm">
+                  <Link href="/auth/login">Connexion</Link>
+                </Button>
               )}
             </>
           )}
@@ -152,6 +154,11 @@ export function Header() {
             </Link>
           ))}
           <div className="mt-4 flex flex-col gap-2 border-t border-warm-beige pt-4">
+            <Button asChild className="w-full">
+              <Link href="/dashboard/participate" onClick={() => setMobileMenuOpen(false)}>
+                Participer
+              </Link>
+            </Button>
             {isHydrated && (
               <>
                 {isAuthenticated ? (
@@ -178,21 +185,11 @@ export function Header() {
                         {user?.firstName || 'Mon compte'}
                       </Link>
                     </Button>
-                    <Button asChild className="w-full">
-                      <Link href="/dashboard/participate" onClick={() => setMobileMenuOpen(false)}>
-                        Jouer
-                      </Link>
-                    </Button>
                   </>
                 ) : (
-                  <>
-                    <Button asChild variant="outline" className="w-full">
-                      <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)}>Connexion</Link>
-                    </Button>
-                    <Button asChild className="w-full">
-                      <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)}>Jouer</Link>
-                    </Button>
-                  </>
+                  <Button asChild variant="outline" className="w-full">
+                    <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)}>Connexion</Link>
+                  </Button>
                 )}
               </>
             )}

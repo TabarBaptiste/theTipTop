@@ -55,7 +55,7 @@ describe('Header', () => {
     signedOut();
     render(<Header />);
 
-    ['Le jeu', 'Lots', 'Règlement', 'FAQ'].forEach((label) => {
+    ['Le jeu', 'Lots', 'Mon concours', 'FAQ'].forEach((label) => {
       expect(screen.getAllByRole('link', { name: label }).length).toBeGreaterThan(0);
     });
   });
@@ -67,20 +67,24 @@ describe('Header', () => {
     expect(screen.queryByRole('link', { name: 'Boutiques' })).not.toBeInTheDocument();
   });
 
-  it('propose Connexion et Jouer quand on est deconnecte', () => {
+  // Participer est toujours visible ; seul le second bouton change selon l'etat.
+  it('propose Participer puis Connexion quand on est deconnecte', () => {
     signedOut();
     render(<Header />);
 
+    screen.getAllByRole('link', { name: 'Participer' }).forEach((link) => {
+      expect(link).toHaveAttribute('href', '/dashboard/participate');
+    });
     expect(screen.getAllByRole('link', { name: 'Connexion' }).length).toBeGreaterThan(0);
-    expect(screen.getAllByRole('link', { name: 'Jouer' }).length).toBeGreaterThan(0);
     expect(screen.queryByRole('link', { name: 'Jean' })).not.toBeInTheDocument();
   });
 
-  it('remplace Connexion par le profil quand on est connecte', () => {
+  it('remplace Connexion par le profil quand on est connecte, en gardant Participer', () => {
     signedInAs('CLIENT');
     render(<Header />);
 
     expect(screen.queryByRole('link', { name: 'Connexion' })).not.toBeInTheDocument();
+    expect(screen.getAllByRole('link', { name: 'Participer' }).length).toBeGreaterThan(0);
     screen.getAllByRole('link', { name: 'Jean' }).forEach((link) => {
       expect(link).toHaveAttribute('href', '/dashboard/profile');
     });
