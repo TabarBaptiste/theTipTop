@@ -84,6 +84,14 @@ export function Footer() {
               </li>
               <li>
                 <Link
+                  href="/auth/register"
+                  className="text-sm text-white/70 transition-colors hover:text-terracotta-300"
+                >
+                  S&apos;inscrire
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/faq"
                   className="text-sm text-white/70 transition-colors hover:text-terracotta-300"
                 >
