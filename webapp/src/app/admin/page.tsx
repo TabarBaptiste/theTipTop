@@ -193,7 +193,7 @@ export default function AdminPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center gap-8 bg-cream px-6">
+      <div className="flex min-h-[calc(100vh-5rem)] flex-col items-center justify-center gap-8 bg-cream px-6">
         <div className="w-full max-w-4xl space-y-6">
           <Skeleton className="h-12 w-1/3" />
           <div className="grid gap-4 md:grid-cols-4">
@@ -212,7 +212,7 @@ export default function AdminPage() {
   const grandPrizeDrawn = globalStats?.game.grandPrizeDrawn ?? false;
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-cream py-8">
+    <div className="min-h-[calc(100vh-5rem)] bg-cream py-8">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">

@@ -51,7 +51,7 @@ export default function DashboardPage() {
 
   if (authLoading || !isAuthenticated) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] bg-gray-50 py-8">
+      <div className="min-h-[calc(100vh-5rem)] bg-gray-50 py-8">
         <div className="container mx-auto px-4">
           {/* Header */}
           <div className="mb-8">
@@ -124,7 +124,7 @@ export default function DashboardPage() {
   const deliveredPrizes = participations?.filter((p) => p.prizeDelivered).length || 0;
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gray-50 py-8">
+    <div className="min-h-[calc(100vh-5rem)] bg-gray-50 py-8">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="mb-8 flex items-start justify-between gap-4">

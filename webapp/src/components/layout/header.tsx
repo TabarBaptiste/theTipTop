@@ -41,7 +41,9 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-warm-beige bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-      <nav className="container mx-auto flex h-16 items-center justify-between px-6">
+      {/* h-20 : la nav est calee sur le logo. Si tu changes cette hauteur,
+          repercute-la sur les min-h-[calc(100vh-5rem)] des pages. */}
+      <nav className="container mx-auto flex h-20 items-center justify-between px-6">
         {/* Logo */}
         <Link href="/" className="flex items-center">
           {/* unoptimized : l'optimiseur de Next refuse les SVG sans dangerouslyAllowSVG,
@@ -49,9 +51,9 @@ export function Header() {
           <Image
             src="/img/logo-artisan-mediterraneen-horizontal.svg"
             alt="Thé Tip Top"
-            width={114}
-            height={48}
-            className="h-12 w-auto"
+            width={152}
+            height={64}
+            className="h-16 w-auto"
             unoptimized
             priority
           />

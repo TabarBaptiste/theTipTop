@@ -56,7 +56,7 @@ export function SkeletonForm() {
 
 export function SkeletonFullPage() {
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center gap-6 bg-cream px-4">
+    <div className="flex min-h-[calc(100vh-5rem)] flex-col items-center justify-center gap-6 bg-cream px-4">
       <Skeleton className="h-8 w-48" />
       <Skeleton className="h-4 w-64" />
     </div>

@@ -84,7 +84,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-cream px-4 py-12">
+    <div className="flex min-h-[calc(100vh-5rem)] items-center justify-center bg-cream px-4 py-12">
       {/* Gestionnaire d'erreurs OAuth - doit etre dans un Suspense boundary */}
       <Suspense fallback={null}>
         <OAuthErrorHandler />
