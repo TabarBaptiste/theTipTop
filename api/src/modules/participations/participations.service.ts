@@ -10,7 +10,7 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, TicketStatus } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TicketsService } from '../tickets/tickets.service';
 import { RedisService } from '../../redis/redis.service';
@@ -66,14 +66,22 @@ export class ParticipationsService {
         throw new NotFoundException('Ticket non trouvé');
       }
 
-      if (ticketCheck.isUsed || ticketCheck.participation) {
+      // RG-18 : un ticket réservé par un lead en cours de vérification doit
+      // renvoyer un message distinct de « déjà utilisé ».
+      if (ticketCheck.status === TicketStatus.EN_ATTENTE) {
+        throw new ConflictException(
+          'Ce code est en cours de validation par un autre participant',
+        );
+      }
+
+      if (ticketCheck.status === TicketStatus.UTILISE || ticketCheck.participation) {
         throw new ConflictException('Ce code a déjà été utilisé');
       }
 
       await tx.ticket.update({
         where: { id: ticketCheck.id },
         data: {
-          isUsed: true,
+          status: TicketStatus.UTILISE,
           usedAt: new Date(),
         },
       });
@@ -233,7 +241,7 @@ export class ParticipationsService {
           code: ticket.code,
           prizeType: ticket.prizeType,
           prize: prizesMap[ticket.prizeType],
-          isUsed: ticket.isUsed,
+          isUsed: ticket.status === TicketStatus.UTILISE,
         },
         participation: null,
       };
@@ -244,7 +252,7 @@ export class ParticipationsService {
         code: ticket.code,
         prizeType: ticket.prizeType,
         prize: prizesMap[ticket.prizeType],
-        isUsed: ticket.isUsed,
+        isUsed: ticket.status === TicketStatus.UTILISE,
       },
       participation: {
         id: ticket.participation.id,

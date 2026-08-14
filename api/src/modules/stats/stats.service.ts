@@ -3,7 +3,7 @@
 // ===========================================
 
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, TicketStatus } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ParticipationsService } from '../participations/participations.service';
 import { RedisService } from '../../redis/redis.service';
@@ -64,7 +64,7 @@ export class StatsService {
       gameConfig,
     ] = await Promise.all([
       this.prisma.ticket.count(),
-      this.prisma.ticket.count({ where: { isUsed: true } }),
+      this.prisma.ticket.count({ where: { status: TicketStatus.UTILISE } }),
       this.prisma.ticket.count({ where: { isDistributed: true } }),
       this.prisma.user.count({ where: { role: 'CLIENT', deletedAt: null } }),
       this.prisma.participation.count(),
@@ -152,7 +152,7 @@ export class StatsService {
       _count: {
         _all: true,
       },
-      where: { isUsed: true },
+      where: { status: TicketStatus.UTILISE },
     });
 
     const deliveredCount = await this.prisma.participation.count({

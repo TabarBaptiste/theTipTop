@@ -6,7 +6,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { PRIZES_MAP_CACHE_KEY, PRIZES_MAP_TTL, STATS_CACHE_PATTERN } from '../../redis/cache-keys';
-import { Ticket, Prize } from '@prisma/client';
+import { Ticket, Prize, TicketStatus } from '@prisma/client';
 
 /** Shape réduite retournée dans les réponses API */
 export type PrizeLabel = { name: string; description: string; value: string | null };
@@ -75,7 +75,16 @@ export class TicketsService {
       return { isValid: false, error: "Ce code n'existe pas." };
     }
 
-    if (ticket.isUsed) {
+    // RG-18 : le ticket réservé par un lead en cours de vérification renvoie un
+    // message distinct, sinon l'utilisateur croit son code définitivement perdu.
+    if (ticket.status === TicketStatus.EN_ATTENTE) {
+      return {
+        isValid: false,
+        error: 'Ce code est en cours de validation par un autre participant.',
+      };
+    }
+
+    if (ticket.status === TicketStatus.UTILISE) {
       return { isValid: false, error: 'Ce code a déjà été utilisé.' };
     }
 
@@ -153,7 +162,7 @@ export class TicketsService {
     }
 
     const tickets = await this.prisma.ticket.findMany({
-      where: { isUsed: false, isDistributed: false },
+      where: { status: TicketStatus.DISPONIBLE, isDistributed: false },
       take: count,
       select: { code: true },
     });
@@ -178,12 +187,12 @@ export class TicketsService {
   async getStats() {
     const [total, used, distributed, byPrize] = await Promise.all([
       this.prisma.ticket.count(),
-      this.prisma.ticket.count({ where: { isUsed: true } }),
+      this.prisma.ticket.count({ where: { status: TicketStatus.UTILISE } }),
       this.prisma.ticket.count({ where: { isDistributed: true } }),
       this.prisma.ticket.groupBy({
         by: ['prizeType'],
         _count: true,
-        where: { isUsed: true },
+        where: { status: TicketStatus.UTILISE },
       }),
     ]);
 
