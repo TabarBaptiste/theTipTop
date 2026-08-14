@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Users, Ticket, Gift, TrendingUp, Trophy,
-  Calendar, Download, PieChart, BarChart3,
+  Loader2, Calendar, Download, PieChart, BarChart3,
   Mail, ShieldCheck, Scale, RefreshCw,
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
