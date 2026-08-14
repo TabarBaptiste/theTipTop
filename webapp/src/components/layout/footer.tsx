@@ -149,10 +149,12 @@ export function Footer() {
                   className="flex-1 rounded-soft border border-warm-beige bg-white/10 px-3 py-2 text-sm text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-terracotta-300"
                   required
                 />
+                {/* Beige au repos, orange au clic (cf. charte). Texte sombre :
+                    le blanc ne passe pas le contraste sur le beige. */}
                 <Button
                   type="submit"
                   size="icon"
-                  className="shrink-0"
+                  className="shrink-0 bg-warm-beige text-noir hover:bg-warm-beige/90 active:bg-terracotta-deep active:text-white"
                   aria-label="S'abonner à la newsletter"
                 >
                   →
