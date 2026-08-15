@@ -23,9 +23,10 @@ export function HeroSection() {
             </h1>
 
             <p className="mt-6 text-body leading-relaxed text-stone-grey">
-              A l&apos;occasion de l&apos;ouverture de notre 10eme boutique a Nice,
-              participez a notre grand jeu-concours et tentez de remporter de
-              nombreux lots. 100% des tickets sont gagnants !
+              À l&apos;occasion de l&apos;ouverture de notre 10<sup>e</sup> boutique à Nice,
+              participez à notre grand jeu-concours : <strong className="text-noir">100 % des
+              tickets sont gagnants</strong>, et chaque participation vous inscrit au tirage
+              au sort d&apos;<strong className="text-noir">un an de thé</strong>.
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">
