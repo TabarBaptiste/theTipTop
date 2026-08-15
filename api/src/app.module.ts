@@ -5,6 +5,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ScheduleModule } from '@nestjs/schedule';
 import { APP_GUARD } from '@nestjs/core';
 
 // Modules internes
@@ -47,6 +48,9 @@ import { HealthModule } from './modules/health/health.module';
         limit: 100,
       },
     ]),
+
+    // Jobs planifiés (libération des réservations, relances, purge RGPD)
+    ScheduleModule.forRoot(),
 
     // Database
     PrismaModule,
