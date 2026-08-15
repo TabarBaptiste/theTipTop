@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useIsHydrated } from '@/lib/hooks/use-is-hydrated';
 
 const MIN_AGE = 18;
 const MAX_AGE = 120;
@@ -63,6 +64,12 @@ interface Props {
 }
 
 export function ParticipationForm({ onSubmit, isSubmitting }: Props) {
+  // Tant que la page n'est pas hydratée, React n'intercepte pas la soumission :
+  // le navigateur ferait un envoi natif en GET et recopierait email, téléphone
+  // et date de naissance dans l'URL. Le bouton reste donc désactivé, ce qui
+  // neutralise aussi la validation implicite par la touche Entrée.
+  const isHydrated = useIsHydrated();
+
   const {
     register,
     handleSubmit,
@@ -238,7 +245,7 @@ export function ParticipationForm({ onSubmit, isSubmitting }: Props) {
         <input id="website" type="text" tabIndex={-1} autoComplete="off" {...register('website')} />
       </div>
 
-      <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
+      <Button type="submit" className="w-full" size="lg" disabled={isSubmitting || !isHydrated}>
         {isSubmitting ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
