@@ -3,10 +3,11 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { useState, useSyncExternalStore } from 'react';
+import { useState } from 'react';
 import { Menu, X, User, ShieldCheck, Store } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/lib/stores/auth-store';
+import { useIsHydrated } from '@/lib/hooks/use-is-hydrated';
 import { cn } from '@/lib/utils';
 
 // « Boutiques » retiré : la route /boutiques n'existe pas encore, le lien renvoyait un 404.
@@ -17,17 +18,6 @@ const navigation = [
   { name: 'Mon concours', href: '/dashboard' },
   { name: 'FAQ', href: '/faq' },
 ];
-
-// Détection d'hydratation sans setState dans un effect :
-// renvoie false côté serveur, true dès le premier rendu client.
-const emptySubscribe = () => () => { };
-function useIsHydrated() {
-  return useSyncExternalStore(
-    emptySubscribe,
-    () => true,
-    () => false,
-  );
-}
 
 export function Header() {
   const pathname = usePathname();

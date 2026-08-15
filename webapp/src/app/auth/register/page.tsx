@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuthStore } from '@/lib/stores/auth-store';
+import { useIsHydrated } from '@/lib/hooks/use-is-hydrated';
 import { trackRegisterSuccess, trackRegisterFailure, trackCTAClick } from '@/lib/analytics';
 
 const MIN_AGE = 18;
@@ -81,6 +82,9 @@ export default function RegisterPage() {
   const router = useRouter();
   const { register: registerUser } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
+  // Même risque qu'à la connexion, aggravé : ce formulaire porte le mot de
+  // passe, sa confirmation, la date de naissance et le téléphone.
+  const isHydrated = useIsHydrated();
 
   const {
     register,
@@ -297,7 +301,7 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+          <Button type="submit" className="w-full" size="lg" disabled={isLoading || !isHydrated}>
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
