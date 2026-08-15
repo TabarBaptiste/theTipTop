@@ -5,6 +5,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { ParticipationsController } from './participations.controller';
 import { ParticipationsService } from './participations.service';
+import { LeadsService } from './leads.service';
 import { User } from '@prisma/client';
 
 describe('ParticipationsController', () => {
@@ -18,14 +19,30 @@ describe('ParticipationsController', () => {
     findById: jest.fn(),
   };
 
+  const mockLeadsService = {
+    initiate: jest.fn(),
+    verify: jest.fn(),
+    resend: jest.fn(),
+  };
+
   const client = { id: 'u1', role: 'CLIENT' } as User;
   const employee = { id: 'e1', role: 'EMPLOYEE' } as User;
 
   beforeEach(() => {
     controller = new ParticipationsController(
       mockParticipationsService as unknown as ParticipationsService,
+      mockLeadsService as unknown as LeadsService,
     );
     jest.clearAllMocks();
+  });
+
+  it('initiate should forward the caller IP for rate limiting', async () => {
+    mockLeadsService.initiate.mockResolvedValue({ leadId: 'l1' });
+    const dto = { code: 'ABCDEFGH23', email: 'a@b.fr' } as never;
+
+    await controller.initiate(dto, '10.0.0.1');
+
+    expect(mockLeadsService.initiate).toHaveBeenCalledWith(dto, '10.0.0.1');
   });
 
   it('participate should delegate with the user id and code', async () => {

@@ -69,9 +69,7 @@ export class ParticipationsService {
       // RG-18 : un ticket réservé par un lead en cours de vérification doit
       // renvoyer un message distinct de « déjà utilisé ».
       if (ticketCheck.status === TicketStatus.EN_ATTENTE) {
-        throw new ConflictException(
-          'Ce code est en cours de validation par un autre participant',
-        );
+        throw new ConflictException('Ce code est en cours de validation par un autre participant');
       }
 
       if (ticketCheck.status === TicketStatus.UTILISE || ticketCheck.participation) {
