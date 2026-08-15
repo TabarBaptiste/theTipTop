@@ -199,6 +199,14 @@ model Lead {
   rgpdConsentAt DateTime
   consentEmail  Boolean    @default(false)
 
+  // Recommandation CNIL du 14/04/2026 : le consentement au pixel de tracking
+  // est distinct du consentement a recevoir des emails. Accepter la newsletter
+  // ne vaut pas acceptation du suivi d'ouverture.
+  // null = inconnu (jamais demande), ce qui correspond au statut « unknown »
+  // de Brevo et se mappe sur contactPixelTrackingConsent.
+  pixelTrackingConsent   Boolean?
+  pixelTrackingConsentAt DateTime?
+
   // Compte cree a la confirmation
   userId        String?
   user          User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
