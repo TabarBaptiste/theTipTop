@@ -73,7 +73,7 @@ describe('Header', () => {
     render(<Header />);
 
     screen.getAllByRole('link', { name: 'Participer' }).forEach((link) => {
-      expect(link).toHaveAttribute('href', '/dashboard/participate');
+      expect(link).toHaveAttribute('href', '/participate');
     });
     expect(screen.getAllByRole('link', { name: 'Connexion' }).length).toBeGreaterThan(0);
     expect(screen.queryByRole('link', { name: 'Jean' })).not.toBeInTheDocument();

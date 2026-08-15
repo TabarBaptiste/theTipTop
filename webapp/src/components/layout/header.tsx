@@ -70,7 +70,7 @@ export function Header() {
         {/* Auth Buttons */}
         <div className="hidden items-center gap-3 md:flex">
           <Button asChild size="sm">
-            <Link href="/dashboard/participate">Participer</Link>
+            <Link href="/participate">Participer</Link>
           </Button>
           {isHydrated && (
             <>
@@ -147,7 +147,7 @@ export function Header() {
           ))}
           <div className="mt-4 flex flex-col gap-2 border-t border-warm-beige pt-4">
             <Button asChild className="w-full">
-              <Link href="/dashboard/participate" onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/participate" onClick={() => setMobileMenuOpen(false)}>
                 Participer
               </Link>
             </Button>

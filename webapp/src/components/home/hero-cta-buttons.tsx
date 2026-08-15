@@ -9,7 +9,7 @@ export function HeroCTAButtons() {
     <div className="mt-8 flex flex-col gap-4 sm:flex-row">
       <Button asChild size="lg">
         <Link
-          href="/dashboard/participate"
+          href="/participate"
           onClick={() => trackCTAClick('Participer maintenant', 'hero_section')}
         >
           Participer maintenant

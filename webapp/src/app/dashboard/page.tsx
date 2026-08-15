@@ -195,7 +195,7 @@ export default function DashboardPage() {
               </p>
             </div>
             <Button asChild size="lg">
-              <Link href="/dashboard/participate">
+              <Link href="/participate">
                 Participer
                 <ChevronRight className="ml-2 h-4 w-4" />
               </Link>
@@ -291,7 +291,7 @@ export default function DashboardPage() {
                   Vous n&apos;avez pas encore participé au jeu-concours.
                 </p>
                 <Button asChild className="mt-4">
-                  <Link href="/dashboard/participate">Participer maintenant</Link>
+                  <Link href="/participate">Participer maintenant</Link>
                 </Button>
               </div>
             )}
