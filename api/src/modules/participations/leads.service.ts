@@ -14,7 +14,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { randomInt } from 'crypto';
-import { Prisma, LeadStatus, TicketStatus, Role } from '@prisma/client';
+import { Prisma, LeadStatus, Role } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { MailService } from '../../mail/mail.service';
@@ -71,44 +71,27 @@ export class LeadsService {
     const code = this.generateVerificationCode();
     const expiresAt = this.hoursFromNow(CODE_TTL_HOURS);
 
-    const lead = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-      const created = await tx.lead.create({
-        data: {
-          email: normalizedEmail,
-          firstName: dto.firstName.trim(),
-          lastName: dto.lastName.trim(),
-          phone: dto.phone ?? null,
-          birthDate: dto.birthDate ? new Date(dto.birthDate) : null,
-          gender: dto.gender ?? null,
-          status: LeadStatus.EN_ATTENTE_VERIFICATION,
-          verificationCode: code,
-          codeExpiresAt: expiresAt,
-          lastCodeSentAt: new Date(),
-          rgpdConsentAt: new Date(),
-          consentEmail: dto.consentEmail ?? false,
-          pixelTrackingConsent: dto.pixelTrackingConsent ?? null,
-          pixelTrackingConsentAt: dto.pixelTrackingConsent === undefined ? null : new Date(),
-        },
-      });
-
-      // RG-15 : réservation exclusive. La condition sur le statut fait partie
-      // du UPDATE : si une autre requête a réservé le même code entre-temps,
-      // aucune ligne n'est touchée et on refuse. Pas de lecture puis écriture,
-      // donc pas de fenêtre de concurrence.
-      const reserved = await tx.ticket.updateMany({
-        where: { id: verification.ticket!.id, status: TicketStatus.DISPONIBLE },
-        data: {
-          status: TicketStatus.EN_ATTENTE,
-          pendingLeadId: created.id,
-          pendingExpiresAt: expiresAt,
-        },
-      });
-
-      if (reserved.count === 0) {
-        throw new ConflictException('Ce code vient d’être pris par un autre participant.');
-      }
-
-      return created;
+    // Le ticket n'est pas réservé : il reste soumettable tant que personne n'a
+    // confirmé son email. On mémorise seulement quel code ce lead vise, pour
+    // pouvoir le consommer à la vérification.
+    const lead = await this.prisma.lead.create({
+      data: {
+        email: normalizedEmail,
+        firstName: dto.firstName.trim(),
+        lastName: dto.lastName.trim(),
+        phone: dto.phone ?? null,
+        birthDate: dto.birthDate ? new Date(dto.birthDate) : null,
+        gender: dto.gender ?? null,
+        status: LeadStatus.EN_ATTENTE_VERIFICATION,
+        ticketId: verification.ticket.id,
+        verificationCode: code,
+        codeExpiresAt: expiresAt,
+        lastCodeSentAt: new Date(),
+        rgpdConsentAt: new Date(),
+        consentEmail: dto.consentEmail ?? false,
+        pixelTrackingConsent: dto.pixelTrackingConsent ?? null,
+        pixelTrackingConsentAt: dto.pixelTrackingConsent === undefined ? null : new Date(),
+      },
     });
 
     await this.mail.sendVerificationCode(normalizedEmail, code, expiresAt);
@@ -139,13 +122,12 @@ export class LeadsService {
     }
 
     const result = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-      const ticket = await tx.ticket.findFirst({
-        where: { pendingLeadId: lead.id, status: TicketStatus.EN_ATTENTE },
-      });
+      const ticket = lead.ticketId
+        ? await tx.ticket.findUnique({ where: { id: lead.ticketId } })
+        : null;
 
       if (!ticket) {
-        // Le job de libération est passé entre la vérification du code et ici.
-        throw new ConflictException('La réservation de votre code a expiré, veuillez recommencer.');
+        throw new ConflictException('Le code associé à cette demande est introuvable.');
       }
 
       // Le compte peut déjà exister si la personne s'est inscrite par ailleurs
@@ -170,18 +152,19 @@ export class LeadsService {
         });
       }
 
+      // RG-12/RG-13 : la condition isUsed fait partie du UPDATE. Si un autre
+      // participant a consommé le code entre-temps, aucune ligne n'est touchée
+      // et on refuse : c'est ici, et nulle part avant, que le code est attribué.
       const consumed = await tx.ticket.updateMany({
-        where: { id: ticket.id, status: TicketStatus.EN_ATTENTE },
+        where: { id: ticket.id, isUsed: false },
         data: {
-          status: TicketStatus.UTILISE,
+          isUsed: true,
           usedAt: new Date(),
-          pendingLeadId: null,
-          pendingExpiresAt: null,
         },
       });
 
       if (consumed.count === 0) {
-        throw new ConflictException('La réservation de votre code a expiré, veuillez recommencer.');
+        throw new ConflictException('Ce code a déjà été utilisé par un autre participant.');
       }
 
       const participation = await tx.participation.create({
@@ -263,27 +246,18 @@ export class LeadsService {
     const expiresAt = this.hoursFromNow(CODE_TTL_HOURS);
     const resendCount = emailChanged ? 0 : lead.resendCount + 1;
 
-    await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-      await tx.lead.update({
-        where: { id: lead.id },
-        data: {
-          email: newEmail,
-          // Le renvoi invalide le code précédent (RG-07).
-          verificationCode: code,
-          codeExpiresAt: expiresAt,
-          lastCodeSentAt: new Date(),
-          resendCount,
-          // Les relances repartent de zéro sur la nouvelle échéance.
-          remindersSent: 0,
-        },
-      });
-
-      // RG-17 : la réservation du ticket suit exactement l'échéance du code.
-      // Sans cela on aurait un code valide sans ticket réservé.
-      await tx.ticket.updateMany({
-        where: { pendingLeadId: lead.id, status: TicketStatus.EN_ATTENTE },
-        data: { pendingExpiresAt: expiresAt },
-      });
+    await this.prisma.lead.update({
+      where: { id: lead.id },
+      data: {
+        email: newEmail,
+        // Le renvoi invalide le code précédent (RG-07).
+        verificationCode: code,
+        codeExpiresAt: expiresAt,
+        lastCodeSentAt: new Date(),
+        resendCount,
+        // Les relances repartent de zéro sur la nouvelle échéance.
+        remindersSent: 0,
+      },
     });
 
     await this.mail.sendVerificationCode(newEmail, code, expiresAt);

@@ -126,7 +126,7 @@ describe('TicketsService', () => {
       mockPrismaService.ticket.findUnique.mockResolvedValue({
         id: 't1',
         code: 'ABCDEFGH23',
-        status: 'UTILISE',
+        isUsed: true,
       });
 
       const result = await service.verifyCode('ABCDEFGH23');
@@ -135,27 +135,11 @@ describe('TicketsService', () => {
       expect(result.error).toContain('déjà été utilisé');
     });
 
-    // RG-18 : un code réservé par un lead en cours de vérification doit être
-    // distingué d'un code consommé, sinon l'utilisateur le croit perdu.
-    it('should reject a code reserved by a pending lead with a distinct message', async () => {
-      mockPrismaService.ticket.findUnique.mockResolvedValue({
-        id: 't1',
-        code: 'ABCDEFGH23',
-        status: 'EN_ATTENTE',
-      });
-
-      const result = await service.verifyCode('ABCDEFGH23');
-
-      expect(result.isValid).toBe(false);
-      expect(result.error).toContain('en cours de validation');
-      expect(result.error).not.toContain('déjà été utilisé');
-    });
-
     it('should reject when no active game config exists', async () => {
       mockPrismaService.ticket.findUnique.mockResolvedValue({
         id: 't1',
         code: 'ABCDEFGH23',
-        status: 'DISPONIBLE',
+        isUsed: false,
       });
       mockPrismaService.gameConfig.findFirst.mockResolvedValue(null);
 
@@ -169,7 +153,7 @@ describe('TicketsService', () => {
       mockPrismaService.ticket.findUnique.mockResolvedValue({
         id: 't1',
         code: 'ABCDEFGH23',
-        status: 'DISPONIBLE',
+        isUsed: false,
       });
       mockPrismaService.gameConfig.findFirst.mockResolvedValue({
         ...activeGameConfig,
@@ -186,7 +170,7 @@ describe('TicketsService', () => {
       mockPrismaService.ticket.findUnique.mockResolvedValue({
         id: 't1',
         code: 'ABCDEFGH23',
-        status: 'DISPONIBLE',
+        isUsed: false,
         prizeType: 'UNKNOWN_PRIZE',
       });
       mockPrismaService.gameConfig.findFirst.mockResolvedValue(activeGameConfig);
@@ -198,7 +182,7 @@ describe('TicketsService', () => {
       mockPrismaService.ticket.findUnique.mockResolvedValue({
         id: 't1',
         code: 'ABCDEFGH23',
-        status: 'DISPONIBLE',
+        isUsed: false,
         prizeType: 'INFUSER',
       });
       mockPrismaService.gameConfig.findFirst.mockResolvedValue(activeGameConfig);

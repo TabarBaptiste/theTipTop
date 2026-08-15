@@ -1,12 +1,8 @@
 -- ===========================================
 -- Tunnel de participation (UC-05)
 -- ===========================================
--- Introduit le statut tri-etat du ticket et la table leads.
--- La colonne booleenne isUsed est reprise dans le nouveau statut AVANT
--- d'etre supprimee : aucune donnee n'est perdue.
-
--- CreateEnum
-CREATE TYPE "TicketStatus" AS ENUM ('DISPONIBLE', 'EN_ATTENTE', 'UTILISE');
+-- Introduit la table leads. La table tickets n'est pas modifiee : le code n'est
+-- consomme qu'a la confirmation de l'email, via isUsed (RG-12).
 
 -- CreateEnum
 CREATE TYPE "LeadStatus" AS ENUM ('EN_ATTENTE_VERIFICATION', 'VERIFIE', 'EXPIRE');
@@ -29,6 +25,7 @@ CREATE TABLE "leads" (
     "rgpdConsentAt" TIMESTAMP(3) NOT NULL,
     "consentEmail" BOOLEAN NOT NULL DEFAULT false,
     "userId" TEXT,
+    "ticketId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "verifiedAt" TIMESTAMP(3),
@@ -42,10 +39,17 @@ CREATE INDEX "leads_email_idx" ON "leads"("email");
 CREATE INDEX "leads_status_idx" ON "leads"("status");
 CREATE INDEX "leads_codeExpiresAt_idx" ON "leads"("codeExpiresAt");
 CREATE INDEX "leads_purgeAfter_idx" ON "leads"("purgeAfter");
+CREATE INDEX "leads_ticketId_idx" ON "leads"("ticketId");
 
 -- AddForeignKey
 ALTER TABLE "leads" ADD CONSTRAINT "leads_userId_fkey"
   FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- Pas de contrainte d'unicite sur ticketId : plusieurs leads peuvent viser le
+-- meme code tant qu'aucun n'a confirme. Le premier a confirmer emporte le
+-- ticket, les suivants sont rejetes a ce moment-la.
+ALTER TABLE "leads" ADD CONSTRAINT "leads_ticketId_fkey"
+  FOREIGN KEY ("ticketId") REFERENCES "tickets"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- RG-01 : l'email est unique parmi les leads ACTIFS uniquement (en attente de
 -- verification ou verifies). Un lead expire ne doit pas bloquer une nouvelle
@@ -54,25 +58,3 @@ ALTER TABLE "leads" ADD CONSTRAINT "leads_userId_fkey"
 -- automatiquement. A reporter manuellement si la migration est un jour rejouee.
 CREATE UNIQUE INDEX "leads_email_actif_unique" ON "leads"("email")
   WHERE "status" IN ('EN_ATTENTE_VERIFICATION', 'VERIFIE');
-
--- AlterTable : nouveau statut, valeur par defaut DISPONIBLE
-ALTER TABLE "tickets" ADD COLUMN "status" "TicketStatus" NOT NULL DEFAULT 'DISPONIBLE';
-ALTER TABLE "tickets" ADD COLUMN "pendingLeadId" TEXT;
-ALTER TABLE "tickets" ADD COLUMN "pendingExpiresAt" TIMESTAMP(3);
-
--- Reprise des donnees : tout ticket deja consomme passe a UTILISE.
--- Les autres conservent la valeur par defaut DISPONIBLE.
-UPDATE "tickets" SET "status" = 'UTILISE' WHERE "isUsed" = true;
-
--- La colonne booleenne n'est supprimee qu'une fois la reprise effectuee.
-DROP INDEX "tickets_isUsed_idx";
-ALTER TABLE "tickets" DROP COLUMN "isUsed";
-
--- CreateIndex
-CREATE UNIQUE INDEX "tickets_pendingLeadId_key" ON "tickets"("pendingLeadId");
-CREATE INDEX "tickets_status_idx" ON "tickets"("status");
-CREATE INDEX "tickets_pendingExpiresAt_idx" ON "tickets"("pendingExpiresAt");
-
--- AddForeignKey
-ALTER TABLE "tickets" ADD CONSTRAINT "tickets_pendingLeadId_fkey"
-  FOREIGN KEY ("pendingLeadId") REFERENCES "leads"("id") ON DELETE SET NULL ON UPDATE CASCADE;

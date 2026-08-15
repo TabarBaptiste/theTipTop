@@ -77,7 +77,7 @@ describe('ParticipationsService', () => {
       id: 'ticket-1',
       code: validCode,
       prizeType: 'INFUSER',
-      status: 'DISPONIBLE',
+      isUsed: false,
     };
 
     it('should create participation for valid code', async () => {
@@ -87,7 +87,7 @@ describe('ParticipationsService', () => {
         return callback({
           ticket: {
             findUnique: jest.fn().mockResolvedValue(mockTicket),
-            update: jest.fn().mockResolvedValue({ ...mockTicket, status: 'UTILISE' }),
+            update: jest.fn().mockResolvedValue({ ...mockTicket, isUsed: true }),
           },
           participation: {
             create: jest.fn().mockResolvedValue({
@@ -237,7 +237,7 @@ describe('ParticipationsService', () => {
       mockPrismaService.ticket.findUnique.mockResolvedValue({
         code: 'ABCDEFGH23',
         prizeType: 'INFUSER',
-        status: 'DISPONIBLE',
+        isUsed: false,
         participation: null,
       });
 
@@ -245,7 +245,6 @@ describe('ParticipationsService', () => {
 
       expect(result.participation).toBeNull();
       expect(result.ticket.prize.name).toBe('Infuseur à thé');
-      // Le contrat expose toujours un booléen, désormais dérivé du statut.
       expect(result.ticket.isUsed).toBe(false);
     });
 
@@ -253,7 +252,7 @@ describe('ParticipationsService', () => {
       mockPrismaService.ticket.findUnique.mockResolvedValue({
         code: 'ABCDEFGH23',
         prizeType: 'INFUSER',
-        status: 'UTILISE',
+        isUsed: true,
         participation: {
           id: 'p1',
           createdAt: new Date(),

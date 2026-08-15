@@ -73,36 +73,25 @@ model Ticket {
   // Gain associé (pré-attribué à la génération)
   prizeType     PrizeType
 
-  // Statut. EN_ATTENTE = reserve par un lead non encore confirme (RG-15) :
-  // le ticket est alors inaccessible a toute autre soumission, y compris la sienne.
-  status        TicketStatus @default(DISPONIBLE)
+  // Statut
+  isUsed        Boolean   @default(false)      // Code utilisé par un client
   isDistributed Boolean   @default(false)      // Ticket imprimé/donné en magasin
-
-  // Reservation temporaire pendant la verification email (RG-15, RG-16).
-  // pendingExpiresAt est toujours aligne sur codeExpiresAt du lead (RG-17).
-  pendingLeadId    String?   @unique
-  pendingLead      Lead?     @relation(fields: [pendingLeadId], references: [id], onDelete: SetNull)
-  pendingExpiresAt DateTime?
 
   // Relation avec participation
   participation Participation?
+
+  // Leads ayant visé ce code sans avoir encore confirmé leur email
+  leads         Lead[]
 
   // Timestamps
   createdAt     DateTime  @default(now())
   usedAt        DateTime?
 
   @@index([code])
-  @@index([status])
+  @@index([isUsed])
   @@index([isDistributed])
   @@index([prizeType])
-  @@index([pendingExpiresAt])              // Job de liberation des reservations echues (RG-16)
   @@map("tickets")
-}
-
-enum TicketStatus {
-  DISPONIBLE    // Libre, peut etre soumis
-  EN_ATTENTE    // Reserve par un lead en cours de verification email
-  UTILISE       // Consomme, une participation existe
 }
 
 enum PrizeType {
@@ -211,8 +200,11 @@ model Lead {
   userId        String?
   user          User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
 
-  // Ticket reserve pendant la verification
-  reservedTicket Ticket?
+  // Ticket vise par le lead. Aucune reservation : le code reste soumettable par
+  // d'autres tant que l'email n'est pas confirme, la consommation n'a lieu qu'a
+  // la verification.
+  ticketId      String?
+  ticket        Ticket?    @relation(fields: [ticketId], references: [id], onDelete: SetNull)
 
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt

@@ -15,7 +15,7 @@ describe('LeadsService', () => {
 
   const mockPrisma = {
     lead: { create: jest.fn(), findFirst: jest.fn(), findUnique: jest.fn(), update: jest.fn() },
-    ticket: { updateMany: jest.fn(), findFirst: jest.fn() },
+    ticket: { updateMany: jest.fn(), findUnique: jest.fn() },
     user: { findUnique: jest.fn(), create: jest.fn() },
     participation: { create: jest.fn() },
     $transaction: jest.fn(),
@@ -51,23 +51,24 @@ describe('LeadsService', () => {
   });
 
   describe('initiate', () => {
-    it('crée le lead, réserve le ticket et envoie le code', async () => {
+    it('crée le lead en mémorisant le ticket visé, sans le consommer', async () => {
       mockTickets.verifyCode.mockResolvedValue({ isValid: true, ticket: { id: 't1' } });
       mockPrisma.lead.findFirst.mockResolvedValue(null);
       mockPrisma.lead.create.mockResolvedValue({ id: 'l1' });
-      mockPrisma.ticket.updateMany.mockResolvedValue({ count: 1 });
 
       const result = await service.initiate(validDto, '10.0.0.1');
 
       expect(result.leadId).toBe('l1');
       // RG-09 : deux premiers caractères puis domaine complet.
       expect(result.maskedEmail).toBe('je*********@email.fr');
-      // L'email est normalisé avant stockage.
+      // L'email est normalisé avant stockage, et le ticket visé est mémorisé.
       expect(mockPrisma.lead.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          data: expect.objectContaining({ email: 'jean.dupont@email.fr' }),
+          data: expect.objectContaining({ email: 'jean.dupont@email.fr', ticketId: 't1' }),
         }),
       );
+      // Le code reste disponible : aucune écriture sur la table tickets.
+      expect(mockPrisma.ticket.updateMany).not.toHaveBeenCalled();
       expect(mockMail.sendVerificationCode).toHaveBeenCalled();
     });
 
@@ -75,7 +76,6 @@ describe('LeadsService', () => {
       mockTickets.verifyCode.mockResolvedValue({ isValid: true, ticket: { id: 't1' } });
       mockPrisma.lead.findFirst.mockResolvedValue(null);
       mockPrisma.lead.create.mockResolvedValue({ id: 'l1' });
-      mockPrisma.ticket.updateMany.mockResolvedValue({ count: 1 });
 
       await service.initiate(validDto, '10.0.0.1');
 
@@ -84,7 +84,7 @@ describe('LeadsService', () => {
     });
 
     // RG-01 : une adresse déjà active ne doit rien révéler ni rien consommer.
-    it('applique le mode silencieux sans créer de lead ni réserver de ticket', async () => {
+    it('applique le mode silencieux sans créer de lead ni toucher au ticket', async () => {
       mockTickets.verifyCode.mockResolvedValue({ isValid: true, ticket: { id: 't1' } });
       mockPrisma.lead.findFirst.mockResolvedValue({
         id: 'existant',
@@ -111,17 +111,6 @@ describe('LeadsService', () => {
       expect(mockPrisma.lead.create).not.toHaveBeenCalled();
     });
 
-    // La réservation est un UPDATE conditionnel : 0 ligne touchée = code pris
-    // entre-temps par une autre requête.
-    it('refuse si le ticket a été réservé entre-temps', async () => {
-      mockTickets.verifyCode.mockResolvedValue({ isValid: true, ticket: { id: 't1' } });
-      mockPrisma.lead.findFirst.mockResolvedValue(null);
-      mockPrisma.lead.create.mockResolvedValue({ id: 'l1' });
-      mockPrisma.ticket.updateMany.mockResolvedValue({ count: 0 });
-
-      await expect(service.initiate(validDto, '10.0.0.1')).rejects.toThrow(ConflictException);
-    });
-
     // RG-03
     it('bloque au-delà du plafond horaire par IP', async () => {
       mockRedis.incr.mockResolvedValue(11);
@@ -144,6 +133,7 @@ describe('LeadsService', () => {
       verificationCode: '123456',
       codeExpiresAt: new Date(Date.now() + 3600_000),
       consentEmail: true,
+      ticketId: 't1',
     };
 
     it('rejette un code erroné', async () => {
@@ -167,7 +157,7 @@ describe('LeadsService', () => {
 
     it('crée le compte, consomme le ticket et ouvre la session', async () => {
       mockPrisma.lead.findUnique.mockResolvedValue(pendingLead);
-      mockPrisma.ticket.findFirst.mockResolvedValue({
+      mockPrisma.ticket.findUnique.mockResolvedValue({
         id: 't1',
         code: 'ABCDEFGH23',
         prizeType: 'INFUSER',
@@ -189,7 +179,7 @@ describe('LeadsService', () => {
 
     it('rattache un compte existant au lieu de le dupliquer', async () => {
       mockPrisma.lead.findUnique.mockResolvedValue(pendingLead);
-      mockPrisma.ticket.findFirst.mockResolvedValue({ id: 't1', code: 'C', prizeType: 'INFUSER' });
+      mockPrisma.ticket.findUnique.mockResolvedValue({ id: 't1', code: 'C', prizeType: 'INFUSER' });
       mockPrisma.user.findUnique.mockResolvedValue({ id: 'existant', password: 'hash' });
       mockPrisma.ticket.updateMany.mockResolvedValue({ count: 1 });
       mockPrisma.participation.create.mockResolvedValue({ id: 'p1', createdAt: new Date() });
@@ -202,9 +192,27 @@ describe('LeadsService', () => {
       expect(result.passwordRequired).toBe(false);
     });
 
-    it('refuse si la réservation a expiré entre-temps', async () => {
+    // RG-12/RG-13 : le code n'étant jamais réservé, la course se tranche ici.
+    // 0 ligne touchée = un autre participant a confirmé avant.
+    it('refuse si le code a été consommé par un autre entre-temps', async () => {
       mockPrisma.lead.findUnique.mockResolvedValue(pendingLead);
-      mockPrisma.ticket.findFirst.mockResolvedValue(null);
+      mockPrisma.ticket.findUnique.mockResolvedValue({
+        id: 't1',
+        code: 'ABCDEFGH23',
+        prizeType: 'INFUSER',
+      });
+      mockPrisma.user.findUnique.mockResolvedValue({ id: 'u1', password: 'hash' });
+      mockPrisma.ticket.updateMany.mockResolvedValue({ count: 0 });
+
+      await expect(service.verify({ leadId: 'l1', code: '123456' })).rejects.toThrow(
+        ConflictException,
+      );
+      expect(mockPrisma.participation.create).not.toHaveBeenCalled();
+    });
+
+    it('refuse si le ticket visé est introuvable', async () => {
+      mockPrisma.lead.findUnique.mockResolvedValue(pendingLead);
+      mockPrisma.ticket.findUnique.mockResolvedValue(null);
 
       await expect(service.verify({ leadId: 'l1', code: '123456' })).rejects.toThrow(
         ConflictException,
@@ -229,15 +237,17 @@ describe('LeadsService', () => {
       expect(mockMail.sendVerificationCode).not.toHaveBeenCalled();
     });
 
-    // RG-17 : sans cela on aurait un code valide sans ticket réservé.
-    it('prolonge la réservation du ticket en même temps que le code', async () => {
+    // RG-07 : le renvoi invalide le code précédent et repousse l'échéance,
+    // sans jamais toucher au ticket.
+    it('régénère le code et repousse l’échéance sans toucher au ticket', async () => {
       mockPrisma.lead.findUnique.mockResolvedValue(base);
 
       await service.resend({ leadId: 'l1' });
 
       const leadUpdate = mockPrisma.lead.update.mock.calls[0][0].data;
-      const ticketUpdate = mockPrisma.ticket.updateMany.mock.calls[0][0].data;
-      expect(ticketUpdate.pendingExpiresAt).toEqual(leadUpdate.codeExpiresAt);
+      expect(leadUpdate.verificationCode).toMatch(/^\d{6}$/);
+      expect(leadUpdate.codeExpiresAt.getTime()).toBeGreaterThan(Date.now());
+      expect(mockPrisma.ticket.updateMany).not.toHaveBeenCalled();
     });
 
     // RG-08

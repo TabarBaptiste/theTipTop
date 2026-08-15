@@ -30,26 +30,27 @@ describe('ParticipationJobsService', () => {
     mockPrisma.lead.updateMany.mockResolvedValue({ count: 0 });
   });
 
-  describe('releaseExpiredReservations (RG-16)', () => {
-    it('ne libère que les réservations échues et encore EN_ATTENTE', async () => {
-      await service.releaseExpiredReservations();
+  describe('expireStaleLeads', () => {
+    it('ne cible que les leads en attente dont le code est échu', async () => {
+      await service.expireStaleLeads();
 
-      const where = mockPrisma.ticket.updateMany.mock.calls[0][0].where;
-      expect(where.status).toBe('EN_ATTENTE');
-      expect(where.pendingExpiresAt.lt).toBeInstanceOf(Date);
+      const where = mockPrisma.lead.findMany.mock.calls[0][0].where;
+      expect(where.status).toBe('EN_ATTENTE_VERIFICATION');
+      expect(where.codeExpiresAt.lt).toBeInstanceOf(Date);
+    });
 
-      // La condition étant dans le WHERE, une confirmation arrivée entre-temps
-      // (ticket déjà UTILISE) n'est pas écrasée.
-      const data = mockPrisma.ticket.updateMany.mock.calls[0][0].data;
-      expect(data.status).toBe('DISPONIBLE');
-      expect(data.pendingLeadId).toBeNull();
-      expect(data.pendingExpiresAt).toBeNull();
+    it('ne touche jamais à la table tickets : aucun code n’était réservé', async () => {
+      mockPrisma.lead.findMany.mockResolvedValue([{ id: 'l1', email: 'a@b.fr' }]);
+
+      await service.expireStaleLeads();
+
+      expect(mockPrisma.ticket.updateMany).not.toHaveBeenCalled();
     });
 
     it('expire les leads, efface leur code et fixe la date de purge', async () => {
       mockPrisma.lead.findMany.mockResolvedValue([{ id: 'l1', email: 'a@b.fr' }]);
 
-      await service.releaseExpiredReservations();
+      await service.expireStaleLeads();
 
       const data = mockPrisma.lead.updateMany.mock.calls[0][0].data;
       expect(data.status).toBe('EXPIRE');
@@ -61,8 +62,8 @@ describe('ParticipationJobsService', () => {
       expect(mockMail.sendExpirationNotice).toHaveBeenCalledWith('a@b.fr');
     });
 
-    it("ne touche à rien quand aucune réservation n'a expiré", async () => {
-      await service.releaseExpiredReservations();
+    it("ne touche à rien quand aucun lead n'a expiré", async () => {
+      await service.expireStaleLeads();
 
       expect(mockPrisma.lead.updateMany).not.toHaveBeenCalled();
       expect(mockMail.sendExpirationNotice).not.toHaveBeenCalled();

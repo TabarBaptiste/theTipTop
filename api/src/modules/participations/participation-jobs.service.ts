@@ -1,7 +1,7 @@
 // ===========================================
 // Jobs planifiés du tunnel de participation
 // ===========================================
-// Trois balayages périodiques : libération des réservations échues (RG-16),
+// Trois balayages périodiques : expiration des leads non confirmés,
 // relances avant expiration (RG-20) et purge RGPD (RG-21).
 //
 // Tous les jobs sont écrits pour être rejouables sans effet de bord : chaque
@@ -11,7 +11,7 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { LeadStatus, TicketStatus } from '@prisma/client';
+import { LeadStatus } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { MailService } from '../../mail/mail.service';
 
@@ -39,31 +39,19 @@ export class ParticipationJobsService {
   ) {}
 
   /**
-   * RG-16 : libère les tickets dont la réservation a expiré et bascule les
-   * leads correspondants en EXPIRE.
+   * Bascule en EXPIRE les leads dont le code de vérification a dépassé les 48 h.
    *
-   * Toutes les dix minutes : un lot immobilisé quelques minutes de plus que
-   * les 48 h annoncées est sans conséquence, alors qu'un balayage à la minute
-   * interrogerait la base pour rien.
+   * Aucun ticket à libérer : le code n'est consommé qu'à la confirmation, donc
+   * un lead abandonné n'a jamais immobilisé quoi que ce soit.
+   *
+   * Toutes les dix minutes : quelques minutes de retard sur l'échéance annoncée
+   * sont sans conséquence, alors qu'un balayage à la minute interrogerait la
+   * base pour rien.
    */
   @Cron(CronExpression.EVERY_10_MINUTES)
-  async releaseExpiredReservations(): Promise<void> {
+  async expireStaleLeads(): Promise<void> {
     const now = new Date();
 
-    // La condition sur le statut fait partie du UPDATE : une confirmation qui
-    // arriverait au même instant a déjà fait passer le ticket à UTILISE, et
-    // n'est donc pas écrasée ici.
-    const released = await this.prisma.ticket.updateMany({
-      where: { status: TicketStatus.EN_ATTENTE, pendingExpiresAt: { lt: now } },
-      data: {
-        status: TicketStatus.DISPONIBLE,
-        pendingLeadId: null,
-        pendingExpiresAt: null,
-      },
-    });
-
-    // Les leads sont traités séparément : un lead peut avoir perdu sa
-    // réservation sans que son propre statut ait suivi.
     const expiring = await this.prisma.lead.findMany({
       where: {
         status: LeadStatus.EN_ATTENTE_VERIFICATION,
@@ -91,10 +79,8 @@ export class ParticipationJobsService {
       }
     }
 
-    if (released.count > 0 || expiring.length > 0) {
-      this.logger.log(
-        `Réservations libérées : ${released.count} ticket(s), ${expiring.length} lead(s) expiré(s)`,
-      );
+    if (expiring.length > 0) {
+      this.logger.log(`Leads expirés : ${expiring.length}`);
     }
   }
 
@@ -118,7 +104,7 @@ export class ParticipationJobsService {
           status: LeadStatus.EN_ATTENTE_VERIFICATION,
           remindersSent: step.alreadySent,
           // Échéance déjà entrée dans la fenêtre, mais pas encore dépassée :
-          // un lead expiré relève du job de libération, pas des relances.
+          // un lead expiré relève du job d'expiration, pas des relances.
           codeExpiresAt: { lte: threshold, gt: now },
         },
         select: { id: true, email: true, verificationCode: true },
