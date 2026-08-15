@@ -10,11 +10,12 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, LeadStatus, User } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TicketsService } from '../tickets/tickets.service';
 import { RedisService } from '../../redis/redis.service';
 import { PRIZES_MAP_CACHE_KEY, STATS_CACHE_PATTERN } from '../../redis/cache-keys';
+import { CreateParticipationDto } from './dto/create-participation.dto';
 
 type ParticipationWithTicket = Prisma.ParticipationGetPayload<{ include: { ticket: true } }>;
 
@@ -42,11 +43,17 @@ export class ParticipationsService {
 
   /**
    * Créer une participation (utiliser un code)
+   *
+   * Emprunté par deux chemins : l'espace personnel d'un client déjà activé
+   * (UC-06), et la première participation via Social Login (UC-05, chemin A),
+   * où l'email est certifié par le fournisseur tiers et ne demande donc ni
+   * réservation du ticket ni code de vérification.
    */
-  async participate(userId: string, code: string) {
+  async participate(user: User, dto: CreateParticipationDto) {
+    const userId = user.id;
     await this.checkSubmitRateLimit(userId);
 
-    const normalizedCode = code.toUpperCase().trim();
+    const normalizedCode = dto.code.toUpperCase().trim();
 
     const verification = await this.ticketsService.verifyCode(normalizedCode);
     if (!verification.isValid || !verification.ticket) {
@@ -97,6 +104,7 @@ export class ParticipationsService {
       });
     });
 
+    await this.ensureVerifiedLead(user, dto);
     await this.invalidateCachesAfterParticipation();
 
     return {
@@ -107,6 +115,60 @@ export class ParticipationsService {
       participatedAt: participation.createdAt,
       prizeDelivered: participation.prizeDelivered,
     };
+  }
+
+  /**
+   * Crée le lead « verifie » du chemin Social Login (UC-05, chemin A).
+   *
+   * Sans lui, un participant arrivé par Google ou Facebook n'existerait que
+   * dans la table users : il échapperait à la synchronisation Brevo et aux
+   * statistiques de conversion, qui reposent toutes deux sur les leads.
+   *
+   * Trois garde-fous :
+   * - sans consentement explicite, on ne crée rien. C'est ce qui préserve le
+   *   comportement historique de l'espace personnel, qui ne poste qu'un code ;
+   * - un lead actif existant n'est jamais dupliqué, ce que l'index unique
+   *   partiel de RG-01 interdirait de toute façon ;
+   * - un échec ici ne doit pas annuler la participation, déjà enregistrée et
+   *   transactionnelle : l'erreur est avalée et journalisée par l'appelant.
+   */
+  private async ensureVerifiedLead(user: User, dto: CreateParticipationDto): Promise<void> {
+    if (dto.consentData !== true) {
+      return;
+    }
+
+    const existing = await this.prisma.lead.findFirst({
+      where: {
+        email: user.email,
+        status: { in: [LeadStatus.VERIFIE, LeadStatus.EN_ATTENTE_VERIFICATION] },
+      },
+      select: { id: true },
+    });
+
+    if (existing) {
+      return;
+    }
+
+    const now = new Date();
+    await this.prisma.lead.create({
+      data: {
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phone: user.phone,
+        birthDate: user.birthDate,
+        gender: user.gender,
+        // L'identité est certifiée par le fournisseur tiers : aucun code de
+        // vérification n'est généré et le lead naît directement vérifié.
+        status: LeadStatus.VERIFIE,
+        verifiedAt: now,
+        rgpdConsentAt: now,
+        consentEmail: dto.consentEmail ?? false,
+        pixelTrackingConsent: dto.pixelTrackingConsent ?? null,
+        pixelTrackingConsentAt: dto.pixelTrackingConsent === undefined ? null : now,
+        userId: user.id,
+      },
+    });
   }
 
   /**
