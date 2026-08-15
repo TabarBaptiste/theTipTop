@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { Leaf, Ticket, ShieldCheck } from 'lucide-react';
-import tassesHeroImg from '@/img/tasses_hero.jpg';
+import tassesHeroImg from '@/img/tasses_hero.webp';
 import { HeroCTAButtons } from '@/components/home/hero-cta-buttons';
 
 export function HeroSection() {

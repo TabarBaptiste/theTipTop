@@ -140,7 +140,7 @@ export const useAuthStore = create<AuthState>()(
       checkAuth: async () => {
         const refreshToken = Cookies.get('refreshToken');
         if (!refreshToken) {
-          set({ isLoading: false });
+          get().logout();
           return;
         }
 

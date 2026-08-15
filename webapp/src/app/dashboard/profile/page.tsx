@@ -120,7 +120,7 @@ export default function ProfilePage() {
 
   if (authLoading || !isAuthenticated) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] bg-cream py-8">
+      <div className="min-h-[calc(100vh-5rem)] bg-cream py-8">
         <div className="container mx-auto px-6">
           <div className="grid gap-8 lg:grid-cols-[240px_1fr]">
             {/* Sidebar skeleton */}
@@ -155,7 +155,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-cream py-8">
+    <div className="min-h-[calc(100vh-5rem)] bg-cream py-8">
       <div className="container mx-auto px-6">
         <div className="grid gap-8 lg:grid-cols-[240px_1fr]">
           {/* Sidebar */}

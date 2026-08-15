@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { SkeletonList } from '@/components/ui/skeleton';
 import { api } from '@/lib/api';
 import { formatDateTime } from '@/lib/utils';
 
@@ -122,7 +123,7 @@ export default function EmployeePage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gray-50 py-8">
+    <div className="min-h-[calc(100vh-5rem)] bg-gray-50 py-8">
       <div className="container mx-auto px-4">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">
@@ -270,9 +271,7 @@ export default function EmployeePage() {
             </CardHeader>
             <CardContent>
               {isLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-8 w-8 animate-spin text-tea-600" />
-                </div>
+                <SkeletonList count={3} />
               ) : pendingDeliveries && pendingDeliveries.length > 0 ? (
                 <div className="max-h-96 space-y-3 overflow-y-auto">
                   {pendingDeliveries.map((delivery) => (

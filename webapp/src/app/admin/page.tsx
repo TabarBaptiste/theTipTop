@@ -7,6 +7,7 @@ import {
   Loader2, Calendar, Download, PieChart, BarChart3,
   Mail, ShieldCheck, Scale, RefreshCw,
 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
@@ -192,8 +193,16 @@ export default function AdminPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-cream">
-        <Loader2 className="h-8 w-8 animate-spin text-terracotta-deep" />
+      <div className="flex min-h-[calc(100vh-5rem)] flex-col items-center justify-center gap-8 bg-cream px-6">
+        <div className="w-full max-w-4xl space-y-6">
+          <Skeleton className="h-12 w-1/3" />
+          <div className="grid gap-4 md:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-24 w-full" />
+            ))}
+          </div>
+          <Skeleton className="h-64 w-full" />
+        </div>
       </div>
     );
   }
@@ -203,7 +212,7 @@ export default function AdminPage() {
   const grandPrizeDrawn = globalStats?.game.grandPrizeDrawn ?? false;
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-cream py-8">
+    <div className="min-h-[calc(100vh-5rem)] bg-cream py-8">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">

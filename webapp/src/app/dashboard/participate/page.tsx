@@ -108,7 +108,7 @@ export default function ParticipatePage() {
 
   if (result) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] bg-cream py-12">
+      <div className="min-h-[calc(100vh-5rem)] bg-cream py-12">
         <div className="container mx-auto max-w-xl px-6">
           <div className="rounded-card border-2 border-terracotta-deep bg-white p-8 text-center">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-terracotta-50">
@@ -153,7 +153,7 @@ export default function ParticipatePage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-cream">
+    <div className="min-h-[calc(100vh-5rem)] bg-cream">
       {/* Hero */}
       <section className="bg-white py-12 text-center">
         <div className="container mx-auto px-6">

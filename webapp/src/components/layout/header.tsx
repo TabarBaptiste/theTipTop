@@ -1,32 +1,23 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { useState, useSyncExternalStore } from 'react';
+import { useState } from 'react';
 import { Menu, X, User, ShieldCheck, Store } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/lib/stores/auth-store';
+import { useIsHydrated } from '@/lib/hooks/use-is-hydrated';
 import { cn } from '@/lib/utils';
 
+// « Boutiques » retiré : la route /boutiques n'existe pas encore, le lien renvoyait un 404.
+// À remettre le jour où la page sera créée. Le règlement reste accessible via le footer.
 const navigation = [
   { name: 'Le jeu', href: '/#how-it-works' },
   { name: 'Lots', href: '/#prizes' },
   { name: 'Mon concours', href: '/dashboard' },
-  // { name: 'Mon Compte', href: '/dashboard/profile' },
-  // { name: 'Participer', href: '/dashboard/participate' },
   { name: 'FAQ', href: '/faq' },
 ];
-
-// Détection d'hydratation sans setState dans un effect :
-// renvoie false côté serveur, true dès le premier rendu client.
-const emptySubscribe = () => () => { };
-function useIsHydrated() {
-  return useSyncExternalStore(
-    emptySubscribe,
-    () => true,
-    () => false,
-  );
-}
 
 export function Header() {
   const pathname = usePathname();
@@ -40,12 +31,22 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-warm-beige bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-      <nav className="container mx-auto flex h-16 items-center justify-between px-6">
+      {/* h-20 : la nav est calee sur le logo. Si tu changes cette hauteur,
+          repercute-la sur les min-h-[calc(100vh-5rem)] des pages. */}
+      <nav className="container mx-auto flex h-20 items-center justify-between px-6">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <span className="font-display text-xl font-bold text-noir">
-            The Tip Top
-          </span>
+        <Link href="/" className="flex items-center">
+          {/* unoptimized : l'optimiseur de Next refuse les SVG sans dangerouslyAllowSVG,
+              et un SVG n'a rien à y gagner. width/height = ratio intrinseque (3019x1270). */}
+          <Image
+            src="/img/logo-artisan-mediterraneen-horizontal.svg"
+            alt="Thé Tip Top"
+            width={152}
+            height={64}
+            className="h-16 w-auto"
+            unoptimized
+            priority
+          />
         </Link>
 
         {/* Desktop Navigation */}
@@ -87,29 +88,19 @@ export function Header() {
                     </Button>
                   )}
                   <Button asChild variant="outline" size="sm">
-
                     <Link
                       href="/dashboard/profile"
                       className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-deep"
                     >
-
                       <User className="h-4 w-4" strokeWidth={1.5} />
                       {user?.firstName || 'Mon compte'}
                     </Link>
                   </Button>
-                  {/* <Button variant="outline" size="sm" onClick={logout}>
-                    Deconnexion
-                  </Button> */}
                 </>
               ) : (
-                <>
-                  {/* <Button asChild variant="outline" size="sm">
-                    <Link href="/auth/register">Inscription</Link>
-                  </Button> */}
-                  <Button asChild variant="outline" size="sm">
-                    <Link href="/auth/login">Connexion</Link>
-                  </Button>
-                </>
+                <Button asChild variant="outline" size="sm">
+                  <Link href="/auth/login">Connexion</Link>
+                </Button>
               )}
             </>
           )}
@@ -134,7 +125,8 @@ export function Header() {
       <div
         className={cn(
           'overflow-hidden border-t border-warm-beige bg-white transition-all duration-300 ease-in-out md:hidden',
-          mobileMenuOpen ? 'max-h-96' : 'max-h-0'
+          // Hauteur calée sur le cas le plus haut : nav + bouton backoffice + profil + Jouer
+          mobileMenuOpen ? 'max-h-[32rem]' : 'max-h-0'
         )}
       >
         <div className="space-y-1 px-6 pb-6 pt-4">
@@ -164,43 +156,32 @@ export function Header() {
                 {isAuthenticated ? (
                   <>
                     {backofficeHref && (
+                      <Button asChild variant="outline" className="w-full">
+                        <Link
+                          href={backofficeHref}
+                          className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-deep"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          <BackofficeIcon className="h-4 w-4" strokeWidth={1.5} />
+                          {user?.role === 'ADMIN' ? 'Admin' : 'Espace employé'}
+                        </Link>
+                      </Button>
+                    )}
+                    <Button asChild variant="outline" className="w-full">
                       <Link
-                        href={backofficeHref}
-                        className="flex items-center gap-2 px-3 py-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-deep"
+                        href="/dashboard/profile"
+                        className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-deep"
                         onClick={() => setMobileMenuOpen(false)}
                       >
-                        <BackofficeIcon className="h-4 w-4" strokeWidth={1.5} />
-                        {user?.role === 'ADMIN' ? 'Admin' : 'Espace employé'}
+                        <User className="h-4 w-4" strokeWidth={1.5} />
+                        {user?.firstName || 'Mon compte'}
                       </Link>
-                    )}
-                    <Link
-                      href="/dashboard/profile"
-                      className="flex items-center gap-2 px-3 py-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-deep"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <User className="h-4 w-4" strokeWidth={1.5} />
-                      {user?.firstName || 'Mon compte'}
-                    </Link>
-                    {/* <Button
-                      variant="ghost"
-                      className="w-full"
-                      onClick={() => {
-                        logout();
-                        setMobileMenuOpen(false);
-                      }}
-                    >
-                      Deconnexion
-                    </Button> */}
+                    </Button>
                   </>
                 ) : (
-                  <>
-                    <Button asChild variant="outline" className="w-full">
-                      <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)}>Connexion</Link>
-                    </Button>
-                    {/* <Button asChild variant="outline" className="w-full">
-                      <Link href="/auth/register" onClick={() => setMobileMenuOpen(false)}>Inscription</Link>
-                    </Button> */}
-                  </>
+                  <Button asChild variant="outline" className="w-full">
+                    <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)}>Connexion</Link>
+                  </Button>
                 )}
               </>
             )}

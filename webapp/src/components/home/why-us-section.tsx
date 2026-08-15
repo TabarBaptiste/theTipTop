@@ -27,9 +27,10 @@ const reasons = [
   },
 ];
 
+// L'id « why-us » est la cible du lien « À propos » du footer (/#why-us).
 export function WhyUsSection() {
   return (
-    <section className="bg-cream py-16 md:py-20">
+    <section id="why-us" className="bg-cream py-16 md:py-20">
       <div className="container mx-auto px-6">
         <h2 className="font-display text-h2 text-noir">
           Pourquoi nous ?
