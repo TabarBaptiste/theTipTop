@@ -16,6 +16,7 @@ module.exports = {
         'backup',
         'db',
         'docs',
+        'auth',
       ],
     ],
     'header-max-length': [2, 'always', 200],

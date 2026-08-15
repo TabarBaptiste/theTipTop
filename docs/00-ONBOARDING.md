@@ -239,13 +239,8 @@ dans `api/` et `webapp/` — **jamais à la racine**.
 | Fichier | Contenu |
 |---------|---------|
 | `.claude/CLAUDE.md` | Règles de travail (IA et humains) + conventions techniques |
-| `docs/01-SPECIFICATIONS-TECHNIQUES.md` | Choix techniques et justifications |
-| `docs/02-ARCHITECTURE.md` | Diagrammes et flux de données |
-| `docs/03-GUIDE-DEPLOIEMENT.md` | Mise en production |
-| `docs/04-RGPD-ACCESSIBILITE.md` | Conformité RGPD et WCAG 2.1 |
 | `docs/context/` | Cahier des charges et specs client d'origine |
 | `.github/instructions/copilot-instructions.instructions.md` | Équivalent CLAUDE.md pour GitHub Copilot |
-
 
 ---
 
