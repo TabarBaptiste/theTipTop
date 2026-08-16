@@ -245,6 +245,7 @@ describe('ParticipationsService', () => {
 
       expect(result.participation).toBeNull();
       expect(result.ticket.prize.name).toBe('Infuseur à thé');
+      expect(result.ticket.isUsed).toBe(false);
     });
 
     it('should return the ticket with its participation when used', async () => {
@@ -266,6 +267,7 @@ describe('ParticipationsService', () => {
 
       expect(result.participation?.id).toBe('p1');
       expect(result.participation?.prizeDelivered).toBe(true);
+      expect(result.ticket.isUsed).toBe(true);
     });
   });
 
