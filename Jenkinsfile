@@ -14,6 +14,24 @@ ciPipeline(
 
     runE2E        : true,
     runK6         : true,
+    runZap        : true,   // scan OWASP ZAP baseline contre PREPROD
+
+    // Surveillance post-déploiement PREPROD avec rollback automatique
+    preprodMonitorMinutes: 5,
+
+    // Comité de pilotage (cf. cahier des charges)
+    notifyRecipients: [
+        preprod: 'alexandre.petit@thetiptop.fr,' +
+                 'nathalie.dubois@thetiptop.fr,' +
+                 'harenaandriamananjaramandimby@furiousducks.fr,' +
+                 'baptistetabarlabonne@furiousducks.com',
+        prod   : 'eric.bourdon@thetiptop.fr,' +
+                 'nathalie.dubois@thetiptop.fr,' +
+                 'alexandre.petit@thetiptop.fr,' +
+                 'guido.brasletti@furiousducks.com,' +
+                 'harenaandriamananjaramandimby@furiousducks.fr,' +
+                 'baptistetabarlabonne@furiousducks.com'
+    ],
 
     devDomain     : "${projectName}-dev.wk-archi-o24a-4-5-g1.fr",
     preprodDomain : "${projectName}-preprod.wk-archi-o24a-4-5-g1.fr",
@@ -25,15 +43,19 @@ ciPipeline(
     dockerfile    : 'webapp/Dockerfile',
 
     // Backend API (NestJS), déployé aux côtés du frontend.
-    // Câblé uniquement pour DEV pour l'instant.
+    // Câblé pour DEV et PREPROD.
     apiDockerfile  : 'api/Dockerfile',
     apiPort        : 3001,
     apiHealthPath  : '/api/v1/health',
     dbCredentialsId: 'thetiptop-db-credentials',
+
+    devApiDomain    : "${projectName}-api-dev.wk-archi-o24a-4-5-g1.fr",
+    preprodApiDomain: "${projectName}-api-preprod.wk-archi-o24a-4-5-g1.fr",
+
+    // FRONTEND_URL et CORS_ORIGINS sont dérivés par la shared library
+    // à partir du domaine front de l'environnement ciblé.
     apiEnv         : [
-        FRONTEND_URL: "https://${projectName}-dev.wk-archi-o24a-4-5-g1.fr",
-        CORS_ORIGINS: "https://${projectName}-dev.wk-archi-o24a-4-5-g1.fr",
-        API_PREFIX  : 'api'
+        API_PREFIX: 'api'
     ],
     apiSecretEnv   : [
         [envVar: 'JWT_SECRET', credentialId: 'thetiptop-jwt-secret'],
