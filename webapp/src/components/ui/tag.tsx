@@ -19,8 +19,11 @@ const tagVariants = cva(
         mediteraneen: 'bg-[#C76C3A]/40 text-[#C76C3A]',
         // #C9A96E - Or discret
         premium:      'bg-[#C9A96E]/30 text-[#C9A96E]',
-        // #8A8378 - Gris pierre
-        neutral:      'bg-[#8A8378]/30 text-[#8A8378]',
+        // #4A463E - Gris pierre assombri, aligne sur le token stone.
+        // Seule variante a franchir le seuil AA (5.24:1 sur creme) : le motif
+        // « texte sur son propre fond a 30% » plafonne les autres bien en
+        // dessous, de 1.30 pour season a 3.56 pour detox.
+        neutral:      'bg-[#4A463E]/30 text-[#4A463E]',
         // #E8D5B0 - Beige chaud (très discret)
         season:       'bg-[#E8D5B0]/10 text-[#E8D5B0]',
       },
