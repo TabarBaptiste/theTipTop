@@ -3,7 +3,12 @@
 // ===========================================
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  NotFoundException,
+  ConflictException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { UsersService } from './users.service';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -168,6 +173,47 @@ describe('UsersService', () => {
         where: { id: 'u1' },
         data: { role: 'EMPLOYEE' },
       });
+    });
+  });
+
+  describe('changePassword', () => {
+    const dto = { currentPassword: 'Actuel123!', newPassword: 'Nouveau123!' };
+
+    it('should reject an unknown user', async () => {
+      mockPrismaService.user.findUnique.mockResolvedValue(null);
+
+      await expect(service.changePassword('inconnu', dto)).rejects.toThrow(NotFoundException);
+    });
+
+    // Un compte Social Login n'a pas de mot de passe : il n'existe alors aucun
+    // moyen de prouver ici que la demande vient du titulaire.
+    it('should reject an account created through social login', async () => {
+      mockPrismaService.user.findUnique.mockResolvedValue({ id: 'u1', password: null });
+
+      await expect(service.changePassword('u1', dto)).rejects.toThrow(BadRequestException);
+      expect(mockPrismaService.user.update).not.toHaveBeenCalled();
+    });
+
+    // Le coeur de la protection : sans le mot de passe actuel, une session
+    // ouverte suffirait a verrouiller le compte hors de son titulaire.
+    it('should reject a wrong current password without touching the record', async () => {
+      const hashed = await bcrypt.hash('LeVrai123!', 4);
+      mockPrismaService.user.findUnique.mockResolvedValue({ id: 'u1', password: hashed });
+
+      await expect(service.changePassword('u1', dto)).rejects.toThrow(ForbiddenException);
+      expect(mockPrismaService.user.update).not.toHaveBeenCalled();
+    });
+
+    it('should store a hash, never the new password itself', async () => {
+      const hashed = await bcrypt.hash(dto.currentPassword, 4);
+      mockPrismaService.user.findUnique.mockResolvedValue({ id: 'u1', password: hashed });
+      mockPrismaService.user.update.mockResolvedValue({ id: 'u1' });
+
+      await service.changePassword('u1', dto);
+
+      const { data } = mockPrismaService.user.update.mock.calls[0][0];
+      expect(data.password).not.toBe(dto.newPassword);
+      await expect(bcrypt.compare(dto.newPassword, data.password)).resolves.toBe(true);
     });
   });
 });

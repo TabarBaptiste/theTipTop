@@ -14,6 +14,7 @@ describe('UsersController', () => {
     findAll: jest.fn(),
     findById: jest.fn(),
     update: jest.fn(),
+    changePassword: jest.fn(),
     delete: jest.fn(),
     exportData: jest.fn(),
     changeRole: jest.fn(),
@@ -99,6 +100,15 @@ describe('UsersController', () => {
       expect(mockUsersService.update).not.toHaveBeenCalled();
     });
 
+    // Le seul chemin autorise est PUT :id/password, qui exige l actuel.
+    it('should refuse a password change requested through the profile update', async () => {
+      await expect(controller.update('u1', { password: 'Nouveau123!' }, client)).rejects.toThrow(
+        ForbiddenException,
+      );
+
+      expect(mockUsersService.update).not.toHaveBeenCalled();
+    });
+
     it('should let an admin change an email', async () => {
       mockUsersService.update.mockResolvedValue(storedUser);
 
@@ -106,6 +116,21 @@ describe('UsersController', () => {
 
       expect(mockUsersService.update).toHaveBeenCalledWith('u1', {
         email: 'nouvelle@thetiptop.fr',
+      });
+    });
+  });
+
+  describe('changePassword', () => {
+    it('should force a client to only change their own password', async () => {
+      await controller.changePassword(
+        'autre-id',
+        { currentPassword: 'Actuel123!', newPassword: 'Nouveau123!' },
+        client,
+      );
+
+      expect(mockUsersService.changePassword).toHaveBeenCalledWith('u1', {
+        currentPassword: 'Actuel123!',
+        newPassword: 'Nouveau123!',
       });
     });
   });

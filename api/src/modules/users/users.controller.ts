@@ -21,6 +21,7 @@ import { Role, User } from '@prisma/client';
 
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -110,8 +111,43 @@ export class UsersController {
       );
     }
 
+    // Même raisonnement pour le mot de passe : l'accepter ici permettrait de le
+    // changer sans connaître l'actuel, donc de verrouiller le compte hors de
+    // son titulaire depuis une session ouverte. Le passage obligé est
+    // PUT :id/password, qui exige le mot de passe en cours.
+    if (currentUser.role === 'CLIENT' && dto.password !== undefined) {
+      throw new ForbiddenException(
+        'Utilisez le changement de mot de passe dédié, qui exige le mot de passe actuel.',
+      );
+    }
+
     const { password: _password, ...user } = await this.usersService.update(targetId, dto);
     return user;
+  }
+
+  // ===========================================
+  // CHANGEMENT DE MOT DE PASSE
+  // ===========================================
+  @Put(':id/password')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Changer son mot de passe',
+    description:
+      "Exige le mot de passe actuel. C'est le seul chemin permettant à un client de " +
+      'changer son mot de passe : la mise à jour de profil le refuse.',
+  })
+  @ApiResponse({ status: 204, description: 'Mot de passe changé' })
+  @ApiResponse({ status: 400, description: 'Compte sans mot de passe (Social Login)' })
+  @ApiResponse({ status: 403, description: 'Mot de passe actuel incorrect' })
+  @ApiResponse({ status: 404, description: 'Utilisateur non trouvé' })
+  async changePassword(
+    @Param('id') id: string,
+    @Body() dto: ChangePasswordDto,
+    @CurrentUser() currentUser: User,
+  ) {
+    // Un client ne peut changer que son propre mot de passe
+    const targetId = currentUser.role === 'CLIENT' ? currentUser.id : id;
+    await this.usersService.changePassword(targetId, dto);
   }
 
   // ===========================================

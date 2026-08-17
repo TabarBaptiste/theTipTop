@@ -5,10 +5,14 @@ import { useRouter } from 'next/navigation';
 import { Download, Loader2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AccountSidebar } from '@/components/dashboard/account-sidebar';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { api } from '@/lib/api';
+
+const EMPTY_PASSWORDS = { current: '', next: '', confirm: '' };
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -16,6 +20,8 @@ export default function SettingsPage() {
   const [isSavingConsent, setIsSavingConsent] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [passwords, setPasswords] = useState(EMPTY_PASSWORDS);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -41,6 +47,42 @@ export default function SettingsPage() {
       toast.error('Erreur lors de la mise à jour de votre choix');
     } finally {
       setIsSavingConsent(false);
+    }
+  };
+
+  // Le mot de passe actuel est exigé par l'API : c'est ce qui empêche une
+  // session ouverte de verrouiller le compte hors de son titulaire.
+  const handlePasswordChange = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!user) return;
+
+    // Vérifié ici plutôt que côté serveur : une faute de frappe sur le nouveau
+    // mot de passe enfermerait l'utilisateur dehors.
+    if (passwords.next !== passwords.confirm) {
+      toast.error('Les deux nouveaux mots de passe ne correspondent pas');
+      return;
+    }
+
+    setIsChangingPassword(true);
+    try {
+      await api.put(`/users/${user.id}/password`, {
+        currentPassword: passwords.current,
+        newPassword: passwords.next,
+      });
+      setPasswords(EMPTY_PASSWORDS);
+      toast.success('Votre mot de passe a été changé');
+    } catch (error: any) {
+      const status = error?.response?.status;
+      const apiMessage = error?.response?.data?.message;
+      const detail = Array.isArray(apiMessage) ? apiMessage[0] : apiMessage;
+
+      if (status === 403) {
+        toast.error('Mot de passe actuel incorrect');
+      } else {
+        toast.error(detail || 'Erreur lors du changement de mot de passe');
+      }
+    } finally {
+      setIsChangingPassword(false);
     }
   };
 
@@ -118,6 +160,60 @@ export default function SettingsPage() {
 
           <main className="max-w-2xl">
             <h1 className="font-display text-h2 text-noir">Paramètres</h1>
+
+            {/* --- Mot de passe --- */}
+            <section className="mt-8 border-t border-warm-beige pt-6">
+              <h2 className="font-display text-h3 text-noir">Mot de passe</h2>
+              <p className="mt-1 text-sm text-stone-grey">
+                Le mot de passe actuel vous est demandé : c&apos;est ce qui empêche quelqu&apos;un
+                d&apos;autre de changer le vôtre depuis une session restée ouverte.
+              </p>
+
+              <form onSubmit={handlePasswordChange} className="mt-4 max-w-sm space-y-4">
+                <div>
+                  <Label htmlFor="currentPassword">Mot de passe actuel</Label>
+                  <Input
+                    id="currentPassword"
+                    type="password"
+                    autoComplete="current-password"
+                    required
+                    value={passwords.current}
+                    onChange={(e) => setPasswords({ ...passwords, current: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="newPassword">Nouveau mot de passe</Label>
+                  <Input
+                    id="newPassword"
+                    type="password"
+                    autoComplete="new-password"
+                    required
+                    value={passwords.next}
+                    onChange={(e) => setPasswords({ ...passwords, next: e.target.value })}
+                  />
+                  <p className="mt-1 text-xs text-stone-grey">
+                    8 caractères minimum, dont une majuscule, une minuscule, un chiffre et un
+                    caractère spécial.
+                  </p>
+                </div>
+                <div>
+                  <Label htmlFor="confirmPassword">Confirmer le nouveau mot de passe</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    autoComplete="new-password"
+                    required
+                    value={passwords.confirm}
+                    onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })}
+                  />
+                </div>
+
+                <Button type="submit" disabled={isChangingPassword}>
+                  {isChangingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Changer mon mot de passe
+                </Button>
+              </form>
+            </section>
 
             {/* --- Communications --- */}
             <section className="mt-8 border-t border-warm-beige pt-6">
