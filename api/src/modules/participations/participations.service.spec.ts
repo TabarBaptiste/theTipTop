@@ -236,6 +236,9 @@ describe('ParticipationsService', () => {
         expect(data.status).toBe('VERIFIE');
         expect(data.email).toBe('user@test.fr');
         expect(data.userId).toBe('user-1');
+        // Le ticket visé est enregistré comme pour un lead du parcours
+        // classique, sans quoi ce lead se lirait « aucun ticket visé ».
+        expect(data.ticketId).toBe('ticket-1');
         expect(data.rgpdConsentAt).toBeInstanceOf(Date);
         expect(data.verifiedAt).toBeInstanceOf(Date);
         // Aucun code de vérification : l'email est certifié par le fournisseur.

@@ -46,8 +46,12 @@ export class ParticipationsService {
    *
    * Emprunté par deux chemins : l'espace personnel d'un client déjà activé
    * (UC-06), et la première participation via Social Login (UC-05, chemin A),
-   * où l'email est certifié par le fournisseur tiers et ne demande donc ni
-   * réservation du ticket ni code de vérification.
+   * où l'identité est certifiée par le fournisseur tiers et ne demande donc
+   * pas de code de vérification par email.
+   *
+   * Dans les deux cas le ticket est consommé au moment de la soumission, sous
+   * verrou transactionnel : le premier arrivé l'emporte, les autres reçoivent
+   * « ce code a déjà été utilisé ».
    */
   async participate(user: User, dto: CreateParticipationDto) {
     const userId = user.id;
@@ -104,7 +108,7 @@ export class ParticipationsService {
       });
     });
 
-    await this.ensureVerifiedLead(user, dto);
+    await this.ensureVerifiedLead(user, dto, ticket.id);
     await this.invalidateCachesAfterParticipation();
 
     return {
@@ -132,7 +136,11 @@ export class ParticipationsService {
    * - un échec ici ne doit pas annuler la participation, déjà enregistrée et
    *   transactionnelle : l'erreur est avalée et journalisée par l'appelant.
    */
-  private async ensureVerifiedLead(user: User, dto: CreateParticipationDto): Promise<void> {
+  private async ensureVerifiedLead(
+    user: User,
+    dto: CreateParticipationDto,
+    ticketId: string,
+  ): Promise<void> {
     if (dto.consentData !== true) {
       return;
     }
@@ -167,6 +175,9 @@ export class ParticipationsService {
         pixelTrackingConsent: dto.pixelTrackingConsent ?? null,
         pixelTrackingConsentAt: dto.pixelTrackingConsent === undefined ? null : now,
         userId: user.id,
+        // Le ticket visé, comme pour un lead du parcours classique : sans lui,
+        // un lead arrivé par Social Login se lirait « aucun ticket visé ».
+        ticketId,
       },
     });
   }
