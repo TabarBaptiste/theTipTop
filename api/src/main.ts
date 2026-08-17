@@ -2,11 +2,18 @@
 // Point d'entrée de l'application
 // ===========================================
 
+// Fix Windows : Node.js ne fait pas confiance au magasin de certificats système.
+// Désactive la vérification SSL uniquement en développement pour permettre
+// les appels OAuth vers Google (HTTPS). À ne jamais activer en production.
+if (process.env.NODE_ENV !== 'production') {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+}
+
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-import * as cookieParser from 'cookie-parser';
+import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 
 async function bootstrap() {
@@ -46,7 +53,8 @@ async function bootstrap() {
   // Documentation Swagger
   const config = new DocumentBuilder()
     .setTitle('Thé Tip Top API')
-    .setDescription(`
+    .setDescription(
+      `
       API pour le jeu-concours Thé Tip Top.
       
       ## Fonctionnalités
@@ -62,7 +70,8 @@ async function bootstrap() {
       - **CLIENT** : Peut participer et voir ses gains
       - **EMPLOYEE** : Peut valider et remettre les lots en boutique
       - **ADMIN** : Accès complet aux statistiques et fonctionnalités admin
-    `)
+    `,
+    )
     .setVersion('1.0')
     .addTag('auth', 'Authentification et gestion des comptes')
     .addTag('users', 'Gestion des utilisateurs')
@@ -106,7 +115,7 @@ async function bootstrap() {
     customSiteTitle: 'Thé Tip Top - API Documentation',
   });
 
-  const port = process.env.PORT || 4000;
+  const port = process.env.PORT || 3001;
   await app.listen(port);
 
   console.log(`

@@ -1,52 +1,70 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useQuery } from '@tanstack/react-query';
 import { differenceInDays, differenceInHours, differenceInMinutes, differenceInSeconds } from 'date-fns';
+import { Button } from '@/components/ui/button';
+import { api } from '@/lib/api';
 
-// Date de fin du jeu (à configurer)
-const GAME_END_DATE = new Date(process.env.NEXT_PUBLIC_GAME_END_DATE || '2025-01-30T23:59:59.999Z');
+type GamePhase = 'not_started' | 'active' | 'claim_only' | 'ended';
+
+interface GameConfig {
+  startDate: string;
+  endDate: string;
+  claimEndDate: string;
+  isActive: boolean;
+  phase: GamePhase;
+}
 
 export function CountdownSection() {
-  const [timeLeft, setTimeLeft] = useState({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
+  const { data: gameConfig } = useQuery<GameConfig>({
+    queryKey: ['game-config'],
+    queryFn: async () => {
+      const response = await api.get('/game/config');
+      return response.data;
+    },
+    staleTime: Infinity,
   });
+
+  // On dépend de la string ISO pour éviter de recréer un objet Date à chaque render
+  const endDateStr = gameConfig?.endDate ?? null;
+
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [isEnded, setIsEnded] = useState(false);
 
   useEffect(() => {
+    if (!endDateStr) return;
+
+    const endDate = new Date(endDateStr);
+
     const calculateTimeLeft = () => {
       const now = new Date();
-      
-      if (now >= GAME_END_DATE) {
+      if (now >= endDate) {
         setIsEnded(true);
         return;
       }
-
-      const days = differenceInDays(GAME_END_DATE, now);
-      const hours = differenceInHours(GAME_END_DATE, now) % 24;
-      const minutes = differenceInMinutes(GAME_END_DATE, now) % 60;
-      const seconds = differenceInSeconds(GAME_END_DATE, now) % 60;
-
-      setTimeLeft({ days, hours, minutes, seconds });
+      setTimeLeft({
+        days:    differenceInDays(endDate, now),
+        hours:   differenceInHours(endDate, now) % 24,
+        minutes: differenceInMinutes(endDate, now) % 60,
+        seconds: differenceInSeconds(endDate, now) % 60,
+      });
     };
 
     calculateTimeLeft();
     const timer = setInterval(calculateTimeLeft, 1000);
-
     return () => clearInterval(timer);
-  }, []);
+  }, [endDateStr]);
 
-  if (isEnded) {
+  // Jeu terminé (phase serveur ou countdown écoulé)
+  const phase = gameConfig?.phase;
+  if (isEnded || phase === 'claim_only' || phase === 'ended') {
     return (
-      <section className="bg-gold-500 py-8">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-2xl font-bold text-white">
-            Le jeu-concours est terminé !
-          </h2>
-          <p className="mt-2 text-gold-100">
-            Vous avez jusqu&apos;au 1er mars 2025 pour récupérer vos lots.
+      <section className="bg-terracotta-deep py-6">
+        <div className="container mx-auto px-6 text-center">
+          <p className="font-display text-lg font-semibold text-white">
+            Le jeu-concours est termine ! Vous avez 30 jours pour recuperer vos lots.
           </p>
         </div>
       </section>
@@ -54,18 +72,26 @@ export function CountdownSection() {
   }
 
   return (
-    <section className="bg-gradient-to-r from-tea-600 to-tea-700 py-8">
-      <div className="container mx-auto px-4 text-center">
-        <h2 className="mb-6 text-xl font-semibold text-white md:text-2xl">
+    <section className="border-y border-warm-beige bg-white py-6">
+      <div className="container mx-auto flex flex-col items-center justify-between gap-6 px-6 sm:flex-row">
+        <p className="font-functional text-ui uppercase tracking-[2px] text-stone-grey">
           Temps restant pour participer
-        </h2>
-        
-        <div className="flex justify-center gap-4 md:gap-8">
-          <TimeBlock value={timeLeft.days} label="Jours" />
-          <TimeBlock value={timeLeft.hours} label="Heures" />
+        </p>
+
+        <div className="flex items-center gap-3">
+          {/* Avant que la config arrive, les valeurs sont à 0 - flash imperceptible */}
+          <TimeBlock value={timeLeft.days}    label="Jours" />
+          <Separator />
+          <TimeBlock value={timeLeft.hours}   label="Heures" />
+          <Separator />
           <TimeBlock value={timeLeft.minutes} label="Minutes" />
+          <Separator />
           <TimeBlock value={timeLeft.seconds} label="Secondes" />
         </div>
+
+        <Button asChild size="sm" variant="secondary">
+          <Link href="/dashboard/participate">Participer maintenant</Link>
+        </Button>
       </div>
     </section>
   );
@@ -74,10 +100,16 @@ export function CountdownSection() {
 function TimeBlock({ value, label }: { value: number; label: string }) {
   return (
     <div className="flex flex-col items-center">
-      <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-white text-2xl font-bold text-tea-600 shadow-lg md:h-20 md:w-20 md:text-3xl">
+      <span className="font-display text-2xl font-bold text-noir">
         {String(value).padStart(2, '0')}
-      </div>
-      <span className="mt-2 text-xs text-tea-100 md:text-sm">{label}</span>
+      </span>
+      <span className="font-functional text-[9px] uppercase tracking-[1px] text-stone-grey">
+        {label}
+      </span>
     </div>
   );
+}
+
+function Separator() {
+  return <span className="text-lg font-bold text-warm-beige">:</span>;
 }

@@ -3,6 +3,8 @@ import { persist } from 'zustand/middleware';
 import Cookies from 'js-cookie';
 import { api } from '@/lib/api';
 
+export type Gender = 'MALE' | 'FEMALE' | 'OTHER' | 'PREFER_NOT_TO_SAY';
+
 export interface User {
   id: string;
   email: string;
@@ -12,7 +14,8 @@ export interface User {
   phone?: string;
   birthDate?: string;
   gender?: string;
-  newsletterOptIn: boolean;
+  consentEmail?: boolean;
+  consentData?: boolean;
   createdAt: string;
 }
 
@@ -21,17 +24,19 @@ interface AuthState {
   accessToken: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  
+
   // Actions
   setUser: (user: User | null) => void;
   setTokens: (accessToken: string, refreshToken: string) => void;
   login: (email: string, password: string) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
+  handleOAuthCallback: (accessToken: string, refreshToken: string) => Promise<void>;
   logout: () => void;
   refreshToken: () => Promise<void>;
   checkAuth: () => Promise<void>;
 }
 
+// Aligné sur RegisterDto du back-end (class-validator)
 interface RegisterData {
   email: string;
   password: string;
@@ -39,9 +44,9 @@ interface RegisterData {
   lastName: string;
   phone?: string;
   birthDate?: string;
-  gender?: string;
-  newsletterOptIn?: boolean;
-  rgpdConsent: boolean;
+  gender?: Gender;
+  consentEmail?: boolean;
+  consentData: boolean;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -91,6 +96,19 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
+      handleOAuthCallback: async (accessToken, refreshToken) => {
+        // Stocke les tokens reçus du back-end après le flux OAuth,
+        // puis récupère le profil pour hydrater le store.
+        get().setTokens(accessToken, refreshToken);
+        try {
+          const response = await api.get('/auth/me');
+          set({ user: response.data, isAuthenticated: true, isLoading: false });
+        } catch (error) {
+          get().logout();
+          throw error;
+        }
+      },
+
       logout: () => {
         Cookies.remove('refreshToken');
         set({
@@ -122,7 +140,7 @@ export const useAuthStore = create<AuthState>()(
       checkAuth: async () => {
         const refreshToken = Cookies.get('refreshToken');
         if (!refreshToken) {
-          set({ isLoading: false });
+          get().logout();
           return;
         }
 

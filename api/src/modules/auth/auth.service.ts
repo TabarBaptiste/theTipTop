@@ -2,15 +2,11 @@
 // Service d'Authentification
 // ===========================================
 
-import {
-  Injectable,
-  UnauthorizedException,
-  ConflictException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import * as bcrypt from 'bcrypt';
+import { randomUUID } from 'crypto';
+import * as bcrypt from 'bcryptjs';
 
 import { PrismaService } from '../../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
@@ -23,7 +19,10 @@ export interface JwtPayload {
   role: Role;
 }
 
+export type SafeUser = Omit<User, 'password'>;
+
 export interface TokenResponse {
+  user: SafeUser;
   accessToken: string;
   refreshToken: string;
   expiresIn: number;
@@ -46,7 +45,7 @@ export class AuthService {
   async validateUser(email: string, password: string): Promise<User | null> {
     const user = await this.usersService.findByEmail(email);
 
-    if (!user || !user.password) {
+    if (!user?.password) {
       return null;
     }
 
@@ -55,7 +54,8 @@ export class AuthService {
       return null;
     }
 
-    return user;
+    const { password: _pw, ...safeUser } = user as any;
+    return safeUser as User;
   }
 
   /**
@@ -148,7 +148,9 @@ export class AuthService {
   }
 
   /**
-   * Connexion/inscription via OAuth (Google/Facebook)
+   * Connexion/inscription via OAuth (Google/Facebook).
+   * Retourne l'utilisateur (trouvé ou créé) ; la génération des tokens
+   * est déléguée au controller via login() après le flux Passport.
    */
   async validateOAuthUser(profile: {
     provider: 'google' | 'facebook';
@@ -157,7 +159,7 @@ export class AuthService {
     firstName: string;
     lastName: string;
     picture?: string;
-  }): Promise<TokenResponse> {
+  }): Promise<User> {
     // Chercher l'utilisateur par provider ID ou email
     let user = await this.prisma.user.findFirst({
       where: {
@@ -202,11 +204,13 @@ export class AuthService {
       this.logger.log(`Nouvel utilisateur OAuth (${profile.provider}): ${user.email}`);
     }
 
-    return this.generateTokens(user);
+    return user;
   }
 
   /**
-   * Génère les tokens JWT
+   * Génère les tokens JWT (access + refresh) et persiste le refresh token.
+   * - Access token : signé avec JWT_SECRET, durée JWT_EXPIRATION (défaut 15m)
+   * - Refresh token : signé avec JWT_REFRESH_SECRET, durée JWT_REFRESH_EXPIRATION (défaut 7d)
    */
   private async generateTokens(user: User): Promise<TokenResponse> {
     const payload: JwtPayload = {
@@ -215,32 +219,61 @@ export class AuthService {
       role: user.role,
     };
 
-    const accessToken = this.jwtService.sign(payload);
+    const accessExpiration = this.configService.get<string>('JWT_EXPIRATION', '15m');
+    const refreshExpiration = this.configService.get<string>('JWT_REFRESH_EXPIRATION', '7d');
 
-    // Générer le refresh token
-    const refreshTokenExpiry = this.configService.get<number>(
-      'JWT_REFRESH_EXPIRES_IN',
-      7 * 24 * 60 * 60, // 7 jours par défaut
-    );
+    const accessToken = this.jwtService.sign(payload, {
+      expiresIn: accessExpiration,
+    } as any);
+
+    // `jwtid` ajoute un claim `jti` unique : sans lui, deux refresh tokens
+    // émis pour le même user dans la même seconde produisent une chaîne JWT
+    // identique (mêmes claims sub/email/role/iat/exp) et violent la contrainte
+    // UNIQUE sur refresh_tokens.token (Prisma P2002).
     const refreshToken = this.jwtService.sign(payload, {
-      expiresIn: refreshTokenExpiry,
-      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-    });
+      expiresIn: refreshExpiration,
+      secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
+      jwtid: randomUUID(),
+    } as any);
 
-    // Stocker le refresh token
+    // Stocker le refresh token (permet la révocation côté serveur)
     await this.prisma.refreshToken.create({
       data: {
         token: refreshToken,
         userId: user.id,
-        expiresAt: new Date(Date.now() + refreshTokenExpiry * 1000),
+        expiresAt: this.getTokenExpiry(refreshToken, 7 * 24 * 60 * 60),
       },
     });
 
+    const { password: _pw, ...safeUser } = user as any;
     return {
+      user: safeUser as SafeUser,
       accessToken,
       refreshToken,
-      expiresIn: 900, // 15 minutes en secondes
+      expiresIn: this.getTokenTtlSeconds(accessToken, 15 * 60),
     };
+  }
+
+  /**
+   * Date d'expiration d'un JWT (depuis le claim `exp`), avec repli.
+   */
+  private getTokenExpiry(token: string, fallbackSeconds: number): Date {
+    const decoded = this.jwtService.decode(token) as { exp?: number } | null;
+    if (decoded?.exp) {
+      return new Date(decoded.exp * 1000);
+    }
+    return new Date(Date.now() + fallbackSeconds * 1000);
+  }
+
+  /**
+   * Durée de vie restante d'un JWT en secondes (depuis le claim `exp`), avec repli.
+   */
+  private getTokenTtlSeconds(token: string, fallbackSeconds: number): number {
+    const decoded = this.jwtService.decode(token) as { exp?: number } | null;
+    if (decoded?.exp) {
+      return Math.max(0, decoded.exp - Math.floor(Date.now() / 1000));
+    }
+    return fallbackSeconds;
   }
 
   /**

@@ -1,9 +1,12 @@
+/* groovylint-disable CompileStatic, NoDef, UnusedVariable, VariableName, VariableTypeRequired */
 @Library('furious-ducks-shared-library') _
 
+def projectName = 'thetiptop'
+
 ciPipeline(
-    projectName   : 'thetiptop',
+    projectName   : projectName,
     stack         : 'node',
-    sonarProject  : 'thetiptop',
+    sonarProject  : projectName,
 
     deployDev     : true,
     deployPreprod : true,
@@ -11,10 +14,51 @@ ciPipeline(
 
     runE2E        : true,
     runK6         : true,
+    runZap        : true,   // scan OWASP ZAP baseline contre PREPROD
 
-    devDomain     : 'thetiptop-dev.wk-archi-o24a-4-5-g1.fr',
-    preprodDomain : 'thetiptop-preprod.wk-archi-o24a-4-5-g1.fr',
-    prodDomain    : 'thetiptop.dsp5-archi-o24a-4-5-g1.fr',
+    // Surveillance post-déploiement PREPROD avec rollback automatique
+    preprodMonitorMinutes: 5,
 
-    appPort       : 3000
+    // Comité de pilotage (cf. cahier des charges)
+    notifyRecipients: [
+        preprod: 'alexandre.petit@thetiptop.fr,' +
+                 'nathalie.dubois@thetiptop.fr,' +
+                 'harenaandriamananjaramandimby@furiousducks.fr,' +
+                 'baptistetabarlabonne@furiousducks.com',
+        prod   : 'eric.bourdon@thetiptop.fr,' +
+                 'nathalie.dubois@thetiptop.fr,' +
+                 'alexandre.petit@thetiptop.fr,' +
+                 'guido.brasletti@furiousducks.com,' +
+                 'harenaandriamananjaramandimby@furiousducks.fr,' +
+                 'baptistetabarlabonne@furiousducks.com'
+    ],
+
+    devDomain     : "${projectName}-dev.wk-archi-o24a-4-5-g1.fr",
+    preprodDomain : "${projectName}-preprod.wk-archi-o24a-4-5-g1.fr",
+    prodDomain    : "${projectName}.dsp5-archi-o24a-4-5-g1.fr",
+
+    appPort       : 3000,
+
+    // Chemin du Dockerfile (monorepo : l'app vit dans webapp/)
+    dockerfile    : 'webapp/Dockerfile',
+
+    // Backend API (NestJS), déployé aux côtés du frontend.
+    // Câblé pour DEV et PREPROD.
+    apiDockerfile  : 'api/Dockerfile',
+    apiPort        : 3001,
+    apiHealthPath  : '/api/v1/health',
+    dbCredentialsId: 'thetiptop-db-credentials',
+
+    devApiDomain    : "${projectName}-api-dev.wk-archi-o24a-4-5-g1.fr",
+    preprodApiDomain: "${projectName}-api-preprod.wk-archi-o24a-4-5-g1.fr",
+
+    // FRONTEND_URL et CORS_ORIGINS sont dérivés par la shared library
+    // à partir du domaine front de l'environnement ciblé.
+    apiEnv         : [
+        API_PREFIX: 'api'
+    ],
+    apiSecretEnv   : [
+        [envVar: 'JWT_SECRET', credentialId: 'thetiptop-jwt-secret'],
+        [envVar: 'JWT_REFRESH_SECRET', credentialId: 'thetiptop-jwt-refresh-secret']
+    ]
 )

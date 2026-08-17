@@ -13,15 +13,10 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  NotFoundException,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiQuery,
-} from '@nestjs/swagger';
-import { Role } from '@prisma/client';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { Role, User } from '@prisma/client';
 
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -61,15 +56,19 @@ export class UsersController {
   // DÉTAIL D'UN UTILISATEUR
   // ===========================================
   @Get(':id')
-  @ApiOperation({ summary: 'Détail d\'un utilisateur' })
+  @ApiOperation({ summary: "Détail d'un utilisateur" })
   @ApiResponse({ status: 200, description: 'Utilisateur trouvé' })
   @ApiResponse({ status: 404, description: 'Utilisateur non trouvé' })
-  async findOne(@Param('id') id: string, @CurrentUser() currentUser: any) {
+  async findOne(@Param('id') id: string, @CurrentUser() currentUser: User) {
     // Un client ne peut voir que son propre profil
-    if (currentUser.role === 'CLIENT' && currentUser.id !== id) {
-      return this.usersService.findById(currentUser.id);
+    const targetId = currentUser.role === 'CLIENT' ? currentUser.id : id;
+    const user = await this.usersService.findById(targetId);
+    if (!user) {
+      throw new NotFoundException('Utilisateur non trouvé');
     }
-    return this.usersService.findById(id);
+    // Ne jamais exposer le hash du mot de passe
+    const { password: _password, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   }
 
   // ===========================================
@@ -82,11 +81,11 @@ export class UsersController {
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateUserDto,
-    @CurrentUser() currentUser: any,
+    @CurrentUser() currentUser: User,
   ) {
     // Un client ne peut modifier que son propre profil
     const targetId = currentUser.role === 'CLIENT' ? currentUser.id : id;
-    const { password, ...user } = await this.usersService.update(targetId, dto);
+    const { password: _password, ...user } = await this.usersService.update(targetId, dto);
     return user;
   }
 
@@ -98,7 +97,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Supprimer un utilisateur (anonymisation RGPD)' })
   @ApiResponse({ status: 204, description: 'Utilisateur supprimé' })
   @ApiResponse({ status: 404, description: 'Utilisateur non trouvé' })
-  async delete(@Param('id') id: string, @CurrentUser() currentUser: any) {
+  async delete(@Param('id') id: string, @CurrentUser() currentUser: User) {
     // Un client ne peut supprimer que son propre compte
     const targetId = currentUser.role === 'CLIENT' ? currentUser.id : id;
     await this.usersService.delete(targetId);
@@ -110,7 +109,7 @@ export class UsersController {
   @Get(':id/export')
   @ApiOperation({ summary: 'Exporter les données personnelles (RGPD)' })
   @ApiResponse({ status: 200, description: 'Données exportées' })
-  async exportData(@Param('id') id: string, @CurrentUser() currentUser: any) {
+  async exportData(@Param('id') id: string, @CurrentUser() currentUser: User) {
     const targetId = currentUser.role === 'CLIENT' ? currentUser.id : id;
     return this.usersService.exportData(targetId);
   }
@@ -120,13 +119,10 @@ export class UsersController {
   // ===========================================
   @Put(':id/role')
   @Roles('ADMIN')
-  @ApiOperation({ summary: 'Changer le rôle d\'un utilisateur (Admin)' })
+  @ApiOperation({ summary: "Changer le rôle d'un utilisateur (Admin)" })
   @ApiResponse({ status: 200, description: 'Rôle mis à jour' })
-  async changeRole(
-    @Param('id') id: string,
-    @Body('role') role: Role,
-  ) {
-    const { password, ...user } = await this.usersService.changeRole(id, role);
+  async changeRole(@Param('id') id: string, @Body('role') role: Role) {
+    const { password: _password, ...user } = await this.usersService.changeRole(id, role);
     return user;
   }
 }

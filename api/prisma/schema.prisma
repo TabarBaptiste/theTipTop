@@ -37,6 +37,7 @@ model User {
 
   // Relations
   participations Participation[]
+  leads          Lead[]                       // Leads confirmes ayant abouti a ce compte
 
   // Timestamps
   createdAt     DateTime  @default(now())
@@ -79,6 +80,9 @@ model Ticket {
   // Relation avec participation
   participation Participation?
 
+  // Leads ayant visé ce code sans avoir encore confirmé leur email
+  leads         Lead[]
+
   // Timestamps
   createdAt     DateTime  @default(now())
   usedAt        DateTime?
@@ -96,6 +100,26 @@ enum PrizeType {
   TEA_SIGNATURE // 10% - Boite 100g thé signature
   GIFT_BOX_39   // 6%  - Coffret découverte 39€
   GIFT_BOX_69   // 4%  - Coffret découverte 69€
+}
+
+// ===========================================
+// LOTS DU CONCOURS (métadonnées gérées en DB)
+// ===========================================
+model Prize {
+  id           String    @id @default(uuid())
+  code         PrizeType @unique          // Identifiant technique du lot
+  name         String                     // "Infuseur à thé"
+  description  String                     // Description courte
+  imageUrl     String?                    // URL/chemin de l'image (optionnel)
+  value        String?                     // "12€"
+  percentage   Float                      // 60.0 (% des tickets)
+  totalCount   Int                        // 300000
+  displayOrder Int       @default(0)      // Ordre d'affichage
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("prizes")
 }
 
 // ===========================================
@@ -128,6 +152,76 @@ model Participation {
 enum DeliveryMethod {
   IN_STORE  // Remis en boutique
   ONLINE    // Envoyé (futur site e-commerce)
+}
+
+// ===========================================
+// LEADS (tunnel de participation - UC-05)
+// ===========================================
+// Un lead est un prospect ayant soumis le formulaire public sans compte.
+// Ce n'est PAS un utilisateur : tant que l'email n'est pas verifie, aucune
+// ligne users n'est creee. A la confirmation du code, on cree le compte et
+// la participation, puis on relie les deux via userId.
+model Lead {
+  id            String     @id @default(uuid())
+
+  // Donnees personnelles saisies au formulaire
+  email         String
+  firstName     String
+  lastName      String
+  phone         String?
+  birthDate     DateTime?
+  gender        Gender?
+
+  status        LeadStatus @default(EN_ATTENTE_VERIFICATION)
+
+  // Code de verification email : 6 chiffres, 48h (RG-06).
+  // Chaque renvoi invalide le precedent et repousse l'echeance (RG-07).
+  verificationCode String?   @db.VarChar(6)
+  codeExpiresAt    DateTime?
+  lastCodeSentAt   DateTime?                  // Verrou de 60 s entre deux envois (RG-07)
+  resendCount      Int       @default(0)      // Au-dela de 2, proposer de corriger l'email (RG-08)
+
+  // Relances automatiques a J+24h, J+36h et J+47h (RG-20)
+  remindersSent Int        @default(0)
+
+  // RGPD : horodatage du consentement, obligatoire (RG-02)
+  rgpdConsentAt DateTime
+  consentEmail  Boolean    @default(false)
+
+  // Recommandation CNIL du 14/04/2026 : le consentement au pixel de tracking
+  // est distinct du consentement a recevoir des emails. Accepter la newsletter
+  // ne vaut pas acceptation du suivi d'ouverture.
+  // null = inconnu (jamais demande), ce qui correspond au statut « unknown »
+  // de Brevo et se mappe sur contactPixelTrackingConsent.
+  pixelTrackingConsent   Boolean?
+  pixelTrackingConsentAt DateTime?
+
+  // Compte cree a la confirmation
+  userId        String?
+  user          User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  // Ticket vise par le lead. Aucune reservation : le code reste soumettable par
+  // d'autres tant que l'email n'est pas confirme, la consommation n'a lieu qu'a
+  // la verification.
+  ticketId      String?
+  ticket        Ticket?    @relation(fields: [ticketId], references: [id], onDelete: SetNull)
+
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  verifiedAt    DateTime?
+  purgeAfter    DateTime?                     // Expire + 30 j, puis suppression (RG-21)
+
+  @@index([email])
+  @@index([status])
+  @@index([codeExpiresAt])                    // Job d'expiration des leads (RG-21)
+  @@index([purgeAfter])                       // Job de purge (RG-21)
+  @@map("leads")
+}
+
+enum LeadStatus {
+  EN_ATTENTE_VERIFICATION  // Code envoye, en attente de saisie
+  VERIFIE                  // Email confirme, compte cree
+  EXPIRE                   // 48h depassees sans confirmation
 }
 
 // ===========================================

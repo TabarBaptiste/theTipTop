@@ -6,6 +6,8 @@
 
 import { PrismaClient, PrizeType } from '@prisma/client';
 import * as crypto from 'crypto';
+import * as readline from 'readline';
+import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -17,17 +19,30 @@ const BATCH_SIZE = 10000; // Insertion par lots pour performance
 
 // Répartition des gains selon le cahier des charges
 const PRIZE_DISTRIBUTION: { type: PrizeType; percentage: number }[] = [
-  { type: 'INFUSER', percentage: 60 },       // 300 000 tickets
-  { type: 'TEA_DETOX', percentage: 20 },     // 100 000 tickets
+  { type: 'INFUSER', percentage: 60 }, // 300 000 tickets
+  { type: 'TEA_DETOX', percentage: 20 }, // 100 000 tickets
   { type: 'TEA_SIGNATURE', percentage: 10 }, // 50 000 tickets
-  { type: 'GIFT_BOX_39', percentage: 6 },    // 30 000 tickets
-  { type: 'GIFT_BOX_69', percentage: 4 },    // 20 000 tickets
+  { type: 'GIFT_BOX_39', percentage: 6 }, // 30 000 tickets
+  { type: 'GIFT_BOX_69', percentage: 4 }, // 20 000 tickets
 ];
 
 // Liste de mots à éviter dans les codes
 const FORBIDDEN_WORDS = [
-  'FUCK', 'SHIT', 'DAMN', 'HELL', 'CRAP', 'NAZI', 'SEXE', 'PORN',
-  'MERD', 'PUTE', 'BITE', 'CULS', 'NAZE', 'BETE', 'MORT',
+  'FUCK',
+  'SHIT',
+  'DAMN',
+  'HELL',
+  'CRAP',
+  'NAZI',
+  'SEXE',
+  'PORN',
+  'MERD',
+  'PUTE',
+  'BITE',
+  'CULS',
+  'NAZE',
+  'BETE',
+  'MORT',
 ];
 
 /**
@@ -98,14 +113,80 @@ function createShuffledPrizes(): PrizeType[] {
   return prizes;
 }
 
+// Métadonnées des lots (source de vérité en DB, alignée avec le CDC)
+const PRIZE_METADATA = [
+  {
+    code: 'INFUSER' as PrizeType,
+    name: 'Infuseur à thé',
+    description: 'Un élégant infuseur à thé en inox de qualité',
+    value: null,
+    percentage: 60,
+    totalCount: 300000,
+    displayOrder: 1,
+  },
+  {
+    code: 'TEA_DETOX' as PrizeType,
+    name: 'Thé Détox / Infusion',
+    description: 'Une boîte de 100g de thé détox ou infusion bio',
+    value: null,
+    percentage: 20,
+    totalCount: 100000,
+    displayOrder: 2,
+  },
+  {
+    code: 'TEA_SIGNATURE' as PrizeType,
+    name: 'Thé Signature',
+    description: 'Une boîte de 100g de thé signature Thé Tip Top',
+    value: null,
+    percentage: 10,
+    totalCount: 50000,
+    displayOrder: 3,
+  },
+  {
+    code: 'GIFT_BOX_39' as PrizeType,
+    name: 'Coffret Découverte',
+    description: "Un coffret découverte avec une sélection de thés d'exception",
+    value: '39€',
+    percentage: 6,
+    totalCount: 30000,
+    displayOrder: 4,
+  },
+  {
+    code: 'GIFT_BOX_69' as PrizeType,
+    name: 'Coffret Découverte Premium',
+    description: 'Notre coffret premium avec une sélection exclusive de grands crus',
+    value: '69€',
+    percentage: 4,
+    totalCount: 20000,
+    displayOrder: 5,
+  },
+];
+
 async function main() {
   console.log('🍵 Démarrage de la génération des tickets Thé Tip Top...\n');
+
+  // ── Lots : créer / mettre à jour les métadonnées ──────────────────────────
+  console.log('🎁 Création des métadonnées des lots...');
+  for (const prize of PRIZE_METADATA) {
+    await prisma.prize.upsert({
+      where: { code: prize.code },
+      update: {
+        name: prize.name,
+        description: prize.description,
+        value: prize.value,
+        percentage: prize.percentage,
+        totalCount: prize.totalCount,
+        displayOrder: prize.displayOrder,
+      },
+      create: prize,
+    });
+  }
+  console.log('✅ 5 lots créés/mis à jour.\n');
 
   // Vérifier si des tickets existent déjà
   const existingCount = await prisma.ticket.count();
   if (existingCount > 0) {
     console.log(`⚠️  ${existingCount} tickets existent déjà en base.`);
-    const readline = require('readline');
     const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
@@ -130,11 +211,19 @@ async function main() {
   // Créer la configuration du jeu si elle n'existe pas
   const existingConfig = await prisma.gameConfig.findFirst();
   if (!existingConfig) {
-    const startDate = new Date();
-    const endDate = new Date(startDate);
-    endDate.setDate(endDate.getDate() + 30);
-    const claimEndDate = new Date(endDate);
-    claimEndDate.setDate(claimEndDate.getDate() + 30);
+    // Lire les dates depuis les variables d'environnement (définis dans api/.env)
+    // Fallback : début aujourd'hui, fin dans 30 jours, réclamation dans 60 jours
+    const startDate = process.env.GAME_START_DATE
+      ? new Date(process.env.GAME_START_DATE)
+      : new Date();
+
+    const endDate = process.env.GAME_END_DATE
+      ? new Date(process.env.GAME_END_DATE)
+      : new Date(startDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+    const claimEndDate = process.env.CLAIM_END_DATE
+      ? new Date(process.env.CLAIM_END_DATE)
+      : new Date(endDate.getTime() + 30 * 24 * 60 * 60 * 1000);
 
     await prisma.gameConfig.create({
       data: {
@@ -148,7 +237,12 @@ async function main() {
     console.log('📅 Configuration du jeu créée:');
     console.log(`   - Début: ${startDate.toLocaleDateString('fr-FR')}`);
     console.log(`   - Fin distribution: ${endDate.toLocaleDateString('fr-FR')}`);
-    console.log(`   - Fin réclamation: ${claimEndDate.toLocaleDateString('fr-FR')}\n`);
+    console.log(`   - Fin réclamation: ${claimEndDate.toLocaleDateString('fr-FR')}`);
+    console.log(
+      process.env.GAME_START_DATE
+        ? '   (dates lues depuis les variables d\'environnement)\n'
+        : '   ⚠️  GAME_START_DATE non défini - dates calculées depuis maintenant\n',
+    );
   }
 
   // Générer les gains mélangés
@@ -157,13 +251,16 @@ async function main() {
   console.log('✅ Distribution créée et mélangée.\n');
 
   // Afficher la répartition
-  const distribution = prizes.reduce((acc, prize) => {
-    acc[prize] = (acc[prize] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const distribution: Record<PrizeType, number> = prizes.reduce(
+    (acc, prize) => {
+      acc[prize] = (acc[prize] || 0) + 1;
+      return acc;
+    },
+    {} as Record<PrizeType, number>,
+  );
 
   console.log('📊 Répartition des gains:');
-  Object.entries(distribution).forEach(([type, count]) => {
+  Object.entries(distribution).forEach(([type, count]: [string, number]) => {
     const percentage = ((count / TOTAL_TICKETS) * 100).toFixed(2);
     console.log(`   - ${type}: ${count.toLocaleString('fr-FR')} (${percentage}%)`);
   });
@@ -196,17 +293,18 @@ async function main() {
     const progress = ((insertedCount / TOTAL_TICKETS) * 100).toFixed(1);
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
     process.stdout.write(
-      `\r   Progression: ${progress}% (${insertedCount.toLocaleString('fr-FR')}/${TOTAL_TICKETS.toLocaleString('fr-FR')}) - ${elapsed}s`
+      `\r   Progression: ${progress}% (${insertedCount.toLocaleString('fr-FR')}/${TOTAL_TICKETS.toLocaleString('fr-FR')}) - ${elapsed}s`,
     );
   }
 
   const totalTime = ((Date.now() - startTime) / 1000).toFixed(1);
-  console.log(`\n\n✅ ${insertedCount.toLocaleString('fr-FR')} tickets générés en ${totalTime} secondes!\n`);
+  console.log(
+    `\n\n✅ ${insertedCount.toLocaleString('fr-FR')} tickets générés en ${totalTime} secondes!\n`,
+  );
 
   // Créer des utilisateurs de test
   console.log('👥 Création des utilisateurs de test...');
 
-  const bcrypt = require('bcrypt');
   const hashedPassword = await bcrypt.hash('Test1234!', 12);
 
   await prisma.user.upsert({

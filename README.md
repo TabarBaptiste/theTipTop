@@ -89,7 +89,7 @@ theTipTop/
 - **Documentation** : Swagger/OpenAPI
 
 ### Frontend (WebApp)
-- **Framework** : Next.js 14 (App Router)
+- **Framework** : Next.js 16 (App Router)
 - **Styling** : TailwindCSS + Shadcn/ui
 - **State** : Zustand + React Query
 - **Forms** : React Hook Form + Zod
@@ -105,7 +105,7 @@ theTipTop/
 
 ### Prérequis
 
-- Node.js 20+
+- Node.js 22+
 - Docker & Docker Compose
 - Git
 
@@ -151,9 +151,9 @@ npm run dev
 
 | Service | URL (Dev) | URL (Prod) |
 |---------|-----------|------------|
-| WebApp | http://localhost:3000 | https://thetiptop.dsp5-archi-o23-15m-g5.fr |
-| API | http://localhost:3001 | https://api.thetiptop.dsp5-archi-o23-15m-g5.fr |
-| API Docs | http://localhost:3001/api/docs | https://api.thetiptop.dsp5-archi-o23-15m-g5.fr/api/docs |
+| WebApp | http://localhost:3000 | https://thetiptop.dsp5-archi-o24a-4-5-g1.fr |
+| API | http://localhost:3001 | https://api.thetiptop.dsp5-archi-o24a-4-5-g1.fr |
+| API Docs | http://localhost:3001/api/docs | https://api.thetiptop.dsp5-archi-o24a-4-5-g1.fr/api/docs |
 | Adminer | http://localhost:8080 | - |
 
 ## 🔐 Comptes de test
@@ -162,9 +162,9 @@ Après le seed de la base de données :
 
 | Rôle | Email | Mot de passe |
 |------|-------|--------------|
-| Admin | admin@thetiptop.fr | Admin123! |
-| Employé | employee@thetiptop.fr | Employee123! |
-| Client | client@thetiptop.fr | Client123! |
+| Admin | admin@thetiptop.fr | Test1234! |
+| Employé | employe@thetiptop.fr | Test1234! |
+| Client | client@test.fr | Test1234! |
 
 ## 📝 Scripts disponibles
 
@@ -199,7 +199,7 @@ npm run lint          # Vérification ESLint
 
 ### Backend (API)
 
-- **Framework** : NestJS 10
+- **Framework** : NestJS 11
 - **Base de données** : PostgreSQL 16
 - **ORM** : Prisma
 - **Authentication** : Passport.js (JWT + OAuth2)
@@ -208,7 +208,7 @@ npm run lint          # Vérification ESLint
 
 ### Frontend (WebApp)
 
-- **Framework** : Next.js 14 (App Router)
+- **Framework** : Next.js 16 (App Router)
 - **UI** : TailwindCSS + Shadcn/ui
 - **State** : Zustand
 - **Formulaires** : React Hook Form + Zod

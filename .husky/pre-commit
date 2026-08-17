@@ -1,0 +1,26 @@
+export NO_COLOR=1
+
+branch=$(git symbolic-ref --short HEAD)
+
+if ! echo "$branch" | grep -Eq '^(main|develop)$|^(feature|release|hotfix|refactor|fix|chore)/[a-z0-9._-]+$'; then
+  echo "Nom de branche invalide : '$branch'"
+  echo "Format attendu : feature/<nom>, refactor/<nom>, fix/<nom>, chore/<nom>, release/<version> ou hotfix/<version>"
+  echo "Exemple : feature/page-404-not-found"
+  exit 1
+fi
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "Gitleaks n'est pas installé sur ce poste."
+  echo "Installation : scoop install gitleaks (Windows) / brew install gitleaks (Mac)"
+  exit 1
+fi
+
+gitleaks protect --staged --no-banner --no-color -v
+if [ $? -ne 0 ]; then
+  echo "Gitleaks a détecté un secret potentiel dans les fichiers stagés. Commit bloqué."
+  exit 1
+fi
+
+if git diff --cached --name-only --diff-filter=ACM | grep -Eq '\.(ts|tsx|js|jsx)$'; then
+  ./node_modules/.bin/lint-staged
+fi

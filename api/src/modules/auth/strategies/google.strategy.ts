@@ -11,15 +11,15 @@ import { AuthService } from '../auth.service';
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(
-    private configService: ConfigService,
-    private authService: AuthService,
+    private readonly configService: ConfigService,
+    private readonly authService: AuthService,
   ) {
     super({
-      clientID: configService.get<string>('GOOGLE_CLIENT_ID'),
-      clientSecret: configService.get<string>('GOOGLE_CLIENT_SECRET'),
-      callbackURL: configService.get<string>('GOOGLE_CALLBACK_URL'),
+      clientID: configService.getOrThrow<string>('GOOGLE_CLIENT_ID'),
+      clientSecret: configService.getOrThrow<string>('GOOGLE_CLIENT_SECRET'),
+      callbackURL: configService.getOrThrow<string>('GOOGLE_CALLBACK_URL'),
       scope: ['email', 'profile'],
-    });
+    } as any);
   }
 
   async validate(
@@ -35,22 +35,21 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       return done(new Error('Email non fourni par Google'), false);
     }
 
-    const result = await this.authService.validateOAuthUser({
-      provider: 'google',
-      providerId: id,
-      email,
-      firstName: name?.givenName || 'Utilisateur',
-      lastName: name?.familyName || 'Google',
-      picture: photos?.[0]?.value,
-    });
+    try {
+      // Trouve ou crée l'utilisateur, puis le rattache à req.user.
+      // Les tokens seront générés par le controller via authService.login().
+      const user = await this.authService.validateOAuthUser({
+        provider: 'google',
+        providerId: id,
+        email,
+        firstName: name?.givenName || 'Utilisateur',
+        lastName: name?.familyName || 'Google',
+        picture: photos?.[0]?.value,
+      });
 
-    // Pour le callback, on retourne l'utilisateur trouvé/créé
-    const user = await this.authService.validateJwtPayload({
-      sub: '', // Sera extrait du token
-      email,
-      role: 'CLIENT',
-    });
-
-    done(null, user || undefined);
+      done(null, user);
+    } catch (error) {
+      done(error as Error, false);
+    }
   }
 }

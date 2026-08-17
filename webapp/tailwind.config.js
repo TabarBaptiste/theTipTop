@@ -1,6 +1,5 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: ['class'],
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -9,9 +8,9 @@ module.exports = {
   theme: {
     container: {
       center: true,
-      padding: '2rem',
+      padding: '1.5rem',
       screens: {
-        '2xl': '1400px',
+        xl: '1200px',
       },
     },
     extend: {
@@ -21,32 +20,6 @@ module.exports = {
         ring: 'hsl(var(--ring))',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
-        // Couleurs Thé Tip Top
-        tea: {
-          50: '#f0fdf4',
-          100: '#dcfce7',
-          200: '#bbf7d0',
-          300: '#86efac',
-          400: '#4ade80',
-          500: '#22c55e', // Couleur principale
-          600: '#16a34a',
-          700: '#15803d',
-          800: '#166534',
-          900: '#14532d',
-          950: '#052e16',
-        },
-        gold: {
-          50: '#fffbeb',
-          100: '#fef3c7',
-          200: '#fde68a',
-          300: '#fcd34d',
-          400: '#fbbf24',
-          500: '#f59e0b', // Accent doré
-          600: '#d97706',
-          700: '#b45309',
-          800: '#92400e',
-          900: '#78350f',
-        },
         primary: {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',
@@ -75,15 +48,97 @@ module.exports = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+        // DESIGN.md brand colors
+        terracotta: {
+          50: '#FDF8F3',
+          100: '#F9EDD9',
+          200: '#F2E0D0',
+          300: '#D4A76A',
+          400: '#C8923A',
+          500: '#BA6905',
+          600: '#A85D04',
+          700: '#8B4D03',
+          800: '#6E3D02',
+          900: '#512D02',
+          pale: '#F2E0D0',
+          deep: '#BA6905',
+          hover: '#C25F1F',
+          warm: '#C76C3A',  // Méditerranéen - variante chaude entre deep et hover
+        },
+        cream: '#FAF6EF',
+        noir: '#1A1A1A',
+        moss: {
+          DEFAULT: '#5C6B3A',
+          light: '#7A8C56',
+          50: '#F2F5EC',
+          100: '#E0E8D0',
+          500: '#5C6B3A',
+        },
+        'warm-beige': '#E8D5B0',
+        gold: {
+          50: '#FBF6ED',
+          100: '#F5E9D0',
+          200: '#EBDBB5',
+          300: '#DCCB95',
+          400: '#D1B97E',
+          500: '#C9A96E',
+          600: '#B5955A',
+          700: '#9A7D48',
+          800: '#7F6638',
+          900: '#644F2A',
+        },
+        stone: {
+          DEFAULT: '#8A8378',
+          grey: '#8A8378',
+        },
+        // Backward compat for admin/employee pages
+        tea: {
+          50: '#FDF8F3',
+          100: '#F9EDD9',
+          200: '#F2E0D0',
+          300: '#D4A76A',
+          400: '#C8923A',
+          500: '#BA6905',
+          600: '#A85D04',
+          700: '#8B4D03',
+          800: '#6E3D02',
+          900: '#512D02',
+          950: '#3A2001',
+        },
       },
       borderRadius: {
+        sharp: '2px',
+        soft: '4px',
+        card: '8px',
+        pill: '20px',
+        full: '999px',
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
       fontFamily: {
-        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
-        display: ['var(--font-playfair)', 'serif'],
+        sans: ['var(--font-montserrat)', 'Montserrat', 'system-ui', 'sans-serif'],
+        display: ['var(--font-playfair)', 'Playfair Display', 'Georgia', 'serif'],
+        editorial: ['var(--font-playfair)', 'Playfair Display', 'Georgia', 'serif'],
+        functional: ['var(--font-montserrat)', 'Montserrat', 'system-ui', 'sans-serif'],
+      },
+      spacing: {
+        '2xs': '4px',
+        xs: '8px',
+        sm: '12px',
+        md: '16px',
+        lg: '24px',
+        xl: '32px',
+        '2xl': '48px',
+        '3xl': '64px',
+      },
+      fontSize: {
+        h1: ['clamp(28px, 4vw, 36px)', { lineHeight: '1.2', letterSpacing: '-0.5px', fontWeight: '700' }],
+        h2: ['clamp(22px, 3vw, 26px)', { lineHeight: '1.3', fontWeight: '600' }],
+        h3: ['20px', { lineHeight: '1.4', fontWeight: '500' }],
+        body: ['14px', { lineHeight: '1.75', letterSpacing: '0.3px' }],
+        ui: ['11px', { lineHeight: '1', letterSpacing: '2px', fontWeight: '700' }],
+        caption: ['11px', { lineHeight: '1.5', letterSpacing: '0.3px' }],
       },
       keyframes: {
         'accordion-down': {
@@ -94,18 +149,10 @@ module.exports = {
           from: { height: 'var(--radix-accordion-content-height)' },
           to: { height: '0' },
         },
-        shimmer: {
-          '100%': { transform: 'translateX(100%)' },
-        },
-        'spin-slow': {
-          to: { transform: 'rotate(360deg)' },
-        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
-        shimmer: 'shimmer 2s infinite',
-        'spin-slow': 'spin-slow 3s linear infinite',
       },
     },
   },

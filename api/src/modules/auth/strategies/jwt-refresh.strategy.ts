@@ -11,14 +11,14 @@ import { AuthService, JwtPayload } from '../auth.service';
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
   constructor(
-    private configService: ConfigService,
-    private authService: AuthService,
+    private readonly configService: ConfigService,
+    private readonly authService: AuthService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromBodyField('refreshToken'),
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>('JWT_REFRESH_SECRET'),
-    });
+      secretOrKey: configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
+    } as any);
   }
 
   async validate(payload: JwtPayload) {

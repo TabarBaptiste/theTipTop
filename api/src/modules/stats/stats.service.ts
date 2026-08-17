@@ -3,21 +3,57 @@
 // ===========================================
 
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ParticipationsService } from '../participations/participations.service';
-import { PRIZE_LABELS } from '../tickets/tickets.service';
+import { RedisService } from '../../redis/redis.service';
+import {
+  STATS_OVERVIEW_TTL,
+  STATS_PRIZES_TTL,
+  STATS_DEMOGRAPHICS_TTL,
+  STATS_TIMELINE_TTL,
+  STATS_EMAILING_TTL,
+} from '../../redis/cache-keys';
+
+type PrizeStat = {
+  prizeType: string;
+  _count: { _all: number };
+};
+
+type GenderGroup = {
+  gender: string | null;
+  _count: number;
+};
+
+type TimelineParticipation = {
+  createdAt: Date;
+};
+
+type EmailingUser = {
+  email: string;
+  firstName: string;
+  lastName: string;
+  _count: { participations: number };
+};
 
 @Injectable()
 export class StatsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly participationsService: ParticipationsService,
+    private readonly redis: RedisService,
   ) {}
 
   /**
    * Statistiques globales du jeu-concours
    */
   async getGlobalStats() {
+    return this.redis.getOrSet('stats:overview', STATS_OVERVIEW_TTL, () =>
+      this.computeGlobalStats(),
+    );
+  }
+
+  private async computeGlobalStats() {
     const [
       totalTickets,
       usedTickets,
@@ -38,7 +74,6 @@ export class StatsService {
 
     const uniqueParticipants = await this.participationsService.countUniqueParticipants();
 
-    // Calcul du temps restant
     let daysRemaining = 0;
     let claimDaysRemaining = 0;
     let gamePhase = 'not_started';
@@ -46,7 +81,6 @@ export class StatsService {
     if (gameConfig) {
       const now = new Date();
       if (now < gameConfig.startDate) {
-        gamePhase = 'not_started';
         daysRemaining = Math.ceil(
           (gameConfig.endDate.getTime() - gameConfig.startDate.getTime()) / (1000 * 60 * 60 * 24),
         );
@@ -74,7 +108,8 @@ export class StatsService {
         used: usedTickets,
         distributed: distributedTickets,
         available: totalTickets - distributedTickets,
-        usageRate: distributedTickets > 0 ? ((usedTickets / distributedTickets) * 100).toFixed(1) : 0,
+        usageRate:
+          distributedTickets > 0 ? ((usedTickets / distributedTickets) * 100).toFixed(1) : 0,
       },
       users: {
         total: totalUsers,
@@ -83,12 +118,14 @@ export class StatsService {
       },
       participations: {
         total: totalParticipations,
-        averagePerUser: uniqueParticipants > 0 ? (totalParticipations / uniqueParticipants).toFixed(1) : 0,
+        averagePerUser:
+          uniqueParticipants > 0 ? (totalParticipations / uniqueParticipants).toFixed(1) : 0,
       },
       prizes: {
         delivered: deliveredPrizes,
         pending: totalParticipations - deliveredPrizes,
-        deliveryRate: totalParticipations > 0 ? ((deliveredPrizes / totalParticipations) * 100).toFixed(1) : 0,
+        deliveryRate:
+          totalParticipations > 0 ? ((deliveredPrizes / totalParticipations) * 100).toFixed(1) : 0,
       },
       game: {
         phase: gamePhase,
@@ -106,6 +143,10 @@ export class StatsService {
    * Statistiques des gains par type
    */
   async getPrizeStats() {
+    return this.redis.getOrSet('stats:prizes', STATS_PRIZES_TTL, () => this.computePrizeStats());
+  }
+
+  private async computePrizeStats() {
     const prizeStats = await this.prisma.ticket.groupBy({
       by: ['prizeType'],
       _count: {
@@ -118,17 +159,25 @@ export class StatsService {
       where: { prizeDelivered: true },
     });
 
-    // Statistiques par type de gain
-    const byType = prizeStats.map((stat) => ({
+    const prizes = await this.prisma.prize.findMany();
+    const prizesMap = prizes.reduce(
+      (acc, p) => {
+        acc[p.code] = { name: p.name, value: p.value };
+        return acc;
+      },
+      {} as Record<string, { name: string; value: string | null }>,
+    );
+
+    const byType = prizeStats.map((stat: PrizeStat) => ({
       type: stat.prizeType,
-      label: PRIZE_LABELS[stat.prizeType].name,
-      value: PRIZE_LABELS[stat.prizeType].value,
+      label: (prizesMap[stat.prizeType] ?? { name: stat.prizeType }).name,
+      value: (prizesMap[stat.prizeType] ?? { value: '' }).value,
       count: stat._count._all,
     }));
 
     return {
       byType,
-      total: prizeStats.reduce((sum, stat) => sum + stat._count._all, 0),
+      total: prizeStats.reduce((sum: number, stat: PrizeStat) => sum + stat._count._all, 0),
       delivered: deliveredCount,
     };
   }
@@ -137,7 +186,12 @@ export class StatsService {
    * Statistiques démographiques des participants
    */
   async getDemographicStats() {
-    // Par genre
+    return this.redis.getOrSet('stats:demographics', STATS_DEMOGRAPHICS_TTL, () =>
+      this.computeDemographicStats(),
+    );
+  }
+
+  private async computeDemographicStats() {
     const byGender = await this.prisma.user.groupBy({
       by: ['gender'],
       _count: true,
@@ -150,7 +204,6 @@ export class StatsService {
       },
     });
 
-    // Par tranche d'âge
     const users = await this.prisma.user.findMany({
       where: {
         role: 'CLIENT',
@@ -188,7 +241,7 @@ export class StatsService {
     });
 
     return {
-      byGender: byGender.map((g) => ({
+      byGender: byGender.map((g: GenderGroup) => ({
         gender: g.gender || 'NON_RENSEIGNE',
         count: g._count,
       })),
@@ -203,6 +256,15 @@ export class StatsService {
    * Statistiques temporelles (participations par jour)
    */
   async getTimelineStats(days: number = 30) {
+    // Borne la fenêtre (1-365 jours) : la boucle de construction de la
+    // timeline itère `days` fois, une valeur arbitraire serait un vecteur DoS.
+    const safeDays = Number.isFinite(days) ? Math.min(Math.max(Math.trunc(days), 1), 365) : 30;
+    return this.redis.getOrSet(`stats:timeline:${safeDays}`, STATS_TIMELINE_TTL, () =>
+      this.computeTimelineStats(safeDays),
+    );
+  }
+
+  private async computeTimelineStats(days: number) {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
@@ -220,14 +282,15 @@ export class StatsService {
       },
     });
 
-    // Grouper par jour
-    const byDay = participations.reduce((acc, p) => {
-      const day = p.createdAt.toISOString().split('T')[0];
-      acc[day] = (acc[day] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const byDay = participations.reduce(
+      (acc: Record<string, number>, p: TimelineParticipation) => {
+        const day = p.createdAt.toISOString().split('T')[0];
+        acc[day] = (acc[day] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
-    // Compléter les jours sans participation
     const timeline: { date: string; count: number }[] = [];
     const current = new Date(startDate);
     const now = new Date();
@@ -250,26 +313,30 @@ export class StatsService {
 
   /**
    * Données pour export (emailing)
+   *
+   * RGPD : le consentement explicite est **toujours** exigé pour un export à
+   * des fins d'emailing (cf. cahier des charges). Les contacts sans
+   * `consentEmail` sont donc systématiquement exclus, quel que soit le segment
+   * demandé. Cette contrainte est appliquée côté serveur pour ne pas dépendre
+   * du client.
    */
-  async getEmailingData(options: {
-    consentEmail?: boolean;
-    hasParticipated?: boolean;
-  }) {
-    const where: any = {
+  async getEmailingData(options: { hasParticipated?: boolean }) {
+    const cacheKey = `stats:emailing:${options.hasParticipated ?? 'all'}`;
+    return this.redis.getOrSet(cacheKey, STATS_EMAILING_TTL, () =>
+      this.computeEmailingData(options),
+    );
+  }
+
+  private async computeEmailingData(options: { hasParticipated?: boolean }) {
+    const where: Prisma.UserWhereInput = {
       role: 'CLIENT',
       deletedAt: null,
+      // RGPD : exclusion non négociable des contacts non consentants
+      consentEmail: true,
     };
 
-    if (options.consentEmail !== undefined) {
-      where.consentEmail = options.consentEmail;
-    }
-
     if (options.hasParticipated !== undefined) {
-      if (options.hasParticipated) {
-        where.participations = { some: {} };
-      } else {
-        where.participations = { none: {} };
-      }
+      where.participations = options.hasParticipated ? { some: {} } : { none: {} };
     }
 
     const users = await this.prisma.user.findMany({
@@ -288,7 +355,7 @@ export class StatsService {
 
     return {
       count: users.length,
-      users: users.map((u) => ({
+      users: users.map((u: EmailingUser) => ({
         email: u.email,
         firstName: u.firstName,
         lastName: u.lastName,

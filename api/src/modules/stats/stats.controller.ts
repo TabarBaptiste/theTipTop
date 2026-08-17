@@ -3,13 +3,7 @@
 // ===========================================
 
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 
 import { StatsService } from './stats.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -59,7 +53,12 @@ export class StatsController {
   // ===========================================
   @Get('timeline')
   @ApiOperation({ summary: 'Évolution des participations dans le temps' })
-  @ApiQuery({ name: 'days', required: false, type: Number, description: 'Nombre de jours (défaut: 30)' })
+  @ApiQuery({
+    name: 'days',
+    required: false,
+    type: Number,
+    description: 'Nombre de jours (défaut: 30)',
+  })
   @ApiResponse({ status: 200, description: 'Statistiques temporelles' })
   async getTimelineStats(@Query('days') days?: number) {
     return this.statsService.getTimelineStats(days);
@@ -69,14 +68,14 @@ export class StatsController {
   // DONNÉES EMAILING
   // ===========================================
   @Get('emailing')
-  @ApiOperation({ summary: 'Données pour campagnes emailing' })
-  @ApiQuery({ name: 'consentEmail', required: false, type: Boolean })
+  @ApiOperation({
+    summary: 'Données pour campagnes emailing (contacts consentants uniquement)',
+    description:
+      'RGPD : seuls les contacts ayant explicitement consenti (consentEmail) sont retournés. Le segment optionnel hasParticipated affine le ciblage sans jamais lever cette contrainte.',
+  })
   @ApiQuery({ name: 'hasParticipated', required: false, type: Boolean })
   @ApiResponse({ status: 200, description: 'Données emailing' })
-  async getEmailingData(
-    @Query('consentEmail') consentEmail?: boolean,
-    @Query('hasParticipated') hasParticipated?: boolean,
-  ) {
-    return this.statsService.getEmailingData({ consentEmail, hasParticipated });
+  async getEmailingData(@Query('hasParticipated') hasParticipated?: boolean) {
+    return this.statsService.getEmailingData({ hasParticipated });
   }
 }

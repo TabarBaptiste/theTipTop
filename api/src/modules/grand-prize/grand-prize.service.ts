@@ -2,13 +2,9 @@
 // Service Grand Prize (Tirage au sort)
 // ===========================================
 
-import {
-  Injectable,
-  BadRequestException,
-  ConflictException,
-} from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import * as crypto from 'crypto';
+import { randomInt } from 'node:crypto';
 
 @Injectable()
 export class GrandPrizeService {
@@ -44,7 +40,7 @@ export class GrandPrizeService {
     if (now < gameConfig.endDate) {
       return {
         canDraw: false,
-        reason: 'Le jeu-concours n\'est pas encore terminé',
+        reason: "Le jeu-concours n'est pas encore terminé",
       };
     }
 
@@ -86,7 +82,7 @@ export class GrandPrizeService {
     }
 
     // Tirage au sort cryptographiquement sécurisé
-    const randomIndex = crypto.randomInt(0, participantIds.length);
+    const randomIndex = randomInt(0, participantIds.length);
     const winnerId = participantIds[randomIndex].userId;
 
     // Récupérer les infos du gagnant
@@ -101,15 +97,21 @@ export class GrandPrizeService {
       },
     });
 
-    // Mettre à jour la config du jeu
-    await this.prisma.gameConfig.updateMany({
-      where: { isActive: true },
+    // Mettre à jour la config du jeu.
+    // La condition `grandPrizeDrawn: false` rend l'opération idempotente :
+    // deux tirages simultanés ne peuvent pas écraser le même gagnant.
+    const updated = await this.prisma.gameConfig.updateMany({
+      where: { isActive: true, grandPrizeDrawn: false },
       data: {
         grandPrizeDrawn: true,
         grandPrizeWinnerId: winnerId,
         grandPrizeDrawnAt: new Date(),
       },
     });
+
+    if (updated.count === 0) {
+      throw new BadRequestException('Le tirage au sort a déjà été effectué');
+    }
 
     // Log d'audit
     await this.prisma.auditLog.create({
@@ -135,7 +137,7 @@ export class GrandPrizeService {
       prize: {
         name: 'Un an de thé',
         value: '360€',
-        description: '1 an de thé Thé Tip Top d\'une valeur de 360€',
+        description: "1 an de thé Thé Tip Top d'une valeur de 360€",
       },
     };
   }
@@ -166,8 +168,22 @@ export class GrandPrizeService {
     }
 
     // Récupérer le gagnant
+    const winnerId = gameConfig.grandPrizeWinnerId;
+    if (!winnerId) {
+      return {
+        drawn: true,
+        drawnAt: gameConfig.grandPrizeDrawnAt,
+        winner: null,
+        totalParticipants: (await this.prisma.participation.groupBy({ by: ['userId'] })).length,
+        prize: {
+          name: 'Un an de thé',
+          value: '360€',
+        },
+      };
+    }
+
     const winner = await this.prisma.user.findUnique({
-      where: { id: gameConfig.grandPrizeWinnerId! },
+      where: { id: winnerId },
       select: {
         id: true,
         email: true,
@@ -177,9 +193,7 @@ export class GrandPrizeService {
     });
 
     // Compter les participants
-    const participantsCount = (
-      await this.prisma.participation.groupBy({ by: ['userId'] })
-    ).length;
+    const participantsCount = (await this.prisma.participation.groupBy({ by: ['userId'] })).length;
 
     return {
       drawn: true,
@@ -188,7 +202,7 @@ export class GrandPrizeService {
         ? {
             id: winner.id,
             firstName: winner.firstName,
-            lastName: winner.lastName?.charAt(0) + '.',
+            lastName: `${winner.lastName?.slice(0, 1) ?? ''}.`,
             email: this.maskEmail(winner.email),
           }
         : null,
@@ -207,9 +221,7 @@ export class GrandPrizeService {
     const [local, domain] = email.split('@');
     if (!local || !domain) return '***@***.***';
     const maskedLocal =
-      local.length > 2
-        ? local.charAt(0) + '*'.repeat(local.length - 2) + local.charAt(local.length - 1)
-        : '**';
+      local.length > 2 ? local.slice(0, 1) + '*'.repeat(local.length - 2) + local.slice(-1) : '**';
     return `${maskedLocal}@${domain}`;
   }
 }

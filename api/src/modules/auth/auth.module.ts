@@ -6,6 +6,7 @@ import { Module, Logger } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { SignOptions } from 'jsonwebtoken';
 
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -26,7 +27,7 @@ const GoogleStrategyFactory = {
   useFactory: (configService: ConfigService, authService: AuthService) => {
     const clientId = configService.get<string>('GOOGLE_CLIENT_ID');
     const clientSecret = configService.get<string>('GOOGLE_CLIENT_SECRET');
-    
+
     if (clientId && clientSecret && !clientId.includes('your-google')) {
       logger.log('Google OAuth strategy enabled');
       return new GoogleStrategy(configService, authService);
@@ -43,7 +44,7 @@ const FacebookStrategyFactory = {
   useFactory: (configService: ConfigService, authService: AuthService) => {
     const appId = configService.get<string>('FACEBOOK_APP_ID');
     const appSecret = configService.get<string>('FACEBOOK_APP_SECRET');
-    
+
     if (appId && appSecret && !appId.includes('your-facebook')) {
       logger.log('Facebook OAuth strategy enabled');
       return new FacebookStrategy(configService, authService);
@@ -61,9 +62,9 @@ const FacebookStrategyFactory = {
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'),
+        secret: configService.getOrThrow<string>('JWT_SECRET'),
         signOptions: {
-          expiresIn: configService.get<string>('JWT_EXPIRES_IN', '15m'),
+          expiresIn: configService.get<string>('JWT_EXPIRATION', '15m') as SignOptions['expiresIn'],
         },
       }),
       inject: [ConfigService],

@@ -13,20 +13,15 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 
-import { TicketsService, PRIZE_LABELS } from './tickets.service';
+import { TicketsService } from './tickets.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Public } from '../auth/decorators/public.decorator';
 import { VerifyCodeDto } from './dto/verify-code.dto';
+import { PrizePublicDto } from './dto/prize-public.dto';
 
 @ApiTags('tickets')
 @Controller('tickets')
@@ -75,11 +70,17 @@ export class TicketsController {
   @Public()
   @Get('prizes')
   @ApiOperation({ summary: 'Liste des lots à gagner' })
-  @ApiResponse({ status: 200, description: 'Liste des lots' })
-  async getPrizes() {
-    return Object.entries(PRIZE_LABELS).map(([type, info]) => ({
-      type,
-      ...info,
+  @ApiResponse({ status: 200, description: 'Liste des lots', type: [PrizePublicDto] })
+  async getPrizes(): Promise<PrizePublicDto[]> {
+    const prizes = await this.ticketsService.findAllPrizes();
+    return prizes.map((p) => ({
+      code: p.code,
+      name: p.name,
+      description: p.description,
+      value: p.value,
+      percentage: p.percentage,
+      displayOrder: p.displayOrder,
+      imageUrl: p.imageUrl ?? null,
     }));
   }
 
@@ -104,7 +105,12 @@ export class TicketsController {
   @Roles('EMPLOYEE', 'ADMIN')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Récupérer des codes disponibles (API Caisses)' })
-  @ApiQuery({ name: 'count', required: false, type: Number, description: 'Nombre de codes (max 100)' })
+  @ApiQuery({
+    name: 'count',
+    required: false,
+    type: Number,
+    description: 'Nombre de codes (max 100)',
+  })
   @ApiResponse({ status: 200, description: 'Codes disponibles' })
   async getAvailableCodes(@Query('count') count?: number) {
     const codes = await this.ticketsService.getAvailableCodes(count);

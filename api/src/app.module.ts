@@ -5,10 +5,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ScheduleModule } from '@nestjs/schedule';
 import { APP_GUARD } from '@nestjs/core';
 
 // Modules internes
 import { PrismaModule } from './prisma/prisma.module';
+import { RedisModule } from './redis/redis.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { TicketsModule } from './modules/tickets/tickets.module';
@@ -17,6 +19,8 @@ import { GainsModule } from './modules/gains/gains.module';
 import { StatsModule } from './modules/stats/stats.module';
 import { GrandPrizeModule } from './modules/grand-prize/grand-prize.module';
 import { AuditModule } from './modules/audit/audit.module';
+import { GameConfigModule } from './modules/game-config/game-config.module';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
   imports: [
@@ -45,8 +49,17 @@ import { AuditModule } from './modules/audit/audit.module';
       },
     ]),
 
+    // Jobs planifiés (libération des réservations, relances, purge RGPD)
+    ScheduleModule.forRoot(),
+
     // Database
     PrismaModule,
+
+    // Health check
+    HealthModule,
+
+    // Cache
+    RedisModule,
 
     // Features
     AuthModule,
@@ -57,6 +70,7 @@ import { AuditModule } from './modules/audit/audit.module';
     StatsModule,
     GrandPrizeModule,
     AuditModule,
+    GameConfigModule,
   ],
   providers: [
     // Rate limiting global

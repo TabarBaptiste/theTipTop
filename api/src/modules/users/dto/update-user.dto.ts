@@ -15,6 +15,7 @@ import {
   IsEnum,
 } from 'class-validator';
 import { Gender } from '@prisma/client';
+import { IsAdult } from '../../../common/validators/is-adult.validator';
 
 export class UpdateUserDto {
   @ApiPropertyOptional({
@@ -30,9 +31,7 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   @MinLength(8)
-  @Matches(
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
-  )
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
   password?: string;
 
   @ApiPropertyOptional({ example: 'Jean' })
@@ -52,6 +51,10 @@ export class UpdateUserDto {
   @ApiPropertyOptional({ example: '1990-05-15' })
   @IsOptional()
   @IsDateString()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+    message: 'La date de naissance doit être au format AAAA-MM-JJ (année sur 4 chiffres)',
+  })
+  @IsAdult()
   birthDate?: string;
 
   @ApiPropertyOptional({ enum: Gender })
