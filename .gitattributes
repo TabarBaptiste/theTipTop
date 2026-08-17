@@ -1,0 +1,4 @@
+# Les hooks Git sont interpretes par sh. Sous Windows, core.autocrlf=true les
+# reecrirait en CRLF au checkout et le \r final ferait echouer le shebang
+# (« bad interpreter »). On force donc LF sur ce dossier uniquement.
+.husky/* text eol=lf
