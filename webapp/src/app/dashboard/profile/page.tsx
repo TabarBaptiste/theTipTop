@@ -1,20 +1,19 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { User, Gift, LogOut, Trash2, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
+import { AccountSidebar } from '@/components/dashboard/account-sidebar';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { api } from '@/lib/api';
-import { cn } from '@/lib/utils';
 
 // Aligné sur UpdateUserDto du back-end (enum Gender Prisma)
 const profileSchema = z.object({
@@ -28,16 +27,10 @@ const profileSchema = z.object({
 
 type ProfileFormData = z.infer<typeof profileSchema>;
 
-const sidebarLinks = [
-  { name: 'Profil', href: '/dashboard/profile', icon: User },
-  { name: 'Mes participations', href: '/dashboard', icon: Gift },
-];
-
 export default function ProfilePage() {
   const router = useRouter();
-  const { user, setUser, isAuthenticated, isLoading: authLoading, logout } = useAuthStore();
+  const { user, setUser, isAuthenticated, isLoading: authLoading } = useAuthStore();
   const [isUpdating, setIsUpdating] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   const {
     register,
@@ -98,26 +91,6 @@ export default function ProfilePage() {
     }
   };
 
-  // Suppression de compte (RGPD) : soft delete + anonymisation côté API
-  const handleDeleteAccount = async () => {
-    if (!user) return;
-    const confirmed = window.confirm(
-      'Supprimer definitivement votre compte ? Vos donnees personnelles seront anonymisees (RGPD). Cette action est irreversible.',
-    );
-    if (!confirmed) return;
-
-    setIsDeleting(true);
-    try {
-      await api.delete(`/users/${user.id}`);
-      toast.success('Votre compte a ete supprime');
-      logout();
-      router.push('/');
-    } catch {
-      toast.error('Erreur lors de la suppression du compte');
-      setIsDeleting(false);
-    }
-  };
-
   if (authLoading || !isAuthenticated) {
     return (
       <div className="min-h-[calc(100vh-5rem)] bg-cream py-8">
@@ -158,47 +131,7 @@ export default function ProfilePage() {
     <div className="min-h-[calc(100vh-5rem)] bg-cream py-8">
       <div className="container mx-auto px-6">
         <div className="grid gap-8 lg:grid-cols-[240px_1fr]">
-          {/* Sidebar */}
-          <aside className="space-y-1">
-            {sidebarLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className={cn(
-                  'flex items-center gap-3 rounded-soft px-4 py-3 text-sm font-medium transition-colors',
-                  link.href === '/dashboard/profile'
-                    ? 'bg-terracotta-50 text-terracotta-deep'
-                    : 'text-noir hover:bg-terracotta-50/50'
-                )}
-              >
-                <link.icon className="h-4 w-4" strokeWidth={1.5} />
-                {link.name}
-              </Link>
-            ))}
-
-            <button
-              onClick={logout}
-              className="flex w-full items-center gap-3 rounded-soft px-4 py-3 text-sm font-medium text-noir transition-colors hover:bg-terracotta-50/50"
-            >
-              <LogOut className="h-4 w-4" strokeWidth={1.5} />
-              Deconnexion
-            </button>
-
-            <div className="pt-4">
-              <button
-                onClick={handleDeleteAccount}
-                disabled={isDeleting}
-                className="flex w-full items-center gap-3 rounded-soft px-4 py-3 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
-              >
-                {isDeleting ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Trash2 className="h-4 w-4" strokeWidth={1.5} />
-                )}
-                Supprimer le compte
-              </button>
-            </div>
-          </aside>
+          <AccountSidebar />
 
           {/* Main content */}
           <main>
