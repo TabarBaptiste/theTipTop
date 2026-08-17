@@ -15,11 +15,13 @@ import { AccountSidebar } from '@/components/dashboard/account-sidebar';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { api } from '@/lib/api';
 
-// Aligné sur UpdateUserDto du back-end (enum Gender Prisma)
+// Aligné sur UpdateUserDto du back-end (enum Gender Prisma), à ceci près que
+// l'e-mail en est volontairement absent : il identifie le compte et sert à la
+// connexion. Le laisser modifiable sans revérification ouvrirait une prise de
+// contrôle à quiconque disposerait d'une session ouverte.
 const profileSchema = z.object({
   firstName: z.string().min(2, 'Min. 2 caractères'),
   lastName: z.string().min(2, 'Min. 2 caractères'),
-  email: z.string().email('E-mail invalide'),
   phone: z.string().optional(),
   birthDate: z.string().optional(),
   gender: z.enum(['MALE', 'FEMALE', 'OTHER', 'PREFER_NOT_TO_SAY', '']).optional(),
@@ -54,7 +56,6 @@ export default function ProfilePage() {
     reset({
       firstName: user.firstName,
       lastName: user.lastName,
-      email: user.email,
       phone: user.phone || '',
       // L'API renvoie un ISO datetime, l'input type=date attend YYYY-MM-DD
       birthDate: user.birthDate ? user.birthDate.slice(0, 10) : '',
@@ -75,7 +76,6 @@ export default function ProfilePage() {
       const payload = {
         firstName: data.firstName,
         lastName: data.lastName,
-        email: data.email,
         phone: data.phone || undefined,
         birthDate: data.birthDate || undefined,
         gender: data.gender || undefined,
@@ -84,13 +84,11 @@ export default function ProfilePage() {
       setUser({ ...user, ...response.data });
       toast.success('Profil mis à jour !');
     } catch (error: any) {
-      if (error?.response?.status === 409) {
-        toast.error("Cet e-mail est déjà utilisé");
-      } else {
-        const apiMessage = error?.response?.data?.message;
-        const detail = Array.isArray(apiMessage) ? apiMessage[0] : apiMessage;
-        toast.error(detail || 'Erreur lors de la mise à jour');
-      }
+      // Le 409 pour e-mail déjà pris ne peut plus survenir depuis ce
+      // formulaire, qui n'envoie plus l'adresse.
+      const apiMessage = error?.response?.data?.message;
+      const detail = Array.isArray(apiMessage) ? apiMessage[0] : apiMessage;
+      toast.error(detail || 'Erreur lors de la mise à jour');
     } finally {
       setIsUpdating(false);
     }
@@ -162,12 +160,23 @@ export default function ProfilePage() {
                   )}
                 </div>
 
+                {/* Champ en lecture seule, hors formulaire : la valeur vient du
+                    store et n'est jamais soumise. */}
                 <div>
-                  <Label htmlFor="email">E-mail*</Label>
-                  <Input id="email" type="email" {...register('email')} />
-                  {errors.email && (
-                    <p className="mt-1 text-xs text-red-700">{errors.email.message}</p>
-                  )}
+                  <Label htmlFor="email">E-mail</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={user?.email ?? ''}
+                    readOnly
+                    disabled
+                    aria-describedby="email-hint"
+                    className="cursor-not-allowed bg-cream text-stone-grey"
+                  />
+                  <p id="email-hint" className="mt-1 text-xs text-stone-grey">
+                    Votre adresse identifie votre compte et sert à vous connecter. Écrivez-nous
+                    pour en changer.
+                  </p>
                 </div>
                 <div>
                   <Label htmlFor="phone">Téléphone</Label>
