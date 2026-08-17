@@ -4,6 +4,7 @@ import { Suspense, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/lib/stores/auth-store';
+import { landingRouteFor } from '@/lib/landing-route';
 import { Skeleton } from '@/components/ui/skeleton';
 
 /**
@@ -35,7 +36,9 @@ function AuthCallbackHandler() {
     handleOAuthCallback(accessToken, refreshToken)
       .then(() => {
         toast.success('Connexion réussie !');
-        router.replace('/dashboard');
+        // Le profil vient d'etre hydrate par handleOAuthCallback : on lit le
+        // role directement dans le store plutot qu'une valeur figee au rendu.
+        router.replace(landingRouteFor(useAuthStore.getState().user?.role));
       })
       .catch(() => {
         toast.error('Session invalide. Veuillez vous reconnecter.');
