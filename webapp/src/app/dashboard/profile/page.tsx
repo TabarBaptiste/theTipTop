@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,9 +17,9 @@ import { api } from '@/lib/api';
 
 // Aligné sur UpdateUserDto du back-end (enum Gender Prisma)
 const profileSchema = z.object({
-  firstName: z.string().min(2, 'Min. 2 caracteres'),
-  lastName: z.string().min(2, 'Min. 2 caracteres'),
-  email: z.string().email('Email invalide'),
+  firstName: z.string().min(2, 'Min. 2 caractères'),
+  lastName: z.string().min(2, 'Min. 2 caractères'),
+  email: z.string().email('E-mail invalide'),
   phone: z.string().optional(),
   birthDate: z.string().optional(),
   gender: z.enum(['MALE', 'FEMALE', 'OTHER', 'PREFER_NOT_TO_SAY', '']).optional(),
@@ -47,19 +47,24 @@ export default function ProfilePage() {
     }
   }, [authLoading, isAuthenticated, router]);
 
-  useEffect(() => {
-    if (user) {
-      reset({
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        phone: user.phone || '',
-        // L'API renvoie un ISO datetime, l'input type=date attend YYYY-MM-DD
-        birthDate: user.birthDate ? user.birthDate.slice(0, 10) : '',
-        gender: (user.gender as ProfileFormData['gender']) || '',
-      });
-    }
+  // Remet le formulaire sur les valeurs enregistrées. Sert à l'initialisation
+  // comme au bouton « Annuler » de la maquette.
+  const resetToStoredValues = useCallback(() => {
+    if (!user) return;
+    reset({
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      phone: user.phone || '',
+      // L'API renvoie un ISO datetime, l'input type=date attend YYYY-MM-DD
+      birthDate: user.birthDate ? user.birthDate.slice(0, 10) : '',
+      gender: (user.gender as ProfileFormData['gender']) || '',
+    });
   }, [user, reset]);
+
+  useEffect(() => {
+    resetToStoredValues();
+  }, [resetToStoredValues]);
 
   const onSubmit = async (data: ProfileFormData) => {
     if (!user) return;
@@ -77,14 +82,14 @@ export default function ProfilePage() {
       };
       const response = await api.put(`/users/${user.id}`, payload);
       setUser({ ...user, ...response.data });
-      toast.success('Profil mis a jour !');
+      toast.success('Profil mis à jour !');
     } catch (error: any) {
       if (error?.response?.status === 409) {
-        toast.error('Cet email est deja utilise');
+        toast.error("Cet e-mail est déjà utilisé");
       } else {
         const apiMessage = error?.response?.data?.message;
         const detail = Array.isArray(apiMessage) ? apiMessage[0] : apiMessage;
-        toast.error(detail || 'Erreur lors de la mise a jour');
+        toast.error(detail || 'Erreur lors de la mise à jour');
       }
     } finally {
       setIsUpdating(false);
@@ -93,7 +98,7 @@ export default function ProfilePage() {
 
   if (authLoading || !isAuthenticated) {
     return (
-      <div className="min-h-[calc(100vh-5rem)] bg-cream py-8">
+      <div className="min-h-[calc(100vh-5rem)] bg-white py-8">
         <div className="container mx-auto px-6">
           <div className="grid gap-8 lg:grid-cols-[240px_1fr]">
             {/* Sidebar skeleton */}
@@ -128,7 +133,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-cream py-8">
+    <div className="min-h-[calc(100vh-5rem)] bg-white py-8">
       <div className="container mx-auto px-6">
         <div className="grid gap-8 lg:grid-cols-[240px_1fr]">
           <AccountSidebar />
@@ -137,69 +142,85 @@ export default function ProfilePage() {
           <main>
             <h1 className="font-display text-h2 text-noir">Mes informations</h1>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-6">
-              <div className="grid gap-4 sm:grid-cols-2">
+            {/* Grille à deux colonnes de bout en bout, comme la maquette. Les
+                champs d'adresse qu'elle montre ne sont pas repris : ils
+                n'existent pas au modèle de données. */}
+            <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
+              <div className="grid gap-5 sm:grid-cols-2">
                 <div>
-                  <Label htmlFor="firstName">Prenom</Label>
+                  <Label htmlFor="firstName">Prénom*</Label>
                   <Input id="firstName" {...register('firstName')} />
                   {errors.firstName && (
-                    <p className="mt-1 text-xs text-red-600">{errors.firstName.message}</p>
+                    <p className="mt-1 text-xs text-red-700">{errors.firstName.message}</p>
                   )}
                 </div>
                 <div>
-                  <Label htmlFor="lastName">Nom</Label>
+                  <Label htmlFor="lastName">Nom*</Label>
                   <Input id="lastName" {...register('lastName')} />
                   {errors.lastName && (
-                    <p className="mt-1 text-xs text-red-600">{errors.lastName.message}</p>
+                    <p className="mt-1 text-xs text-red-700">{errors.lastName.message}</p>
                   )}
                 </div>
-              </div>
 
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" {...register('email')} />
-                {errors.email && (
-                  <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>
-                )}
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <Label htmlFor="phone">Telephone</Label>
+                  <Label htmlFor="email">E-mail*</Label>
+                  <Input id="email" type="email" {...register('email')} />
+                  {errors.email && (
+                    <p className="mt-1 text-xs text-red-700">{errors.email.message}</p>
+                  )}
+                </div>
+                <div>
+                  <Label htmlFor="phone">Téléphone</Label>
                   <Input id="phone" type="tel" placeholder="06 12 34 56 78" {...register('phone')} />
                 </div>
+
                 <div>
                   <Label htmlFor="birthDate">Date de naissance</Label>
                   <Input id="birthDate" type="date" {...register('birthDate')} />
                 </div>
+                <div>
+                  <Label htmlFor="gender">Genre</Label>
+                  <select
+                    id="gender"
+                    className="flex h-10 w-full rounded-soft border-[1.5px] border-warm-beige bg-white px-4 py-2 font-functional text-sm text-noir transition-colors focus:border-terracotta-deep focus:outline-none"
+                    {...register('gender')}
+                  >
+                    <option value="">Sélectionner</option>
+                    <option value="MALE">Homme</option>
+                    <option value="FEMALE">Femme</option>
+                    <option value="OTHER">Autre</option>
+                    <option value="PREFER_NOT_TO_SAY">Je préfère ne pas répondre</option>
+                  </select>
+                </div>
               </div>
 
-              <div>
-                <Label htmlFor="gender">Genre</Label>
-                <select
-                  id="gender"
-                  className="flex h-10 w-full rounded-soft border-[1.5px] border-warm-beige bg-white px-4 py-2 font-functional text-sm text-noir transition-colors focus:border-terracotta-deep focus:outline-none"
-                  {...register('gender')}
+              <div className="flex justify-end gap-3 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={resetToStoredValues}
+                  disabled={isUpdating}
                 >
-                  <option value="">Selectionner</option>
-                  <option value="MALE">Homme</option>
-                  <option value="FEMALE">Femme</option>
-                  <option value="OTHER">Autre</option>
-                  <option value="PREFER_NOT_TO_SAY">Je prefere ne pas repondre</option>
-                </select>
+                  Annuler
+                </Button>
+                <Button type="submit" disabled={isUpdating}>
+                  {isUpdating ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Enregistrement...
+                    </>
+                  ) : (
+                    'Enregistrer'
+                  )}
+                </Button>
               </div>
-
-              <Button type="submit" size="lg" disabled={isUpdating}>
-                {isUpdating ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Mise a jour...
-                  </>
-                ) : (
-                  'Mettre a jour'
-                )}
-              </Button>
             </form>
+
+            {/* Bandeau de réassurance de la maquette. Blanc sur moss : 5.80:1. */}
+            <p className="mt-6 rounded-soft bg-moss px-5 py-4 text-sm text-white">
+              Vos données personnelles sont sécurisées et ne seront jamais partagées avec des
+              tiers.
+            </p>
           </main>
         </div>
       </div>

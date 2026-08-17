@@ -60,6 +60,6 @@ describe('AccountSidebar', () => {
     mockPathname.mockReturnValue('/dashboard');
     render(<AccountSidebar />);
 
-    expect(screen.getByRole('button', { name: /Deconnexion/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Déconnexion/ })).toBeInTheDocument();
   });
 });

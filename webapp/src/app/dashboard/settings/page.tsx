@@ -38,7 +38,7 @@ export default function SettingsPage() {
           : 'Vous ne recevrez plus de communications commerciales',
       );
     } catch {
-      toast.error('Erreur lors de la mise a jour de votre choix');
+      toast.error('Erreur lors de la mise à jour de votre choix');
     } finally {
       setIsSavingConsent(false);
     }
@@ -61,9 +61,9 @@ export default function SettingsPage() {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
-      toast.success('Vos donnees ont ete telechargees');
+      toast.success('Vos données ont été téléchargées');
     } catch {
-      toast.error('Erreur lors de l export de vos donnees');
+      toast.error("Erreur lors de l'export de vos données");
     } finally {
       setIsExporting(false);
     }
@@ -73,14 +73,14 @@ export default function SettingsPage() {
   const handleDeleteAccount = async () => {
     if (!user) return;
     const confirmed = window.confirm(
-      'Supprimer definitivement votre compte ? Vos donnees personnelles seront anonymisees (RGPD). Cette action est irreversible.',
+      "Supprimer définitivement votre compte ? Vos données personnelles seront anonymisées (RGPD). Cette action est irréversible.",
     );
     if (!confirmed) return;
 
     setIsDeleting(true);
     try {
       await api.delete(`/users/${user.id}`);
-      toast.success('Votre compte a ete supprime');
+      toast.success('Votre compte a été supprimé');
       logout();
       router.push('/');
     } catch {
@@ -91,7 +91,7 @@ export default function SettingsPage() {
 
   if (authLoading || !isAuthenticated) {
     return (
-      <div className="min-h-[calc(100vh-5rem)] bg-cream py-8">
+      <div className="min-h-[calc(100vh-5rem)] bg-white py-8">
         <div className="container mx-auto px-6">
           <div className="grid gap-8 lg:grid-cols-[240px_1fr]">
             <aside className="space-y-1">
@@ -111,19 +111,19 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-cream py-8">
+    <div className="min-h-[calc(100vh-5rem)] bg-white py-8">
       <div className="container mx-auto px-6">
         <div className="grid gap-8 lg:grid-cols-[240px_1fr]">
           <AccountSidebar />
 
           <main className="max-w-2xl">
-            <h1 className="font-display text-h2 text-noir">Parametres</h1>
+            <h1 className="font-display text-h2 text-noir">Paramètres</h1>
 
             {/* --- Communications --- */}
             <section className="mt-8 border-t border-warm-beige pt-6">
               <h2 className="font-display text-h3 text-noir">Communications</h2>
               <p className="mt-1 text-sm text-stone-grey">
-                Vous pouvez retirer votre consentement a tout moment, sans avoir a vous
+                Vous pouvez retirer votre consentement à tout moment, sans avoir à vous
                 justifier. Cela n&apos;affecte pas vos participations en cours.
               </p>
 
@@ -136,10 +136,10 @@ export default function SettingsPage() {
                   onChange={(e) => handleConsentChange(e.target.checked)}
                 />
                 <span className="text-sm text-noir">
-                  Je souhaite recevoir les offres et actualites de The Tip Top par e-mail.
+                  Je souhaite recevoir les offres et actualités de Thé Tip Top par e-mail.
                   <span className="mt-1 block text-xs text-stone-grey">
-                    Les e-mails lies a vos participations, eux, vous seront toujours envoyes :
-                    ils sont necessaires au jeu-concours.
+                    Les e-mails liés à vos participations, eux, vous seront toujours envoyés :
+                    ils sont nécessaires au jeu-concours.
                   </span>
                 </span>
                 {isSavingConsent && (
@@ -150,10 +150,10 @@ export default function SettingsPage() {
 
             {/* --- Donnees personnelles --- */}
             <section className="mt-8 border-t border-warm-beige pt-6">
-              <h2 className="font-display text-h3 text-noir">Mes donnees</h2>
+              <h2 className="font-display text-h3 text-noir">Mes données</h2>
               <p className="mt-1 text-sm text-stone-grey">
-                Telechargez l&apos;integralite des donnees que nous detenons sur vous : votre
-                profil, vos participations et les lots associes, au format JSON.
+                Téléchargez l&apos;intégralité des données que nous détenons sur vous : votre
+                profil, vos participations et les lots associés, au format JSON.
               </p>
 
               <Button
@@ -167,7 +167,7 @@ export default function SettingsPage() {
                 ) : (
                   <Download className="mr-2 h-4 w-4" strokeWidth={1.5} />
                 )}
-                Telecharger mes donnees
+                Télécharger mes données
               </Button>
             </section>
 
@@ -175,15 +175,15 @@ export default function SettingsPage() {
             <section className="mt-8 border-t border-warm-beige pt-6">
               <h2 className="font-display text-h3 text-noir">Supprimer mon compte</h2>
               <p className="mt-1 text-sm text-stone-grey">
-                Vos donnees personnelles seront anonymisees. Les participations deja
-                enregistrees sont conservees de facon anonyme, le reglement du jeu-concours
-                imposant de pouvoir justifier des tirages aupres de l&apos;huissier.
+                Vos données personnelles seront anonymisées. Les participations déjà
+                enregistrées sont conservées de façon anonyme, le règlement du jeu-concours
+                imposant de pouvoir justifier des tirages auprès de l&apos;huissier.
               </p>
 
               <button
                 onClick={handleDeleteAccount}
                 disabled={isDeleting}
-                className="mt-4 flex items-center gap-2 rounded-full border-[1.5px] border-red-600 px-6 py-2 font-functional text-ui font-bold uppercase tracking-[2px] text-red-600 transition-colors hover:bg-red-600 hover:text-white disabled:opacity-50"
+                className="mt-4 flex items-center gap-2 rounded-full border-[1.5px] border-red-700 px-6 py-2 font-functional text-ui font-bold uppercase tracking-[2px] text-red-700 transition-colors hover:bg-red-700 hover:text-white disabled:opacity-50"
               >
                 {isDeleting ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
