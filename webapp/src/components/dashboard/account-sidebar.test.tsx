@@ -2,7 +2,7 @@
 // Tests unitaires - AccountSidebar
 // ===========================================
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { AccountSidebar } from './account-sidebar';
 
 const mockPathname = jest.fn();
@@ -61,5 +61,45 @@ describe('AccountSidebar', () => {
     render(<AccountSidebar />);
 
     expect(screen.getByRole('button', { name: /Déconnexion/ })).toBeInTheDocument();
+  });
+
+  // Sur mobile la maquette replie la navigation : depliee en permanence, elle
+  // repousserait le formulaire d un ecran entier avant le premier champ.
+  describe('bascule mobile', () => {
+    it('part replie et annonce son etat', () => {
+      mockPathname.mockReturnValue('/dashboard/profile');
+      render(<AccountSidebar />);
+
+      const bascule = screen.getByRole('button', { name: /Afficher le menu/ });
+      expect(bascule).toHaveAttribute('aria-expanded', 'false');
+      expect(bascule).toHaveAttribute('aria-controls', 'account-nav');
+    });
+
+    it('deplie et replie au clic', () => {
+      mockPathname.mockReturnValue('/dashboard/profile');
+      render(<AccountSidebar />);
+
+      fireEvent.click(screen.getByRole('button', { name: /Afficher le menu/ }));
+
+      const ouverte = screen.getByRole('button', { name: /Masquer le menu/ });
+      expect(ouverte).toHaveAttribute('aria-expanded', 'true');
+
+      fireEvent.click(ouverte);
+      expect(screen.getByRole('button', { name: /Afficher le menu/ })).toHaveAttribute(
+        'aria-expanded',
+        'false',
+      );
+    });
+
+    // Le panneau reste dans le DOM : il est masque par CSS et redevient visible
+    // des le point de rupture lg, ou la bascule disparait.
+    it('garde le panneau monte meme replie', () => {
+      mockPathname.mockReturnValue('/dashboard/profile');
+      const { container } = render(<AccountSidebar />);
+
+      const panneau = container.querySelector('#account-nav');
+      expect(panneau).toBeInTheDocument();
+      expect(panneau).toHaveClass('hidden', 'lg:block');
+    });
   });
 });

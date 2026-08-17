@@ -136,10 +136,10 @@ export default function SettingsPage() {
       <div className="min-h-[calc(100vh-5rem)] bg-white py-8">
         <div className="container mx-auto px-6">
           <div className="grid gap-8 lg:grid-cols-[240px_1fr]">
-            <aside className="space-y-1">
-              <Skeleton className="h-11 w-full" />
-              <Skeleton className="h-11 w-full" />
-              <Skeleton className="h-11 w-full" />
+            {/* Squelette calé sur la forme réelle : un panneau, pas des lignes
+                séparées, sinon la mise en page saute au chargement. */}
+            <aside>
+              <Skeleton className="h-56 w-full rounded-card" />
             </aside>
             <div className="space-y-6">
               <Skeleton className="h-8 w-48" />

@@ -99,11 +99,10 @@ export default function ProfilePage() {
       <div className="min-h-[calc(100vh-5rem)] bg-white py-8">
         <div className="container mx-auto px-6">
           <div className="grid gap-8 lg:grid-cols-[240px_1fr]">
-            {/* Sidebar skeleton */}
-            <aside className="space-y-1">
-              <Skeleton className="h-11 w-full" />
-              <Skeleton className="h-11 w-full" />
-              <Skeleton className="h-11 w-full" />
+            {/* Squelette calé sur la forme réelle : un panneau, pas des lignes
+                séparées, sinon la mise en page saute au chargement. */}
+            <aside>
+              <Skeleton className="h-56 w-full rounded-card" />
             </aside>
 
             {/* Main content skeleton */}
@@ -175,7 +174,7 @@ export default function ProfilePage() {
                   />
                   <p id="email-hint" className="mt-1 text-xs text-stone-grey">
                     Votre adresse identifie votre compte et sert à vous connecter. Écrivez-nous
-                    pour en changer.
+                    pour la changer.
                   </p>
                 </div>
                 <div>
@@ -203,16 +202,21 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 pt-2">
+              {/* Empilés et pleine largeur sur mobile, alignés à droite dès que
+                  la place le permet : la maquette fait les deux. Côte à côte sur
+                  un écran étroit, les deux boutons deviendraient trop courts
+                  pour être visés au pouce. */}
+              <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={resetToStoredValues}
                   disabled={isUpdating}
+                  className="w-full sm:w-auto"
                 >
                   Annuler
                 </Button>
-                <Button type="submit" disabled={isUpdating}>
+                <Button type="submit" disabled={isUpdating} className="w-full sm:w-auto">
                   {isUpdating ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
