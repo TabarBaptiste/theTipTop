@@ -94,25 +94,79 @@ describe('MailService', () => {
       expect(body.htmlContent).not.toMatch(/\d{6}/);
     });
 
-    // Le lead est déjà créé et le ticket réservé quand l'envoi a lieu : lever
-    // une exception afficherait une erreur alors que la participation est bien
-    // enregistrée, sur un ticket désormais bloqué.
-    it('ne propage pas un refus de Brevo', async () => {
+    // Le CDC accorde les 30 jours du jeu plus 30 jours a compter de la cloture.
+    // C'est le nombre de jours restants qui est affiche, pas la duree totale :
+    // seul le premier est exploitable par le destinataire.
+    it('indique les jours restants pour reclamer son lot', async () => {
+      const service = new MailService(config);
+      const dans10Jours = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
+
+      await service.sendExpirationNotice('jean.dupont@email.fr', dans10Jours);
+
+      const html = JSON.parse(fetchMock.mock.calls[0][1].body).htmlContent;
+      expect(html).toContain('10 jours');
+      expect(html).toContain('reclamer votre lot'.replace('recl', 'récl'));
+    });
+
+    it('accorde le singulier au dernier jour', async () => {
+      const service = new MailService(config);
+      const demain = new Date(Date.now() + 12 * 60 * 60 * 1000);
+
+      await service.sendExpirationNotice('jean.dupont@email.fr', demain);
+
+      const html = JSON.parse(fetchMock.mock.calls[0][1].body).htmlContent;
+      expect(html).toContain('1 jour');
+      expect(html).not.toContain('1 jours');
+    });
+
+    it('annonce un delai ecoule plutot qu un nombre negatif', async () => {
+      const service = new MailService(config);
+      const hier = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+      await service.sendExpirationNotice('jean.dupont@email.fr', hier);
+
+      const html = JSON.parse(fetchMock.mock.calls[0][1].body).htmlContent;
+      expect(html).toContain('écoulé');
+      expect(html).not.toMatch(/-\d+ jour/);
+    });
+
+    it('omet la phrase quand aucune date de cloture n est connue', async () => {
+      const service = new MailService(config);
+
+      await service.sendExpirationNotice('jean.dupont@email.fr', null);
+
+      const html = JSON.parse(fetchMock.mock.calls[0][1].body).htmlContent;
+      expect(html).not.toContain('jour');
+    });
+
+    // Lever une exception afficherait une erreur a l'utilisateur alors que sa
+    // participation est bien enregistree. L'echec est donc signale par la
+    // valeur de retour, que les jobs de relance exploitent pour retenter.
+    it('signale un refus de Brevo sans lever d exception', async () => {
       fetchMock.mockResolvedValue({ ok: false, status: 401, text: async () => 'Unauthorized' });
       const service = new MailService(config);
 
       await expect(
         service.sendVerificationCode('jean.dupont@email.fr', '123456', new Date()),
-      ).resolves.toBeUndefined();
+      ).resolves.toBe(false);
     });
 
-    it('ne propage pas une panne réseau', async () => {
+    it('signale une panne reseau sans lever d exception', async () => {
       fetchMock.mockRejectedValue(new Error('ECONNREFUSED'));
       const service = new MailService(config);
 
       await expect(
         service.sendVerificationCode('jean.dupont@email.fr', '123456', new Date()),
-      ).resolves.toBeUndefined();
+      ).resolves.toBe(false);
+    });
+
+    it('renvoie vrai quand Brevo accepte', async () => {
+      fetchMock.mockResolvedValue({ ok: true, status: 201, text: async () => '' });
+      const service = new MailService(config);
+
+      await expect(
+        service.sendVerificationCode('jean.dupont@email.fr', '123456', new Date()),
+      ).resolves.toBe(true);
     });
   });
 });

@@ -46,8 +46,8 @@ export class MailService {
   /**
    * Code de vérification à 6 chiffres du tunnel de participation (RG-06).
    */
-  async sendVerificationCode(to: string, code: string, expiresAt: Date): Promise<void> {
-    await this.send({
+  async sendVerificationCode(to: string, code: string, expiresAt: Date): Promise<boolean> {
+    return this.send({
       to,
       subject: `${code} — votre code de participation Thé Tip Top`,
       debugCode: code,
@@ -55,45 +55,76 @@ export class MailService {
         'Confirmez votre participation',
         `<p>Saisissez ce code sur le site pour valider votre participation et découvrir votre lot.</p>
          ${this.codeBlock(code)}
-         <p>Ce code est valable jusqu'au <strong>${this.formatDate(expiresAt)}</strong>.
-         Passé ce délai, votre code de ticket redeviendra disponible.</p>`,
+         <p>Ce code de confirmation est valable jusqu'au
+         <strong>${this.formatDate(expiresAt)}</strong>. Passé ce délai il faudra recommencer :
+         votre code de ticket, lui, n'est pas consommé et reste valable.</p>`,
       ),
     });
   }
 
   /**
-   * Relance avant expiration du code (RG-20 : J+24h, J+36h, J+47h).
+   * Relance avant expiration du code (RG-20 : 24 h, 12 h et 1 h avant l'échéance).
    */
-  async sendVerificationReminder(to: string, code: string, hoursLeft: number): Promise<void> {
+  async sendVerificationReminder(to: string, code: string, hoursLeft: number): Promise<boolean> {
     const delay = hoursLeft === 1 ? 'une heure' : `${hoursLeft} heures`;
 
-    await this.send({
+    return this.send({
       to,
       subject: `Il vous reste ${delay} pour valider votre participation`,
       debugCode: code,
       html: this.layout(
         'Votre participation attend une confirmation',
-        `<p>Votre code de participation expire dans <strong>${delay}</strong>.
-         Sans confirmation, votre ticket sera libéré et vous devrez recommencer.</p>
+        `<p>Votre code de confirmation expire dans <strong>${delay}</strong>.
+         Sans confirmation, il faudra reprendre la saisie depuis le début.</p>
          ${this.codeBlock(code)}`,
       ),
     });
   }
 
   /**
-   * Le délai est écoulé : le ticket a été libéré, la session est close.
+   * Le délai de confirmation est écoulé.
+   *
+   * Le ticket n'a jamais été consommé — il ne l'est qu'à la confirmation de
+   * l'email — donc rien n'est perdu. Le message indique le temps restant pour
+   * recommencer, borné par la fin de la période de réclamation du jeu.
    */
-  async sendExpirationNotice(to: string): Promise<void> {
-    await this.send({
+  async sendExpirationNotice(to: string, claimEndDate?: Date | null): Promise<boolean> {
+    return this.send({
       to,
       subject: 'Votre participation Thé Tip Top a expiré',
       html: this.layout(
         'Délai dépassé',
-        `<p>Faute de confirmation dans les 48 heures, votre participation n'a pas pu être
-         enregistrée et votre code de ticket a été libéré.</p>
-         <p>Il reste utilisable : vous pouvez recommencer quand vous le souhaitez.</p>`,
+        `<p>Faute de confirmation dans les 48 heures, votre participation n'a pas été
+         enregistrée.</p>
+         <p>Votre code de ticket n'a pas été consommé : il reste utilisable, vous pouvez
+         recommencer quand vous le souhaitez.</p>
+         ${this.claimWindowParagraph(claimEndDate)}`,
       ),
     });
+  }
+
+  /**
+   * Phrase indiquant le temps restant pour saisir son code et réclamer son lot.
+   *
+   * Le CDC accorde les 30 jours du jeu plus 30 jours a compter de la cloture.
+   * On affiche le nombre de jours restants a la date d'envoi plutot que la
+   * duree totale : c'est la seule information exploitable par le destinataire.
+   */
+  private claimWindowParagraph(claimEndDate?: Date | null): string {
+    if (!claimEndDate) {
+      return '';
+    }
+
+    const msPerDay = 24 * 60 * 60 * 1000;
+    const daysLeft = Math.ceil((claimEndDate.getTime() - Date.now()) / msPerDay);
+
+    if (daysLeft <= 0) {
+      return `<p>Le délai de réclamation des lots est désormais écoulé.</p>`;
+    }
+
+    const plural = daysLeft > 1 ? 's' : '';
+    return `<p>Il vous reste <strong>${daysLeft} jour${plural}</strong> pour saisir votre code et
+      réclamer votre lot, soit jusqu'au <strong>${this.formatDate(claimEndDate)}</strong>.</p>`;
   }
 
   // ===========================================
@@ -109,10 +140,12 @@ export class MailService {
    * bloqué. On journalise en erreur — le monitoring le voit — et l'utilisateur
    * dispose du bouton de renvoi.
    */
-  private async send(payload: MailPayload): Promise<void> {
+  private async send(payload: MailPayload): Promise<boolean> {
     if (!this.apiKey) {
       this.logStub(payload);
-      return;
+      // Le mode journalise est un succes fonctionnel : en local, il permet aux
+      // appelants de progresser comme si l'email etait parti.
+      return true;
     }
 
     try {
@@ -140,14 +173,16 @@ export class MailService {
         this.logger.error(
           `Envoi Brevo refusé (${response.status}) vers ${this.maskEmail(payload.to)} : ${body}`,
         );
-        return;
+        return false;
       }
 
       this.logger.log(`Email envoyé à ${this.maskEmail(payload.to)} — ${payload.subject}`);
+      return true;
     } catch (error) {
       this.logger.error(
         `Envoi Brevo impossible vers ${this.maskEmail(payload.to)} : ${(error as Error).message}`,
       );
+      return false;
     }
   }
 
