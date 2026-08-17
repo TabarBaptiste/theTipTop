@@ -2,7 +2,7 @@
 // Tests unitaires - Users Controller
 // ===========================================
 
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, ForbiddenException } from '@nestjs/common';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { User } from '@prisma/client';
@@ -87,6 +87,26 @@ describe('UsersController', () => {
 
       expect(mockUsersService.update).toHaveBeenCalledWith('u1', { firstName: 'Jean' });
       expect(result).not.toHaveProperty('password');
+    });
+
+    // L'adresse identifie le compte : la changer depuis une session ouverte
+    // permettrait d'en reprendre l'acces par le formulaire de connexion.
+    it('should refuse an email change requested by a client', async () => {
+      await expect(
+        controller.update('u1', { email: 'pirate@example.com' }, client),
+      ).rejects.toThrow(ForbiddenException);
+
+      expect(mockUsersService.update).not.toHaveBeenCalled();
+    });
+
+    it('should let an admin change an email', async () => {
+      mockUsersService.update.mockResolvedValue(storedUser);
+
+      await controller.update('u1', { email: 'nouvelle@thetiptop.fr' }, admin);
+
+      expect(mockUsersService.update).toHaveBeenCalledWith('u1', {
+        email: 'nouvelle@thetiptop.fr',
+      });
     });
   });
 

@@ -14,6 +14,7 @@ import {
   HttpCode,
   HttpStatus,
   NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { Role, User } from '@prisma/client';
@@ -75,9 +76,19 @@ export class UsersController {
   // MISE À JOUR D'UN UTILISATEUR
   // ===========================================
   @Put(':id')
-  @ApiOperation({ summary: 'Mettre à jour un utilisateur' })
+  @ApiOperation({
+    summary: 'Mettre à jour un utilisateur',
+    description:
+      'Un client ne peut modifier que son propre profil, et ne peut pas y changer son adresse ' +
+      'e-mail. Seuls les rôles EMPLOYEE et ADMIN peuvent modifier une adresse.',
+  })
   @ApiResponse({ status: 200, description: 'Utilisateur mis à jour' })
+  @ApiResponse({
+    status: 403,
+    description: 'Un client a tenté de modifier son adresse e-mail',
+  })
   @ApiResponse({ status: 404, description: 'Utilisateur non trouvé' })
+  @ApiResponse({ status: 409, description: 'Adresse e-mail déjà utilisée' })
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateUserDto,
@@ -85,6 +96,20 @@ export class UsersController {
   ) {
     // Un client ne peut modifier que son propre profil
     const targetId = currentUser.role === 'CLIENT' ? currentUser.id : id;
+
+    // L'adresse identifie le compte et sert à la connexion. La laisser changer
+    // sans revérification permettrait, depuis une session ouverte, de basculer
+    // le compte vers une autre adresse puis d'en reprendre l'accès par le
+    // formulaire de connexion.
+    //
+    // Refus explicite plutôt que retrait silencieux du champ : ignorer l'envoi
+    // renverrait un 200 laissant croire au changement.
+    if (currentUser.role === 'CLIENT' && dto.email !== undefined) {
+      throw new ForbiddenException(
+        "L'adresse e-mail ne peut pas être modifiée depuis votre profil.",
+      );
+    }
+
     const { password: _password, ...user } = await this.usersService.update(targetId, dto);
     return user;
   }
