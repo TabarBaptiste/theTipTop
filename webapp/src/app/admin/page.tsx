@@ -16,6 +16,7 @@ import { fr } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { DeliveredPrizesList } from '@/components/gains/delivered-prizes-list';
 import { api } from '@/lib/api';
 import { formatDate } from '@/lib/utils';
 
@@ -471,6 +472,8 @@ export default function AdminPage() {
               </div>
             </CardContent>
           </Card>
+
+          <DeliveredPrizesList className="lg:col-span-2" />
 
           {/* Module emailing - export segmenté et consentant (RGPD) */}
           <Card className="lg:col-span-2">

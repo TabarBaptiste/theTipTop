@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SkeletonList } from '@/components/ui/skeleton';
+import { DeliveredPrizesList } from '@/components/gains/delivered-prizes-list';
 import { api } from '@/lib/api';
 import { formatDateTime } from '@/lib/utils';
 
@@ -314,6 +315,10 @@ export default function EmployeePage() {
               )}
             </CardContent>
           </Card>
+
+          {/* Historique des remises, sur toute la largeur : une liste paginée
+              respire mal dans une demi-colonne. */}
+          <DeliveredPrizesList className="lg:col-span-2" />
         </div>
       </div>
     </div>
