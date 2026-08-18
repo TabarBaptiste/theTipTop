@@ -85,6 +85,69 @@ describe('MailService', () => {
       expect(JSON.parse(fetchMock.mock.calls[1][1].body).subject).toContain('12 heures');
     });
 
+    describe('sendPrizeWon', () => {
+      const lot = { name: 'Coffret Découverte', value: '39€' };
+
+      it('nomme le lot dans l objet et dans le corps', async () => {
+        const service = new MailService(config);
+
+        await service.sendPrizeWon('jean.dupont@email.fr', lot, 'ABCDEFGH23', null);
+
+        const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+        expect(body.subject).toContain('Coffret Découverte');
+        expect(body.htmlContent).toContain('Coffret Découverte');
+        expect(body.htmlContent).toContain('39€');
+      });
+
+      // Contrairement au code de confirmation, celui du ticket est le
+      // justificatif a presenter en boutique : il doit figurer dans le mail.
+      it('inclut le code du ticket', async () => {
+        const service = new MailService(config);
+
+        await service.sendPrizeWon('jean.dupont@email.fr', lot, 'ABCDEFGH23', null);
+
+        expect(JSON.parse(fetchMock.mock.calls[0][1].body).htmlContent).toContain('ABCDEFGH23');
+      });
+
+      it('rappelle les deux modes de retrait', async () => {
+        const service = new MailService(config);
+
+        await service.sendPrizeWon('jean.dupont@email.fr', lot, 'ABCDEFGH23', null);
+
+        const html = JSON.parse(fetchMock.mock.calls[0][1].body).htmlContent;
+        expect(html).toContain('boutique');
+        expect(html).toContain('expédier');
+      });
+
+      it('annonce les jours restants pour reclamer', async () => {
+        const service = new MailService(config);
+        const dans10Jours = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
+
+        await service.sendPrizeWon('jean.dupont@email.fr', lot, 'ABCDEFGH23', dans10Jours);
+
+        const html = JSON.parse(fetchMock.mock.calls[0][1].body).htmlContent;
+        expect(html).toContain('10 jours');
+        expect(html).toContain('réclamer votre lot');
+        // L action differe de l avis d expiration : le code est deja consomme.
+        expect(html).not.toContain('saisir votre code');
+      });
+
+      it('omet la valeur quand le lot n en a pas', async () => {
+        const service = new MailService(config);
+
+        await service.sendPrizeWon(
+          'jean.dupont@email.fr',
+          { name: 'Infuseur à thé', value: null },
+          'ABCDEFGH23',
+          null,
+        );
+
+        const html = JSON.parse(fetchMock.mock.calls[0][1].body).htmlContent;
+        expect(html).toContain('Infuseur à thé');
+        expect(html).not.toContain('valeur de');
+      });
+    });
+
     it("n'expose aucun code dans l'avis d'expiration", async () => {
       const service = new MailService(config);
 

@@ -82,6 +82,39 @@ export class MailService {
   }
 
   /**
+   * Annonce du lot gagné, envoyée dès que la participation est enregistrée.
+   *
+   * Le code y figure volontairement : contrairement au code de confirmation à
+   * six chiffres, celui du ticket est ce que le participant présentera en
+   * boutique. C'est son justificatif, il doit pouvoir le retrouver dans sa
+   * boîte sans se reconnecter.
+   */
+  async sendPrizeWon(
+    to: string,
+    prize: { name: string; value?: string | null },
+    code: string,
+    claimEndDate?: Date | null,
+  ): Promise<boolean> {
+    const value = prize.value ? ` — d'une valeur de ${prize.value}` : '';
+
+    return this.send({
+      to,
+      subject: `Vous avez gagné : ${prize.name} !`,
+      html: this.layout(
+        'Félicitations, vous avez gagné',
+        `<p>Votre participation est enregistrée. Vous remportez :</p>
+         <p style="margin:24px 0;font-size:20px;font-weight:bold;color:#BA6905;">
+           ${prize.name}${value}
+         </p>
+         <p>Présentez le code ci-dessous en boutique pour retirer votre lot, ou faites-le
+         vous expédier depuis notre site de vente en ligne.</p>
+         ${this.codeBlock(code)}
+         ${this.claimWindowParagraph(claimEndDate, 'réclamer votre lot')}`,
+      ),
+    });
+  }
+
+  /**
    * Le délai de confirmation est écoulé.
    *
    * Le ticket n'a jamais été consommé — il ne l'est qu'à la confirmation de
@@ -98,19 +131,23 @@ export class MailService {
          enregistrée.</p>
          <p>Votre code de ticket n'a pas été consommé : il reste utilisable, vous pouvez
          recommencer quand vous le souhaitez.</p>
-         ${this.claimWindowParagraph(claimEndDate)}`,
+         ${this.claimWindowParagraph(claimEndDate, 'saisir votre code et réclamer votre lot')}`,
       ),
     });
   }
 
   /**
-   * Phrase indiquant le temps restant pour saisir son code et réclamer son lot.
+   * Phrase indiquant le temps restant avant la fin de la periode de reclamation.
    *
    * Le CDC accorde les 30 jours du jeu plus 30 jours a compter de la cloture.
    * On affiche le nombre de jours restants a la date d'envoi plutot que la
    * duree totale : c'est la seule information exploitable par le destinataire.
+   *
+   * L'action est passee en parametre car elle differe selon le message : apres
+   * une expiration il reste un code a saisir, apres un gain il ne reste qu'a
+   * retirer le lot.
    */
-  private claimWindowParagraph(claimEndDate?: Date | null): string {
+  private claimWindowParagraph(claimEndDate: Date | null | undefined, action: string): string {
     if (!claimEndDate) {
       return '';
     }
@@ -123,8 +160,8 @@ export class MailService {
     }
 
     const plural = daysLeft > 1 ? 's' : '';
-    return `<p>Il vous reste <strong>${daysLeft} jour${plural}</strong> pour saisir votre code et
-      réclamer votre lot, soit jusqu'au <strong>${this.formatDate(claimEndDate)}</strong>.</p>`;
+    return `<p>Il vous reste <strong>${daysLeft} jour${plural}</strong> pour ${action}, soit
+      jusqu'au <strong>${this.formatDate(claimEndDate)}</strong>.</p>`;
   }
 
   // ===========================================
