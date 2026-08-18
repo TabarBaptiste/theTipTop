@@ -14,6 +14,12 @@ import { ConfigService } from '@nestjs/config';
 
 const BREVO_ENDPOINT = 'https://api.brevo.com/v3/smtp/email';
 
+// Adresse de contact deja affichee cote site (page de connexion, mentions
+// legales). Les emails sont envoyes depuis une boite non surveillee : sans
+// alternative visible, un destinataire ayant une vraie question repondrait dans
+// le vide.
+const SUPPORT_EMAIL = 'contact@thetiptop.fr';
+
 interface MailPayload {
   to: string;
   subject: string;
@@ -241,9 +247,14 @@ export class MailService {
       <p style="margin:0 0 24px;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#BA6905;">Thé Tip Top</p>
       <h1 style="margin:0 0 16px;font-size:22px;font-weight:600;">${title}</h1>
       <div style="font-size:14px;line-height:1.7;color:#4A4A4A;">${body}</div>
-      <p style="margin:32px 0 0;padding-top:16px;border-top:1px solid #E8D5B0;font-size:11px;color:#8A8378;">
+      <p style="margin:32px 0 0;padding-top:16px;border-top:1px solid #E8D5B0;font-size:11px;color:#4A463E;">
         Cet email vous est adressé dans le cadre du jeu-concours Thé Tip Top.
         Si vous n'êtes pas à l'origine de cette demande, ignorez-le simplement.
+      </p>
+      <p style="margin:12px 0 0;font-size:11px;color:#4A463E;">
+        <strong>Message automatique, merci de ne pas y répondre.</strong>
+        Pour toute question, écrivez-nous à
+        <a href="mailto:${SUPPORT_EMAIL}" style="color:#A85D04;">${SUPPORT_EMAIL}</a>.
       </p>
     </div>
   </body>

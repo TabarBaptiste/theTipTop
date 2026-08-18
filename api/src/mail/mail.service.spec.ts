@@ -85,6 +85,28 @@ describe('MailService', () => {
       expect(JSON.parse(fetchMock.mock.calls[1][1].body).subject).toContain('12 heures');
     });
 
+    // Le gabarit est partage : la mention doit apparaitre sur les quatre envois,
+    // pas seulement sur celui qu'on a pense a verifier.
+    describe('mention de non-reponse', () => {
+      const envois = [
+        ['code de verification', (s) => s.sendVerificationCode('a@b.fr', '123456', new Date())],
+        ['relance', (s) => s.sendVerificationReminder('a@b.fr', '123456', 24)],
+        ['avis d expiration', (s) => s.sendExpirationNotice('a@b.fr', null)],
+        ['annonce de gain', (s) => s.sendPrizeWon('a@b.fr', { name: 'Infuseur' }, 'CODE', null)],
+      ] as [string, (s: MailService) => Promise<boolean>][];
+
+      it.each(envois)('figure dans le mail : %s', async (_nom, envoyer) => {
+        const service = new MailService(config);
+
+        await envoyer(service);
+
+        const html = JSON.parse(fetchMock.mock.calls[0][1].body).htmlContent;
+        expect(html).toContain('ne pas y répondre');
+        // Une adresse de repli, sinon la question du destinataire reste sans issue.
+        expect(html).toContain('contact@thetiptop.fr');
+      });
+    });
+
     describe('sendPrizeWon', () => {
       const lot = { name: 'Coffret Découverte', value: '39€' };
 
