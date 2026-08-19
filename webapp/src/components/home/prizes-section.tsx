@@ -76,9 +76,11 @@ export function PrizesSection() {
           {prizes?.map((prize) => {
             const imgConfig = PRIZE_IMAGES[prize.code];
 
-            // Sécurité : Si le code API n'existe pas localement, on évite le crash en utilisant
-            // l'imageUrl de l'API (si disponible) ou un fallback vide.
-            const imageSrc = imgConfig?.src ?? prize.imageUrl ?? '';
+            // L'URL distante d'abord : c'est elle qui permet de changer un
+            // visuel sans redéployer. L'image empaquetée reste en repli, et
+            // couvre trois cas — Cloudinary non configuré, lot absent du
+            // catalogue local, ou compte injoignable au moment du rendu.
+            const imageSrc = prize.imageUrl ?? imgConfig?.src ?? '';
             const imageAlt = imgConfig?.alt ?? prize.name;
 
             return (
