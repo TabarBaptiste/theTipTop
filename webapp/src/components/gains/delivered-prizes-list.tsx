@@ -84,7 +84,7 @@ export function DeliveredPrizesList({ className }: { className?: string }) {
                   <p className="mt-0.5 font-mono text-xs text-stone-grey">{delivery.code}</p>
                 </div>
                 <div className="shrink-0 text-right">
-                  <p className="text-sm font-medium text-terracotta-deep">
+                  <p className="text-sm font-medium text-terracotta-600">
                     {delivery.prize?.name ?? delivery.prizeType}
                   </p>
                   {delivery.prizeDeliveredAt && (

@@ -39,11 +39,11 @@ export function WhyUsSection() {
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {reasons.map((reason) => (
             <div key={reason.number} className="flex flex-col">
-              <span className="font-functional text-ui uppercase tracking-[2px] text-terracotta-deep">
+              <span className="font-functional text-ui uppercase tracking-[2px] text-terracotta-600">
                 {reason.number}
               </span>
               <div className="mt-3 flex h-10 w-10 items-center justify-center rounded-full bg-terracotta-50">
-                <reason.icon className="h-5 w-5 text-terracotta-deep" strokeWidth={1.5} />
+                <reason.icon className="h-5 w-5 text-terracotta-600" strokeWidth={1.5} />
               </div>
               <h3 className="mt-3 font-functional text-sm font-bold text-noir">
                 {reason.title}

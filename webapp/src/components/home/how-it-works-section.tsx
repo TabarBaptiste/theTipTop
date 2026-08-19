@@ -30,7 +30,7 @@ export function HowItWorksSection() {
         <div className="mt-8 grid gap-8 md:grid-cols-3">
           {steps.map((step) => (
             <div key={step.number} className="flex flex-col">
-              <span className="font-functional text-ui uppercase tracking-[2px] text-terracotta-deep">
+              <span className="font-functional text-ui uppercase tracking-[2px] text-terracotta-600">
                 {step.number}
               </span>
               {/* italic est volontaire : les titres d'etapes sont en italique

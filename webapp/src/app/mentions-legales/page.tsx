@@ -29,7 +29,7 @@ export default function MentionsLegalesPage() {
       {/* En-tête */}
       <section className="border-b border-warm-beige bg-white">
         <div className="container mx-auto px-6 py-12 md:py-16">
-          <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-deep">
+          <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-600">
             Informations légales
           </p>
           <h1 className="mt-3 font-display text-h1 text-noir">
@@ -59,7 +59,7 @@ export default function MentionsLegalesPage() {
                   <a
                     key={a.id}
                     href={`#${a.id}`}
-                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-deep"
+                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-600"
                   >
                     {a.label}
                   </a>
@@ -72,19 +72,19 @@ export default function MentionsLegalesPage() {
                 <nav className="mt-3 space-y-1">
                   <Link
                     href="/cgu"
-                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-deep"
+                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-600"
                   >
                     CGU
                   </Link>
                   <Link
                     href="/politique-confidentialite"
-                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-deep"
+                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-600"
                   >
                     Politique de confidentialité
                   </Link>
                   <Link
                     href="/gestion-cookies"
-                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-deep"
+                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-600"
                   >
                     Gestion des cookies
                   </Link>
@@ -127,7 +127,7 @@ export default function MentionsLegalesPage() {
                             {label === 'Email' ? (
                               <a
                                 href="mailto:contact@thetiptop.fr"
-                                className="text-terracotta-deep underline underline-offset-2"
+                                className="text-terracotta-600 underline underline-offset-2"
                               >
                                 {value}
                               </a>
@@ -192,7 +192,7 @@ export default function MentionsLegalesPage() {
                   Pour tout contact relatif au contenu éditorial du site :{' '}
                   <a
                     href="mailto:contact@thetiptop.fr"
-                    className="text-terracotta-deep underline underline-offset-2"
+                    className="text-terracotta-600 underline underline-offset-2"
                   >
                     contact@thetiptop.fr
                   </a>
@@ -218,7 +218,7 @@ export default function MentionsLegalesPage() {
                   commissaire de justice assermenté. Son règlement complet est consultable{' '}
                   <Link
                     href="/reglement"
-                    className="text-terracotta-deep underline underline-offset-2"
+                    className="text-terracotta-600 underline underline-offset-2"
                   >
                     ici
                   </Link>
@@ -314,7 +314,7 @@ export default function MentionsLegalesPage() {
                   doit être adressée à{' '}
                   <a
                     href="mailto:contact@thetiptop.fr"
-                    className="text-terracotta-deep underline underline-offset-2"
+                    className="text-terracotta-600 underline underline-offset-2"
                   >
                     contact@thetiptop.fr
                   </a>
@@ -339,7 +339,7 @@ export default function MentionsLegalesPage() {
                   consultez notre{' '}
                   <Link
                     href="/politique-confidentialite"
-                    className="text-terracotta-deep underline underline-offset-2"
+                    className="text-terracotta-600 underline underline-offset-2"
                   >
                     Politique de confidentialité
                   </Link>
@@ -350,7 +350,7 @@ export default function MentionsLegalesPage() {
                   portabilité) en contactant :{' '}
                   <a
                     href="mailto:rgpd@thetiptop.fr"
-                    className="text-terracotta-deep underline underline-offset-2"
+                    className="text-terracotta-600 underline underline-offset-2"
                   >
                     rgpd@thetiptop.fr
                   </a>
@@ -363,7 +363,7 @@ export default function MentionsLegalesPage() {
                     href="https://www.cnil.fr"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-terracotta-deep underline underline-offset-2"
+                    className="text-terracotta-600 underline underline-offset-2"
                   >
                     www.cnil.fr
                   </a>).
@@ -386,7 +386,7 @@ export default function MentionsLegalesPage() {
                   page de{' '}
                   <Link
                     href="/gestion-cookies"
-                    className="text-terracotta-deep underline underline-offset-2"
+                    className="text-terracotta-600 underline underline-offset-2"
                   >
                     gestion des cookies
                   </Link>
@@ -415,7 +415,7 @@ export default function MentionsLegalesPage() {
                   sur simple demande à{' '}
                   <a
                     href="mailto:contact@thetiptop.fr"
-                    className="text-terracotta-deep underline underline-offset-2"
+                    className="text-terracotta-600 underline underline-offset-2"
                   >
                     contact@thetiptop.fr
                   </a>
@@ -444,21 +444,21 @@ export default function MentionsLegalesPage() {
                 Pour toute question relative aux présentes mentions légales, contactez-nous à{' '}
                 <a
                   href="mailto:contact@thetiptop.fr"
-                  className="font-medium text-terracotta-deep underline underline-offset-2"
+                  className="font-medium text-terracotta-600 underline underline-offset-2"
                 >
                   contact@thetiptop.fr
                 </a>
                 . Consultez également nos{' '}
                 <Link
                   href="/cgu"
-                  className="font-medium text-terracotta-deep underline underline-offset-2"
+                  className="font-medium text-terracotta-600 underline underline-offset-2"
                 >
                   CGU
                 </Link>{' '}
                 et notre{' '}
                 <Link
                   href="/politique-confidentialite"
-                  className="font-medium text-terracotta-deep underline underline-offset-2"
+                  className="font-medium text-terracotta-600 underline underline-offset-2"
                 >
                   Politique de confidentialité
                 </Link>

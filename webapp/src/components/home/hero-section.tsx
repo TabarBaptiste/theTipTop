@@ -13,13 +13,13 @@ export function HeroSection() {
         <div className="grid items-center gap-12 lg:grid-cols-2">
           {/* Content */}
           <div>
-            <p className="mb-3 font-functional text-ui uppercase tracking-[2px] text-terracotta-deep">
+            <p className="mb-3 font-functional text-ui uppercase tracking-[2px] text-terracotta-600">
               Jeu-concours exclusif
             </p>
 
             <h1 className="font-display text-h1 text-noir">
               Bienvenue au jeu-concours{' '}
-              <span className="text-terracotta-deep">The Tip Top</span>
+              <span className="text-terracotta-600">The Tip Top</span>
             </h1>
 
             <p className="mt-6 text-body leading-relaxed text-stone-grey">

@@ -70,7 +70,7 @@ export function CountdownSection() {
   const phase = gameConfig?.phase;
   if (isEnded || phase === 'claim_only' || phase === 'ended') {
     return (
-      <section className="bg-terracotta-deep py-6">
+      <section className="bg-terracotta-600 py-6">
         <div className="container mx-auto px-6 text-center">
           <p className="font-display text-lg font-semibold text-white">
             Le jeu-concours est terminé.{' '}
@@ -126,5 +126,7 @@ function TimeBlock({ value, label }: { value: number; label: string }) {
 }
 
 function Separator() {
-  return <span className="text-lg font-bold text-warm-beige">:</span>;
+  // Le beige chaud d'origine plafonnait à 1.44:1 sur blanc. Ces deux-points
+  // restent du texte au sens du critère 1.4.3, décoratifs ou non.
+  return <span className="text-lg font-bold text-stone-grey">:</span>;
 }

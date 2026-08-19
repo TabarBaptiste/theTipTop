@@ -13,7 +13,7 @@ export default function NotFound() {
       <Leaf
         size={64}
         strokeWidth={1.5}
-        className="mb-8 text-terracotta-deep opacity-20"
+        className="mb-8 text-terracotta-600 opacity-20"
       />
       {/* terracotta-600 et non -deep : sur le crème, -deep plafonne a 3.81:1,
           sous le minimum AA de 4.5:1 exige pour du petit texte. La nuance 600

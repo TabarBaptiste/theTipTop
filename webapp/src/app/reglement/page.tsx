@@ -90,7 +90,7 @@ export default function ReglementPage() {
       {/* En-tête */}
       <section className="border-b border-warm-beige bg-white">
         <div className="container mx-auto px-6 py-12 md:py-16">
-          <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-deep">
+          <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-600">
             Jeu-concours
           </p>
           <h1 className="mt-3 font-display text-h1 text-noir">Règlement du jeu-concours</h1>
@@ -114,11 +114,11 @@ export default function ReglementPage() {
           <div className="rounded-card border border-warm-beige bg-white p-6">
             <p className="text-sm text-stone-grey">
               Pour toute question relative au règlement, consultez notre{' '}
-              <Link href="/faq" className="text-terracotta-deep hover:underline">
+              <Link href="/faq" className="text-terracotta-600 hover:underline">
                 FAQ
               </Link>{' '}
               ou notre{' '}
-              <Link href="/politique-confidentialite" className="text-terracotta-deep hover:underline">
+              <Link href="/politique-confidentialite" className="text-terracotta-600 hover:underline">
                 politique de confidentialité
               </Link>
               .

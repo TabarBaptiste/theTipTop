@@ -54,9 +54,9 @@ export function Footer() {
 
           {/* Jeu Concours */}
           <div>
-            <h3 className="font-functional text-ui uppercase tracking-[2px] text-white">
+            <h2 className="font-functional text-ui uppercase tracking-[2px] text-white">
               Jeu Concours
-            </h3>
+            </h2>
             <ul className="mt-4 space-y-2">
               <li>
                 <Link
@@ -103,9 +103,9 @@ export function Footer() {
 
           {/* Légal */}
           <div>
-            <h3 className="font-functional text-ui uppercase tracking-[2px] text-white">
+            <h2 className="font-functional text-ui uppercase tracking-[2px] text-white">
               Légal
-            </h3>
+            </h2>
             <ul className="mt-4 space-y-2">
               <li>
                 <Link
@@ -144,12 +144,21 @@ export function Footer() {
 
           {/* Newsletter */}
           <div>
-            <h3 className="font-functional text-ui uppercase tracking-[2px] text-white">
+            <h2 className="font-functional text-ui uppercase tracking-[2px] text-white">
               Newsletter
-            </h3>
+            </h2>
             <form onSubmit={handleNewsletterSubmit} className="mt-4 space-y-3">
               <div className="flex gap-2">
+                {/* Étiquette réelle plutôt que le seul placeholder : celui-ci
+                    disparaît à la saisie et n'est pas annoncé de façon fiable
+                    par les lecteurs d'écran (critères 3.3.2 et 4.1.2). Elle est
+                    masquée visuellement, la maquette ne prévoyant pas de
+                    libellé au-dessus du champ. */}
+                <label htmlFor="newsletter-email" className="sr-only">
+                  Votre adresse e-mail
+                </label>
                 <input
+                  id="newsletter-email"
                   type="email"
                   placeholder="Votre email"
                   value={email}
@@ -162,7 +171,7 @@ export function Footer() {
                 <Button
                   type="submit"
                   size="icon"
-                  className="shrink-0 bg-warm-beige text-noir hover:bg-warm-beige/90 active:bg-terracotta-deep active:text-white"
+                  className="shrink-0 bg-warm-beige text-noir hover:bg-warm-beige/90 active:bg-terracotta-600 active:text-white"
                   aria-label="S'abonner à la newsletter"
                 >
                   →

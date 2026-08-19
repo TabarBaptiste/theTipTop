@@ -230,7 +230,7 @@ export default function ParticipatePage() {
 
             <p className="mt-6 text-center text-xs text-stone-grey">
               Vous avez déjà un compte ?{' '}
-              <Link href="/auth/login" className="font-semibold text-terracotta-deep hover:underline">
+              <Link href="/auth/login" className="font-semibold text-terracotta-600 hover:underline">
                 Se connecter
               </Link>
             </p>

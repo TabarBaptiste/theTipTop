@@ -39,7 +39,7 @@ export default function CGUPage() {
       {/* En-tête */}
       <section className="border-b border-warm-beige bg-white">
         <div className="container mx-auto px-6 py-12 md:py-16">
-          <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-deep">
+          <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-600">
             Informations légales
           </p>
           <h1 className="mt-3 font-display text-h1 text-noir">
@@ -69,7 +69,7 @@ export default function CGUPage() {
                   <a
                     key={a.id}
                     href={`#${a.id}`}
-                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-deep"
+                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-600"
                   >
                     {a.label}
                   </a>
@@ -82,19 +82,19 @@ export default function CGUPage() {
                 <nav className="mt-3 space-y-1">
                   <Link
                     href="/mentions-legales"
-                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-deep"
+                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-600"
                   >
                     Mentions légales
                   </Link>
                   <Link
                     href="/politique-confidentialite"
-                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-deep"
+                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-600"
                   >
                     Politique de confidentialité
                   </Link>
                   <Link
                     href="/gestion-cookies"
-                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-deep"
+                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-600"
                   >
                     Gestion des cookies
                   </Link>
@@ -137,7 +137,7 @@ export default function CGUPage() {
                     <strong>Email :</strong>{' '}
                     <a
                       href="mailto:contact@thetiptop.fr"
-                      className="text-terracotta-deep underline underline-offset-2"
+                      className="text-terracotta-600 underline underline-offset-2"
                     >
                       contact@thetiptop.fr
                     </a>
@@ -320,7 +320,7 @@ export default function CGUPage() {
                         <tr key={lot} className="bg-white even:bg-cream">
                           <td className="px-4 py-3 text-stone-grey">{lot}</td>
                           <td className="px-4 py-3 text-stone-grey">{valeur}</td>
-                          <td className="px-4 py-3 font-medium text-terracotta-deep">{proba}</td>
+                          <td className="px-4 py-3 font-medium text-terracotta-600">{proba}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -513,7 +513,7 @@ export default function CGUPage() {
                   Ces droits peuvent être exercés par email à{' '}
                   <a
                     href="mailto:rgpd@thetiptop.fr"
-                    className="text-terracotta-deep underline underline-offset-2"
+                    className="text-terracotta-600 underline underline-offset-2"
                   >
                     rgpd@thetiptop.fr
                   </a>{' '}
@@ -521,7 +521,7 @@ export default function CGUPage() {
                   consultez notre{' '}
                   <Link
                     href="/politique-confidentialite"
-                    className="text-terracotta-deep underline underline-offset-2"
+                    className="text-terracotta-600 underline underline-offset-2"
                   >
                     Politique de confidentialité
                   </Link>
@@ -546,7 +546,7 @@ export default function CGUPage() {
                   notre page de{' '}
                   <Link
                     href="/gestion-cookies"
-                    className="text-terracotta-deep underline underline-offset-2"
+                    className="text-terracotta-600 underline underline-offset-2"
                   >
                     gestion des cookies
                   </Link>
@@ -588,14 +588,14 @@ export default function CGUPage() {
                 vous pouvez nous contacter à{' '}
                 <a
                   href="mailto:contact@thetiptop.fr"
-                  className="font-medium text-terracotta-deep underline underline-offset-2"
+                  className="font-medium text-terracotta-600 underline underline-offset-2"
                 >
                   contact@thetiptop.fr
                 </a>{' '}
                 ou consulter notre page de{' '}
                 <Link
                   href="/mentions-legales"
-                  className="font-medium text-terracotta-deep underline underline-offset-2"
+                  className="font-medium text-terracotta-600 underline underline-offset-2"
                 >
                   mentions légales
                 </Link>

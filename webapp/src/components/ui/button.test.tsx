@@ -16,7 +16,7 @@ describe('Button', () => {
     render(<Button>CTA</Button>);
 
     const button = screen.getByRole('button');
-    expect(button.className).toContain('bg-terracotta-deep');
+    expect(button.className).toContain('bg-terracotta-600');
     expect(button.className).toContain('rounded-full');
     expect(button.className).toContain('uppercase');
   });
@@ -24,7 +24,7 @@ describe('Button', () => {
   it('renders the outline variant with a terracotta border', () => {
     render(<Button variant="outline">Outline</Button>);
 
-    expect(screen.getByRole('button').className).toContain('border-terracotta-deep');
+    expect(screen.getByRole('button').className).toContain('border-terracotta-600');
   });
 
   it('renders as the child element with asChild (Slot)', () => {
@@ -36,7 +36,7 @@ describe('Button', () => {
 
     const link = screen.getByRole('link', { name: 'Mon compte' });
     expect(link).toHaveAttribute('href', '/dashboard');
-    expect(link.className).toContain('bg-terracotta-deep');
+    expect(link.className).toContain('bg-terracotta-600');
   });
 
   it('can be disabled', () => {

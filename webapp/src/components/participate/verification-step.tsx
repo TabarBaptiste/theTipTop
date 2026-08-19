@@ -53,7 +53,7 @@ export function VerificationStep({
     <div>
       <div className="flex justify-center">
         <div className="rounded-full bg-terracotta-50 p-3">
-          <Mail className="h-6 w-6 text-terracotta-deep" strokeWidth={1.5} />
+          <Mail className="h-6 w-6 text-terracotta-600" strokeWidth={1.5} />
         </div>
       </div>
 
@@ -65,7 +65,7 @@ export function VerificationStep({
 
       <div className="mt-6 rounded-soft bg-terracotta-50 p-4">
         <div className="flex gap-3">
-          <AlertCircle className="h-5 w-5 shrink-0 text-terracotta-deep" strokeWidth={1.5} />
+          <AlertCircle className="h-5 w-5 shrink-0 text-terracotta-600" strokeWidth={1.5} />
           <p className="text-xs leading-relaxed text-noir">
             Votre code est réservé jusqu&apos;au <strong>{deadline}</strong>. Passé ce délai, il
             redeviendra disponible et vous devrez recommencer.

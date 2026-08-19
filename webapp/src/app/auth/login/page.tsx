@@ -122,7 +122,7 @@ export default function LoginPage() {
               {/* Pas de flux "mot de passe oublié" côté API : on oriente vers le support */}
               <a
                 href="mailto:contact@thetiptop.fr?subject=Mot%20de%20passe%20oubli%C3%A9"
-                className="text-xs text-terracotta-deep hover:underline"
+                className="text-xs text-terracotta-600 hover:underline"
               >
                 Mot de passe oublie ?
               </a>
@@ -187,7 +187,7 @@ export default function LoginPage() {
 
         <p className="mt-8 text-center text-sm text-stone-grey">
           Pas encore de compte ?{' '}
-          <Link href="/auth/register" className="font-semibold text-terracotta-deep hover:underline">
+          <Link href="/auth/register" className="font-semibold text-terracotta-600 hover:underline">
             Créer un compte
           </Link>
         </p>
