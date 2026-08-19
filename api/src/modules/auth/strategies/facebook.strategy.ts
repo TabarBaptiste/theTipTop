@@ -7,6 +7,7 @@ import { Strategy, Profile } from 'passport-facebook';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from '../auth.service';
+import { OAuthMissingEmailError } from '../oauth-missing-email.error';
 
 @Injectable()
 export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
@@ -53,7 +54,7 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
       this.logger.warn(
         `Connexion Facebook refusee pour le compte ${id} : aucune adresse email fournie.`,
       );
-      return done(new Error('Facebook n a fourni aucune adresse email'), false);
+      return done(new OAuthMissingEmailError('Facebook'), false);
     }
 
     try {
