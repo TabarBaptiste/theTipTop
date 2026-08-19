@@ -6,9 +6,9 @@ import {
   CLAIM_END_DATE,
   GAME_DURATION_DAYS,
   CLAIM_DURATION_DAYS,
-  formatGameDate,
-  formatGameDateTime,
 } from '@/lib/game-dates';
+import { formatFrenchDate, formatFrenchDateTime } from '@/lib/french-date';
+import { LEGAL_UPDATED_AT } from '@/lib/legal-dates';
 
 export const metadata: Metadata = {
   title: "Conditions Générales d'Utilisation",
@@ -51,7 +51,7 @@ export default function CGUPage() {
             jeu-concours organisé par la société.
           </p>
           <p className="mt-4 text-sm text-stone-grey/70">
-            Dernière mise à jour : 9 juin 2026
+            Dernière mise à jour : {formatFrenchDate(LEGAL_UPDATED_AT.cgu)}
           </p>
         </div>
       </section>
@@ -258,7 +258,7 @@ export default function CGUPage() {
                 </p>
                 <p>
                   <strong>Période du jeu-concours :</strong> du{' '}
-                  {formatGameDate(GAME_START_DATE)} à 00h00 au {formatGameDateTime(GAME_END_DATE)}{' '}
+                  {formatFrenchDate(GAME_START_DATE)} à 00h00 au {formatFrenchDateTime(GAME_END_DATE)}{' '}
                   inclus, soit {GAME_DURATION_DAYS} jours civils. Toute participation en dehors de
                   cette période sera rejetée.
                 </p>
@@ -394,7 +394,7 @@ export default function CGUPage() {
                 </ul>
                 <p>
                   Les lots doivent être réclamés au plus tard le{' '}
-                  <strong>{formatGameDateTime(CLAIM_END_DATE)}</strong> ({CLAIM_DURATION_DAYS}{' '}
+                  <strong>{formatFrenchDateTime(CLAIM_END_DATE)}</strong> ({CLAIM_DURATION_DAYS}{' '}
                   jours après la clôture du jeu). Passé ce délai, une clause de forclusion
                   s&apos;applique automatiquement : les lots standard restent la propriété de la
                   marque, tandis que les lots majeurs sont réintégrés dans un tirage au sort final

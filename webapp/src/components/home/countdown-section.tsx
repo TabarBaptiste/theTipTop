@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { differenceInDays, differenceInHours, differenceInMinutes, differenceInSeconds } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
-import { formatGameDateTime, formatGamePeriod } from '@/lib/game-dates';
+import { formatFrenchDateTime, formatFrenchDateRange } from '@/lib/french-date';
 
 type GamePhase = 'not_started' | 'active' | 'claim_only' | 'ended';
 
@@ -63,7 +63,7 @@ export function CountdownSection() {
   // un document juridique doit rester lisible API éteinte.
   const periode =
     gameConfig?.startDate && gameConfig?.endDate
-      ? formatGamePeriod(new Date(gameConfig.startDate), new Date(gameConfig.endDate))
+      ? formatFrenchDateRange(new Date(gameConfig.startDate), new Date(gameConfig.endDate))
       : null;
 
   // Jeu terminé (phase serveur ou countdown écoulé)
@@ -75,7 +75,7 @@ export function CountdownSection() {
           <p className="font-display text-lg font-semibold text-white">
             Le jeu-concours est terminé.{' '}
             {gameConfig?.claimEndDate
-              ? `Vous pouvez réclamer vos lots jusqu'au ${formatGameDateTime(new Date(gameConfig.claimEndDate))}.`
+              ? `Vous pouvez réclamer vos lots jusqu'au ${formatFrenchDateTime(new Date(gameConfig.claimEndDate))}.`
               : 'La période de réclamation des lots est en cours.'}
           </p>
         </div>

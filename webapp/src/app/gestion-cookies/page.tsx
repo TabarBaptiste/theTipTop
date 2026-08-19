@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Lock, BarChart2 } from 'lucide-react';
+import { formatFrenchDate } from '@/lib/french-date';
+import { LEGAL_UPDATED_AT } from '@/lib/legal-dates';
 
 export const metadata: Metadata = {
   title: 'Gestion des cookies',
@@ -122,7 +124,9 @@ export default function GestionCookiesPage() {
             sur votre appareil. Cette page vous explique ce que sont ces cookies, lesquels nous
             utilisons et comment gérer vos préférences.
           </p>
-          <p className="mt-4 text-sm text-stone-grey/70">Dernière mise à jour : 9 juin 2026</p>
+          <p className="mt-4 text-sm text-stone-grey/70">
+            Dernière mise à jour : {formatFrenchDate(LEGAL_UPDATED_AT.gestionCookies)}
+          </p>
         </div>
       </section>
 

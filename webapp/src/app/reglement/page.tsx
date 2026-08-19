@@ -6,9 +6,8 @@ import {
   CLAIM_END_DATE,
   GAME_DURATION_DAYS,
   CLAIM_DURATION_DAYS,
-  formatGameDate,
-  formatGameDateTime,
 } from '@/lib/game-dates';
+import { formatFrenchDate, formatFrenchDateTime } from '@/lib/french-date';
 
 export const metadata: Metadata = {
   title: 'Règlement du jeu-concours',
@@ -35,11 +34,11 @@ const ARTICLES = [
   {
     id: 'duree',
     title: 'Article 3 - Durée du jeu',
-    content: `Le jeu-concours se déroule du ${formatGameDate(GAME_START_DATE)} à 00h00 au
-      ${formatGameDateTime(GAME_END_DATE)} inclus, soit une période de ${GAME_DURATION_DAYS} jours,
+    content: `Le jeu-concours se déroule du ${formatFrenchDate(GAME_START_DATE)} à 00h00 au
+      ${formatFrenchDateTime(GAME_END_DATE)} inclus, soit une période de ${GAME_DURATION_DAYS} jours,
       durant laquelle un maximum de 500 000 tickets pourra être distribué. Les participants
       disposent ensuite de ${CLAIM_DURATION_DAYS} jours supplémentaires à compter de la date de
-      clôture, soit jusqu'au ${formatGameDateTime(CLAIM_END_DATE)}, pour tester leur(s) code(s) sur
+      clôture, soit jusqu'au ${formatFrenchDateTime(CLAIM_END_DATE)}, pour tester leur(s) code(s) sur
       le site et réclamer leur lot en boutique ou en ligne.`,
   },
   {
@@ -65,7 +64,7 @@ const ARTICLES = [
     title: 'Article 6 - Remise des lots',
     content: `Les lots sont à retirer en boutique sur présentation du code gagnant, ou peuvent être
       expédiés via le site de vente en ligne. Tout lot non réclamé au
-      ${formatGameDateTime(CLAIM_END_DATE)}, soit ${CLAIM_DURATION_DAYS} jours après la clôture du
+      ${formatFrenchDateTime(CLAIM_END_DATE)}, soit ${CLAIM_DURATION_DAYS} jours après la clôture du
       jeu, sera définitivement perdu.`,
   },
   {
