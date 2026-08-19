@@ -51,7 +51,7 @@ export default function DashboardPage() {
 
   if (authLoading || !isAuthenticated) {
     return (
-      <div className="min-h-[calc(100vh-5rem)] bg-gray-50 py-8">
+      <div className="min-h-[calc(100vh-5rem)] bg-cream py-8">
         <div className="container mx-auto px-4">
           {/* Header */}
           <div className="mb-8">
@@ -62,9 +62,9 @@ export default function DashboardPage() {
           {/* Stats Cards */}
           <div className="mb-8 grid gap-4 md:grid-cols-3">
             {Array.from({ length: 3 }).map((_, i) => (
-              <Card key={i}>
+              <Card key={i} className="bg-white">
                 <CardContent className="flex items-center gap-4 p-6">
-                  <Skeleton className="h-12 w-12 rounded-xl" />
+                  <Skeleton className="h-12 w-12 rounded-card" />
                   <div>
                     <Skeleton className="h-3 w-24" />
                     <Skeleton className="mt-2 h-6 w-10" />
@@ -75,18 +75,18 @@ export default function DashboardPage() {
           </div>
 
           {/* CTA to participate */}
-          <Card className="mb-8 border-tea-200 bg-gradient-to-r from-tea-50 to-emerald-50">
+          <Card className="mb-8">
             <CardContent className="flex flex-col items-center justify-between gap-4 p-6 sm:flex-row">
               <div>
                 <Skeleton className="h-6 w-64" />
                 <Skeleton className="mt-2 h-4 w-48" />
               </div>
-              <Skeleton className="h-10 w-32 rounded-lg" />
+              <Skeleton className="h-10 w-32 rounded-full" />
             </CardContent>
           </Card>
 
           {/* Participations List */}
-          <Card>
+          <Card className="bg-white">
             <CardHeader>
               <Skeleton className="h-5 w-40" />
               <Skeleton className="mt-2 h-4 w-72" />
@@ -96,10 +96,10 @@ export default function DashboardPage() {
                 {Array.from({ length: 3 }).map((_, i) => (
                   <div
                     key={i}
-                    className="flex items-center justify-between rounded-lg border p-4"
+                    className="flex items-center justify-between rounded-soft border border-warm-beige p-4"
                   >
                     <div className="flex items-center gap-4">
-                      <Skeleton className="h-9 w-9 rounded-lg" />
+                      <Skeleton className="h-9 w-9 rounded-soft" />
                       <div>
                         <Skeleton className="h-4 w-32" />
                         <Skeleton className="mt-2 h-3 w-24" />
@@ -124,15 +124,15 @@ export default function DashboardPage() {
   const deliveredPrizes = participations?.filter((p) => p.prizeDelivered).length || 0;
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-gray-50 py-8">
+    <div className="min-h-[calc(100vh-5rem)] bg-cream py-8">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="mb-8 flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="font-display text-h1 text-noir">
               Bonjour, {user?.firstName} !
             </h1>
-            <p className="mt-2 text-gray-600">
+            <p className="mt-2 text-stone-grey">
               Bienvenue dans votre espace personnel Thé Tip Top
             </p>
           </div>
@@ -146,56 +146,60 @@ export default function DashboardPage() {
 
         {/* Stats Cards */}
         <div className="mb-8 grid gap-4 md:grid-cols-3">
-          <Card>
+          <Card className="bg-white">
             <CardContent className="flex items-center gap-4 p-6">
-              <div className="rounded-xl bg-tea-100 p-3">
-                <Ticket className="h-6 w-6 text-tea-600" />
+              <div className="rounded-card bg-terracotta-50 p-3">
+                <Ticket className="h-6 w-6 text-terracotta-deep" strokeWidth={1.5} />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Participations</p>
-                <p className="text-2xl font-bold text-gray-900">{totalParticipations}</p>
+                <p className="text-sm text-stone-grey">Participations</p>
+                <p className="text-2xl font-bold text-noir">{totalParticipations}</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white">
             <CardContent className="flex items-center gap-4 p-6">
-              <div className="rounded-xl bg-amber-100 p-3">
-                <Gift className="h-6 w-6 text-amber-600" />
+              {/* gold-800 et non gold-600 : ce dernier ne donne que 2.35:1 sur
+                  la pastille, sous le minimum de 3:1 exige pour un pictogramme. */}
+              <div className="rounded-card bg-gold-100 p-3">
+                <Gift className="h-6 w-6 text-gold-800" strokeWidth={1.5} />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Lots à récupérer</p>
-                <p className="text-2xl font-bold text-gray-900">{pendingPrizes}</p>
+                <p className="text-sm text-stone-grey">Lots à récupérer</p>
+                <p className="text-2xl font-bold text-noir">{pendingPrizes}</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white">
             <CardContent className="flex items-center gap-4 p-6">
-              <div className="rounded-xl bg-emerald-100 p-3">
-                <Trophy className="h-6 w-6 text-emerald-600" />
+              <div className="rounded-card bg-moss-50 p-3">
+                <Trophy className="h-6 w-6 text-moss" strokeWidth={1.5} />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Lots récupérés</p>
-                <p className="text-2xl font-bold text-gray-900">{deliveredPrizes}</p>
+                <p className="text-sm text-stone-grey">Lots récupérés</p>
+                <p className="text-2xl font-bold text-noir">{deliveredPrizes}</p>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* CTA to participate */}
-        <Card className="mb-8 border-tea-200 bg-gradient-to-r from-tea-50 to-emerald-50">
+        {/* CTA to participate.
+            Seule carte a garder la teinte native de Card : sur une page ou tout
+            le reste est blanc, c'est ce qui la designe comme l'action a mener. */}
+        <Card className="mb-8">
           <CardContent className="flex flex-col items-center justify-between gap-4 p-6 sm:flex-row">
             <div>
-              <h2 className="text-xl font-bold text-gray-900">
+              <h2 className="font-display text-h3 text-noir">
                 Vous avez un code de participation ?
               </h2>
-              <p className="text-gray-600">
+              <p className="text-stone-grey">
                 Entrez-le maintenant pour découvrir votre lot !
               </p>
             </div>
             <Button asChild size="lg">
-              <Link href="/dashboard/participate">
+              <Link href="/participate">
                 Participer
                 <ChevronRight className="ml-2 h-4 w-4" />
               </Link>
@@ -204,7 +208,7 @@ export default function DashboardPage() {
         </Card>
 
         {/* Participations List */}
-        <Card>
+        <Card className="bg-white">
           <CardHeader>
             <CardTitle>Mes participations</CardTitle>
             <CardDescription>
@@ -217,10 +221,10 @@ export default function DashboardPage() {
                 {Array.from({ length: 3 }).map((_, i) => (
                   <div
                     key={i}
-                    className="flex items-center justify-between rounded-lg border p-4"
+                    className="flex items-center justify-between rounded-soft border border-warm-beige p-4"
                   >
                     <div className="flex items-center gap-4">
-                      <Skeleton className="h-9 w-9 rounded-lg" />
+                      <Skeleton className="h-9 w-9 rounded-soft" />
                       <div>
                         <Skeleton className="h-4 w-32" />
                         <Skeleton className="mt-2 h-3 w-24" />
@@ -238,44 +242,47 @@ export default function DashboardPage() {
                 {participations.map((participation) => (
                   <div
                     key={participation.id}
-                    className="flex items-center justify-between rounded-lg border p-4"
+                    className="flex items-center justify-between rounded-soft border border-warm-beige p-4"
                   >
                     <div className="flex items-center gap-4">
                       <div
-                        className={`rounded-lg p-2 ${
+                        className={`rounded-soft p-2 ${
                           participation.prizeDelivered
-                            ? 'bg-emerald-100'
-                            : 'bg-amber-100'
+                            ? 'bg-moss-50'
+                            : 'bg-gold-100'
                         }`}
                       >
                         <Gift
+                          strokeWidth={1.5}
                           className={`h-5 w-5 ${
                             participation.prizeDelivered
-                              ? 'text-emerald-600'
-                              : 'text-amber-600'
+                              ? 'text-moss'
+                              : 'text-gold-800'
                           }`}
                         />
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">
+                        <p className="font-medium text-noir">
                           {participation.prize.name}
                         </p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-stone-grey">
                           Code : {participation.code}
                         </p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium text-tea-600">
+                      {/* terracotta-600 et non deep : #BA6905 plafonne a 4.11:1
+                          sur blanc, sous le seuil AA pour ce corps de texte. */}
+                      <p className="font-medium text-terracotta-600">
                         {participation.prize.value}
                       </p>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm">
                         {participation.prizeDelivered ? (
-                          <span className="text-emerald-600">
+                          <span className="text-moss">
                             ✓ Récupéré le {formatDate(participation.prizeDeliveredAt!)}
                           </span>
                         ) : (
-                          <span className="text-amber-600">
+                          <span className="text-gold-800">
                             À récupérer en boutique
                           </span>
                         )}
@@ -286,12 +293,12 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="py-8 text-center">
-                <Ticket className="mx-auto h-12 w-12 text-gray-300" />
-                <p className="mt-4 text-gray-500">
+                <Ticket className="mx-auto h-12 w-12 text-warm-beige" strokeWidth={1.5} />
+                <p className="mt-4 text-stone-grey">
                   Vous n&apos;avez pas encore participé au jeu-concours.
                 </p>
                 <Button asChild className="mt-4">
-                  <Link href="/dashboard/participate">Participer maintenant</Link>
+                  <Link href="/participate">Participer maintenant</Link>
                 </Button>
               </div>
             )}

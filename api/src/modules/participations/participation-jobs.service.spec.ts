@@ -12,6 +12,7 @@ describe('ParticipationJobsService', () => {
   const mockPrisma = {
     ticket: { updateMany: jest.fn() },
     lead: { findMany: jest.fn(), updateMany: jest.fn(), update: jest.fn() },
+    gameConfig: { findFirst: jest.fn() },
   };
 
   const mockMail = {
@@ -28,6 +29,10 @@ describe('ParticipationJobsService', () => {
     mockPrisma.ticket.updateMany.mockResolvedValue({ count: 0 });
     mockPrisma.lead.findMany.mockResolvedValue([]);
     mockPrisma.lead.updateMany.mockResolvedValue({ count: 0 });
+    mockPrisma.gameConfig.findFirst.mockResolvedValue({ claimEndDate: new Date('2026-11-01') });
+    // Le service n'incremente qu'apres un envoi confirme.
+    mockMail.sendVerificationReminder.mockResolvedValue(true);
+    mockMail.sendExpirationNotice.mockResolvedValue(true);
   });
 
   describe('expireStaleLeads', () => {
@@ -59,7 +64,7 @@ describe('ParticipationJobsService', () => {
       // RG-21 : 30 jours de conservation.
       const days = Math.round((data.purgeAfter.getTime() - Date.now()) / 86_400_000);
       expect(days).toBe(30);
-      expect(mockMail.sendExpirationNotice).toHaveBeenCalledWith('a@b.fr');
+      expect(mockMail.sendExpirationNotice).toHaveBeenCalledWith('a@b.fr', new Date('2026-11-01'));
     });
 
     it("ne touche à rien quand aucun lead n'a expiré", async () => {
@@ -89,7 +94,7 @@ describe('ParticipationJobsService', () => {
       expect(where.codeExpiresAt.lte).toBeInstanceOf(Date);
     });
 
-    it('réserve la relance avant de l’envoyer', async () => {
+    it('envoie la relance puis incremente le compteur', async () => {
       mockPrisma.lead.findMany
         .mockResolvedValueOnce([{ id: 'l1', email: 'a@b.fr', verificationCode: '123456' }])
         .mockResolvedValue([]);
@@ -97,16 +102,32 @@ describe('ParticipationJobsService', () => {
 
       await service.sendVerificationReminders();
 
+      expect(mockMail.sendVerificationReminder).toHaveBeenCalledWith('a@b.fr', '123456', 24);
       expect(mockPrisma.lead.updateMany).toHaveBeenCalledWith({
         where: { id: 'l1', remindersSent: 0 },
         data: { remindersSent: 1 },
       });
-      expect(mockMail.sendVerificationReminder).toHaveBeenCalledWith('a@b.fr', '123456', 24);
     });
 
-    // Le cœur de l'idempotence : si une autre exécution a déjà pris la relance,
-    // le UPDATE conditionnel ne touche aucune ligne et l'email ne part pas.
-    it("n'envoie rien si la relance a déjà été prise par une autre exécution", async () => {
+    // La garantie que l'ordre inverse apporte : un envoi echoue laisse le
+    // compteur intact, donc le balayage suivant retentera. Auparavant la
+    // reservation precedait l'envoi et la relance etait perdue pour de bon.
+    it("n'incremente pas le compteur si l'envoi a echoue", async () => {
+      mockPrisma.lead.findMany
+        .mockResolvedValueOnce([{ id: 'l1', email: 'a@b.fr', verificationCode: '123456' }])
+        .mockResolvedValue([]);
+      mockMail.sendVerificationReminder.mockResolvedValue(false);
+
+      await service.sendVerificationReminders();
+
+      expect(mockMail.sendVerificationReminder).toHaveBeenCalled();
+      expect(mockPrisma.lead.updateMany).not.toHaveBeenCalled();
+    });
+
+    // Le compromis assume : deux executions simultanees peuvent chacune envoyer
+    // avant que l'une n'incremente. Le UPDATE conditionnel empeche au moins le
+    // double comptage, de sorte que l'etape suivante ne soit pas sautee.
+    it('ne compte pas deux fois une relance deja prise par une autre execution', async () => {
       mockPrisma.lead.findMany
         .mockResolvedValueOnce([{ id: 'l1', email: 'a@b.fr', verificationCode: '123456' }])
         .mockResolvedValue([]);
@@ -114,7 +135,21 @@ describe('ParticipationJobsService', () => {
 
       await service.sendVerificationReminders();
 
+      expect(mockPrisma.lead.updateMany).toHaveBeenCalledWith({
+        where: { id: 'l1', remindersSent: 0 },
+        data: { remindersSent: 1 },
+      });
+    });
+
+    it('ignore un lead sans code de verification', async () => {
+      mockPrisma.lead.findMany
+        .mockResolvedValueOnce([{ id: 'l1', email: 'a@b.fr', verificationCode: null }])
+        .mockResolvedValue([]);
+
+      await service.sendVerificationReminders();
+
       expect(mockMail.sendVerificationReminder).not.toHaveBeenCalled();
+      expect(mockPrisma.lead.updateMany).not.toHaveBeenCalled();
     });
   });
 

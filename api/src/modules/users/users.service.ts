@@ -2,10 +2,17 @@
 // Service Users
 // ===========================================
 
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { User, Role } from '@prisma/client';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import * as bcrypt from 'bcryptjs';
 
 @Injectable()
@@ -189,6 +196,41 @@ export class UsersService {
 
     const { password: _password, ...userData } = user;
     return userData;
+  }
+
+  /**
+   * Change le mot de passe en exigeant l'actuel.
+   *
+   * Cette vérification est tout l'intérêt de la méthode : sans elle, une
+   * session ouverte suffirait à verrouiller le compte hors de son titulaire.
+   */
+  async changePassword(id: string, dto: ChangePasswordDto): Promise<void> {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: { id: true, password: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Utilisateur non trouvé');
+    }
+
+    // Compte créé par Social Login : il n'y a aucun mot de passe à comparer,
+    // donc aucun moyen de prouver ici que la demande vient bien du titulaire.
+    if (!user.password) {
+      throw new BadRequestException(
+        "Ce compte se connecte via Google ou Facebook et n'a pas de mot de passe à modifier.",
+      );
+    }
+
+    const isCurrentValid = await bcrypt.compare(dto.currentPassword, user.password);
+    if (!isCurrentValid) {
+      throw new ForbiddenException('Mot de passe actuel incorrect');
+    }
+
+    await this.prisma.user.update({
+      where: { id },
+      data: { password: await bcrypt.hash(dto.newPassword, 12) },
+    });
   }
 
   /**

@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { landingRouteFor } from '@/lib/landing-route';
 import { Skeleton } from '@/components/ui/skeleton';
+import { consumePostAuthDestination } from '@/lib/post-auth-redirect';
 
 /**
  * Point d'atterrissage après le flux OAuth (Google / Facebook).
@@ -36,9 +37,22 @@ function AuthCallbackHandler() {
     handleOAuthCallback(accessToken, refreshToken)
       .then(() => {
         toast.success('Connexion réussie !');
-        // Le profil vient d'etre hydrate par handleOAuthCallback : on lit le
-        // role directement dans le store plutot qu'une valeur figee au rendu.
-        router.replace(landingRouteFor(useAuthStore.getState().user?.role));
+        // Deux règles à concilier : revenir là d'où l'utilisateur est parti, et
+        // ne pas déposer un admin ou un employé sur /dashboard, qui ne liste que
+        // les participations personnelles du compte.
+        //
+        // consumePostAuthDestination doit être appelée dans tous les cas : elle
+        // vide la destination mémorisée. Son défaut étant /dashboard, une
+        // demande explicite se reconnaît à ce qu'elle en diffère, et c'est elle
+        // qui l'emporte — l'utilisateur a voulu cette page-là. Sinon le rôle
+        // tranche, lu dans le store que handleOAuthCallback vient d'hydrater
+        // plutôt qu'à une valeur figée au rendu.
+        const destination = consumePostAuthDestination();
+        router.replace(
+          destination === '/dashboard'
+            ? landingRouteFor(useAuthStore.getState().user?.role)
+            : destination
+        );
       })
       .catch(() => {
         toast.error('Session invalide. Veuillez vous reconnecter.');

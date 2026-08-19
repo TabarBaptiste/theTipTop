@@ -12,6 +12,16 @@ import {
 } from '@/components/participate/participation-form';
 import { VerificationStep } from '@/components/participate/verification-step';
 import { ParticipationResult } from '@/components/participate/participation-result';
+import { SocialLoginButtons } from '@/components/participate/social-login-buttons';
+import {
+  AuthenticatedParticipationForm,
+  type AuthenticatedParticipationData,
+} from '@/components/participate/authenticated-participation-form';
+import { useIsHydrated } from '@/lib/hooks/use-is-hydrated';
+
+// Le code déjà saisi est conservé le temps de l'aller-retour OAuth : rien ne
+// quitte le navigateur, et l'utilisateur n'a pas à le retaper au retour.
+const DRAFT_CODE_KEY = 'participateDraftCode';
 
 interface InitiateResponse {
   leadId: string;
@@ -39,7 +49,10 @@ interface VerifyResponse {
 type Step = 'form' | 'verify' | 'result';
 
 export default function ParticipatePage() {
-  const { setTokens, setUser } = useAuthStore();
+  const { setTokens, setUser, user, isAuthenticated } = useAuthStore();
+  // L'état d'authentification n'est fiable qu'après hydratation : rendre la
+  // variante connectée trop tôt provoquerait un écart entre serveur et client.
+  const isHydrated = useIsHydrated();
 
   const [step, setStep] = useState<Step>('form');
   const [pending, setPending] = useState<InitiateResponse | null>(null);
@@ -92,6 +105,31 @@ export default function ParticipatePage() {
     },
   });
 
+  // Chemin A d'UC-05 : l'identité est déjà certifiée, le ticket est consommé
+  // sans réservation ni code de vérification, et le lot est révélé aussitôt.
+  const directParticipate = useMutation({
+    mutationFn: async (data: AuthenticatedParticipationData) => {
+      const { data: response } = await api.post('/participations', data);
+      return response as { code: string; prize: { name: string; value?: string } };
+    },
+    onSuccess: (data) => {
+      sessionStorage.removeItem(DRAFT_CODE_KEY);
+      setResult({
+        user: { id: user?.id ?? '' },
+        accessToken: '',
+        refreshToken: '',
+        // La session existe déjà et le mot de passe a été défini à
+        // l'inscription, ou n'est pas nécessaire en connexion tierce.
+        passwordRequired: false,
+        participation: { code: data.code, prize: data.prize },
+      });
+      setStep('result');
+    },
+    onError: (error: unknown) => {
+      toast.error(readApiError(error, 'Ce code ne peut pas être utilisé'));
+    },
+  });
+
   const verify = useMutation({
     mutationFn: async (code: string) => {
       const { data } = await api.post<VerifyResponse>('/participations/verify', {
@@ -116,13 +154,46 @@ export default function ParticipatePage() {
   return (
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-cream px-4 py-12">
       <div className="w-full max-w-xl sm:rounded-card sm:border sm:border-warm-beige sm:bg-white sm:p-8 sm:shadow-sm">
-        {step === 'form' && (
+        {step === 'form' && isHydrated && isAuthenticated && user && (
+          <AuthenticatedParticipationForm
+            firstName={user.firstName}
+            email={user.email}
+            defaultCode={
+              typeof window !== 'undefined'
+                ? (sessionStorage.getItem(DRAFT_CODE_KEY) ?? undefined)
+                : undefined
+            }
+            isSubmitting={directParticipate.isPending}
+            onSubmit={(data) => directParticipate.mutate(data)}
+          />
+        )}
+
+        {step === 'form' && !(isHydrated && isAuthenticated) && (
           <>
             <h1 className="font-display text-h2 text-noir">Participer au jeu-concours</h1>
             <p className="mt-2 text-sm text-stone-grey">
               Saisissez le code de votre ticket de caisse. Aucun compte n&apos;est nécessaire
               pour commencer.
             </p>
+
+            {/* Placés avant le formulaire : l'ordre naturel devient alors
+                l'authentification d'abord, ce qui évite de saisir un code pour
+                le perdre en partant chez le fournisseur. */}
+            <div className="mt-6">
+              <SocialLoginButtons
+                returnTo="/participate"
+                onBeforeRedirect={() => {
+                  const code = (document.getElementById('code') as HTMLInputElement | null)?.value;
+                  if (code) sessionStorage.setItem(DRAFT_CODE_KEY, code);
+                }}
+              />
+            </div>
+
+            <div className="mt-6 flex items-center gap-4">
+              <div className="flex-1 border-t border-warm-beige" />
+              <span className="text-sm text-stone-grey">OU</span>
+              <div className="flex-1 border-t border-warm-beige" />
+            </div>
 
             <ParticipationForm
               onSubmit={(data) => initiate.mutate(data)}

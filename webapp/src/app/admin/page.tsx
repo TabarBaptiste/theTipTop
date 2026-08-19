@@ -341,17 +341,20 @@ export default function AdminPage() {
                         <stop offset="95%" stopColor="#BA6905" stopOpacity={0} />
                       </linearGradient>
                     </defs>
+                    {/* Recharts pose ces couleurs en attributs SVG : une variable
+                        CSS n'y serait pas resolue, d'ou les valeurs litterales.
+                        Elles doivent suivre les tokens de tailwind.config.js. */}
                     <CartesianGrid strokeDasharray="3 3" stroke="#E8D5B0" />
                     <XAxis
                       dataKey="date"
                       tickFormatter={(d: string) => format(parseISO(d), 'dd/MM', { locale: fr })}
-                      tick={{ fontSize: 11, fill: '#8A8378' }}
+                      tick={{ fontSize: 11, fill: '#4A463E' }}
                       interval="preserveStartEnd"
                       minTickGap={24}
                     />
                     <YAxis
                       allowDecimals={false}
-                      tick={{ fontSize: 11, fill: '#8A8378' }}
+                      tick={{ fontSize: 11, fill: '#4A463E' }}
                       width={40}
                     />
                     <Tooltip
