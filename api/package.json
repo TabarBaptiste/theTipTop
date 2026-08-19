@@ -25,7 +25,8 @@
     "prisma:studio": "prisma studio",
     "prisma:seed": "ts-node prisma/seed.ts",
     "db:reset": "prisma migrate reset --force && npm run prisma:seed",
-    "images:upload": "ts-node scripts/upload-images.ts"
+    "images:upload": "ts-node scripts/upload-images.ts",
+    "draw:simulate": "ts-node scripts/simulate-grand-prize-draw.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.24",
