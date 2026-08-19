@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { useIsHydrated } from '@/lib/hooks/use-is-hydrated';
+import { landingRouteFor } from '@/lib/landing-route';
 import { trackLoginSuccess, trackLoginFailure, trackCTAClick } from '@/lib/analytics';
 
 const loginSchema = z.object({
@@ -63,7 +64,9 @@ export default function LoginPage() {
       await login(data.email, data.password);
       trackLoginSuccess('email');
       toast.success('Connexion réussie !');
-      router.push('/dashboard');
+      // getState() et non la valeur du hook : le rôle vient tout juste d'être
+      // écrit dans le store, celle capturée au rendu serait encore nulle.
+      router.push(landingRouteFor(useAuthStore.getState().user?.role));
     } catch (error: any) {
       const status = error?.response?.status;
       if (status === 401 || status === 403) {
