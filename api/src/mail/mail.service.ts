@@ -88,6 +88,32 @@ export class MailService {
   }
 
   /**
+   * Confirmation d'une adresse ajoutée à un compte existant.
+   *
+   * Distinct de sendVerificationCode, qui parle de participation : ici le code
+   * ne valide pas un ticket mais l'adresse elle-même, sur un compte déjà créé.
+   * Le cas type est un compte Facebook qui n'a jamais transmis d'adresse et
+   * fonctionne sous une adresse de substitution injoignable.
+   */
+  async sendEmailConfirmation(to: string, code: string, expiresAt: Date): Promise<boolean> {
+    return this.send({
+      to,
+      subject: `${code} — confirmez votre adresse Thé Tip Top`,
+      debugCode: code,
+      html: this.layout(
+        'Confirmez votre adresse',
+        `<p>Saisissez ce code sur le site pour rattacher cette adresse à votre compte.</p>
+         ${this.codeBlock(code)}
+         <p>Ce code est valable jusqu'au <strong>${this.formatDate(expiresAt)}</strong>.</p>
+         <p>Tant que cette confirmation n'est pas faite, votre compte reste injoignable :
+         nous ne pourrions vous prévenir ni d'un lot gagné, ni de son délai de retrait.</p>
+         <p>Si vous n'êtes pas à l'origine de cette demande, ignorez ce message :
+         sans le code ci-dessus, aucune modification n'est possible.</p>`,
+      ),
+    });
+  }
+
+  /**
    * Annonce du lot gagné, envoyée dès que la participation est enregistrée.
    *
    * Le code y figure volontairement : contrairement au code de confirmation à
