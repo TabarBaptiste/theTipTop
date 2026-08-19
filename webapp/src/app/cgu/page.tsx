@@ -1,5 +1,14 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import {
+  GAME_START_DATE,
+  GAME_END_DATE,
+  CLAIM_END_DATE,
+  GAME_DURATION_DAYS,
+  CLAIM_DURATION_DAYS,
+} from '@/lib/game-dates';
+import { formatFrenchDate, formatFrenchDateTime } from '@/lib/french-date';
+import { LEGAL_UPDATED_AT } from '@/lib/legal-dates';
 
 export const metadata: Metadata = {
   title: "Conditions Générales d'Utilisation",
@@ -42,7 +51,7 @@ export default function CGUPage() {
             jeu-concours organisé par la société.
           </p>
           <p className="mt-4 text-sm text-stone-grey/70">
-            Dernière mise à jour : 9 juin 2026
+            Dernière mise à jour : {formatFrenchDate(LEGAL_UPDATED_AT.cgu)}
           </p>
         </div>
       </section>
@@ -248,9 +257,10 @@ export default function CGUPage() {
                   qu&apos;un lot au cours de la période du jeu-concours.
                 </p>
                 <p>
-                  <strong>Période du jeu-concours :</strong> du 24 août 2026 à 00h01 au 23 octobre
-                  2026 à 23h59 inclus (60 jours civils). Toute participation en dehors de cette
-                  période sera rejetée.
+                  <strong>Période du jeu-concours :</strong> du{' '}
+                  {formatFrenchDate(GAME_START_DATE)} à 00h00 au {formatFrenchDateTime(GAME_END_DATE)}{' '}
+                  inclus, soit {GAME_DURATION_DAYS} jours civils. Toute participation en dehors de
+                  cette période sera rejetée.
                 </p>
                 <p>
                   Pour participer, l&apos;utilisateur doit :
@@ -383,8 +393,9 @@ export default function CGUPage() {
                   <li>De la confirmation de gain reçue par email (version numérique acceptée).</li>
                 </ul>
                 <p>
-                  Les lots doivent être réclamés au plus tard le <strong>22 novembre 2026</strong>
-                  (30 jours après la clôture du jeu). Passé ce délai, une clause de forclusion
+                  Les lots doivent être réclamés au plus tard le{' '}
+                  <strong>{formatFrenchDateTime(CLAIM_END_DATE)}</strong> ({CLAIM_DURATION_DAYS}{' '}
+                  jours après la clôture du jeu). Passé ce délai, une clause de forclusion
                   s&apos;applique automatiquement : les lots standard restent la propriété de la
                   marque, tandis que les lots majeurs sont réintégrés dans un tirage au sort final
                   supervisé par le commissaire de justice.

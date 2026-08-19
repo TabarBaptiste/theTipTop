@@ -1,5 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { GAME_START_DATE, GAME_END_DATE, CLAIM_END_DATE } from '@/lib/game-dates';
+import { formatFrenchDate, formatFrenchDateTime } from '@/lib/french-date';
+import { LEGAL_UPDATED_AT } from '@/lib/legal-dates';
 
 export const metadata: Metadata = {
   title: 'Mentions Légales',
@@ -38,7 +41,7 @@ export default function MentionsLegalesPage() {
             l&apos;éditeur du site internet Thé Tip Top.
           </p>
           <p className="mt-4 text-sm text-stone-grey/70">
-            Dernière mise à jour : 9 juin 2026
+            Dernière mise à jour : {formatFrenchDate(LEGAL_UPDATED_AT.mentionsLegales)}
           </p>
         </div>
       </section>
@@ -220,6 +223,15 @@ export default function MentionsLegalesPage() {
                     ici
                   </Link>
                   .
+                </p>
+                <p>
+                  {/* Les espaces autour des expressions sont explicites : JSX
+                      supprime l'espace de tête d'un bloc de texte qui court sur
+                      plusieurs lignes, ce qui collait « 23h59inclus ». */}
+                  <strong>Période du jeu-concours :</strong> du {formatFrenchDate(GAME_START_DATE)}{' '}
+                  à 00h00 au {formatFrenchDateTime(GAME_END_DATE)}{' '}
+                  inclus. Les lots restent réclamables jusqu&apos;au{' '}
+                  {formatFrenchDateTime(CLAIM_END_DATE)}.
                 </p>
               </div>
             </section>

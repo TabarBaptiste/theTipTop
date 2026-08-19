@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { differenceInDays, differenceInHours, differenceInMinutes, differenceInSeconds } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
+import { formatFrenchDateTime, formatFrenchDateRange } from '@/lib/french-date';
 
 type GamePhase = 'not_started' | 'active' | 'claim_only' | 'ended';
 
@@ -57,6 +58,14 @@ export function CountdownSection() {
     return () => clearInterval(timer);
   }, [endDateStr]);
 
+  // Les dates viennent de l'API, seule autorité sur le déroulement du jeu. Les
+  // pages légales, elles, s'appuient sur les constantes de lib/game-dates :
+  // un document juridique doit rester lisible API éteinte.
+  const periode =
+    gameConfig?.startDate && gameConfig?.endDate
+      ? formatFrenchDateRange(new Date(gameConfig.startDate), new Date(gameConfig.endDate))
+      : null;
+
   // Jeu terminé (phase serveur ou countdown écoulé)
   const phase = gameConfig?.phase;
   if (isEnded || phase === 'claim_only' || phase === 'ended') {
@@ -64,7 +73,10 @@ export function CountdownSection() {
       <section className="bg-terracotta-deep py-6">
         <div className="container mx-auto px-6 text-center">
           <p className="font-display text-lg font-semibold text-white">
-            Le jeu-concours est termine ! Vous avez 30 jours pour recuperer vos lots.
+            Le jeu-concours est terminé.{' '}
+            {gameConfig?.claimEndDate
+              ? `Vous pouvez réclamer vos lots jusqu'au ${formatFrenchDateTime(new Date(gameConfig.claimEndDate))}.`
+              : 'La période de réclamation des lots est en cours.'}
           </p>
         </div>
       </section>
@@ -74,9 +86,12 @@ export function CountdownSection() {
   return (
     <section className="border-y border-warm-beige bg-white py-6">
       <div className="container mx-auto flex flex-col items-center justify-between gap-6 px-6 sm:flex-row">
-        <p className="font-functional text-ui uppercase tracking-[2px] text-stone-grey">
-          Temps restant pour participer
-        </p>
+        <div className="text-center sm:text-left">
+          <p className="font-functional text-ui uppercase tracking-[2px] text-stone-grey">
+            Temps restant pour participer
+          </p>
+          {periode && <p className="mt-1 text-xs text-stone-grey">{periode}</p>}
+        </div>
 
         <div className="flex items-center gap-3">
           {/* Avant que la config arrive, les valeurs sont à 0 - flash imperceptible */}

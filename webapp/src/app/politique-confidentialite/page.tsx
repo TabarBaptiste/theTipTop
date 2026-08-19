@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { formatFrenchDate } from '@/lib/french-date';
+import { LEGAL_UPDATED_AT } from '@/lib/legal-dates';
 
 export const metadata: Metadata = {
   title: 'Politique de confidentialité',
@@ -41,7 +43,7 @@ export default function PolitiqueConfidentialitePage() {
             de la loi Informatique et Libertés.
           </p>
           <p className="mt-4 text-sm text-stone-grey/70">
-            Dernière mise à jour : 9 juin 2026
+            Dernière mise à jour : {formatFrenchDate(LEGAL_UPDATED_AT.politiqueConfidentialite)}
           </p>
         </div>
       </section>
