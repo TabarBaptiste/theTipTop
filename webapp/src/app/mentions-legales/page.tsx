@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   alternates: { canonical: '/mentions-legales' },
   title: 'Mentions Légales',
   description:
-    'Mentions légales obligatoires du site The Tip Top - identification de l\'éditeur, hébergeur et informations réglementaires.',
+    'Mentions légales obligatoires du site Thé Tip Top - identification de l\'éditeur, hébergeur et informations réglementaires.',
 };
 
 const ARTICLES = [
@@ -379,7 +379,7 @@ export default function MentionsLegalesPage() {
               <h2 className="font-display text-h2 text-noir">Article 9 - Cookies</h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
                 <p>
-                  Le site utilise des cookies afin d&apos;assurer son bon fonctionnement et
+                  Le site utilisé des cookies afin d&apos;assurer son bon fonctionnement et
                   d&apos;améliorer l&apos;expérience utilisateur. Certains cookies sont
                   strictement nécessaires (session, authentification) ; d&apos;autres sont soumis
                   à votre consentement préalable (mesure d&apos;audience via Google Analytics).

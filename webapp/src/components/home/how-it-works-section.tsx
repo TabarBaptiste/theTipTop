@@ -3,7 +3,7 @@ const steps = [
     number: '01',
     title: 'Trouve ton code',
     description:
-      'Cherche le code unique sur ton ticket de caisse auprès de ton vendeur The Tip Top.',
+      'Cherche le code unique sur ton ticket de caisse auprès de ton vendeur Thé Tip Top.',
   },
   {
     number: '02',

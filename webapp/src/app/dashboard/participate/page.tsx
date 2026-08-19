@@ -17,7 +17,7 @@ import { trackParticipateSubmit, trackParticipateSuccess, trackParticipateFailur
 const participateSchema = z.object({
   code: z
     .string()
-    .length(10, 'Le code doit contenir exactement 10 caracteres')
+    .length(10, 'Le code doit contenir exactement 10 caractères')
     .regex(/^[A-Z0-9]+$/, 'Le code ne doit contenir que des lettres majuscules et des chiffres'),
 });
 
@@ -46,9 +46,9 @@ interface PrizeApi {
 }
 
 const rules = [
-  { color: 'bg-moss', text: 'Le jeu-concours est ouvert a toute personne ayant effectue un achat superieur a 49€ en magasin.' },
-  { color: 'bg-terracotta-600', text: 'Les participants disposent de 30 jours apres la fin du jeu pour reclamer leur lot.' },
-  { color: 'bg-red-500', text: 'Le reglement complet est disponible aupres de Maitre Arnaud Rick, huissier de justice.' },
+  { color: 'bg-moss', text: 'Le jeu-concours est ouvert a toute personne ayant effectué un achat supérieur a 49€ en magasin.' },
+  { color: 'bg-terracotta-600', text: 'Les participants disposent de 30 jours après la fin du jeu pour réclamer leur lot.' },
+  { color: 'bg-red-500', text: 'Le règlement complet est disponible auprès de Maître Arnaud Rick, huissier de justice.' },
 ];
 
 export default function ParticipatePage() {
@@ -89,11 +89,11 @@ export default function ParticipatePage() {
       trackParticipateSuccess(data.prizeType, data.prize.value);
       setResult(data);
       queryClient.invalidateQueries({ queryKey: ['participations'] });
-      toast.success('Felicitations ! Vous avez gagne !');
+      toast.success('Félicitations ! Vous avez gagné !');
     },
     onError: () => {
       trackParticipateFailure('invalid_or_used_code');
-      toast.error('Code invalide ou deja utilise');
+      toast.error('Code invalide ou déjà utilisé');
     },
   });
 
@@ -115,8 +115,8 @@ export default function ParticipatePage() {
               <PartyPopper className="h-8 w-8 text-terracotta-600" strokeWidth={1.5} />
             </div>
 
-            <h1 className="mt-6 font-display text-h2 text-noir">Felicitations !</h1>
-            <p className="mt-2 text-sm text-stone-grey">Vous avez gagne :</p>
+            <h1 className="mt-6 font-display text-h2 text-noir">Félicitations !</h1>
+            <p className="mt-2 text-sm text-stone-grey">Vous avez gagné :</p>
 
             <div className="mt-6 rounded-card bg-terracotta-50 p-6">
               <Gift className="mx-auto h-10 w-10 text-terracotta-600" strokeWidth={1.5} />
@@ -130,7 +130,7 @@ export default function ParticipatePage() {
 
             <div className="mt-6 rounded-soft bg-cream p-4 text-left">
               <p className="text-xs text-stone-grey">
-                <strong>Code utilise :</strong> {result.code}
+                <strong>Code utilisé :</strong> {result.code}
               </p>
               <p className="mt-2 text-xs text-stone-grey">
                 <Sparkles className="mr-1 inline h-3 w-3 text-gold-500" />
@@ -158,7 +158,7 @@ export default function ParticipatePage() {
       <section className="bg-white py-12 text-center">
         <div className="container mx-auto px-6">
           <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-600">
-            Jeu-concours The Tip Top
+            Jeu-concours Thé Tip Top
           </p>
           <h1 className="mt-3 font-display text-h1 text-noir">
             Participez et gagnez !
@@ -288,9 +288,9 @@ export default function ParticipatePage() {
           </div>
         </section>
 
-        {/* Reglement du concours */}
+        {/* Règlement du concours */}
         <section className="mt-16">
-          <h2 className="font-display text-h2 text-noir">Reglement du concours</h2>
+          <h2 className="font-display text-h2 text-noir">Règlement du concours</h2>
           <div className="mt-6 space-y-3 rounded-card bg-terracotta-50 p-6">
             {rules.map((rule, idx) => (
               <div key={idx} className="flex items-start gap-3">
@@ -305,7 +305,7 @@ export default function ParticipatePage() {
         <section className="mt-16 text-center">
           <h2 className="font-display text-h2 text-noir">Votre engagement</h2>
           <p className="mt-2 text-xs text-stone-grey">
-            The Tip Top s&apos;engage dans une demarche responsable
+            Thé Tip Top s&apos;engage dans une démarche responsable
           </p>
 
           <div className="mt-8 flex justify-center gap-8">
@@ -322,7 +322,7 @@ export default function ParticipatePage() {
                 <ShieldCheck className="h-7 w-7 text-terracotta-600" strokeWidth={1.5} />
               </div>
               <span className="mt-2 font-functional text-[10px] font-semibold uppercase tracking-[1px] text-noir">
-                Certifie bio
+                Certifié bio
               </span>
             </div>
             <div className="flex flex-col items-center">

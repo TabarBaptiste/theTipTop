@@ -4,26 +4,26 @@ const reasons = [
   {
     icon: Leaf,
     number: '01',
-    title: 'The 100% bio',
-    description: 'Tous nos thes sont certifies bio depuis l\'origine de notre marque.',
+    title: 'Thé 100% bio',
+    description: 'Tous nos thés sont certifiés bio depuis l\'origine de notre marque.',
   },
   {
     icon: Award,
     number: '02',
     title: 'Artisanat unique',
-    description: 'Chaque melange est cree a la main par nos maitres theiers.',
+    description: 'Chaque mélange est créé à la main par nos maîtres théiers.',
   },
   {
     icon: ShieldCheck,
     number: '03',
-    title: 'Tracabilite totale',
-    description: 'De la plantation a votre tasse, nous garantissons la provenance.',
+    title: 'Traçabilité totale',
+    description: 'De la plantation à votre tasse, nous garantissons la provenance.',
   },
   {
     icon: Heart,
     number: '04',
     title: 'Engagement RSE',
-    description: 'Une demarche eco-responsable a chaque etape de production.',
+    description: 'Une démarche éco-responsable à chaque étape de production.',
   },
 ];
 

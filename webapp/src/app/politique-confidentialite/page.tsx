@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   alternates: { canonical: '/politique-confidentialite' },
   title: 'Politique de confidentialité',
   description:
-    'Politique de confidentialité et protection des données personnelles du site The Tip Top - RGPD, droits des utilisateurs, cookies.',
+    'Politique de confidentialité et protection des données personnelles du site Thé Tip Top - RGPD, droits des utilisateurs, cookies.',
 };
 
 const ARTICLES = [

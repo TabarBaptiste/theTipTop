@@ -153,13 +153,15 @@ describe('Accessibilité WCAG 2.1 niveau AA', () => {
       // Critères 3.3.2 et 4.1.2 - Étiquettes des champs
       it('associe une étiquette à chaque champ de formulaire', () => {
         cy.get('body').then(($body) => {
-          const sansEtiquette = $body
-            .find('input,select,textarea')
-            .toArray()
-            .filter((c) => (c as HTMLInputElement).type !== 'hidden')
+          // jQuery type ces éléments d'après la racine interrogée, ici body :
+          // le transtypage direct est refusé, d'où le passage par unknown.
+          const champs = $body.find('input,select,textarea').toArray() as unknown as
+            HTMLInputElement[];
+          const sansEtiquette = champs
+            .filter((c) => c.type !== 'hidden')
             .filter(
               (c) =>
-                !(c as HTMLInputElement).labels?.length &&
+                !c.labels?.length &&
                 !c.getAttribute('aria-label') &&
                 !c.getAttribute('aria-labelledby'),
             );

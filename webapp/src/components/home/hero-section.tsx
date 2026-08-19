@@ -19,7 +19,7 @@ export function HeroSection() {
 
             <h1 className="font-display text-h1 text-noir">
               Bienvenue au jeu-concours{' '}
-              <span className="text-terracotta-600">The Tip Top</span>
+              <span className="text-terracotta-600">Thé Tip Top</span>
             </h1>
 
             <p className="mt-6 text-body leading-relaxed text-stone-grey">
@@ -32,7 +32,7 @@ export function HeroSection() {
             <div className="mt-6 flex flex-wrap gap-3">
               <Badge variant="bio">
                 <Leaf className="h-4 w-4" strokeWidth={1.5} />
-                Bio certifie
+                Bio certifié
               </Badge>
               <Badge variant="location">
                 <Ticket className="h-4 w-4" strokeWidth={1.5} />
