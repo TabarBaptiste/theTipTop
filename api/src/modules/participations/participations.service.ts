@@ -7,6 +7,7 @@ import {
   BadRequestException,
   NotFoundException,
   ConflictException,
+  ForbiddenException,
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
@@ -14,6 +15,7 @@ import { Prisma, LeadStatus, User } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TicketsService } from '../tickets/tickets.service';
 import { RedisService } from '../../redis/redis.service';
+import { isPlaceholderEmail } from '../auth/placeholder-email';
 import { PRIZES_MAP_CACHE_KEY, STATS_CACHE_PATTERN } from '../../redis/cache-keys';
 import { CreateParticipationDto } from './dto/create-participation.dto';
 
@@ -54,6 +56,16 @@ export class ParticipationsService {
    * « ce code a déjà été utilisé ».
    */
   async participate(user: User, dto: CreateParticipationDto) {
+    // Verrou place avant toute autre verification : un compte sous adresse de
+    // substitution ne peut recevoir ni l'annonce du lot ni le rappel du delai
+    // de retrait. Le laisser participer consommerait definitivement son ticket
+    // pour un gain dont il ne serait jamais informe.
+    if (isPlaceholderEmail(user.email)) {
+      throw new ForbiddenException(
+        'Renseignez une adresse email valide avant de participer : sans elle, nous ne pourrions pas vous annoncer votre lot.',
+      );
+    }
+
     const userId = user.id;
     await this.checkSubmitRateLimit(userId);
 

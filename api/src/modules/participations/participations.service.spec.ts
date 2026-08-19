@@ -7,7 +7,8 @@ import { ParticipationsService } from './participations.service';
 import { TicketsService } from '../tickets/tickets.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException } from '@nestjs/common';
+import { User } from '@prisma/client';
 
 describe('ParticipationsService', () => {
   let service: ParticipationsService;
@@ -78,7 +79,9 @@ describe('ParticipationsService', () => {
       phone: null,
       birthDate: null,
       gender: null,
-    } as never;
+      // `as unknown as User` et non `as never` : le second interdit d'etendre
+      // l'objet, ce dont les tests ont besoin pour varier un seul champ.
+    } as unknown as User;
 
     const mockGameConfig = {
       id: '1',
@@ -177,6 +180,20 @@ describe('ParticipationsService', () => {
       await expect(service.participate(user, { code: validCode })).rejects.toThrow(
         'Trop de tentatives, veuillez réessayer plus tard.',
       );
+      expect(mockTicketsService.verifyCode).not.toHaveBeenCalled();
+    });
+
+    // Un compte sous adresse de substitution ne recevrait ni l'annonce du lot
+    // ni le rappel du delai : son ticket serait consomme pour rien.
+    it('should refuse a participation from an unreachable account', async () => {
+      const unreachable = { ...user, email: 'fb_123@facebook-noreply.invalid' };
+
+      await expect(service.participate(unreachable, { code: validCode })).rejects.toThrow(
+        ForbiddenException,
+      );
+
+      // Le verrou tombe avant tout : ni compteur consomme, ni ticket touche.
+      expect(mockRedisService.incr).not.toHaveBeenCalled();
       expect(mockTicketsService.verifyCode).not.toHaveBeenCalled();
     });
 
