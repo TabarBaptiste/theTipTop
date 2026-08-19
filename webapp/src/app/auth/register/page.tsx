@@ -37,7 +37,10 @@ const registerSchema = z.object({
     .regex(/[A-Z]/, 'Le mot de passe doit contenir au moins une majuscule')
     .regex(/[a-z]/, 'Le mot de passe doit contenir au moins une minuscule')
     .regex(/[0-9]/, 'Le mot de passe doit contenir au moins un chiffre')
-    .regex(/[@$!%*?&]/, 'Le mot de passe doit contenir au moins un caractère spécial (@$!%*?&)'),
+    .regex(
+      /[@$!%*?&#]/,
+      'Le mot de passe doit contenir au moins un caractère spécial (@$!%*?&#)'
+    ),
   confirmPassword: z.string(),
   firstName: z.string().min(2, 'Le prénom doit faire au moins 2 caractères'),
   lastName: z.string().min(2, 'Le nom doit faire au moins 2 caractères'),

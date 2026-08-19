@@ -32,7 +32,10 @@ export class RegisterDto {
   @IsString()
   @MinLength(8, { message: 'Le mot de passe doit contenir au moins 8 caractères' })
   @MaxLength(50)
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, {
+  // Le diese figure aux deux endroits : la premiere liste decide quels
+  // caracteres comptent comme special, la seconde regit le premier caractere du
+  // mot de passe. L'omettre de l'une ou l'autre laisserait un cas refuse.
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]/, {
     message:
       'Le mot de passe doit contenir au moins une majuscule, une minuscule, un chiffre et un caractère spécial',
   })
