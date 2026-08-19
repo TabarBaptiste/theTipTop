@@ -7,7 +7,7 @@ import { Strategy, Profile } from 'passport-facebook';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from '../auth.service';
-import { OAuthMissingEmailError } from '../oauth-missing-email.error';
+import { buildPlaceholderEmail } from '../placeholder-email';
 
 @Injectable()
 export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
@@ -36,7 +36,7 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
 
     // Facebook ne renvoie pas toujours d'adresse : compte cree avec un numero
     // de telephone, permission email refusee, ou compte de test sans email.
-    const email = emails?.[0]?.value ?? (profile as any)._json?.email;
+    let email = emails?.[0]?.value ?? (profile as any)._json?.email;
 
     // On refuse, comme le fait deja la strategie Google.
     //
@@ -50,19 +50,23 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
     // /auth/login?error=facebook_no_email, ou la page invite a passer par
     // Google ou par email et mot de passe. Ce chemin existait deja mais ne
     // pouvait jamais s'executer, la strategie renvoyant toujours un utilisateur.
+    // Facebook ne transmet pas toujours d'adresse : compte cree avec un numero
+    // de telephone, permission refusee, compte de test, ou compte ancien.
+    //
+    // On n'interdit pas la connexion pour autant, sinon ces personnes n'ont
+    // aucun moyen d'entrer. Une adresse de substitution est fabriquee, et
+    // l'application reclamera une vraie adresse avant toute participation :
+    // isPlaceholderEmail sert de garde a cet endroit.
     if (!email) {
-      // On journalise les champs recus, jamais leur contenu : sans cela on sait
-      // seulement que l'adresse manque, pas si Meta a refuse la permission ou
-      // si le compte n'en porte simplement aucune. La distinction change
-      // entierement la marche a suivre.
+      // Noms des champs seulement, jamais leur contenu : « email » absent
+      // signale une permission non accordee, « email » vide un compte sans
+      // adresse confirmee. La distinction guide le message d'aide.
       const champsRecus = Object.keys((profile as any)._json ?? {}).sort();
       this.logger.warn(
-        `Connexion Facebook refusee pour le compte ${id} : aucune adresse email fournie. ` +
-          `Champs transmis par Meta : ${champsRecus.length ? champsRecus.join(', ') : 'aucun'}. ` +
-          `Si « email » n'y figure pas, la permission n'a pas ete accordee a l'ecran ` +
-          `d'autorisation ; s'il y figure vide, le compte n'a pas d'adresse confirmee.`,
+        `Compte Facebook ${id} sans adresse email : adresse de substitution utilisee. ` +
+          `Champs transmis par Meta : ${champsRecus.length ? champsRecus.join(', ') : 'aucun'}.`,
       );
-      return done(new OAuthMissingEmailError('Facebook'), false);
+      email = buildPlaceholderEmail(id);
     }
 
     try {
