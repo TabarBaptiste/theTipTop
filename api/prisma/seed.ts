@@ -8,6 +8,7 @@ import { PrismaClient, PrizeType, Gender } from '@prisma/client';
 import * as crypto from 'crypto';
 import * as readline from 'readline';
 import * as bcrypt from 'bcryptjs';
+import { buildPrizeImageUrl } from '../src/common/cloudinary';
 
 const prisma = new PrismaClient();
 
@@ -390,6 +391,11 @@ async function main() {
   // ── Lots : créer / mettre à jour les métadonnées ──────────────────────────
   console.log('🎁 Création des métadonnées des lots...');
   for (const prize of PRIZE_METADATA) {
+    // null quand Cloudinary n'est pas configuré : la seed doit rester
+    // exécutable sans compte, et l'interface retombe alors sur ses images
+    // empaquetées.
+    const imageUrl = buildPrizeImageUrl(prize.code, process.env.CLOUDINARY_CLOUD_NAME);
+
     await prisma.prize.upsert({
       where: { code: prize.code },
       update: {
@@ -399,8 +405,9 @@ async function main() {
         percentage: prize.percentage,
         totalCount: prize.totalCount,
         displayOrder: prize.displayOrder,
+        imageUrl,
       },
-      create: prize,
+      create: { ...prize, imageUrl },
     });
   }
   console.log('✅ 5 lots créés/mis à jour.\n');

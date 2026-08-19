@@ -24,7 +24,8 @@
     "prisma:migrate:prod": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
     "prisma:seed": "ts-node prisma/seed.ts",
-    "db:reset": "prisma migrate reset --force && npm run prisma:seed"
+    "db:reset": "prisma migrate reset --force && npm run prisma:seed",
+    "images:upload": "ts-node scripts/upload-images.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.24",
