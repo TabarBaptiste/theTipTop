@@ -303,7 +303,7 @@ export default function RegisterPage() {
                 {...register('consentEmail')}
               />
               <label htmlFor="consentEmail" className="text-xs leading-relaxed text-stone-grey">
-                Je souhaite recevoir les offres et nouveautes de The Tip Top
+                Je souhaite recevoir les offres et nouveautés de Thé Tip Top
               </label>
             </div>
           </div>

@@ -5,6 +5,9 @@ import { formatFrenchDate } from '@/lib/french-date';
 import { LEGAL_UPDATED_AT } from '@/lib/legal-dates';
 
 export const metadata: Metadata = {
+  // URL de reference : evite qu'un parametre de campagne ou une variante
+  // avec barre finale soit traite comme une page distincte.
+  alternates: { canonical: '/gestion-cookies' },
   title: 'Gestion des cookies',
   description:
     'Politique de gestion des cookies du site Thé Tip Top - types de cookies utilisés, durée de conservation, gestion de vos préférences.',
@@ -31,14 +34,14 @@ const COOKIES_LIST = [
         name: 'refreshToken',
         emetteur: 'Thé Tip Top',
         finalite: 'Maintien de la session utilisateur authentifié',
-        duree: '7 jours',
+        durée: '7 jours',
         type: 'Fonctionnel',
       },
       {
         name: 'cookie_consent',
         emetteur: 'Thé Tip Top',
         finalite: 'Mémorisation de vos préférences de consentement',
-        duree: '13 mois',
+        durée: '13 mois',
         type: 'Fonctionnel',
       },
     ],
@@ -55,28 +58,28 @@ const COOKIES_LIST = [
         name: '_ga',
         emetteur: 'Google Analytics',
         finalite: 'Distinguer les utilisateurs uniques',
-        duree: '2 ans',
+        durée: '2 ans',
         type: 'Analytique',
       },
       {
         name: '_ga_XXXXXXXX',
         emetteur: 'Google Analytics',
         finalite: 'Maintenir l\'état de la session Analytics',
-        duree: '2 ans',
+        durée: '2 ans',
         type: 'Analytique',
       },
       {
         name: '_gid',
         emetteur: 'Google Analytics',
         finalite: 'Distinguer les utilisateurs sur courte durée',
-        duree: '24 heures',
+        durée: '24 heures',
         type: 'Analytique',
       },
       {
         name: '_gat',
         emetteur: 'Google Analytics',
         finalite: 'Limiter le taux de requêtes vers les serveurs',
-        duree: '1 minute',
+        durée: '1 minute',
         type: 'Analytique',
       },
     ],
@@ -210,7 +213,7 @@ export default function GestionCookiesPage() {
               </h2>
               <div className="mt-4 space-y-4 text-body text-stone-grey">
                 <p>
-                  Le site Thé Tip Top utilise deux catégories de cookies selon leur finalité
+                  Le site Thé Tip Top utilisé deux catégories de cookies selon leur finalité
                   et leur base légale :
                 </p>
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -307,7 +310,7 @@ export default function GestionCookiesPage() {
                               </td>
                               <td className="px-4 py-3 text-stone-grey">{cookie.emetteur}</td>
                               <td className="px-4 py-3 text-stone-grey">{cookie.finalite}</td>
-                              <td className="px-4 py-3 text-stone-grey">{cookie.duree}</td>
+                              <td className="px-4 py-3 text-stone-grey">{cookie.durée}</td>
                               <td className="px-4 py-3 text-stone-grey">{cookie.type}</td>
                             </tr>
                           ))}

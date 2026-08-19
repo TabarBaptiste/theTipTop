@@ -11,9 +11,12 @@ import { formatFrenchDate, formatFrenchDateTime } from '@/lib/french-date';
 import { LEGAL_UPDATED_AT } from '@/lib/legal-dates';
 
 export const metadata: Metadata = {
+  // URL de reference : evite qu'un parametre de campagne ou une variante
+  // avec barre finale soit traite comme une page distincte.
+  alternates: { canonical: '/cgu' },
   title: "Conditions Générales d'Utilisation",
   description:
-    "Conditions générales d'utilisation du site The Tip Top et règlement du jeu-concours.",
+    "Conditions générales d'utilisation du site Thé Tip Top et règlement du jeu-concours.",
 };
 
 const ARTICLES = [
@@ -535,7 +538,7 @@ export default function CGUPage() {
               <h2 className="font-display text-h2 text-noir">Article 13 - Cookies</h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
                 <p>
-                  Le Site utilise des cookies afin d&apos;améliorer l&apos;expérience utilisateur
+                  Le Site utilisé des cookies afin d&apos;améliorer l&apos;expérience utilisateur
                   et d&apos;assurer le bon fonctionnement des services proposés. Certains cookies
                   sont strictement nécessaires au fonctionnement du Site (session, authentification) ;
                   d&apos;autres sont utilisés à des fins d&apos;analyse d&apos;audience

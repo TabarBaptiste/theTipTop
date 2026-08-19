@@ -98,7 +98,7 @@ export default function SettingsPage() {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `mes-donnees-thetiptop-${Date.now()}.json`);
+      link.setAttribute('download', `mes-données-thetiptop-${Date.now()}.json`);
       document.body.appendChild(link);
       link.click();
       link.remove();
