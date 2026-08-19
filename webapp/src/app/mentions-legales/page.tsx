@@ -1,5 +1,12 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import {
+  GAME_START_DATE,
+  GAME_END_DATE,
+  CLAIM_END_DATE,
+  formatGameDate,
+  formatGameDateTime,
+} from '@/lib/game-dates';
 
 export const metadata: Metadata = {
   title: 'Mentions Légales',
@@ -220,6 +227,15 @@ export default function MentionsLegalesPage() {
                     ici
                   </Link>
                   .
+                </p>
+                <p>
+                  {/* Les espaces autour des expressions sont explicites : JSX
+                      supprime l'espace de tête d'un bloc de texte qui court sur
+                      plusieurs lignes, ce qui collait « 23h59inclus ». */}
+                  <strong>Période du jeu-concours :</strong> du {formatGameDate(GAME_START_DATE)}{' '}
+                  à 00h00 au {formatGameDateTime(GAME_END_DATE)}{' '}
+                  inclus. Les lots restent réclamables jusqu&apos;au{' '}
+                  {formatGameDateTime(CLAIM_END_DATE)}.
                 </p>
               </div>
             </section>
