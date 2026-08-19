@@ -51,11 +51,34 @@ function parisParts(date: Date): Record<string, string> {
   return Object.fromEntries(formatter.formatToParts(date).map((p) => [p.type, p.value]));
 }
 
+/** Le français veut « 1er » et non « 1 », que Intl ne produit pas seul. */
+function dayLabel(day: string): string {
+  return day === '1' ? '1er' : day;
+}
+
 /** « 1er septembre 2026 », « 30 septembre 2026 ». */
 export function formatGameDate(date: Date): string {
   const { day, month, year } = parisParts(date);
-  // Le français veut « 1er » et non « 1 », que Intl ne produit pas seul.
-  return `${day === '1' ? '1er' : day} ${month} ${year}`;
+  return `${dayLabel(day)} ${month} ${year}`;
+}
+
+/**
+ * Période lisible : « Du 1er au 30 septembre 2026 ».
+ *
+ * Le mois et l'année ne sont pas répétés quand les deux bornes les partagent —
+ * l'usage en français, et accessoirement quinze caractères de moins, ce qui
+ * evite un retour à la ligne disgracieux sur les largeurs intermédiaires.
+ * Si les bornes changent de mois, on retombe sur les deux dates complètes.
+ */
+export function formatGamePeriod(start: Date, end: Date): string {
+  const from = parisParts(start);
+  const to = parisParts(end);
+
+  if (from.month === to.month && from.year === to.year) {
+    return `Du ${dayLabel(from.day)} au ${dayLabel(to.day)} ${to.month} ${to.year}`;
+  }
+
+  return `Du ${formatGameDate(start)} au ${formatGameDate(end)}`;
 }
 
 /** « 30 septembre 2026 à 23h59 ». */

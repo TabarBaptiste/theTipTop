@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { differenceInDays, differenceInHours, differenceInMinutes, differenceInSeconds } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
-import { formatGameDate, formatGameDateTime } from '@/lib/game-dates';
+import { formatGameDateTime, formatGamePeriod } from '@/lib/game-dates';
 
 type GamePhase = 'not_started' | 'active' | 'claim_only' | 'ended';
 
@@ -63,7 +63,7 @@ export function CountdownSection() {
   // un document juridique doit rester lisible API éteinte.
   const periode =
     gameConfig?.startDate && gameConfig?.endDate
-      ? `Du ${formatGameDate(new Date(gameConfig.startDate))} au ${formatGameDate(new Date(gameConfig.endDate))}`
+      ? formatGamePeriod(new Date(gameConfig.startDate), new Date(gameConfig.endDate))
       : null;
 
   // Jeu terminé (phase serveur ou countdown écoulé)

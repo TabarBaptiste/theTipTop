@@ -6,6 +6,7 @@ import {
   CLAIM_END_DATE,
   formatGameDate,
   formatGameDateTime,
+  formatGamePeriod,
 } from './game-dates';
 
 describe('dates officielles', () => {
@@ -49,6 +50,16 @@ describe('dates officielles', () => {
 
     it('affiche l’heure de clôture en heure française', () => {
       expect(formatGameDateTime(GAME_END_DATE)).toBe('30 septembre 2026 à 23h59');
+    });
+
+    it('ne répète pas le mois quand les deux bornes le partagent', () => {
+      expect(formatGamePeriod(GAME_START_DATE, GAME_END_DATE)).toBe('Du 1er au 30 septembre 2026');
+    });
+
+    it('donne les deux dates entières quand la période change de mois', () => {
+      expect(formatGamePeriod(GAME_START_DATE, CLAIM_END_DATE)).toBe(
+        'Du 1er septembre 2026 au 30 octobre 2026',
+      );
     });
   });
 });
