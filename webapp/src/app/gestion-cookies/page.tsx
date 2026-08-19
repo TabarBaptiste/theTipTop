@@ -5,6 +5,9 @@ import { formatFrenchDate } from '@/lib/french-date';
 import { LEGAL_UPDATED_AT } from '@/lib/legal-dates';
 
 export const metadata: Metadata = {
+  // URL de reference : evite qu'un parametre de campagne ou une variante
+  // avec barre finale soit traite comme une page distincte.
+  alternates: { canonical: '/gestion-cookies' },
   title: 'Gestion des cookies',
   description:
     'Politique de gestion des cookies du site Thé Tip Top - types de cookies utilisés, durée de conservation, gestion de vos préférences.',

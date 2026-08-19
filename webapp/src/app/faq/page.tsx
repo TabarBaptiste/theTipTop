@@ -1,7 +1,11 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { StructuredData } from '@/components/seo/structured-data';
 
 export const metadata: Metadata = {
+  // URL de reference : evite qu'un parametre de campagne ou une variante
+  // avec barre finale soit traite comme une page distincte.
+  alternates: { canonical: '/faq' },
   title: 'FAQ',
   description:
     'Questions fréquentes sur le jeu-concours Thé Tip Top : participation, codes, lots, remise des gains et tirage au sort du grand prix.',
@@ -55,6 +59,26 @@ const FAQ_ITEMS = [
 export default function FaqPage() {
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-cream">
+      {/* Décrit ces questions comme telles aux moteurs, ce que le HTML seul ne
+          permet pas. Google peut alors les afficher dépliées dans ses résultats.
+          Les réponses sont écrites en littéraux multilignes : leurs retours et
+          indentations sont réduits à des espaces simples, un balisage JSON-LD
+          devant contenir le texte tel qu'il se lit. */}
+      <StructuredData
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'FAQPage',
+          mainEntity: FAQ_ITEMS.map((item) => ({
+            '@type': 'Question',
+            name: item.question,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: item.answer.replace(/\s+/g, ' ').trim(),
+            },
+          })),
+        }}
+      />
+
       {/* En-tête */}
       <section className="border-b border-warm-beige bg-white">
         <div className="container mx-auto px-6 py-12 md:py-16">

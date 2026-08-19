@@ -4,6 +4,9 @@ import { formatFrenchDate } from '@/lib/french-date';
 import { LEGAL_UPDATED_AT } from '@/lib/legal-dates';
 
 export const metadata: Metadata = {
+  // URL de reference : evite qu'un parametre de campagne ou une variante
+  // avec barre finale soit traite comme une page distincte.
+  alternates: { canonical: '/politique-confidentialite' },
   title: 'Politique de confidentialité',
   description:
     'Politique de confidentialité et protection des données personnelles du site The Tip Top - RGPD, droits des utilisateurs, cookies.',

@@ -10,6 +10,9 @@ import {
 import { formatFrenchDate, formatFrenchDateTime } from '@/lib/french-date';
 
 export const metadata: Metadata = {
+  // URL de reference : evite qu'un parametre de campagne ou une variante
+  // avec barre finale soit traite comme une page distincte.
+  alternates: { canonical: '/reglement' },
   title: 'Règlement du jeu-concours',
   description:
     'Règlement officiel du jeu-concours Thé Tip Top : conditions de participation, lots, durée, modalités de réclamation et tirage au sort du grand prix.',

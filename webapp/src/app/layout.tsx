@@ -7,6 +7,8 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { CookieConsentBanner } from '@/components/layout/cookie-consent-banner';
 import { ConditionalAnalytics } from '@/components/layout/conditional-analytics';
+import { StructuredData } from '@/components/seo/structured-data';
+import { ORGANIZATION_SCHEMA, WEBSITE_SCHEMA } from '@/lib/organization-schema';
 
 const montserrat = Montserrat({
   subsets: ['latin'],
@@ -31,6 +33,10 @@ export const metadata: Metadata = {
     default: 'The Tip Top - Jeu Concours',
     template: '%s | The Tip Top',
   },
+  // Canonique de l'accueil. Les pages qui en ont une la remplacent ; celles
+  // qui n'en déclarent pas héritent de celle-ci, ce qui est exact puisque
+  // seules les pages publiques sont indexables.
+  alternates: { canonical: '/' },
   description:
     'Participez au grand jeu-concours The Tip Top ! 100% des tickets sont gagnants. Tentez de remporter un an de thé gratuit !',
   keywords: ['thé', 'jeu concours', 'bio', 'fait main', 'Nice', 'artisanal', 'méditerranéen'],
@@ -74,6 +80,11 @@ export default function RootLayout({
   return (
     <html lang="fr" suppressHydrationWarning data-scroll-behavior="smooth">
       <body className={`${montserrat.variable} ${playfair.variable} font-sans antialiased`}>
+        {/* Identité de l'éditeur, présente sur toutes les pages : c'est ce qui
+            permet aux moteurs de rattacher le site à l'entreprise plutôt que de
+            le traiter comme une page isolée. */}
+        <StructuredData data={ORGANIZATION_SCHEMA} />
+        <StructuredData data={WEBSITE_SCHEMA} />
         <Providers>
           <div className="flex min-h-screen flex-col">
             <Header />
