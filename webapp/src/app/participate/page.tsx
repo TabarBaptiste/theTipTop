@@ -18,6 +18,9 @@ import {
   type AuthenticatedParticipationData,
 } from '@/components/participate/authenticated-participation-form';
 import { useIsHydrated } from '@/lib/hooks/use-is-hydrated';
+import { isPlaceholderEmail } from '@/lib/placeholder-email';
+import { Button } from '@/components/ui/button';
+import { MailWarning } from 'lucide-react';
 
 // Le code déjà saisi est conservé le temps de l'aller-retour OAuth : rien ne
 // quitte le navigateur, et l'utilisateur n'a pas à le retaper au retour.
@@ -53,6 +56,12 @@ export default function ParticipatePage() {
   // L'état d'authentification n'est fiable qu'après hydratation : rendre la
   // variante connectée trop tôt provoquerait un écart entre serveur et client.
   const isHydrated = useIsHydrated();
+
+  // Un compte créé par un fournisseur qui n'a transmis aucune adresse ne peut
+  // pas participer : il ne recevrait ni l'annonce du lot ni le rappel du délai.
+  const isConnected = isHydrated && isAuthenticated && !!user;
+  const needsRealEmail = isConnected && isPlaceholderEmail(user?.email);
+  const canParticipate = isConnected && !needsRealEmail;
 
   const [step, setStep] = useState<Step>('form');
   const [pending, setPending] = useState<InitiateResponse | null>(null);
@@ -154,7 +163,26 @@ export default function ParticipatePage() {
   return (
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-cream px-4 py-12">
       <div className="w-full max-w-xl sm:rounded-card sm:border sm:border-warm-beige sm:bg-white sm:p-8 sm:shadow-sm">
-        {step === 'form' && isHydrated && isAuthenticated && user && (
+        {/* L'API refuse la participation d'un compte injoignable. Mieux vaut le
+            dire ici que laisser saisir un code pour un refus, d'autant que le
+            formulaire afficherait l'adresse de substitution comme contact. */}
+        {step === 'form' && needsRealEmail && (
+          <div className="text-center">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-terracotta-50">
+              <MailWarning className="h-8 w-8 text-terracotta-600" strokeWidth={1.5} />
+            </div>
+            <h1 className="mt-6 font-display text-h2 text-noir">Une adresse est nécessaire</h1>
+            <p className="mt-3 text-body text-stone-grey">
+              Votre compte a été créé sans adresse e-mail. Avant de participer, renseignez-en une :
+              c&apos;est par là que nous vous annoncerions votre lot et le délai pour le retirer.
+            </p>
+            <Button asChild className="mt-8 w-full" size="lg">
+              <Link href="/auth/complete-email">Renseigner mon adresse</Link>
+            </Button>
+          </div>
+        )}
+
+        {step === 'form' && canParticipate && user && (
           <AuthenticatedParticipationForm
             firstName={user.firstName}
             email={user.email}
@@ -168,7 +196,7 @@ export default function ParticipatePage() {
           />
         )}
 
-        {step === 'form' && !(isHydrated && isAuthenticated) && (
+        {step === 'form' && !isConnected && (
           <>
             <h1 className="font-display text-h2 text-noir">Participer au jeu-concours</h1>
             <p className="mt-2 text-sm text-stone-grey">

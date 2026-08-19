@@ -4,6 +4,7 @@
 
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { EmailChangeService } from './email-change.service';
 import { User } from '@prisma/client';
 import { type Response } from 'express';
 
@@ -26,12 +27,20 @@ describe('AuthController', () => {
     role: 'CLIENT',
   } as User;
 
+  const mockEmailChangeService = {
+    request: jest.fn(),
+    confirm: jest.fn(),
+  };
+
   const tokens = { accessToken: 'at', refreshToken: 'rt', expiresIn: 900, user };
 
   const createRes = () => ({ redirect: jest.fn() }) as unknown as Response;
 
   beforeEach(() => {
-    controller = new AuthController(mockAuthService as unknown as AuthService);
+    controller = new AuthController(
+      mockAuthService as unknown as AuthService,
+      mockEmailChangeService as unknown as EmailChangeService,
+    );
     jest.clearAllMocks();
     process.env.FRONTEND_URL = 'http://localhost:3000';
   });

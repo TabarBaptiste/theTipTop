@@ -17,9 +17,11 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nes
 import { type Request, type Response } from 'express';
 
 import { AuthService } from './auth.service';
+import { EmailChangeService } from './email-change.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { RequestEmailChangeDto, ConfirmEmailChangeDto } from './dto/email-change.dto';
 
 // Guards
 import { LocalAuthGuard } from './guards/local-auth.guard';
@@ -38,7 +40,10 @@ type OAuthRequest = Request & { user: User };
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly emailChangeService: EmailChangeService,
+  ) {}
 
   // ===========================================
   // INSCRIPTION
@@ -131,6 +136,42 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   async getProfile(@CurrentUser() user: User) {
     const { password: _password, ...userWithoutPassword } = user;
+    return userWithoutPassword;
+  }
+
+  // ===========================================
+  // RATTACHEMENT D'UNE ADRESSE REELLE
+  // ===========================================
+  // Reserve aux comptes crees par un fournisseur qui n'a transmis aucune
+  // adresse : ils fonctionnent sous une adresse de substitution injoignable.
+  @UseGuards(JwtAuthGuard)
+  @Post('email/request')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Envoyer un code de confirmation a une nouvelle adresse' })
+  @ApiResponse({ status: 200, description: 'Code envoye a l’adresse indiquee' })
+  @ApiResponse({ status: 400, description: 'Adresse invalide ou envoi impossible' })
+  @ApiResponse({
+    status: 403,
+    description: 'Compte deja pourvu d’une adresse, ou trop de demandes',
+  })
+  @ApiResponse({ status: 409, description: 'Adresse deja associee a un compte' })
+  async requestEmailChange(@CurrentUser() user: User, @Body() dto: RequestEmailChangeDto) {
+    return this.emailChangeService.request(user, dto.email);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('email/confirm')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: "Confirmer la nouvelle adresse a l'aide du code recu" })
+  @ApiResponse({ status: 200, description: 'Adresse rattachee au compte' })
+  @ApiResponse({ status: 400, description: 'Aucune demande en cours ou delai depasse' })
+  @ApiResponse({ status: 403, description: 'Code incorrect ou trop d’essais' })
+  @ApiResponse({ status: 409, description: 'Adresse prise entre-temps' })
+  async confirmEmailChange(@CurrentUser() user: User, @Body() dto: ConfirmEmailChangeDto) {
+    const updated = await this.emailChangeService.confirm(user, dto.code);
+    const { password: _password, ...userWithoutPassword } = updated;
     return userWithoutPassword;
   }
 
