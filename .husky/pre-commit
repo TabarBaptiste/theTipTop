@@ -1,3 +1,4 @@
+#!/usr/bin/env sh
 export NO_COLOR=1
 
 branch=$(git symbolic-ref --short HEAD)
