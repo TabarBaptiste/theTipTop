@@ -20,6 +20,9 @@
 import { PrismaClient, PrizeType } from '@prisma/client';
 import { randomInt } from 'node:crypto';
 
+import { GrandPrizeService } from '../src/modules/grand-prize/grand-prize.service';
+import { PrismaService } from '../src/prisma/prisma.service';
+
 const prisma = new PrismaClient();
 
 /** Nombre de tirages simulés. Plus il est grand, plus l'écart toléré est fin. */
@@ -163,6 +166,89 @@ async function verifierVerrouConcurrent(tentatives = 20): Promise<number> {
   }
 }
 
+/**
+ * Déroule le cycle de vie complet du tirage sur le vrai service.
+ *
+ * Le service est instancié avec le client de transaction plutôt qu'avec le
+ * client global : c'est donc le code de production qui s'exécute, contre
+ * PostgreSQL, mais tout est annulé à la sortie. C'est ce qui permet de
+ * manipuler la date de clôture sans jamais toucher à la configuration réelle.
+ *
+ * La configuration active du moment est désactivée dans la transaction, sinon
+ * canDraw lirait la vraie plutôt que celle de l'essai.
+ */
+async function verifierCycleDeVie(): Promise<string[]> {
+  const constats: string[] = [];
+
+  try {
+    await prisma.$transaction(
+      async (tx) => {
+        const service = new GrandPrizeService(tx as unknown as PrismaService);
+
+        await tx.gameConfig.updateMany({ data: { isActive: false } });
+
+        const config = await tx.gameConfig.create({
+          data: {
+            startDate: new Date(Date.now() - 30 * 86_400_000),
+            // Clôture dans le futur : le tirage doit être refusé.
+            endDate: new Date(Date.now() + 86_400_000),
+            claimEndDate: new Date(Date.now() + 31 * 86_400_000),
+            isActive: true,
+            grandPrizeDrawn: false,
+          },
+        });
+
+        const avant = await service.canDraw();
+        constats.push(
+          avant.canDraw === false && avant.reason?.includes('pas encore terminé')
+            ? 'OK|jeu en cours : tirage refusé — ' + avant.reason
+            : `KO|jeu en cours : tirage autorisé à tort (${JSON.stringify(avant)})`,
+        );
+
+        // La clôture passe dans le passé, rien d'autre ne change.
+        await tx.gameConfig.update({
+          where: { id: config.id },
+          data: { endDate: new Date(Date.now() - 86_400_000) },
+        });
+
+        const apres = await service.canDraw();
+        constats.push(
+          apres.canDraw === true
+            ? `OK|jeu clôturé : tirage autorisé sur ${apres.participantsCount} participants`
+            : `KO|jeu clôturé : tirage toujours refusé (${apres.reason})`,
+        );
+
+        const resultat = await service.draw();
+        constats.push(
+          resultat.success && resultat.winner?.email
+            ? `OK|tirage effectué, gagnant désigné et adresse masquée : ${resultat.winner.email}`
+            : 'KO|le tirage n’a pas désigné de gagnant',
+        );
+
+        // Second tirage : le verrou doit se refermer.
+        try {
+          await service.draw();
+          constats.push('KO|un second tirage a été accepté');
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          constats.push(
+            message.includes('déjà')
+              ? `OK|second tirage refusé — ${message}`
+              : `KO|second tirage refusé pour une mauvaise raison : ${message}`,
+          );
+        }
+
+        throw new Rollback();
+      },
+      { timeout: 120_000 },
+    );
+  } catch (error) {
+    if (!(error instanceof Rollback)) throw error;
+  }
+
+  return constats;
+}
+
 function main() {
   const ok = (m: string) => console.log('  \x1b[32mOK\x1b[0m   ' + m);
   const ko = (m: string) => {
@@ -263,9 +349,22 @@ function main() {
         ko(`20 tirages simultanés ont produit ${gagnants} écritures`);
       }
 
-      console.log(
-        '\nAucune donnée écrite : transaction annulée, configuration jetable supprimée.\n',
-      );
+      // --- Garantie 5 : les verrous du cycle de vie -----------------------
+      return verifierCycleDeVie().then((constats) => {
+        console.log('\n  Cycle de vie, joué sur le vrai service :\n');
+        for (const constat of constats) {
+          const [statut, message] = constat.split('|');
+          if (statut === 'OK') {
+            ok(message);
+          } else {
+            ko(message);
+          }
+        }
+
+        console.log(
+          '\nAucune donnée écrite : transactions annulées, configuration jetable supprimée.\n',
+        );
+      });
     });
   });
 }
