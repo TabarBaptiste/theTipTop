@@ -73,9 +73,9 @@ export function Header() {
               key={item.name}
               href={item.href}
               className={cn(
-                'whitespace-nowrap font-functional text-[10px] uppercase tracking-[1.5px] transition-colors hover:text-terracotta-deep lg:text-ui lg:tracking-[2px]',
+                'whitespace-nowrap font-functional text-[10px] uppercase tracking-[1.5px] transition-colors hover:text-terracotta-600 lg:text-ui lg:tracking-[2px]',
                 pathname === item.href
-                  ? 'text-terracotta-deep'
+                  ? 'text-terracotta-600'
                   : 'text-noir'
               )}
             >
@@ -97,7 +97,7 @@ export function Header() {
                     <Button asChild variant="outline" size="sm">
                       <Link
                         href={backofficeHref}
-                        className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-deep"
+                        className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-600"
                       >
                         <BackofficeIcon className="h-4 w-4" strokeWidth={1.5} />
                         {user?.role === 'ADMIN' ? 'Admin' : 'Espace employé'}
@@ -107,7 +107,7 @@ export function Header() {
                   <Button asChild variant="outline" size="sm">
                     <Link
                       href="/dashboard/profile"
-                      className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-deep"
+                      className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-600"
                     >
                       <User className="h-4 w-4" strokeWidth={1.5} />
                       {user?.firstName || 'Mon compte'}
@@ -154,7 +154,7 @@ export function Header() {
               className={cn(
                 'block rounded-soft px-3 py-2 font-functional text-sm font-semibold',
                 pathname === item.href
-                  ? 'bg-terracotta-50 text-terracotta-deep'
+                  ? 'bg-terracotta-50 text-terracotta-600'
                   : 'text-noir hover:bg-cream'
               )}
               onClick={() => setMobileMenuOpen(false)}
@@ -176,7 +176,7 @@ export function Header() {
                       <Button asChild variant="outline" className="w-full">
                         <Link
                           href={backofficeHref}
-                          className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-deep"
+                          className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-600"
                           onClick={() => setMobileMenuOpen(false)}
                         >
                           <BackofficeIcon className="h-4 w-4" strokeWidth={1.5} />
@@ -187,7 +187,7 @@ export function Header() {
                     <Button asChild variant="outline" className="w-full">
                       <Link
                         href="/dashboard/profile"
-                        className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-deep"
+                        className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-600"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         <User className="h-4 w-4" strokeWidth={1.5} />

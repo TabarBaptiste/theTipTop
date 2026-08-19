@@ -205,7 +205,7 @@ export function ParticipationForm({ onSubmit, isSubmitting }: Props) {
           />
           <label htmlFor="consentData" className="text-xs leading-relaxed text-stone-grey">
             J&apos;accepte le traitement de mes données et le{' '}
-            <Link href="/reglement" className="text-terracotta-deep hover:underline">
+            <Link href="/reglement" className="text-terracotta-600 hover:underline">
               règlement du jeu
             </Link>{' '}
             *

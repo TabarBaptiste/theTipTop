@@ -76,17 +76,17 @@ export function ParticipationResult({
   return (
     <div className="text-center">
       <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-terracotta-50">
-        <PartyPopper className="h-8 w-8 text-terracotta-deep" strokeWidth={1.5} />
+        <PartyPopper className="h-8 w-8 text-terracotta-600" strokeWidth={1.5} />
       </div>
 
       <h1 className="mt-6 font-display text-h2 text-noir">Félicitations !</h1>
       <p className="mt-2 text-sm text-stone-grey">Vous avez gagné :</p>
 
       <div className="mt-6 rounded-card bg-terracotta-50 p-6">
-        <Gift className="mx-auto h-10 w-10 text-terracotta-deep" strokeWidth={1.5} />
+        <Gift className="mx-auto h-10 w-10 text-terracotta-600" strokeWidth={1.5} />
         <h2 className="mt-3 font-display text-xl font-bold text-noir">{prizeName}</h2>
         {prizeValue && (
-          <p className="mt-1 font-functional text-lg font-bold text-terracotta-deep">
+          <p className="mt-1 font-functional text-lg font-bold text-terracotta-600">
             Valeur : {prizeValue}
           </p>
         )}

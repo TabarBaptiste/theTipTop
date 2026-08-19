@@ -149,7 +149,7 @@ export default function DashboardPage() {
           <Card className="bg-white">
             <CardContent className="flex items-center gap-4 p-6">
               <div className="rounded-card bg-terracotta-50 p-3">
-                <Ticket className="h-6 w-6 text-terracotta-deep" strokeWidth={1.5} />
+                <Ticket className="h-6 w-6 text-terracotta-600" strokeWidth={1.5} />
               </div>
               <div>
                 <p className="text-sm text-stone-grey">Participations</p>

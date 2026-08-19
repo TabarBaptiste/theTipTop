@@ -234,7 +234,7 @@ export default function AdminPage() {
           <Card>
             <CardContent className="flex items-center gap-4 p-6">
               <div className="rounded-xl bg-terracotta-50 p-3">
-                <Users className="h-6 w-6 text-terracotta-deep" strokeWidth={1.5} />
+                <Users className="h-6 w-6 text-terracotta-600" strokeWidth={1.5} />
               </div>
               <div>
                 <p className="text-sm text-stone-grey">Utilisateurs</p>
@@ -276,7 +276,7 @@ export default function AdminPage() {
           <Card>
             <CardContent className="flex items-center gap-4 p-6">
               <div className="rounded-xl bg-terracotta-100 p-3">
-                <TrendingUp className="h-6 w-6 text-terracotta-hover" strokeWidth={1.5} />
+                <TrendingUp className="h-6 w-6 text-terracotta-700" strokeWidth={1.5} />
               </div>
               <div>
                 <p className="text-sm text-stone-grey">Taux d&apos;utilisation</p>
@@ -415,7 +415,7 @@ export default function AdminPage() {
                         </div>
                         <div className="h-2 rounded-full bg-warm-beige/50">
                           <div
-                            className="h-2 rounded-full bg-terracotta-deep transition-all"
+                            className="h-2 rounded-full bg-terracotta-600 transition-all"
                             style={{ width: `${percent.toFixed(1)}%` }}
                           />
                         </div>
@@ -448,7 +448,7 @@ export default function AdminPage() {
                   <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                     {(demographics?.byGender ?? []).map((g) => (
                       <div key={g.gender} className="rounded-soft bg-terracotta-50 p-3 text-center">
-                        <p className="text-lg font-bold text-terracotta-deep">{g.count}</p>
+                        <p className="text-lg font-bold text-terracotta-600">{g.count}</p>
                         <p className="text-xs text-stone-grey">
                           {GENDER_LABELS[g.gender] ?? g.gender}
                         </p>
@@ -507,8 +507,8 @@ export default function AdminPage() {
                       onClick={() => setSegment(s.key)}
                       className={`rounded-pill border px-4 py-2 text-sm transition-colors ${
                         segment === s.key
-                          ? 'border-terracotta-deep bg-terracotta-deep text-white'
-                          : 'border-warm-beige bg-white text-stone-grey hover:border-terracotta-deep'
+                          ? 'border-terracotta-600 bg-terracotta-600 text-white'
+                          : 'border-warm-beige bg-white text-stone-grey hover:border-terracotta-600'
                       }`}
                     >
                       {s.label}

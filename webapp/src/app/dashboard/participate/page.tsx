@@ -47,7 +47,7 @@ interface PrizeApi {
 
 const rules = [
   { color: 'bg-moss', text: 'Le jeu-concours est ouvert a toute personne ayant effectue un achat superieur a 49€ en magasin.' },
-  { color: 'bg-terracotta-deep', text: 'Les participants disposent de 30 jours apres la fin du jeu pour reclamer leur lot.' },
+  { color: 'bg-terracotta-600', text: 'Les participants disposent de 30 jours apres la fin du jeu pour reclamer leur lot.' },
   { color: 'bg-red-500', text: 'Le reglement complet est disponible aupres de Maitre Arnaud Rick, huissier de justice.' },
 ];
 
@@ -110,20 +110,20 @@ export default function ParticipatePage() {
     return (
       <div className="min-h-[calc(100vh-5rem)] bg-cream py-12">
         <div className="container mx-auto max-w-xl px-6">
-          <div className="rounded-card border-2 border-terracotta-deep bg-white p-8 text-center">
+          <div className="rounded-card border-2 border-terracotta-600 bg-white p-8 text-center">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-terracotta-50">
-              <PartyPopper className="h-8 w-8 text-terracotta-deep" strokeWidth={1.5} />
+              <PartyPopper className="h-8 w-8 text-terracotta-600" strokeWidth={1.5} />
             </div>
 
             <h1 className="mt-6 font-display text-h2 text-noir">Felicitations !</h1>
             <p className="mt-2 text-sm text-stone-grey">Vous avez gagne :</p>
 
             <div className="mt-6 rounded-card bg-terracotta-50 p-6">
-              <Gift className="mx-auto h-10 w-10 text-terracotta-deep" strokeWidth={1.5} />
+              <Gift className="mx-auto h-10 w-10 text-terracotta-600" strokeWidth={1.5} />
               <h2 className="mt-3 font-display text-xl font-bold text-noir">
                 {result.prize.name}
               </h2>
-              <p className="mt-1 font-functional text-lg font-bold text-terracotta-deep">
+              <p className="mt-1 font-functional text-lg font-bold text-terracotta-600">
                 Valeur : {result.prize.value}
               </p>
             </div>
@@ -157,7 +157,7 @@ export default function ParticipatePage() {
       {/* Hero */}
       <section className="bg-white py-12 text-center">
         <div className="container mx-auto px-6">
-          <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-deep">
+          <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-600">
             Jeu-concours The Tip Top
           </p>
           <h1 className="mt-3 font-display text-h1 text-noir">
@@ -269,7 +269,7 @@ export default function ParticipatePage() {
                   key={prize.code}
                   className="rounded-card border border-warm-beige bg-white p-5"
                 >
-                  <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-deep">
+                  <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-600">
                     {prize.name}
                   </p>
                   <p className="mt-2 font-functional text-sm font-semibold text-noir">
@@ -278,7 +278,7 @@ export default function ParticipatePage() {
                   <div className="mt-2 flex items-center justify-between">
                     <span className="text-xs text-stone-grey">Chance : {prize.percentage}%</span>
                     {prize.value && (
-                      <span className="font-functional text-sm font-bold text-terracotta-deep">
+                      <span className="font-functional text-sm font-bold text-terracotta-600">
                         {prize.value}
                       </span>
                     )}
@@ -319,7 +319,7 @@ export default function ParticipatePage() {
             </div>
             <div className="flex flex-col items-center">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-terracotta-50">
-                <ShieldCheck className="h-7 w-7 text-terracotta-deep" strokeWidth={1.5} />
+                <ShieldCheck className="h-7 w-7 text-terracotta-600" strokeWidth={1.5} />
               </div>
               <span className="mt-2 font-functional text-[10px] font-semibold uppercase tracking-[1px] text-noir">
                 Certifie bio

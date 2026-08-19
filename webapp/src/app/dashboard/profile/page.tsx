@@ -190,7 +190,7 @@ export default function ProfilePage() {
                   <Label htmlFor="gender">Genre</Label>
                   <select
                     id="gender"
-                    className="flex h-10 w-full rounded-soft border-[1.5px] border-warm-beige bg-white px-4 py-2 font-functional text-sm text-noir transition-colors focus:border-terracotta-deep focus:outline-none"
+                    className="flex h-10 w-full rounded-soft border-[1.5px] border-warm-beige bg-white px-4 py-2 font-functional text-sm text-noir transition-colors focus:border-terracotta-600 focus:outline-none"
                     {...register('gender')}
                   >
                     <option value="">Sélectionner</option>

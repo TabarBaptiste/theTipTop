@@ -276,16 +276,16 @@ export default function RegisterPage() {
               <input
                 type="checkbox"
                 id="consentData"
-                className="mt-1 h-4 w-4 rounded-sharp border-warm-beige text-terracotta-deep accent-terracotta-deep"
+                className="mt-1 h-4 w-4 rounded-sharp border-warm-beige text-terracotta-600 accent-terracotta-deep"
                 {...register('consentData')}
               />
               <label htmlFor="consentData" className="text-xs leading-relaxed text-stone-grey">
                 J&apos;accepte les{' '}
-                <Link href="/cgu" className="text-terracotta-deep hover:underline">
+                <Link href="/cgu" className="text-terracotta-600 hover:underline">
                   Conditions d&apos;utilisation
                 </Link>{' '}
                 et la{' '}
-                <Link href="/politique-confidentialite" className="text-terracotta-deep hover:underline">
+                <Link href="/politique-confidentialite" className="text-terracotta-600 hover:underline">
                   Politique de confidentialité
                 </Link>{' '}
                 *
@@ -299,7 +299,7 @@ export default function RegisterPage() {
               <input
                 type="checkbox"
                 id="consentEmail"
-                className="mt-1 h-4 w-4 rounded-sharp border-warm-beige text-terracotta-deep accent-terracotta-deep"
+                className="mt-1 h-4 w-4 rounded-sharp border-warm-beige text-terracotta-600 accent-terracotta-deep"
                 {...register('consentEmail')}
               />
               <label htmlFor="consentEmail" className="text-xs leading-relaxed text-stone-grey">
@@ -350,7 +350,7 @@ export default function RegisterPage() {
 
         <p className="mt-8 text-center text-sm text-stone-grey">
           Déjà un compte ?{' '}
-          <Link href="/auth/login" className="font-semibold text-terracotta-deep hover:underline">
+          <Link href="/auth/login" className="font-semibold text-terracotta-600 hover:underline">
             Se connecter
           </Link>
         </p>

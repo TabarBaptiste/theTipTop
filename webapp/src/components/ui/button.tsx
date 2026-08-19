@@ -9,17 +9,17 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          'bg-terracotta-deep text-white rounded-full hover:bg-terracotta-hover',
+          'bg-terracotta-600 text-white rounded-full hover:bg-terracotta-700',
         destructive:
           'bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90',
         outline:
-          'border-[1.5px] border-terracotta-deep text-terracotta-deep bg-transparent rounded-full hover:bg-terracotta-deep hover:text-white',
+          'border-[1.5px] border-terracotta-600 text-terracotta-600 bg-transparent rounded-full hover:bg-terracotta-600 hover:text-white',
         secondary:
           'bg-moss text-white rounded-full hover:bg-moss-light',
         ghost:
-          'hover:bg-terracotta-50 hover:text-terracotta-deep rounded-soft normal-case tracking-normal font-semibold',
+          'hover:bg-terracotta-50 hover:text-terracotta-600 rounded-soft normal-case tracking-normal font-semibold',
         link:
-          'text-terracotta-deep underline-offset-4 hover:underline normal-case tracking-normal font-semibold',
+          'text-terracotta-600 underline-offset-4 hover:underline normal-case tracking-normal font-semibold',
       },
       size: {
         default: 'h-10 px-8 py-3 text-ui',

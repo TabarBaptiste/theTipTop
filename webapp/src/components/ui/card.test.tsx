@@ -19,7 +19,7 @@ describe('PrizeCard', () => {
     render(<PrizeCard {...baseProps} />);
 
     const category = screen.getByText('Accessoire');
-    expect(category.className).toContain('text-terracotta-deep');
+    expect(category.className).toContain('text-terracotta-600');
     expect(category.className).not.toContain('rounded');
   });
 

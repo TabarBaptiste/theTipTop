@@ -115,7 +115,7 @@ export default function GestionCookiesPage() {
       {/* En-tête */}
       <section className="border-b border-warm-beige bg-white">
         <div className="container mx-auto px-6 py-12 md:py-16">
-          <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-deep">
+          <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-600">
             Informations légales
           </p>
           <h1 className="mt-3 font-display text-h1 text-noir">Gestion des cookies</h1>
@@ -143,7 +143,7 @@ export default function GestionCookiesPage() {
                   <a
                     key={a.id}
                     href={`#${a.id}`}
-                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-deep"
+                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-600"
                   >
                     {a.label}
                   </a>
@@ -156,13 +156,13 @@ export default function GestionCookiesPage() {
                 <nav className="mt-3 space-y-1">
                   <Link
                     href="/politique-confidentialite"
-                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-deep"
+                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-600"
                   >
                     Politique de confidentialité
                   </Link>
                   <Link
                     href="/mentions-legales"
-                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-deep"
+                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-600"
                   >
                     Mentions légales
                   </Link>
@@ -448,7 +448,7 @@ export default function GestionCookiesPage() {
                         href={lien}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="mt-3 inline-block text-sm text-terracotta-deep underline underline-offset-2 transition-colors hover:text-terracotta-hover"
+                        className="mt-3 inline-block text-sm text-terracotta-600 underline underline-offset-2 transition-colors hover:text-terracotta-700"
                       >
                         Voir les instructions
                       </a>
@@ -488,14 +488,14 @@ export default function GestionCookiesPage() {
                             {label === 'Email RGPD' ? (
                               <a
                                 href="mailto:rgpd@thetiptop.fr"
-                                className="text-terracotta-deep underline underline-offset-2"
+                                className="text-terracotta-600 underline underline-offset-2"
                               >
                                 {value}
                               </a>
                             ) : label === 'Email contact' ? (
                               <a
                                 href="mailto:contact@thetiptop.fr"
-                                className="text-terracotta-deep underline underline-offset-2"
+                                className="text-terracotta-600 underline underline-offset-2"
                               >
                                 {value}
                               </a>
@@ -504,7 +504,7 @@ export default function GestionCookiesPage() {
                                 href="https://www.cnil.fr"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-terracotta-deep underline underline-offset-2"
+                                className="text-terracotta-600 underline underline-offset-2"
                               >
                                 {value}
                               </a>
@@ -526,21 +526,21 @@ export default function GestionCookiesPage() {
                 Pour en savoir plus sur la protection de vos données, consultez notre{' '}
                 <Link
                   href="/politique-confidentialite"
-                  className="font-medium text-terracotta-deep underline underline-offset-2"
+                  className="font-medium text-terracotta-600 underline underline-offset-2"
                 >
                   Politique de confidentialité
                 </Link>
                 , nos{' '}
                 <Link
                   href="/mentions-legales"
-                  className="font-medium text-terracotta-deep underline underline-offset-2"
+                  className="font-medium text-terracotta-600 underline underline-offset-2"
                 >
                   Mentions légales
                 </Link>{' '}
                 et nos{' '}
                 <Link
                   href="/cgu"
-                  className="font-medium text-terracotta-deep underline underline-offset-2"
+                  className="font-medium text-terracotta-600 underline underline-offset-2"
                 >
                   CGU
                 </Link>
