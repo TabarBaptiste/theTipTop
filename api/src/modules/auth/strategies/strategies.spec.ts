@@ -164,6 +164,10 @@ describe('GoogleStrategy', () => {
 describe('FacebookStrategy', () => {
   const strategy = new FacebookStrategy(mockConfigService, mockAuthService);
 
+  beforeEach(() => {
+    mockAuthService.validateOAuthUser.mockReset();
+  });
+
   it('should create/find the user with the profile email', async () => {
     mockAuthService.validateOAuthUser.mockResolvedValue({ id: 'u1' });
     const done = jest.fn();
@@ -186,14 +190,31 @@ describe('FacebookStrategy', () => {
     expect(done).toHaveBeenCalledWith(null, { id: 'u1' });
   });
 
-  it('should fall back to a substitution email when Facebook provides none', async () => {
-    mockAuthService.validateOAuthUser.mockResolvedValue({ id: 'u1' });
+  // Fabriquer une adresse a partir du Facebook ID creait un compte injoignable
+  // dans un jeu ou tout passe par l'email. Le refus rejoint le comportement de
+  // la strategie Google et active le chemin facebook_no_email du controleur.
+  it('should fail when Facebook does not provide an email', async () => {
     const done = jest.fn();
 
     await strategy.validate('access', 'refresh', { id: 'f1', _json: {} } as never, done);
 
+    expect(done).toHaveBeenCalledWith(expect.any(Error), false);
+    expect(mockAuthService.validateOAuthUser).not.toHaveBeenCalled();
+  });
+
+  it('should read the email from _json when the profile has no emails array', async () => {
+    mockAuthService.validateOAuthUser.mockResolvedValue({ id: 'u1' });
+    const done = jest.fn();
+
+    await strategy.validate(
+      'access',
+      'refresh',
+      { id: 'f1', _json: { email: 'jean@fb.com' } } as never,
+      done,
+    );
+
     expect(mockAuthService.validateOAuthUser).toHaveBeenCalledWith(
-      expect.objectContaining({ email: 'fb_f1@facebook-noreply.local' }),
+      expect.objectContaining({ email: 'jean@fb.com' }),
     );
   });
 

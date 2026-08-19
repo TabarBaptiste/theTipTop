@@ -4,7 +4,7 @@
 
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, Profile } from 'passport-facebook';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from '../auth.service';
 
@@ -23,6 +23,8 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
     } as any);
   }
 
+  private readonly logger = new Logger(FacebookStrategy.name);
+
   async validate(
     accessToken: string,
     refreshToken: string,
@@ -31,16 +33,27 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
   ): Promise<any> {
     const { id, name, emails, photos } = profile;
 
-    // L'email peut être absent si le compte Facebook est un compte de test
-    // sans email configuré, ou si l'utilisateur a une confidentialité stricte.
-    // Dans ce cas on génère un email de substitution basé sur le Facebook ID.
-    const email =
-      emails?.[0]?.value ?? (profile as any)._json?.email ?? `fb_${id}@facebook-noreply.local`;
+    // Facebook ne renvoie pas toujours d'adresse : compte cree avec un numero
+    // de telephone, permission email refusee, ou compte de test sans email.
+    const email = emails?.[0]?.value ?? (profile as any)._json?.email;
 
-    if (!emails?.[0]?.value && !(profile as any)._json?.email) {
-      console.warn(
-        `[FacebookStrategy] Aucun email reçu pour le compte Facebook ID ${id}. Email de substitution utilisé.`,
+    // On refuse, comme le fait deja la strategie Google.
+    //
+    // La version precedente fabriquait une adresse a partir du Facebook ID.
+    // Le compte etait alors cree mais injoignable, dans un jeu ou tout passe
+    // par l'email : code de confirmation, annonce du lot, relances. Le
+    // participant aurait gagne sans jamais l'apprendre, et sans pouvoir
+    // reclamer son lot dans les trente jours.
+    //
+    // Le refus n'est pas un cul-de-sac : le controleur redirige vers
+    // /auth/login?error=facebook_no_email, ou la page invite a passer par
+    // Google ou par email et mot de passe. Ce chemin existait deja mais ne
+    // pouvait jamais s'executer, la strategie renvoyant toujours un utilisateur.
+    if (!email) {
+      this.logger.warn(
+        `Connexion Facebook refusee pour le compte ${id} : aucune adresse email fournie.`,
       );
+      return done(new Error('Facebook n a fourni aucune adresse email'), false);
     }
 
     try {
