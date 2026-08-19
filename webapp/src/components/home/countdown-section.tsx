@@ -90,7 +90,7 @@ export function CountdownSection() {
         </div>
 
         <Button asChild size="sm" variant="secondary">
-          <Link href="/dashboard/participate">Participer maintenant</Link>
+          <Link href="/participate">Participer maintenant</Link>
         </Button>
       </div>
     </section>

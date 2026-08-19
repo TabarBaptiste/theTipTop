@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { Skeleton } from '@/components/ui/skeleton';
+import { consumePostAuthDestination } from '@/lib/post-auth-redirect';
 
 /**
  * Point d'atterrissage après le flux OAuth (Google / Facebook).
@@ -35,7 +36,9 @@ function AuthCallbackHandler() {
     handleOAuthCallback(accessToken, refreshToken)
       .then(() => {
         toast.success('Connexion réussie !');
-        router.replace('/dashboard');
+        // Retour là d'où l'utilisateur est parti : la page de participation
+        // s'il venait d'y saisir un code, l'espace personnel par défaut.
+        router.replace(consumePostAuthDestination());
       })
       .catch(() => {
         toast.error('Session invalide. Veuillez vous reconnecter.');

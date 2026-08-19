@@ -50,7 +50,9 @@ describe('ParticipationsController', () => {
 
     await controller.participate(client, { code: 'ABCDEFGH23' });
 
-    expect(mockParticipationsService.participate).toHaveBeenCalledWith('u1', 'ABCDEFGH23');
+    expect(mockParticipationsService.participate).toHaveBeenCalledWith(client, {
+      code: 'ABCDEFGH23',
+    });
   });
 
   it('getMyParticipations should scope to the current user', async () => {
