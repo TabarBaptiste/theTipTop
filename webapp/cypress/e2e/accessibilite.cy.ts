@@ -1,5 +1,5 @@
 // ===========================================
-// Accessibilité - WCAG 2.1 niveau AA
+// Accessibilité - WCAG 2.2 niveau AA
 // ===========================================
 // Le cahier des charges fait de l'accessibilité un critère de recette, pas une
 // intention : « la plateforme est développée dans le respect des normes WCAG,
@@ -189,6 +189,69 @@ describe('Accessibilité WCAG 2.1 niveau AA', () => {
         cy.get('main').should('have.length', 1);
         cy.get('header').should('exist');
         cy.get('footer').should('exist');
+      });
+
+      // Critère 2.5.8 - Taille des cibles (minimum), ajouté par WCAG 2.2
+      it('dimensionne ou espace suffisamment les cibles de pointage', () => {
+        cy.window().then((win) => {
+          const cibles = Array.from(
+            win.document.querySelectorAll<HTMLElement>(
+              'a[href],button,input:not([type=hidden]),select,textarea,[role="button"]',
+            ),
+          )
+            .filter((el) => el.offsetParent !== null && el.getBoundingClientRect().width > 0)
+            .map((el) => {
+              const r = el.getBoundingClientRect();
+              return { el, r, cx: r.x + r.width / 2, cy: r.y + r.height / 2 };
+            });
+
+          // Exception « en ligne » : cible insérée dans une phrase ou un bloc
+          // de texte, dont la taille est dictée par la typographie.
+          const enLigne = (c: (typeof cibles)[0]) => {
+            const parent = c.el.parentElement;
+            if (!parent) return false;
+            const texteParent = (parent.innerText || '').trim();
+            const texteCible = (c.el.innerText || '').trim();
+            return (
+              /^(P|LI|SPAN|LABEL)$/.test(parent.tagName) &&
+              texteParent.length > texteCible.length + 10
+            );
+          };
+
+          // Exception « espacement » : deux disques de 24 px centrés sur les
+          // cibles ne se croisent pas dès que leurs centres sont distants de
+          // 24 px. Une cible plus petite reste alors conforme.
+          const espacee = (c: (typeof cibles)[0]) =>
+            cibles.every((a) => a === c || Math.hypot(a.cx - c.cx, a.cy - c.cy) >= 24);
+
+          const echecs = cibles.filter(
+            (c) =>
+              !(c.r.width >= 24 && c.r.height >= 24) && !enLigne(c) && !espacee(c),
+          );
+
+          expect(
+            echecs.map(
+              (c) =>
+                `${Math.round(c.r.width)}x${Math.round(c.r.height)} « ${(c.el.innerText || c.el.tagName).trim().slice(0, 30)} »`,
+            ),
+          ).to.deep.equal([]);
+        });
+      });
+
+      // Critère 2.4.11 - Focus non masqué, ajouté par WCAG 2.2
+      it('réserve la hauteur de l’en-tête collant au défilement', () => {
+        cy.window().then((win) => {
+          const entete = win.document.querySelector('header');
+          if (!entete) return;
+          const style = win.getComputedStyle(entete);
+          if (style.position !== 'sticky' && style.position !== 'fixed') return;
+
+          const reserve = parseFloat(win.getComputedStyle(win.document.documentElement).scrollPaddingTop);
+          expect(
+            reserve,
+            'scroll-padding-top doit couvrir un en-tête collant, sinon le focus atterrit derrière',
+          ).to.be.at.least(entete.getBoundingClientRect().height);
+        });
       });
     });
   });
