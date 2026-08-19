@@ -51,8 +51,16 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
     // Google ou par email et mot de passe. Ce chemin existait deja mais ne
     // pouvait jamais s'executer, la strategie renvoyant toujours un utilisateur.
     if (!email) {
+      // On journalise les champs recus, jamais leur contenu : sans cela on sait
+      // seulement que l'adresse manque, pas si Meta a refuse la permission ou
+      // si le compte n'en porte simplement aucune. La distinction change
+      // entierement la marche a suivre.
+      const champsRecus = Object.keys((profile as any)._json ?? {}).sort();
       this.logger.warn(
-        `Connexion Facebook refusee pour le compte ${id} : aucune adresse email fournie.`,
+        `Connexion Facebook refusee pour le compte ${id} : aucune adresse email fournie. ` +
+          `Champs transmis par Meta : ${champsRecus.length ? champsRecus.join(', ') : 'aucun'}. ` +
+          `Si « email » n'y figure pas, la permission n'a pas ete accordee a l'ecran ` +
+          `d'autorisation ; s'il y figure vide, le compte n'a pas d'adresse confirmee.`,
       );
       return done(new OAuthMissingEmailError('Facebook'), false);
     }
