@@ -29,12 +29,11 @@ function OAuthErrorHandler() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
+    // facebook_no_email n'est plus émis : un compte sans adresse est désormais
+    // accepté sous une adresse de substitution, puis invité à en renseigner une
+    // vraie. Seule une panne réelle refuse encore la connexion.
     const error = searchParams.get('error');
-    if (error === 'facebook_no_email') {
-      toast.error(
-        "Votre compte Facebook ne partage pas d'adresse e-mail. Connectez-vous avec email/mot de passe ou Google.",
-      );
-    } else if (error === 'facebook_failed') {
+    if (error === 'facebook_failed') {
       toast.error('La connexion Facebook a échoué. Veuillez réessayer.');
     }
   }, [searchParams]);

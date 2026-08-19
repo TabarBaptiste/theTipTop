@@ -7,6 +7,7 @@ import { useAuthStore } from '@/lib/stores/auth-store';
 import { landingRouteFor } from '@/lib/landing-route';
 import { Skeleton } from '@/components/ui/skeleton';
 import { consumePostAuthDestination } from '@/lib/post-auth-redirect';
+import { isPlaceholderEmail } from '@/lib/placeholder-email';
 
 /**
  * Point d'atterrissage après le flux OAuth (Google / Facebook).
@@ -48,10 +49,19 @@ function AuthCallbackHandler() {
         // tranche, lu dans le store que handleOAuthCallback vient d'hydrater
         // plutôt qu'à une valeur figée au rendu.
         const destination = consumePostAuthDestination();
+        const currentUser = useAuthStore.getState().user;
+
+        // Un compte dépourvu d'adresse réelle passe d'abord par le rattachement :
+        // en l'état il ne peut recevoir ni annonce de lot ni rappel de délai.
+        // La destination mémorisée est consommée quand même, pour qu'elle ne
+        // resurgisse pas à une connexion ultérieure.
+        if (isPlaceholderEmail(currentUser?.email)) {
+          router.replace('/auth/complete-email');
+          return;
+        }
+
         router.replace(
-          destination === '/dashboard'
-            ? landingRouteFor(useAuthStore.getState().user?.role)
-            : destination
+          destination === '/dashboard' ? landingRouteFor(currentUser?.role) : destination
         );
       })
       .catch(() => {
