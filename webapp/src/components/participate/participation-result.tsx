@@ -23,7 +23,7 @@ const passwordSchema = z
       .regex(/[A-Z]/, 'Il doit contenir au moins une majuscule')
       .regex(/[a-z]/, 'Il doit contenir au moins une minuscule')
       .regex(/[0-9]/, 'Il doit contenir au moins un chiffre')
-      .regex(/[@$!%*?&]/, 'Il doit contenir au moins un caractère spécial (@$!%*?&)'),
+      .regex(/[@$!%*?&#]/, 'Il doit contenir au moins un caractère spécial (@$!%*?&#)'),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
