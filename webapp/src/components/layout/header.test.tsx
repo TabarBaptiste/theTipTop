@@ -51,13 +51,41 @@ describe('Header', () => {
 
   // La nav est rendue deux fois (desktop + menu mobile) : on interroge donc
   // toujours avec getAllByRole plutot que getByRole.
-  it('liste les entrees de navigation attendues', () => {
+  it('liste les entrees de navigation publiques', () => {
     signedOut();
     render(<Header />);
 
-    ['Le jeu', 'Lots', 'Mon concours', 'FAQ'].forEach((label) => {
+    ['Le jeu', 'Lots', 'Règlement', 'FAQ'].forEach((label) => {
       expect(screen.getAllByRole('link', { name: label }).length).toBeGreaterThan(0);
     });
+  });
+
+  // /dashboard est protege par le middleware : proposer ce lien a un visiteur
+  // anonyme le renverrait vers la connexion depuis une nav censee mener
+  // quelque part.
+  it('masque l espace personnel a un visiteur anonyme', () => {
+    signedOut();
+    render(<Header />);
+
+    expect(screen.queryByRole('link', { name: 'Mes participations' })).not.toBeInTheDocument();
+  });
+
+  it('expose l espace personnel a un compte connecte', () => {
+    signedInAs('CLIENT');
+    render(<Header />);
+
+    const liens = screen.getAllByRole('link', { name: 'Mes participations' });
+    expect(liens.length).toBeGreaterThan(0);
+    expect(liens[0]).toHaveAttribute('href', '/dashboard');
+  });
+
+  // L ancien libelle etait un hapax : la page s appelle « Mes participations »
+  // partout ailleurs dans l application.
+  it('n emploie plus l ancien libelle Mon concours', () => {
+    signedInAs('CLIENT');
+    render(<Header />);
+
+    expect(screen.queryByRole('link', { name: 'Mon concours' })).not.toBeInTheDocument();
   });
 
   it('n expose aucun lien vers la route inexistante /boutiques', () => {

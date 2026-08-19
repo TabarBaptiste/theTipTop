@@ -10,14 +10,25 @@ import { useAuthStore } from '@/lib/stores/auth-store';
 import { useIsHydrated } from '@/lib/hooks/use-is-hydrated';
 import { cn } from '@/lib/utils';
 
+// Destinations publiques, atteignables par n'importe quel visiteur.
 // « Boutiques » retiré : la route /boutiques n'existe pas encore, le lien renvoyait un 404.
-// À remettre le jour où la page sera créée. Le règlement reste accessible via le footer.
+// À remettre le jour où la page sera créée.
 const navigation = [
   { name: 'Le jeu', href: '/#how-it-works' },
   { name: 'Lots', href: '/#prizes' },
-  { name: 'Mon concours', href: '/dashboard' },
+  { name: 'Règlement', href: '/reglement' },
   { name: 'FAQ', href: '/faq' },
 ];
+
+// Espace personnel, ajouté à la nav seulement pour un compte connecté.
+//
+// L'entrée s'appelait « Mon concours » et figurait dans la nav publique. Deux
+// problèmes : /dashboard est protégé par le middleware, donc un visiteur
+// anonyme qui cliquait était éjecté vers la connexion depuis une signalétique
+// censée mener quelque part ; et « Mon concours » était un libellé unique dans
+// toute l'application, qui nomme cette page « Mes participations » partout
+// ailleurs, y compris dans la barre latérale du profil.
+const personalNavigation = { name: 'Mes participations', href: '/dashboard' };
 
 export function Header() {
   const pathname = usePathname();
@@ -28,6 +39,12 @@ export function Header() {
   const backofficeHref =
     user?.role === 'ADMIN' ? '/admin' : user?.role === 'EMPLOYEE' ? '/employee' : null;
   const BackofficeIcon = user?.role === 'ADMIN' ? ShieldCheck : Store;
+
+  // isHydrated conditionne l'ajout : sans lui, le rendu serveur et le rendu
+  // client differeraient sur la presence du lien, et React signalerait une
+  // divergence d'hydratation.
+  const navLinks =
+    isHydrated && isAuthenticated ? [...navigation, personalNavigation] : navigation;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-warm-beige bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
@@ -51,7 +68,7 @@ export function Header() {
 
         {/* Desktop Navigation */}
         <div className="hidden items-center gap-4 md:flex lg:gap-6">
-          {navigation.map((item) => (
+          {navLinks.map((item) => (
             <Link
               key={item.name}
               href={item.href}
@@ -130,7 +147,7 @@ export function Header() {
         )}
       >
         <div className="space-y-1 px-6 pb-6 pt-4">
-          {navigation.map((item) => (
+          {navLinks.map((item) => (
             <Link
               key={item.name}
               href={item.href}
