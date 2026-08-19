@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useIsHydrated } from '@/lib/hooks/use-is-hydrated';
+import { toDateInputValue } from '@/lib/utils';
 
 const MIN_AGE = 18;
 const MAX_AGE = 120;
@@ -80,12 +81,15 @@ export function ParticipationForm({ onSubmit, isSubmitting }: Props) {
   });
 
   const today = new Date();
-  const maxBirthDate = new Date(today.getFullYear() - MIN_AGE, today.getMonth(), today.getDate())
-    .toISOString()
-    .split('T')[0];
-  const minBirthDate = new Date(today.getFullYear() - MAX_AGE, today.getMonth(), today.getDate())
-    .toISOString()
-    .split('T')[0];
+  // toDateInputValue lit les composants en heure locale. toISOString() convertit
+  // en UTC, ou minuit heure de Paris devient la veille : la borne tombait un jour
+  // trop tot et bloquait la personne ayant 18 ans le jour meme.
+  const maxBirthDate = toDateInputValue(
+    new Date(today.getFullYear() - MIN_AGE, today.getMonth(), today.getDate()),
+  );
+  const minBirthDate = toDateInputValue(
+    new Date(today.getFullYear() - MAX_AGE, today.getMonth(), today.getDate()),
+  );
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
