@@ -24,7 +24,7 @@ describe('Participation au jeu-concours', () => {
   it('valide le format du code', () => {
     cy.get('input[name="code"]').type('ABC');
     cy.contains('Valider mon code').click();
-    cy.contains('Le code doit contenir exactement 10 caracteres').should('be.visible');
+    cy.contains('Le code doit contenir exactement 10 caractères').should('be.visible');
   });
 
   it('convertit le code en majuscules', () => {
@@ -32,15 +32,18 @@ describe('Participation au jeu-concours', () => {
     cy.get('input[name="code"]').should('have.value', 'ABCDEFGHIJ');
   });
 
-  it('affiche une erreur pour un code invalide ou déjà utilisé', () => {
+  it('affiche le motif de refus renvoye par l API', () => {
+    // L'API distingue ses refus : code inconnu, code deja joue, jeu pas encore
+    // ouvert, jeu termine. Les remplacer par un message generique conduirait un
+    // participant venu avant l'ouverture a croire son ticket sans valeur.
     cy.intercept('POST', '**/participations', {
       statusCode: 400,
-      body: { message: 'Code invalide' },
+      body: { message: "Le jeu-concours n'a pas encore commencé." },
     });
 
     cy.get('input[name="code"]').type('INVALIDC0D');
     cy.contains('Valider mon code').click();
-    cy.contains('Code invalide ou deja utilise').should('be.visible');
+    cy.contains("Le jeu-concours n'a pas encore commencé.").should('be.visible');
   });
 
   it('affiche le résultat gagnant', () => {
@@ -64,7 +67,7 @@ describe('Participation au jeu-concours', () => {
     cy.contains('Valider mon code').click();
 
     // Écran de félicitations
-    cy.contains('Felicitations').should('be.visible');
+    cy.contains('Félicitations').should('be.visible');
     cy.contains('Infuseur à thé').should('be.visible');
     cy.contains('12€').should('be.visible');
     cy.contains('tirage au sort').should('be.visible');
@@ -85,7 +88,7 @@ describe('Participation au jeu-concours', () => {
 
     cy.get('input[name="code"]').type('VALIDC0DE1');
     cy.contains('Valider mon code').click();
-    cy.contains('Felicitations').should('be.visible');
+    cy.contains('Félicitations').should('be.visible');
 
     cy.contains('Nouveau code').click();
     cy.get('input[name="code"]').should('be.visible');

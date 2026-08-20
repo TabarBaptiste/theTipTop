@@ -124,7 +124,7 @@ export default function LoginPage() {
                 href="mailto:contact@thetiptop.fr?subject=Mot%20de%20passe%20oubli%C3%A9"
                 className="text-xs text-terracotta-600 hover:underline"
               >
-                Mot de passe oublie ?
+                Mot de passe oublié ?
               </a>
             </div>
             <Input
