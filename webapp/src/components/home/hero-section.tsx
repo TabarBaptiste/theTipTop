@@ -17,9 +17,13 @@ export function HeroSection() {
               Jeu-concours exclusif
             </p>
 
+            {/* « Bienvenue » ouvrait le titre principal de la page la plus
+                importante du site sans porter aucune valeur de recherche.
+                L'argument différenciant y prend sa place : il était jusqu'ici
+                relégué dans un badge. */}
             <h1 className="font-display text-h1 text-noir">
-              Bienvenue au jeu-concours{' '}
-              <span className="text-terracotta-600">Thé Tip Top</span>
+              Jeu-concours <span className="text-terracotta-600">Thé Tip Top</span> : 100 % des
+              tickets sont gagnants
             </h1>
 
             <p className="mt-6 text-body leading-relaxed text-stone-grey">
