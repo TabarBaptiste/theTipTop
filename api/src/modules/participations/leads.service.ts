@@ -89,8 +89,6 @@ export class LeadsService {
         lastCodeSentAt: new Date(),
         rgpdConsentAt: new Date(),
         consentEmail: dto.consentEmail ?? false,
-        pixelTrackingConsent: dto.pixelTrackingConsent ?? null,
-        pixelTrackingConsentAt: dto.pixelTrackingConsent === undefined ? null : new Date(),
       },
     });
 

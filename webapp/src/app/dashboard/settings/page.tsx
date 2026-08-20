@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Download, Loader2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -242,6 +243,22 @@ export default function SettingsPage() {
                   <Loader2 className="ml-auto h-4 w-4 shrink-0 animate-spin text-stone-grey" />
                 )}
               </label>
+
+              {/* Les cookies se gèrent sur une page dédiée, imposée par leur
+                  nature : le choix vaut pour le navigateur, pas pour le compte,
+                  et s'exerce sans être connecté. Sans ce renvoi, quelqu'un venu
+                  chercher « mes consentements » ici repartirait en croyant les
+                  avoir tous vus. */}
+              <p className="mt-4 text-sm text-stone-grey">
+                Le suivi de mesure d&apos;audience se règle séparément, depuis la{' '}
+                <Link
+                  href="/gestion-cookies"
+                  className="text-terracotta-600 underline underline-offset-2"
+                >
+                  gestion des cookies
+                </Link>
+                . Ce choix est lié à votre navigateur, non à votre compte.
+              </p>
             </section>
 
             {/* --- Donnees personnelles --- */}
