@@ -207,44 +207,104 @@ describe('UC-06 — Participation depuis l espace personnel', () => {
   // Bornes temporelles
   // ===========================================
   describe('Fenetre de jeu', () => {
-    it('refuse un code une fois le delai de reclamation passe', async () => {
-      const { jeton } = await client('uc06-delai');
-      const ticket = await creerTicket(ctx, 105);
-
+    /**
+     * Deplace la fenetre de jeu le temps d'une verification, puis la remet en
+     * place — y compris si l'assertion echoue, la configuration etant partagee
+     * avec l'environnement de developpement.
+     */
+    async function avecFenetre(
+      debut: Date,
+      fin: Date,
+      verification: () => Promise<void>,
+    ): Promise<void> {
       const config = await ctx.prisma.gameConfig.findFirst({ where: { isActive: true } });
-      const avant = config!.claimEndDate;
+      const avant = {
+        startDate: config!.startDate,
+        endDate: config!.endDate,
+        claimEndDate: config!.claimEndDate,
+      };
 
       await ctx.prisma.gameConfig.update({
         where: { id: config!.id },
-        data: { claimEndDate: new Date(Date.now() - 86_400_000) },
+        // Le delai de reclamation reste largement ouvert : c'est bien la
+        // fenetre de jeu qui est mise a l'epreuve, et elle seule.
+        data: {
+          startDate: debut,
+          endDate: fin,
+          claimEndDate: new Date(Date.now() + 31_536_000_000),
+        },
       });
 
       try {
-        const r = await http()
-          .post('/api/v1/participations')
-          .set('Authorization', `Bearer ${jeton}`)
-          .send({ code: ticket.code })
-          .expect(400);
-
-        expect(r.body.message).toMatch(/r[ée]clamation/i);
-
-        const intact = await ctx.prisma.ticket.findUnique({ where: { id: ticket.id } });
-        expect(intact!.isUsed).toBe(false);
+        await verification();
       } finally {
-        // La date est partagee avec l'environnement de developpement : elle est
-        // remise en place meme si l'assertion echoue.
-        await ctx.prisma.gameConfig.update({
-          where: { id: config!.id },
-          data: { claimEndDate: avant },
-        });
+        await ctx.prisma.gameConfig.update({ where: { id: config!.id }, data: avant });
       }
+    }
+
+    it('refuse un code soumis avant l ouverture du jeu', async () => {
+      const { jeton } = await client('uc06-avant');
+      const ticket = await creerTicket(ctx, 105);
+
+      await avecFenetre(
+        new Date(Date.now() + 86_400_000),
+        new Date(Date.now() + 2 * 86_400_000),
+        async () => {
+          const r = await http()
+            .post('/api/v1/participations')
+            .set('Authorization', `Bearer ${jeton}`)
+            .send({ code: ticket.code })
+            .expect(400);
+
+          expect(r.body.message).toMatch(/pas encore commenc/i);
+
+          const intact = await ctx.prisma.ticket.findUnique({ where: { id: ticket.id } });
+          expect(intact!.isUsed).toBe(false);
+        },
+      );
     });
 
-    // Constat d'audit, en attente d'arbitrage : verifyCode ne controle que
-    // claimEndDate. Ni startDate ni endDate n'empechent aujourd'hui de jouer un
-    // code, alors que le reglement definit une periode de participation fermee.
-    // Ces deux tests sont a activer avec la correction correspondante.
-    it.todo('refuse un code soumis avant l ouverture du jeu');
-    it.todo('refuse un code soumis apres la cloture du jeu');
+    it('refuse un code soumis apres la cloture du jeu', async () => {
+      const { jeton } = await client('uc06-apres');
+      const ticket = await creerTicket(ctx, 106);
+
+      await avecFenetre(
+        new Date(Date.now() - 2 * 86_400_000),
+        new Date(Date.now() - 86_400_000),
+        async () => {
+          const r = await http()
+            .post('/api/v1/participations')
+            .set('Authorization', `Bearer ${jeton}`)
+            .send({ code: ticket.code })
+            .expect(400);
+
+          expect(r.body.message).toMatch(/termin/i);
+
+          // Le delai de reclamation court encore : si le ticket etait accepte
+          // ici, c'est que la cloture du jeu ne bornait pas la participation.
+          const intact = await ctx.prisma.ticket.findUnique({ where: { id: ticket.id } });
+          expect(intact!.isUsed).toBe(false);
+        },
+      );
+    });
+
+    it('accepte un code pendant la periode de jeu', async () => {
+      const { jeton } = await client('uc06-pendant');
+      const ticket = await creerTicket(ctx, 107);
+
+      // Contrepartie indispensable des deux refus ci-dessus : sans elle, une
+      // fenetre systematiquement fermee les ferait passer tous les deux.
+      await avecFenetre(
+        new Date(Date.now() - 86_400_000),
+        new Date(Date.now() + 86_400_000),
+        async () => {
+          await http()
+            .post('/api/v1/participations')
+            .set('Authorization', `Bearer ${jeton}`)
+            .send({ code: ticket.code })
+            .expect(201);
+        },
+      );
+    });
   });
 });
