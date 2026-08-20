@@ -155,19 +155,14 @@ describe('UC-01 / UC-02 — Comptes et controle d acces', () => {
       expect(mauvaisMotDePasse.body.accessToken).toBeUndefined();
       expect(compteInconnu.body.accessToken).toBeUndefined();
 
-      // Meme statut et meme message : rien ne doit permettre d'enumerer les
-      // adresses inscrites.
-      expect(mauvaisMotDePasse.status).toBe(compteInconnu.status);
-      expect(mauvaisMotDePasse.body.message).toBe(compteInconnu.body.message);
+      // Convention du projet : jamais 401, y compris sur l'echec
+      // d'authentification lui-meme.
+      expect(mauvaisMotDePasse.status).toBe(403);
+      expect(compteInconnu.status).toBe(403);
 
-      // NOTE — LocalAuthGuard et JwtRefreshGuard n'appliquent pas la
-      // convention 403 du projet, contrairement a JwtAuthGuard qui la
-      // documente et l'impose. Ces routes repondent donc encore 401. L'ecart
-      // est signale ; tant qu'il n'est pas tranche, ce test verifie la
-      // propriete de securite plutot que le code de statut, pour ne pas
-      // graver un comportement contraire a la convention.
-      expect(mauvaisMotDePasse.status).toBeGreaterThanOrEqual(400);
-      expect(mauvaisMotDePasse.status).toBeLessThan(500);
+      // Meme message : rien ne doit permettre d'enumerer les adresses
+      // inscrites.
+      expect(mauvaisMotDePasse.body.message).toBe(compteInconnu.body.message);
     });
   });
 
@@ -293,7 +288,7 @@ describe('UC-01 / UC-02 — Comptes et controle d acces', () => {
         .post('/api/v1/auth/refresh')
         .send({ refreshToken: 'jeton.completement.invente' });
 
-      expect(r.status).toBeGreaterThanOrEqual(400);
+      expect(r.status).toBe(403);
       expect(r.body.accessToken).toBeUndefined();
     });
 
@@ -309,7 +304,7 @@ describe('UC-01 / UC-02 — Comptes et controle d acces', () => {
       // Le meme jeton ne doit plus rouvrir de session : c'est tout l'interet
       // d'une deconnexion cote serveur.
       const r = await http().post('/api/v1/auth/refresh').send({ refreshToken });
-      expect(r.status).toBeGreaterThanOrEqual(400);
+      expect(r.status).toBe(403);
       expect(r.body.accessToken).toBeUndefined();
     });
   });

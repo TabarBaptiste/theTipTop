@@ -88,7 +88,7 @@ export class AuthController {
       },
     },
   })
-  @ApiResponse({ status: 401, description: 'Identifiants invalides' })
+  @ApiResponse({ status: 403, description: 'Identifiants invalides' })
   async login(@CurrentUser() user: User) {
     return this.authService.login(user);
   }
@@ -106,7 +106,7 @@ export class AuthController {
     status: 200,
     description: 'Token rafraîchi',
   })
-  @ApiResponse({ status: 401, description: 'Refresh token invalide' })
+  @ApiResponse({ status: 403, description: 'Refresh token invalide' })
   async refreshToken(@CurrentUser() user: User, @Body() dto: RefreshTokenDto) {
     return this.authService.refreshToken(user.id, dto.refreshToken);
   }
@@ -133,7 +133,7 @@ export class AuthController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: "Obtenir le profil de l'utilisateur connecté" })
   @ApiResponse({ status: 200, description: 'Profil utilisateur' })
-  @ApiResponse({ status: 401, description: 'Non authentifié' })
+  @ApiResponse({ status: 403, description: 'Non authentifié' })
   async getProfile(@CurrentUser() user: User) {
     const { password: _password, ...userWithoutPassword } = user;
     return userWithoutPassword;
