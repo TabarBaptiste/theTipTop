@@ -1,0 +1,4 @@
+# Plan genere par zap-baseline.py dans le repertoire monte, a chaque execution.
+zap.yaml
+*.html
+*.json

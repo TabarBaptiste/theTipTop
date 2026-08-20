@@ -28,6 +28,18 @@ const customJestConfig = {
     '!src/app/**',
     '!src/middleware.ts',
   ],
+  // Le pipeline Jenkins impose 70 % de couverture globale. Le déclarer ici
+  // fait échouer les tests avant même le pipeline : le retour va au
+  // développeur plutôt qu'à la CI. Les valeurs sont posées légèrement sous la
+  // couverture atteinte, pour garder une marge sans laisser filer.
+  coverageThreshold: {
+    global: {
+      statements: 70,
+      branches: 65,
+      functions: 68,
+      lines: 70,
+    },
+  },
 }
 
 module.exports = createJestConfig(customJestConfig)
