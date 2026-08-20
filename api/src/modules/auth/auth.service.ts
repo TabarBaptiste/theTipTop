@@ -2,7 +2,7 @@
 // Service d'Authentification
 // ===========================================
 
-import { Injectable, UnauthorizedException, ConflictException, Logger } from '@nestjs/common';
+import { Injectable, ForbiddenException, ConflictException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
@@ -117,7 +117,8 @@ export class AuthService {
     });
 
     if (!storedToken) {
-      throw new UnauthorizedException('Refresh token invalide ou expiré');
+      // Convention projet : 403 et jamais 401, y compris hors des gardes.
+      throw new ForbiddenException('Refresh token invalide ou expiré');
     }
 
     // Révoquer l'ancien refresh token
@@ -128,7 +129,7 @@ export class AuthService {
 
     const user = await this.usersService.findById(userId);
     if (!user) {
-      throw new UnauthorizedException('Utilisateur non trouvé');
+      throw new ForbiddenException('Utilisateur non trouvé');
     }
 
     return this.generateTokens(user);

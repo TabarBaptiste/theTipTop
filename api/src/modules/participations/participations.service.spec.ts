@@ -7,7 +7,7 @@ import { ParticipationsService } from './participations.service';
 import { TicketsService } from '../tickets/tickets.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
-import { BadRequestException, ForbiddenException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException } from '@nestjs/common';
 import { User } from '@prisma/client';
 
 describe('ParticipationsService', () => {
@@ -18,6 +18,7 @@ describe('ParticipationsService', () => {
     ticket: {
       findUnique: jest.fn(),
       update: jest.fn(),
+      updateMany: jest.fn(),
     },
     participation: {
       create: jest.fn(),
@@ -104,7 +105,7 @@ describe('ParticipationsService', () => {
         return callback({
           ticket: {
             findUnique: jest.fn().mockResolvedValue(mockTicket),
-            update: jest.fn().mockResolvedValue({ ...mockTicket, isUsed: true }),
+            updateMany: jest.fn().mockResolvedValue({ count: 1 }),
           },
           participation: {
             create: jest.fn().mockResolvedValue({
@@ -121,6 +122,31 @@ describe('ParticipationsService', () => {
 
       expect(result).toHaveProperty('id');
       expect(result).toHaveProperty('code', validCode);
+    });
+
+    // Cas de course : le ticket paraît libre à la lecture, mais une autre
+    // transaction l'a consommé avant l'UPDATE conditionnel. Aucune ligne n'est
+    // touchée, et la participation doit être refusée par un conflit métier.
+    it('refuse la participation quand le ticket a été consommé entre-temps', async () => {
+      mockTicketsService.verifyCode.mockResolvedValue({ isValid: true, ticket: mockTicket });
+      mockPrismaService.gameConfig.findFirst.mockResolvedValue(mockGameConfig);
+
+      const create = jest.fn();
+      mockPrismaService.$transaction.mockImplementation(async (callback) =>
+        callback({
+          ticket: {
+            findUnique: jest.fn().mockResolvedValue(mockTicket),
+            updateMany: jest.fn().mockResolvedValue({ count: 0 }),
+          },
+          participation: { create },
+        }),
+      );
+
+      await expect(service.participate(user, { code: validCode })).rejects.toThrow(
+        ConflictException,
+      );
+      // Et surtout : aucune participation n'est créée.
+      expect(create).not.toHaveBeenCalled();
     });
 
     it('should throw NotFoundException for invalid code', async () => {
@@ -218,7 +244,7 @@ describe('ParticipationsService', () => {
           callback({
             ticket: {
               findUnique: jest.fn().mockResolvedValue(mockTicket),
-              update: jest.fn(),
+              updateMany: jest.fn().mockResolvedValue({ count: 1 }),
             },
             participation: {
               create: jest.fn().mockResolvedValue({ id: 'p1', ticket: mockTicket }),

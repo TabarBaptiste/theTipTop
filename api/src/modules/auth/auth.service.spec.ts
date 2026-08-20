@@ -7,7 +7,7 @@ import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
-import { ConflictException, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, ForbiddenException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { UsersService } from '../users/users.service';
 
@@ -246,10 +246,10 @@ describe('AuthService', () => {
       });
     });
 
-    it('should throw UnauthorizedException if the refresh token is unknown/expired', async () => {
+    it('should throw ForbiddenException if the refresh token is unknown/expired', async () => {
       mockPrismaService.refreshToken.findFirst.mockResolvedValue(null);
 
-      await expect(service.refreshToken('1', 'bad-token')).rejects.toThrow(UnauthorizedException);
+      await expect(service.refreshToken('1', 'bad-token')).rejects.toThrow(ForbiddenException);
     });
   });
 

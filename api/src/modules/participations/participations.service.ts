@@ -93,13 +93,22 @@ export class ParticipationsService {
         throw new ConflictException('Ce code a déjà été utilisé');
       }
 
-      await tx.ticket.update({
-        where: { id: ticketCheck.id },
+      // La condition isUsed fait partie du UPDATE, comme dans le parcours sans
+      // compte. La relire séparément ne suffit pas : deux soumissions
+      // simultanées voient toutes deux un ticket libre, et la seconde échouait
+      // alors sur la contrainte d'unicité — une erreur 500 au lieu du conflit
+      // métier. Ici la seconde ne touche aucune ligne et repart proprement.
+      const consumed = await tx.ticket.updateMany({
+        where: { id: ticketCheck.id, isUsed: false },
         data: {
           isUsed: true,
           usedAt: new Date(),
         },
       });
+
+      if (consumed.count === 0) {
+        throw new ConflictException('Ce code a déjà été utilisé');
+      }
 
       return tx.participation.create({
         data: {
