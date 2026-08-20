@@ -4,11 +4,12 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { Ticket, Gift, Trophy, ChevronRight, User } from 'lucide-react';
+import { Ticket, Gift, Trophy, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuthStore } from '@/lib/stores/auth-store';
+import { AccountSidebar } from '@/components/dashboard/account-sidebar';
 import { api } from '@/lib/api';
 import { formatDate } from '@/lib/utils';
 
@@ -53,11 +54,20 @@ export default function DashboardPage() {
     return (
       <div className="min-h-[calc(100vh-5rem)] bg-cream py-8">
         <div className="container mx-auto px-4">
-          {/* Header */}
-          <div className="mb-8">
-            <Skeleton className="h-8 w-64" />
-            <Skeleton className="mt-2 h-4 w-80" />
-          </div>
+          {/* Squelette cale sur la forme reelle, barre laterale comprise : sans
+              elle, la mise en page sauterait d'une colonne a deux au moment ou
+              les donnees arrivent. */}
+          <div className="grid gap-8 lg:grid-cols-[240px_1fr]">
+            <aside>
+              <Skeleton className="h-56 w-full rounded-card" />
+            </aside>
+
+            <main>
+              {/* Header */}
+              <div className="mb-8">
+                <Skeleton className="h-8 w-64" />
+                <Skeleton className="mt-2 h-4 w-80" />
+              </div>
 
           {/* Stats Cards */}
           <div className="mb-8 grid gap-4 md:grid-cols-3">
@@ -114,6 +124,8 @@ export default function DashboardPage() {
               </div>
             </CardContent>
           </Card>
+            </main>
+          </div>
         </div>
       </div>
     );
@@ -126,23 +138,22 @@ export default function DashboardPage() {
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-cream py-8">
       <div className="container mx-auto px-4">
-        {/* Header */}
-        <div className="mb-8 flex items-start justify-between gap-4">
-          <div>
-            <h1 className="font-display text-h1 text-noir">
-              Bonjour, {user?.firstName} !
-            </h1>
-            <p className="mt-2 text-stone-grey">
-              Bienvenue dans votre espace personnel Thé Tip Top
-            </p>
-          </div>
-          <Button asChild variant="outline" size="sm" className="shrink-0">
-            <Link href="/dashboard/profile">
-              <User className="mr-2 h-4 w-4" />
-              Mon profil
-            </Link>
-          </Button>
-        </div>
+        {/* Meme gabarit que /dashboard/profile et /dashboard/settings : cette
+            page etait la seule de l'espace personnel sans sa navigation, ce que
+            compensait un bouton « Mon profil » greffe sur le titre. */}
+        <div className="grid gap-8 lg:grid-cols-[240px_1fr]">
+          <AccountSidebar />
+
+          <main>
+            {/* Header */}
+            <div className="mb-8">
+              <h1 className="font-display text-h1 text-noir">
+                Bonjour, {user?.firstName} !
+              </h1>
+              <p className="mt-2 text-stone-grey">
+                Bienvenue dans votre espace personnel Thé Tip Top
+              </p>
+            </div>
 
         {/* Stats Cards */}
         <div className="mb-8 grid gap-4 md:grid-cols-3">
@@ -304,6 +315,8 @@ export default function DashboardPage() {
             )}
           </CardContent>
         </Card>
+          </main>
+        </div>
       </div>
     </div>
   );
