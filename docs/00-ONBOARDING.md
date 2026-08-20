@@ -189,6 +189,9 @@ npm test --workspaces
 | API — fonctionnels | `cd api && npm run test:e2e:ci` (provisionne ses propres Postgres + Redis, cf. `api/test/README.md`) |
 | WebApp — unitaires | `cd webapp && npm test` |
 | WebApp — E2E | `cd webapp && npm run test:e2e` (Cypress ; nécessite app + API + DB seedée en marche) |
+| Régression complète | `npm run test:regression` (lint + unitaires des deux côtés + fonctionnels API) |
+| Charge | `tests/performance/` — cinq profils k6, cf. [05-PROTOCOLES-DE-TESTS.md](05-PROTOCOLES-DE-TESTS.md) |
+| Sécurité | `npm run test:securite` + scan ZAP, cf. [05-PROTOCOLES-DE-TESTS.md](05-PROTOCOLES-DE-TESTS.md) |
 
 ### Ce qui fait échouer le pipeline Jenkins
 
