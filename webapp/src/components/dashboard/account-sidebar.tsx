@@ -10,10 +10,13 @@ import { cn } from '@/lib/utils';
 // « Mes gains » et « Notifications » figurent dans la maquette mais leurs routes
 // n'existent pas : les afficher produirait des 404. À ajouter le jour où les
 // pages seront créées.
+// « Mes participations » ouvre la liste : c'est /dashboard, la racine de
+// l'espace personnel et la destination du menu de compte. La reléguer en
+// troisième position contredisait cet ordre.
 const links = [
+  { name: 'Mes participations', href: '/dashboard', icon: Gift },
   { name: 'Profil', href: '/dashboard/profile', icon: User },
   { name: 'Paramètres', href: '/dashboard/settings', icon: SlidersHorizontal },
-  { name: 'Mes participations', href: '/dashboard', icon: Gift },
 ];
 
 /**

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { Menu, X, User, ShieldCheck, Store, ChevronDown } from 'lucide-react';
+import { Menu, X, User, ShieldCheck, Store, ChevronDown, Gift, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -26,15 +26,6 @@ const navigation = [
   { name: 'FAQ', href: '/faq' },
 ];
 
-// Espace personnel, ajouté à la nav seulement pour un compte connecté.
-//
-// L'entrée s'appelait « Mon concours » et figurait dans la nav publique. Deux
-// problèmes : /dashboard est protégé par le middleware, donc un visiteur
-// anonyme qui cliquait était éjecté vers la connexion depuis une signalétique
-// censée mener quelque part ; et « Mon concours » était un libellé unique dans
-// toute l'application, qui nomme cette page « Mes participations » partout
-// ailleurs, y compris dans la barre latérale du profil.
-const personalNavigation = { name: 'Mes participations', href: '/dashboard' };
 
 export function Header() {
   const pathname = usePathname();
@@ -52,14 +43,11 @@ export function Header() {
   // boutique pour un employé, la silhouette pour un participant.
   const AccountIcon = user?.role === 'ADMIN' ? ShieldCheck : user?.role === 'EMPLOYEE' ? Store : User;
 
-  // isHydrated conditionne l'ajout : sans lui, le rendu serveur et le rendu
-  // client differeraient sur la presence du lien, et React signalerait une
-  // divergence d'hydratation.
-  //
-  // « Mes participations » est réservé aux participants : la proposer au
-  // personnel encombrerait sa navigation d'un espace vide.
-  const navLinks =
-    isHydrated && isAuthenticated && !isStaff ? [...navigation, personalNavigation] : navigation;
+  // La navigation ne porte plus que du contenu public. « Mes participations »
+  // y figurait pour les participants, alors qu'il s'agit d'une destination
+  // privée : elle apparaissait donc deux fois, ici et dans la barre latérale du
+  // compte, qui est sa place. Elle a rejoint le menu de compte.
+  const navLinks = navigation;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-warm-beige bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
@@ -107,47 +95,56 @@ export function Header() {
           {isHydrated && (
             <>
               {isAuthenticated ? (
-                isStaff ? (
-                  // Un seul bouton au lieu de deux : le back-office se déplie
-                  // sous le compte plutôt que d'occuper une place à côté.
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-600"
-                      >
-                        <AccountIcon className="h-4 w-4" strokeWidth={1.5} />
-                        {user?.firstName || 'Mon compte'}
-                        <ChevronDown className="h-3 w-3" strokeWidth={2} />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
+                // Un seul contrôle de compte, quel que soit le rôle : les
+                // destinations personnelles s'y rangent au lieu d'encombrer la
+                // navigation publique, qui ne porte que du contenu accessible
+                // à tous.
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-600"
+                    >
+                      <AccountIcon className="h-4 w-4" strokeWidth={1.5} />
+                      {user?.firstName || 'Mon compte'}
+                      <ChevronDown className="h-3 w-3" strokeWidth={2} />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {isStaff ? (
                       <DropdownMenuItem asChild>
                         <Link href={backofficeHref}>
                           <AccountIcon className="h-4 w-4" strokeWidth={1.5} />
                           {backofficeLabel}
                         </Link>
                       </DropdownMenuItem>
+                    ) : (
                       <DropdownMenuItem asChild>
-                        <Link href="/dashboard/profile">
-                          <User className="h-4 w-4" strokeWidth={1.5} />
-                          Mon profil
+                        <Link href="/dashboard">
+                          <Gift className="h-4 w-4" strokeWidth={1.5} />
+                          Mes participations
                         </Link>
                       </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                ) : (
-                  <Button asChild variant="outline" size="sm">
-                    <Link
-                      href="/dashboard/profile"
-                      className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-600"
+                    )}
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard/profile">
+                        <User className="h-4 w-4" strokeWidth={1.5} />
+                        Mon profil
+                      </Link>
+                    </DropdownMenuItem>
+                    {/* La déconnexion n'existait que dans la barre latérale du
+                        compte : un visiteur connecté sur une page publique
+                        devait d'abord naviguer ailleurs pour se déconnecter. */}
+                    <DropdownMenuItem
+                      onSelect={logout}
+                      className="text-red-700 data-[highlighted]:text-red-700"
                     >
-                      <AccountIcon className="h-4 w-4" strokeWidth={1.5} />
-                      {user?.firstName || 'Mon compte'}
-                    </Link>
-                  </Button>
-                )
+                      <LogOut className="h-4 w-4" strokeWidth={1.5} />
+                      Se déconnecter
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               ) : (
                 <Button asChild variant="outline" size="sm">
                   <Link href="/auth/login">Connexion</Link>
@@ -206,31 +203,44 @@ export function Header() {
               <>
                 {isAuthenticated ? (
                   <>
-                    {/* Le menu mobile est déjà une liste dépliée : le
-                        back-office s'y range sous le compte, sans qu'un second
-                        niveau déroulant soit nécessaire. */}
+                    {/* Le menu mobile est déjà une liste dépliée : les mêmes
+                        destinations que le menu de compte s'y succèdent, sans
+                        qu'un second niveau déroulant soit nécessaire. */}
+                    <Button asChild variant="outline" className="w-full">
+                      <Link
+                        href={isStaff ? backofficeHref : '/dashboard'}
+                        className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-600"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        {isStaff ? (
+                          <AccountIcon className="h-4 w-4" strokeWidth={1.5} />
+                        ) : (
+                          <Gift className="h-4 w-4" strokeWidth={1.5} />
+                        )}
+                        {isStaff ? backofficeLabel : 'Mes participations'}
+                      </Link>
+                    </Button>
                     <Button asChild variant="outline" className="w-full">
                       <Link
                         href="/dashboard/profile"
                         className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-600"
                         onClick={() => setMobileMenuOpen(false)}
                       >
-                        <AccountIcon className="h-4 w-4" strokeWidth={1.5} />
-                        {user?.firstName || 'Mon compte'}
+                        <User className="h-4 w-4" strokeWidth={1.5} />
+                        Mon profil
                       </Link>
                     </Button>
-                    {isStaff && (
-                      <Button asChild variant="outline" className="w-full">
-                        <Link
-                          href={backofficeHref}
-                          className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-600"
-                          onClick={() => setMobileMenuOpen(false)}
-                        >
-                          <AccountIcon className="h-4 w-4" strokeWidth={1.5} />
-                          {backofficeLabel}
-                        </Link>
-                      </Button>
-                    )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        logout();
+                      }}
+                      className="flex w-full items-center justify-center gap-2 rounded-full border-[1.5px] border-red-700 px-6 py-2 font-functional text-ui font-bold uppercase tracking-[2px] text-red-700 transition-colors hover:bg-red-50"
+                    >
+                      <LogOut className="h-4 w-4" strokeWidth={1.5} />
+                      Se déconnecter
+                    </button>
                   </>
                 ) : (
                   <Button asChild variant="outline" className="w-full">
