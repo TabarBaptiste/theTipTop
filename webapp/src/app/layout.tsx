@@ -76,6 +76,20 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  // Preuve de propriété pour Google Search Console, sans laquelle le plan du
+  // site ne peut être soumis et les objectifs de trafic du CDC ne sont
+  // mesurables par rien.
+  //
+  // La vérification par Google Analytics, plus simple en apparence puisque GA
+  // est déjà installé, ne fonctionnerait pas ici : la balise GA ne se charge
+  // qu'après consentement aux cookies, et le robot de vérification n'en donne
+  // aucun. Il ne la verrait jamais.
+  //
+  // Le code vient de l'environnement : il est propre à une propriété et n'a
+  // pas à vivre dans le dépôt. Absent, aucune balise n'est émise.
+  verification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+    ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
+    : undefined,
 };
 
 export default function RootLayout({
