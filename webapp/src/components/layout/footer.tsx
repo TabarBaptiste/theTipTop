@@ -4,6 +4,10 @@ import Link from 'next/link';
 import { Mail, Instagram, Facebook, Youtube, Linkedin, Music2 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { SOCIAL_LINKS } from '@/lib/social-links';
+
+/** Adresse officielle d'un reseau, par son nom. */
+const lienSocial = (nom: string) => SOCIAL_LINKS.find((r) => r.nom === nom)!.url;
 
 export function Footer() {
   const [email, setEmail] = useState('');
@@ -204,7 +208,7 @@ export function Footer() {
           </p>
           <div className="flex gap-4">
             <a
-              href="https://instagram.com/thetiptop"
+              href={lienSocial('Instagram')}
               target="_blank"
               rel="noopener noreferrer"
               className="text-white/70 transition-colors hover:text-terracotta-300"
@@ -213,7 +217,7 @@ export function Footer() {
               <Instagram className="h-4 w-4" strokeWidth={1.5} />
             </a>
             <a
-              href="https://tiktok.com/@thetiptop"
+              href={lienSocial('TikTok')}
               target="_blank"
               rel="noopener noreferrer"
               className="text-white/70 transition-colors hover:text-terracotta-300"
@@ -222,7 +226,7 @@ export function Footer() {
               <Music2 className="h-4 w-4" strokeWidth={1.5} />
             </a>
             <a
-              href="https://pinterest.com/thetiptop"
+              href={lienSocial('Pinterest')}
               target="_blank"
               rel="noopener noreferrer"
               className="text-white/70 transition-colors hover:text-terracotta-300"
@@ -233,7 +237,7 @@ export function Footer() {
               </svg>
             </a>
             <a
-              href="https://facebook.com/thetiptop"
+              href={lienSocial('Facebook')}
               target="_blank"
               rel="noopener noreferrer"
               className="text-white/70 transition-colors hover:text-terracotta-300"
@@ -242,7 +246,7 @@ export function Footer() {
               <Facebook className="h-4 w-4" strokeWidth={1.5} />
             </a>
             <a
-              href="https://linkedin.com/company/thetiptop"
+              href={lienSocial('LinkedIn')}
               target="_blank"
               rel="noopener noreferrer"
               className="text-white/70 transition-colors hover:text-terracotta-300"
@@ -251,7 +255,7 @@ export function Footer() {
               <Linkedin className="h-4 w-4" strokeWidth={1.5} />
             </a>
             <a
-              href="https://youtube.com/@thetiptop"
+              href={lienSocial('YouTube')}
               target="_blank"
               rel="noopener noreferrer"
               className="text-white/70 transition-colors hover:text-terracotta-300"
