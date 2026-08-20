@@ -4,7 +4,7 @@
 // Source unique : les adresses reproduites ici sont celles déclarées comme
 // « lien officiel » dans le cahier des charges. Le pied de page portait
 // jusqu'ici six adresses inventées, toutes bâties sur le motif
-// « /thetiptop » — aucune ne correspondait à un compte existant.
+// « /thetiptop » - aucune ne correspondait à un compte existant.
 //
 // Ces liens ne relèvent pas seulement de la navigation : ils alimentent la
 // propriété `sameAs` des données structurées, par laquelle les moteurs

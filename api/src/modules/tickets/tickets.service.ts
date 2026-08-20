@@ -88,7 +88,7 @@ export class TicketsService {
     // La fenêtre de participation est celle du règlement : de l'ouverture à la
     // clôture du jeu. Le délai de réclamation, plus tardif, ne borne que le
     // retrait des lots déjà gagnés. Les confondre revenait à laisser jouer un
-    // code un mois après la fin du concours — et, avant, à laisser jouer avant
+    // code un mois après la fin du concours - et, avant, à laisser jouer avant
     // même son ouverture, aucune des deux bornes n'étant contrôlée ici.
     const now = new Date();
 

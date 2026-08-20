@@ -1,9 +1,9 @@
 // ===========================================
-// Profil 3 — Pic d'activation
+// Profil 3 - Pic d'activation
 // ===========================================
 // « Simule l'afflux massif et soudain de visiteurs correspondant à une
-// activation influenceur — plusieurs centaines de connexions simultanées en
-// moins d'une minute — pour vérifier que le système de cache Redis absorbe
+// activation influenceur - plusieurs centaines de connexions simultanées en
+// moins d'une minute - pour vérifier que le système de cache Redis absorbe
 // correctement la charge sans répercuter les requêtes sur PostgreSQL. »
 // (CCTD, §3.5)
 //

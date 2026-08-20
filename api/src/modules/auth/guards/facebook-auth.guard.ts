@@ -43,7 +43,7 @@ export class FacebookAuthGuard extends AuthGuard('facebook') {
     } catch (err) {
       // Un compte sans adresse ne passe plus par ici : la strategie lui attribue
       // une adresse de substitution et le laisse entrer. Ne restent donc que
-      // les vraies pannes — code deja consomme, token expire, acces refuse.
+      // les vraies pannes - code deja consomme, token expire, acces refuse.
       this.logger.error('Erreur OAuth sur le callback Facebook', err as Error);
 
       if (isCallback) {

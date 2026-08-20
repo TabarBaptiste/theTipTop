@@ -4,7 +4,7 @@
 // Rejouable sans risque : chaque image part sous un identifiant stable avec
 // overwrite, donc un second passage remplace au lieu de dupliquer.
 //
-// Les fichiers restent dans webapp/src/img — ils servent de repli quand
+// Les fichiers restent dans webapp/src/img - ils servent de repli quand
 // Cloudinary est injoignable ou non configuré. Ce script n'en est qu'une copie.
 //
 //   npm run images:upload
@@ -29,7 +29,7 @@ const IMAGES_DIR = join(__dirname, '..', '..', 'webapp', 'src', 'img');
  * Signature attendue par Cloudinary : les paramètres signés triés par nom,
  * assemblés en chaîne de requête, puis SHA-1 avec le secret en suffixe.
  *
- * Le secret n'est jamais transmis — seule son empreinte l'est.
+ * Le secret n'est jamais transmis - seule son empreinte l'est.
  */
 function sign(params: Record<string, string>, secret: string): string {
   const canonical = Object.keys(params)

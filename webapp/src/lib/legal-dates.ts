@@ -5,7 +5,7 @@
 // version il consulte. Écrites à la main dans chaque page, ces dates étaient
 // restées au 9 juin alors que deux documents avaient changé depuis.
 //
-// Regrouper ne suffit pas à garantir l'exactitude — modifier un texte sans
+// Regrouper ne suffit pas à garantir l'exactitude - modifier un texte sans
 // toucher à sa date reste possible. Ce qui est garanti, c'est qu'il n'existe
 // qu'un seul endroit à corriger, et le test associé vérifie qu'aucune page ne
 // réintroduit une date en dur.

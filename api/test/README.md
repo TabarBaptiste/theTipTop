@@ -3,7 +3,7 @@
 Ces suites exercent les cas d'usage du cahier des charges de bout en bout, à
 travers la couche HTTP réelle : mêmes routes, même `ValidationPipe`, mêmes
 gardes, même base. Elles répondent à une question que les tests unitaires ne
-peuvent pas trancher — *est-ce que l'enchaînement tient ?* — et non à celle de
+peuvent pas trancher - *est-ce que l'enchaînement tient ?* - et non à celle de
 savoir si un service isolé se comporte bien.
 
 ## Lancer les tests
@@ -20,7 +20,7 @@ n'est requis, et la base de développement n'est jamais touchée : conteneurs,
 ports (15432 / 16379) et stockage sont distincts, et les données vivent en
 tmpfs.
 
-C'est la commande à privilégier — elle repart d'un état connu, là où une base
+C'est la commande à privilégier - elle repart d'un état connu, là où une base
 de développement accumule les particularités.
 
 ### Sur vos services de développement
@@ -37,7 +37,7 @@ suites s'appuient sur la configuration de jeu active et sur la table des lots.
 
 Ces suites ne tournent pas dans l'étape `npm test` du pipeline, qui s'exécute
 sans service de base de données. `test:e2e:ci` étant autonome, les y ajouter ne
-demande plus qu'une ligne côté `ciPipeline` — l'agent Jenkins dispose déjà de
+demande plus qu'une ligne côté `ciPipeline` - l'agent Jenkins dispose déjà de
 Docker, puisqu'il construit les images. Cette ligne vit dans la shared library
 `furious-ducks-shared-library`, hors de ce dépôt.
 

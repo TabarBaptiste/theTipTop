@@ -1,10 +1,10 @@
-# Protocoles de tests — charge, régression, sécurité
+# Protocoles de tests - charge, régression, sécurité
 
 Ce document définit **comment** ces trois familles de tests sont conduites : ce
 qu'elles mesurent, dans quelles conditions, selon quels critères d'acceptation,
 et ce qui se passe quand un critère n'est pas tenu.
 
-Les tests unitaires et fonctionnels ne sont pas décrits ici — ils le sont dans
+Les tests unitaires et fonctionnels ne sont pas décrits ici - ils le sont dans
 [api/test/README.md](../api/test/README.md) et dans la stratégie de tests du
 cahier des clauses techniques détaillées. Ils interviennent en revanche comme
 composants du protocole de régression.
@@ -16,7 +16,7 @@ composants du protocole de régression.
 ### 1.1. Objet
 
 Vérifier que la plateforme absorbe les niveaux de trafic attendus pendant
-l'opération, en particulier les pics d'activation influenceurs — « plusieurs
+l'opération, en particulier les pics d'activation influenceurs - « plusieurs
 milliers de connexions simultanées en quelques minutes » selon le cahier des
 charges.
 
@@ -27,7 +27,7 @@ se rattrape pas.
 
 ### 1.2. Outillage
 
-k6 de Grafana, exécuté via l'image officielle — aucune installation locale
+k6 de Grafana, exécuté via l'image officielle - aucune installation locale
 n'est requise. Les scénarios vivent dans
 [tests/performance/](../tests/performance/).
 
@@ -41,8 +41,8 @@ n'est requise. Les scénarios vivent dans
 | **Stress** | jusqu'à 1600 VUs | Où est le point de rupture, et la dégradation est-elle graduelle ? |
 | **Récupération** | pic de 600 VUs, retour au nominal | La plateforme revient-elle à son état initial, et en combien de temps ? |
 
-Les cinq sollicitent exactement le même trafic — page d'accueil, table des
-lots, vérification de code — et ne diffèrent que par leur profil de montée.
+Les cinq sollicitent exactement le même trafic - page d'accueil, table des
+lots, vérification de code - et ne diffèrent que par leur profil de montée.
 C'est la condition pour que leurs résultats soient comparables entre eux.
 
 ### 1.4. Critères d'acceptation
@@ -73,7 +73,7 @@ d'exploitable.
 
 #### Préparation obligatoire : la limitation de débit
 
-L'API plafonne les requêtes **par adresse IP** — trois par seconde sur le
+L'API plafonne les requêtes **par adresse IP** - trois par seconde sur le
 palier le plus court. Une campagne k6 part d'une seule machine, donc d'une
 seule adresse : au-delà de quelques utilisateurs virtuels, elle ne mesure plus
 la plateforme mais le limiteur.
@@ -99,8 +99,8 @@ production, et le prochain scan de sécurité le signalera à juste titre.
 #### Aucun ticket n'est consommé
 
 Le parcours simulé vérifie des codes volontairement inexistants. Le chemin
-exercé est le même — validation du format, lecture indexée du ticket, table des
-lots depuis Redis — mais rien n'est écrit. Un test de charge qui participerait
+exercé est le même - validation du format, lecture indexée du ticket, table des
+lots depuis Redis - mais rien n'est écrit. Un test de charge qui participerait
 réellement brûlerait des lots à chaque exécution, et fausserait les
 statistiques de l'opération.
 
@@ -113,7 +113,7 @@ statistiques de l'opération.
    plateforme dans un état dégradé qui fausserait les profils suivants.
 4. Laisser la plateforme revenir au repos entre deux profils.
 5. Pendant le profil **pic**, relever le nombre de connexions actives sur
-   PostgreSQL — c'est la seule façon de vérifier que Redis absorbe la charge
+   PostgreSQL - c'est la seule façon de vérifier que Redis absorbe la charge
    plutôt que de la répercuter :
    ```sql
    SELECT count(*) FROM pg_stat_activity WHERE datname = 'thetiptop';
@@ -188,8 +188,8 @@ s'exécutent donc sur un environnement de test aux données représentatives,
 jamais sur la production. C'est le prix de ce qu'ils prouvent : un code simulé
 ne dirait rien de l'accord entre le front et le back.
 
-**Ne rien exécuter d'autre en parallèle.** Certaines suites — le hachage de
-mots de passe en particulier — approchent leur délai d'expiration sous forte
+**Ne rien exécuter d'autre en parallèle.** Certaines suites - le hachage de
+mots de passe en particulier - approchent leur délai d'expiration sous forte
 contention processeur. Lancée en même temps qu'une campagne de charge ou qu'un
 calcul de couverture, la régression produit des échecs qui disparaissent à
 l'exécution suivante. Un échec observé dans ces conditions doit être rejoué
@@ -226,7 +226,7 @@ suggestion.
 1. **Ne pas désactiver le test.** Un test qui échoue a fait exactement ce qu'on
    attendait de lui.
 2. Écrire, si elle n'existe pas, l'assertion qui reproduit le défaut au niveau
-   le plus bas où il se manifeste — unitaire de préférence, fonctionnel si le
+   le plus bas où il se manifeste - unitaire de préférence, fonctionnel si le
    défaut naît de l'assemblage.
 3. Corriger.
 4. Vérifier que le test échoue sans la correction et passe avec.
@@ -249,7 +249,7 @@ exposée.
 | Contrôle | Outil | Déclenchement | Bloquant |
 |---|---|---|---|
 | Secrets dans le code | gitleaks | Avant chaque commit (husky) | Oui |
-| Vulnérabilités des dépendances | `npm audit` | Manuel + revue de dépendances | Non — arbitrage |
+| Vulnérabilités des dépendances | `npm audit` | Manuel + revue de dépendances | Non - arbitrage |
 | Vulnérabilités des images | Trivy | À chaque build d'image (Jenkins) | Oui, niveau CRITICAL |
 | Application exposée | OWASP ZAP baseline | Après déploiement en préproduction | Oui, niveau FAIL |
 
@@ -285,7 +285,7 @@ temps de réponse et du chargement asynchrone. Deux exécutions successives ne
 visitent pas exactement les mêmes pages : une alerte absente d'un rapport n'est
 donc pas nécessairement corrigée, elle peut simplement ne pas avoir été
 atteinte. C'est la raison pour laquelle le scan complète les tests
-fonctionnels, sans les remplacer — eux visitent un parcours déterminé.
+fonctionnels, sans les remplacer - eux visitent un parcours déterminé.
 
 ### 3.4. Première application du protocole
 
@@ -324,7 +324,7 @@ fonctionnels, qui les vérifient à chaque exécution :
   produisent le même statut et le même message ; il en va de même pour un code
   de vérification faux et une demande inexistante.
 - **Anti-IDOR** : un client consultant la participation d'un autre reçoit 404,
-  et non 403 — le second révélerait l'existence de la ressource.
+  et non 403 - le second révélerait l'existence de la ressource.
 - **Limitation de débit** : plafonds par IP et par utilisateur.
 - **Validation stricte** : toute propriété non prévue au contrat est refusée,
   jamais ignorée silencieusement.
@@ -348,7 +348,7 @@ actionnables ni toutes exposées. La grille de lecture :
    applique les correctifs compatibles.
 
 Toute mise à jour se fait depuis la racine et pour les deux workspaces à la
-fois — `npm run upgrade:patch` ou `upgrade:minor` — jamais sur un seul côté :
+fois - `npm run upgrade:patch` ou `upgrade:minor` - jamais sur un seul côté :
 le hoisting npm mélangerait les versions.
 
 ### 3.7. En cas de découverte

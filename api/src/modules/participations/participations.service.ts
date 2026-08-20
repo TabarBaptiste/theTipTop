@@ -96,7 +96,7 @@ export class ParticipationsService {
       // La condition isUsed fait partie du UPDATE, comme dans le parcours sans
       // compte. La relire séparément ne suffit pas : deux soumissions
       // simultanées voient toutes deux un ticket libre, et la seconde échouait
-      // alors sur la contrainte d'unicité — une erreur 500 au lieu du conflit
+      // alors sur la contrainte d'unicité - une erreur 500 au lieu du conflit
       // métier. Ici la seconde ne touche aucune ligne et repart proprement.
       const consumed = await tx.ticket.updateMany({
         where: { id: ticketCheck.id, isUsed: false },

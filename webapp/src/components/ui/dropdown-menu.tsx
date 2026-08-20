@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 
 // Habillage minimal de Radix : seules les quatre pièces utilisées par l'en-tête
 // sont exposées. Radix apporte la navigation au clavier, la fermeture par
-// Échap, le retour du focus sur le déclencheur et les attributs ARIA — autant
+// Échap, le retour du focus sur le déclencheur et les attributs ARIA - autant
 // de comportements qu'une implémentation maison rate presque toujours.
 
 const DropdownMenu = DropdownMenuPrimitive.Root;

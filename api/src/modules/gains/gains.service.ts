@@ -240,7 +240,7 @@ export class GainsService {
    * Nom d'affichage de l'employé ayant remis un lot : prénom et initiale du
    * nom, comme partout ailleurs dans le projet.
    *
-   * Renvoie null quand l'employé est introuvable — remise antérieure au suivi
+   * Renvoie null quand l'employé est introuvable - remise antérieure au suivi
    * de l'auteur, ou compte supprimé depuis. L'historique reste alors lisible,
    * seule la colonne est vide.
    */

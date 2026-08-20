@@ -32,7 +32,7 @@ type CodeFormData = z.infer<typeof codeSchema>;
  * Certains comptes Facebook ne transmettent aucune adresse : ils sont créés
  * sous une adresse de substitution qui ne reçoit rien. Tant qu'elle n'est pas
  * remplacée, le titulaire ne peut être prévenu ni d'un lot gagné ni du délai
- * pour le retirer — d'où la vérification, qui interdit aussi de saisir
+ * pour le retirer - d'où la vérification, qui interdit aussi de saisir
  * l'adresse d'un tiers.
  */
 export default function CompleteEmailPage() {

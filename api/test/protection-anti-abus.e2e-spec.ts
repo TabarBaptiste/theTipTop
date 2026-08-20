@@ -34,7 +34,7 @@ describe('Limitation de debit', () => {
     }
 
     // Les trois premieres passent, la quatrieme est repoussee. Affirmer les
-    // deux evite qu'un plafond mal regle — declenche des la premiere requete —
+    // deux evite qu'un plafond mal regle - declenche des la premiere requete -
     // ne fasse passer ce test pour la mauvaise raison.
     expect(statuts.slice(0, 3)).toEqual([200, 200, 200]);
     expect(statuts[3]).toBe(429);

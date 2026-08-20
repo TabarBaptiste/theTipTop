@@ -7,12 +7,12 @@ import { cn } from '@/lib/utils';
 // Le motif d'origine « texte de la même couleur que son fond translucide » est
 // structurellement incompatible avec le critère 1.4.3 : un texte posé sur une
 // teinte de lui-même plafonnait entre 1.39 et 3.79 pour toutes les variantes
-// sauf neutral, là où le niveau AA exige 4.5 sur du petit texte — et ces tags
+// sauf neutral, là où le niveau AA exige 4.5 sur du petit texte - et ces tags
 // sont en 10 px.
 //
 // Aucune nuance sombre de la même teinte ne s'en sortait : la palette n'en
-// possède pas pour le vert mousse. Le fond teinté est donc conservé — c'est lui
-// qui porte le code couleur — et le texte passe au gris pierre, conforme sur
+// possède pas pour le vert mousse. Le fond teinté est donc conservé - c'est lui
+// qui porte le code couleur - et le texte passe au gris pierre, conforme sur
 // toutes les variantes, de 5.23 pour bio à 9.07 pour season.
 //
 // Hex explicites pour garantir la génération JIT (évite les problèmes avec les clés imbriquées)

@@ -78,7 +78,7 @@ export function PrizesSection() {
 
             // L'URL distante d'abord : c'est elle qui permet de changer un
             // visuel sans redéployer. L'image empaquetée reste en repli, et
-            // couvre trois cas — Cloudinary non configuré, lot absent du
+            // couvre trois cas - Cloudinary non configuré, lot absent du
             // catalogue local, ou compte injoignable au moment du rendu.
             const imageSrc = prize.imageUrl ?? imgConfig?.src ?? '';
             const imageAlt = imgConfig?.alt ?? prize.name;

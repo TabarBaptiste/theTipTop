@@ -1,5 +1,5 @@
 // ===========================================
-// UC-01 / UC-02 — Inscription, connexion, controle d'acces
+// UC-01 / UC-02 - Inscription, connexion, controle d'acces
 // ===========================================
 // Deux choses se jouent ici. D'abord le parcours de compte lui-meme. Ensuite
 // une convention du projet qui n'existe qu'a l'execution : toute route
@@ -11,7 +11,7 @@ import { Role } from '@prisma/client';
 
 import { Contexte, adresse, demarrer, nettoyer } from './utils';
 
-describe('UC-01 / UC-02 — Comptes et controle d acces', () => {
+describe('UC-01 / UC-02 - Comptes et controle d acces', () => {
   let ctx: Contexte;
   let http: () => request.Agent;
 
@@ -227,8 +227,8 @@ describe('UC-01 / UC-02 — Comptes et controle d acces', () => {
         .expect(403);
     });
 
-    /** Inscrit un compte puis le promeut : aucune route ne permet — et ne doit
-     * permettre — de s'attribuer un role a soi-meme. */
+    /** Inscrit un compte puis le promeut : aucune route ne permet - et ne doit
+     * permettre - de s'attribuer un role a soi-meme. */
     async function compteAvecRole(prefixe: string, role: Role) {
       const email = adresse(prefixe);
       await http().post('/api/v1/auth/register').send(inscription(email)).expect(201);

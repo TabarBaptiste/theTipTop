@@ -183,7 +183,7 @@
      auparavant a 767px, ce qui laissait passer les tablettes : un iPad en
      portrait fait exactement 768px, et iOS zoome sous 16px quelle que soit la
      largeur de l'ecran. Le zoom est un comportement du tactile, pas de la
-     taille de fenetre — la requete le dit desormais. Une souris sur petit ecran
+     taille de fenetre - la requete le dit desormais. Une souris sur petit ecran
      garde donc les 14px de la charte.
 
      !important est ici necessaire, et non un raccourci : la taille vient de la

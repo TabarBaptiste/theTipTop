@@ -9,7 +9,7 @@ import { AuthGuard } from '@nestjs/passport';
 export class LocalAuthGuard extends AuthGuard('local') {
   /**
    * Conformément aux specs projet : jamais de 401, y compris sur l'échec
-   * d'authentification lui-même. Le message de la stratégie est conservé —
+   * d'authentification lui-même. Le message de la stratégie est conservé -
    * volontairement identique pour un mot de passe faux et pour une adresse
    * inconnue, afin de ne pas permettre d'énumérer les comptes.
    */

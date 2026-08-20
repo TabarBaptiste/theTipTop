@@ -3,7 +3,7 @@
 // ===========================================
 // La CNIL exige que le retrait soit aussi simple que l'acceptation. Ces tests
 // figent les deux sens, et surtout le rechargement : sans lui, gtag.js reste
-// charge en memoire et continue d'emettre apres le retrait — un arret purement
+// charge en memoire et continue d'emettre apres le retrait - un arret purement
 // declaratif.
 
 import { render, screen, fireEvent } from '@testing-library/react';

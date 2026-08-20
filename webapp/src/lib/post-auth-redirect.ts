@@ -2,8 +2,8 @@
 // Destination de retour après un aller-retour OAuth
 // ===========================================
 // Le fournisseur tiers renvoie toujours sur /auth/callback, qui redirige
-// ensuite vers l'espace personnel. Pour revenir ailleurs — la page de
-// participation, par exemple — il faut mémoriser la destination avant de
+// ensuite vers l'espace personnel. Pour revenir ailleurs - la page de
+// participation, par exemple - il faut mémoriser la destination avant de
 // partir.
 //
 // Le sessionStorage plutôt que le paramètre `state` d'OAuth : rien ne transite

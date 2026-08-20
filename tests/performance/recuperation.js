@@ -1,11 +1,11 @@
 // ===========================================
-// Profil 5 — Récupération
+// Profil 5 - Récupération
 // ===========================================
 // « Vérifie que la plateforme revient à un état nominal dans un délai
 // acceptable après un pic de charge intense. » (CCTD, §3.5)
 //
-// La question posée n'est pas « tient-elle le pic ? » — c'est l'objet du
-// profil 3 — mais « qu'en reste-t-il ensuite ? ». Une plateforme peut absorber
+// La question posée n'est pas « tient-elle le pic ? » - c'est l'objet du
+// profil 3 - mais « qu'en reste-t-il ensuite ? ». Une plateforme peut absorber
 // un afflux et rester durablement dégradée : connexions PostgreSQL non
 // rendues, cache invalidé en cascade, files d'attente encore pleines.
 //
