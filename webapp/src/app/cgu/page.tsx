@@ -297,7 +297,14 @@ export default function CGUPage() {
                   début du jeu-concours, sous le contrôle d&apos;un huissier de justice. La
                   répartition des lots est la suivante :
                 </p>
-                <div className="overflow-hidden rounded-card border border-warm-beige">
+                <div
+                  // Defilable plutot que coupe : a 375 px ces tableaux depassent
+                  // le cadre, et overflow-hidden rendait la derniere colonne
+                  // inatteignable. tabIndex rend la zone defilable au clavier,
+                  // sans quoi son contenu resterait hors de portee sans souris.
+                  tabIndex={0}
+                  className="overflow-x-auto rounded-card border border-warm-beige"
+                >
                   <table className="w-full text-sm">
                     <thead className="bg-noir text-white">
                       <tr>

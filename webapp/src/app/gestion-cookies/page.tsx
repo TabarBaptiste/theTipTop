@@ -282,8 +282,10 @@ export default function GestionCookiesPage() {
                       <p className="text-sm text-stone-grey">{cat.description}</p>
                     </div>
 
-                    {/* Tableau */}
-                    <div className="overflow-x-auto bg-white">
+                    {/* Tableau. Ce conteneur defilait deja horizontalement,
+                        mais sans etre atteignable au clavier : son contenu
+                        debordant restait hors de portee sans souris. */}
+                    <div tabIndex={0} className="overflow-x-auto bg-white">
                       <table className="w-full text-sm">
                         <thead className="border-b border-warm-beige bg-cream">
                           <tr>
@@ -391,7 +393,14 @@ export default function GestionCookiesPage() {
                   cookies déposés sur votre terminal ne dépasse pas <strong>13 mois</strong>.
                   Au-delà, votre consentement est à nouveau recueilli.
                 </p>
-                <div className="overflow-hidden rounded-card border border-warm-beige">
+                <div
+                  // Defilable plutot que coupe : a 375 px ces tableaux depassent
+                  // le cadre, et overflow-hidden rendait la derniere colonne
+                  // inatteignable. tabIndex rend la zone defilable au clavier,
+                  // sans quoi son contenu resterait hors de portee sans souris.
+                  tabIndex={0}
+                  className="overflow-x-auto rounded-card border border-warm-beige"
+                >
                   <table className="w-full text-sm">
                     <thead className="bg-noir text-white">
                       <tr>
@@ -484,7 +493,14 @@ export default function GestionCookiesPage() {
                   protection de vos données personnelles, contactez le responsable du
                   traitement :
                 </p>
-                <div className="overflow-hidden rounded-card border border-warm-beige bg-white">
+                <div
+                  // Defilable plutot que coupe : a 375 px ces tableaux depassent
+                  // le cadre, et overflow-hidden rendait la derniere colonne
+                  // inatteignable. tabIndex rend la zone defilable au clavier,
+                  // sans quoi son contenu resterait hors de portee sans souris.
+                  tabIndex={0}
+                  className="overflow-x-auto rounded-card border border-warm-beige bg-white"
+                >
                   <table className="w-full text-sm">
                     <tbody className="divide-y divide-warm-beige">
                       {[

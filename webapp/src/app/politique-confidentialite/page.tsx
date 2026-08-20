@@ -108,7 +108,14 @@ export default function PolitiqueConfidentialitePage() {
               </h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
                 <p>Le responsable du traitement des données personnelles collectées sur ce site est :</p>
-                <div className="overflow-hidden rounded-card border border-warm-beige bg-white">
+                <div
+                  // Defilable plutot que coupe : a 375 px ces tableaux depassent
+                  // le cadre, et overflow-hidden rendait la derniere colonne
+                  // inatteignable. tabIndex rend la zone defilable au clavier,
+                  // sans quoi son contenu resterait hors de portee sans souris.
+                  tabIndex={0}
+                  className="overflow-x-auto rounded-card border border-warm-beige bg-white"
+                >
                   <table className="w-full text-sm">
                     <tbody className="divide-y divide-warm-beige">
                       {[
@@ -208,7 +215,14 @@ export default function PolitiqueConfidentialitePage() {
               </h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
                 <p>Vos données sont traitées pour les finalités suivantes :</p>
-                <div className="overflow-hidden rounded-card border border-warm-beige">
+                <div
+                  // Defilable plutot que coupe : a 375 px ces tableaux depassent
+                  // le cadre, et overflow-hidden rendait la derniere colonne
+                  // inatteignable. tabIndex rend la zone defilable au clavier,
+                  // sans quoi son contenu resterait hors de portee sans souris.
+                  tabIndex={0}
+                  className="overflow-x-auto rounded-card border border-warm-beige"
+                >
                   <table className="w-full text-sm">
                     <thead className="bg-noir text-white">
                       <tr>
@@ -271,7 +285,14 @@ export default function PolitiqueConfidentialitePage() {
                 Article 5 - Durée de conservation
               </h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
-                <div className="overflow-hidden rounded-card border border-warm-beige">
+                <div
+                  // Defilable plutot que coupe : a 375 px ces tableaux depassent
+                  // le cadre, et overflow-hidden rendait la derniere colonne
+                  // inatteignable. tabIndex rend la zone defilable au clavier,
+                  // sans quoi son contenu resterait hors de portee sans souris.
+                  tabIndex={0}
+                  className="overflow-x-auto rounded-card border border-warm-beige"
+                >
                   <table className="w-full text-sm">
                     <thead className="bg-noir text-white">
                       <tr>
