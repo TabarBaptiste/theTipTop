@@ -1,0 +1,15 @@
+{
+  // Contexte de typage propre aux tests de bout en bout.
+  //
+  // Les types de Cypress embarquent ceux de Chai, dont le `expect` global entre
+  // en conflit avec celui de Jest. Les isoler ici permet aux specs de rester
+  // typees sans que ce conflit atteigne l'application ni les tests unitaires.
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "types": ["cypress", "node"],
+    // Le fichier de configuration Cypress vit un niveau au-dessus.
+    "rootDir": ".."
+  },
+  "include": ["**/*.ts", "../cypress.config.ts"],
+  "exclude": ["../node_modules"]
+}
