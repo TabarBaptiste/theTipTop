@@ -109,7 +109,14 @@ export default function MentionsLegalesPage() {
                   Le site internet accessible à l&apos;adresse{' '}
                   <strong>thetiptop.dsp5-archi-o24a-4-5-g1.fr</strong> est édité par :
                 </p>
-                <div className="overflow-hidden rounded-card border border-warm-beige bg-white">
+                <div
+                  // Defilable plutot que coupe : a 375 px ces tableaux depassent
+                  // le cadre, et overflow-hidden rendait la derniere colonne
+                  // inatteignable. tabIndex rend la zone defilable au clavier,
+                  // sans quoi son contenu resterait hors de portee sans souris.
+                  tabIndex={0}
+                  className="overflow-x-auto rounded-card border border-warm-beige bg-white"
+                >
                   <table className="w-full text-sm">
                     <tbody className="divide-y divide-warm-beige">
                       {[
@@ -155,7 +162,14 @@ export default function MentionsLegalesPage() {
               <h2 className="font-display text-h2 text-noir">Article 2 - Hébergeur</h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
                 <p>Le site est hébergé par :</p>
-                <div className="overflow-hidden rounded-card border border-warm-beige bg-white">
+                <div
+                  // Defilable plutot que coupe : a 375 px ces tableaux depassent
+                  // le cadre, et overflow-hidden rendait la derniere colonne
+                  // inatteignable. tabIndex rend la zone defilable au clavier,
+                  // sans quoi son contenu resterait hors de portee sans souris.
+                  tabIndex={0}
+                  className="overflow-x-auto rounded-card border border-warm-beige bg-white"
+                >
                   <table className="w-full text-sm">
                     <tbody className="divide-y divide-warm-beige">
                       {[

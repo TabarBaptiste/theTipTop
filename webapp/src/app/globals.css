@@ -179,8 +179,12 @@
      volontaire, dont dependent les personnes malvoyantes. C'est un echec
      WCAG 1.4.4 pour un confort de developpeur.
 
-     La regle s'arrete au point de rupture md : au-dela, on est sur un ecran
-     large ou la charte impose ses 14px.
+     La regle cible les appareils tactiles, non une largeur. Elle s'arretait
+     auparavant a 767px, ce qui laissait passer les tablettes : un iPad en
+     portrait fait exactement 768px, et iOS zoome sous 16px quelle que soit la
+     largeur de l'ecran. Le zoom est un comportement du tactile, pas de la
+     taille de fenetre — la requete le dit desormais. Une souris sur petit ecran
+     garde donc les 14px de la charte.
 
      !important est ici necessaire, et non un raccourci : la taille vient de la
      classe utilitaire .text-body posee par le composant Input. Un selecteur
@@ -190,7 +194,7 @@
 
      Les cases a cocher et boutons radio sont exclus : ils ne declenchent aucun
      zoom et leur taille ne depend pas de la police. */
-  @media (max-width: 767px) {
+  @media (hover: none) and (pointer: coarse) {
     input:not([type='checkbox']):not([type='radio']),
     select,
     textarea {
