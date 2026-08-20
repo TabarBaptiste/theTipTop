@@ -130,7 +130,7 @@ describe('Header', () => {
     signedInAs('ADMIN');
     render(<Header />);
 
-    const links = screen.getAllByRole('link', { name: 'Admin' });
+    const links = screen.getAllByRole('link', { name: 'Administration' });
     expect(links.length).toBeGreaterThan(0);
     links.forEach((link) => expect(link).toHaveAttribute('href', '/admin'));
   });
@@ -142,5 +142,33 @@ describe('Header', () => {
     const links = screen.getAllByRole('link', { name: 'Espace employé' });
     expect(links.length).toBeGreaterThan(0);
     links.forEach((link) => expect(link).toHaveAttribute('href', '/employee'));
+  });
+
+  // Le personnel pilote l'opération, il n'y joue pas : lui proposer l'espace
+  // personnel l'enverrait sur une page vide.
+  it.each(['ADMIN', 'EMPLOYEE'] as const)(
+    'ne propose pas Mes participations a un compte %s',
+    (role) => {
+      signedInAs(role);
+      render(<Header />);
+
+      expect(screen.queryByRole('link', { name: 'Mes participations' })).not.toBeInTheDocument();
+    },
+  );
+
+  it('propose Mes participations a un compte CLIENT', () => {
+    signedInAs('CLIENT');
+    render(<Header />);
+
+    expect(screen.getAllByRole('link', { name: 'Mes participations' }).length).toBeGreaterThan(0);
+  });
+
+  // Le compte du personnel ouvre un menu au lieu de mener directement au
+  // profil : c'est ce qui evite un second bouton dans la barre.
+  it('replie le backoffice sous un bouton pour le personnel', () => {
+    signedInAs('ADMIN');
+    render(<Header />);
+
+    expect(screen.getByRole('button', { name: /Jean/ })).toBeInTheDocument();
   });
 });
