@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Lock, BarChart2 } from 'lucide-react';
+import { CookiePreferences } from '@/components/cookies/cookie-preferences';
 import { formatFrenchDate } from '@/lib/french-date';
 import { LEGAL_UPDATED_AT } from '@/lib/legal-dates';
 
@@ -327,6 +328,14 @@ export default function GestionCookiesPage() {
               <h2 className="font-display text-h2 text-noir">
                 Article 4 - Gestion du consentement
               </h2>
+
+              {/* La commande précède le texte explicatif : c'est ce que vient
+                  chercher un visiteur arrivé ici depuis le bandeau, qui lui
+                  promet de pouvoir changer d'avis. */}
+              <div className="mt-4">
+                <CookiePreferences />
+              </div>
+
               <div className="mt-4 space-y-4 text-body text-stone-grey">
                 <p>
                   Lors de votre première visite sur le site, un bandeau de gestion des cookies
