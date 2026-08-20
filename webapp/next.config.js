@@ -2,6 +2,9 @@
 const nextConfig = {
   output: 'standalone',
   reactStrictMode: true,
+  // Chaque reponse annoncait « X-Powered-By: Next.js ». Ce n'est pas une faille
+  // en soi, mais cela oriente vers les CVE du framework et de sa version.
+  poweredByHeader: false,
   // Repertoire de sortie parametrable. Un build de production ecrit sinon dans
   // le meme .next que le serveur de developpement, qu'il interrompt : mesurer
   // les performances obligeait donc a arreter son environnement de travail.
@@ -56,6 +59,14 @@ const nextConfig = {
           {
             key: 'Referrer-Policy',
             value: 'origin-when-cross-origin',
+          },
+          {
+            // Aucune page n'utilise ces API. Les refuser explicitement empeche
+            // qu'un script injecte, ou une iframe tierce, y accede au nom du
+            // site.
+            key: 'Permissions-Policy',
+            value:
+              'camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=()',
           },
         ],
       },
