@@ -10,7 +10,7 @@ import { LEGAL_UPDATED_AT } from '@/lib/legal-dates';
  * le fichier lui-même : les robots récoltaient un 404 à chaque passage.
  *
  * Seules les pages publiques y figurent. L'espace personnel, les back-offices
- * et le tunnel d'authentification en sont exclus — ils sont déjà interdits au
+ * et le tunnel d'authentification en sont exclus - ils sont déjà interdits au
  * crawl par robots.txt, et les référencer ici serait contradictoire.
  */
 const BASE_URL =

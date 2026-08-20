@@ -30,8 +30,8 @@ export function buildPlaceholderEmail(facebookId: string): string {
  * est deja portee par l'adresse, et une migration de plus sur ce projet ne se
  * justifie pas pour une donnee derivable sans ambiguite.
  *
- * Tout ce qui suppose un envoi — confirmation de participation, annonce du lot,
- * relances — doit s'appuyer sur cette fonction plutot que sur une comparaison
+ * Tout ce qui suppose un envoi - confirmation de participation, annonce du lot,
+ * relances - doit s'appuyer sur cette fonction plutot que sur une comparaison
  * de chaine dispersee dans le code.
  */
 export function isPlaceholderEmail(email: string | null | undefined): boolean {

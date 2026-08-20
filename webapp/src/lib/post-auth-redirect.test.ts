@@ -4,7 +4,7 @@
 // Ce module porte une garde de securite : la destination memorisee est
 // restituee telle quelle a router.replace. Sans filtrage, une valeur commencant
 // par « // » ou par un protocole enverrait l'utilisateur sur un site tiers juste
-// apres sa connexion — une redirection ouverte, d'autant plus credible qu'elle
+// apres sa connexion - une redirection ouverte, d'autant plus credible qu'elle
 // survient au moment ou il vient de saisir ses identifiants.
 
 import {

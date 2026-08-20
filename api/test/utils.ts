@@ -47,7 +47,7 @@ export interface Contexte {
  * Un test fonctionnel ne doit pas appeler le prestataire d'emailing : il
  * expedierait de vrais messages a chaque execution, et dependrait d'un service
  * tiers pour passer. On garde en revanche la trace exacte des appels, ce qui
- * permet d'affirmer non seulement qu'un email part, mais avec quel contenu —
+ * permet d'affirmer non seulement qu'un email part, mais avec quel contenu -
  * le code de verification lu ici est celui que le destinataire recevrait.
  */
 function faireUnMailDeTest(envois: Envoi[]): Partial<MailService> {

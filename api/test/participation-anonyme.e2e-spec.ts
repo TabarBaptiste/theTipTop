@@ -1,10 +1,10 @@
 // ===========================================
-// UC-05 — Participer au jeu-concours sans compte
+// UC-05 - Participer au jeu-concours sans compte
 // ===========================================
 // Le parcours est verifie de bout en bout a travers la couche HTTP reelle :
 // meme validation, memes gardes, meme base. Les tests unitaires existants
 // couvrent chaque service isolement ; ce qu'ils ne peuvent pas montrer, c'est
-// que l'enchainement tient — qu'un code saisi sur le site finit reellement en
+// que l'enchainement tient - qu'un code saisi sur le site finit reellement en
 // participation, et qu'un ticket ne peut pas etre joue deux fois.
 
 import request from 'supertest';
@@ -20,7 +20,7 @@ import {
   reinitialiserQuota,
 } from './utils';
 
-describe('UC-05 — Participation sans compte', () => {
+describe('UC-05 - Participation sans compte', () => {
   let ctx: Contexte;
   let refermerLeJeu: () => Promise<void>;
   let http: () => request.Agent;
@@ -255,8 +255,8 @@ describe('UC-05 — Participation sans compte', () => {
     it('refuse un champ non prevu par le contrat', async () => {
       const ticket = await creerTicket(ctx, 7);
 
-      // forbidNonWhitelisted : un client qui inventerait un champ — role,
-      // prizeType — doit etre repousse, pas ignore silencieusement.
+      // forbidNonWhitelisted : un client qui inventerait un champ - role,
+      // prizeType - doit etre repousse, pas ignore silencieusement.
       await http()
         .post('/api/v1/participations/initiate')
         .send({ ...ouverture(ticket.code, adresse('injection')), role: 'ADMIN' })
@@ -350,7 +350,7 @@ describe('UC-05 — Participation sans compte', () => {
   });
 
   // ===========================================
-  // RG-01 — Mode silencieux
+  // RG-01 - Mode silencieux
   // ===========================================
   describe('Adresse deja engagee (RG-01)', () => {
     it('repond comme au premier passage, sans creer de seconde demande', async () => {
@@ -386,14 +386,14 @@ describe('UC-05 — Participation sans compte', () => {
   });
 
   // ===========================================
-  // RG-03 — Plafond horaire par adresse IP
+  // RG-03 - Plafond horaire par adresse IP
   // ===========================================
   describe('Plafond de tentatives (RG-03)', () => {
     it('refuse la onzieme ouverture de la meme heure', async () => {
       // Les dix premieres franchissent le quota, quel que soit leur sort
       // metier : le compteur s'incremente avant toute verification de code.
       // On l'affirme explicitement, sans quoi le test passerait aussi si le
-      // plafond se declenchait des la premiere — pour la mauvaise raison.
+      // plafond se declenchait des la premiere - pour la mauvaise raison.
       const statuts: number[] = [];
       for (let i = 0; i < 10; i++) {
         const r = await http()
@@ -411,7 +411,7 @@ describe('UC-05 — Participation sans compte', () => {
   });
 
   // ===========================================
-  // RG-07 — Verrou entre deux renvois
+  // RG-07 - Verrou entre deux renvois
   // ===========================================
   describe('Renvoi du code (RG-07)', () => {
     it('refuse un renvoi immediat', async () => {

@@ -7,7 +7,7 @@
 //
 // Aucune dépendance au SDK Cloudinary : une URL de livraison se construit, elle
 // ne se demande pas. Le projet appelle déjà Brevo en REST direct pour la même
-// raison — une dépendance de moins à suivre.
+// raison - une dépendance de moins à suivre.
 
 /**
  * Identifiant Cloudinary de chaque visuel de lot, par code de lot.
@@ -44,7 +44,7 @@ export function buildImageUrl(cloudName: string, publicId: string): string {
  * lot n'a pas de visuel connu.
  *
  * Renvoyer `null` plutôt que d'échouer est délibéré : la seed doit rester
- * exécutable sans compte Cloudinary — en local comme en intégration continue —
+ * exécutable sans compte Cloudinary - en local comme en intégration continue -
  * et l'interface retombe alors sur ses images empaquetées.
  */
 export function buildPrizeImageUrl(code: string, cloudName: string | undefined): string | null {

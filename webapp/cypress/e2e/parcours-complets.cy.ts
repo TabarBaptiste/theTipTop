@@ -8,7 +8,7 @@
 // C'est le seul niveau où certaines choses se voient. Les tests fonctionnels
 // de l'API couvrent la logique métier ; ils ne peuvent rien dire du rendu
 // serveur de Next, de l'hydratation, du store de session ni des redirections
-// côté client — précisément là où plusieurs défauts sont apparus.
+// côté client - précisément là où plusieurs défauts sont apparus.
 //
 // Aucun `cy.intercept` ici, volontairement : une réponse simulée ne prouve
 // jamais que le front et le back s'accordent.
@@ -36,8 +36,8 @@ const MARQUEUR = `cy${Date.now()}`;
  * Délai laissé à une page pour devenir interactive.
  *
  * Les formulaires restent volontairement désactivés tant que la page n'est pas
- * hydratée : non hydraté, un formulaire part en GET et recopie ses champs —
- * dont le mot de passe — dans l'URL. Attendre cet état fait donc partie du
+ * hydratée : non hydraté, un formulaire part en GET et recopie ses champs -
+ * dont le mot de passe - dans l'URL. Attendre cet état fait donc partie du
  * parcours, ce n'est pas un contournement.
  *
  * La valeur est large parce qu'en développement le serveur compile chaque
@@ -77,7 +77,7 @@ describe('Parcours complets', () => {
   /**
    * Se connecte par le formulaire, comme le ferait un participant.
    *
-   * Le bouton reste désactivé tant que la page n'est pas hydratée — un
+   * Le bouton reste désactivé tant que la page n'est pas hydratée - un
    * formulaire non hydraté partirait en GET et recopierait le mot de passe
    * dans l'URL. Il faut donc attendre qu'il s'active plutôt que de cliquer
    * aussitôt : en développement, la compilation à la demande repousse
@@ -136,7 +136,7 @@ describe('Parcours complets', () => {
   });
 
   // ===========================================
-  // UC-06 — Participer depuis son espace personnel
+  // UC-06 - Participer depuis son espace personnel
   // ===========================================
   describe('Participation, de la connexion au lot', () => {
     let code: string;
@@ -239,7 +239,7 @@ describe('Parcours complets', () => {
   });
 
   // ===========================================
-  // UC-01 / UC-02 — Créer un compte et s'en servir
+  // UC-01 / UC-02 - Créer un compte et s'en servir
   // ===========================================
   describe('Inscription puis espace personnel', () => {
     const email = `${MARQUEUR}@simulation.invalid`;
@@ -302,8 +302,8 @@ describe('Parcours complets', () => {
       // Le middleware lit le role dans le cookie et renvoie ailleurs.
       cy.location('pathname', { timeout: HYDRATATION }).should('not.include', '/employee');
 
-      // Et l'interface de remise des lots — qui existe reellement sur cette
-      // page — n'apparait pas. Sans cette seconde assertion, le test passerait
+      // Et l'interface de remise des lots - qui existe reellement sur cette
+      // page - n'apparait pas. Sans cette seconde assertion, le test passerait
       // aussi si la page etait simplement vide.
       cy.contains(/remise du lot|Espace Employ/i).should('not.exist');
     });

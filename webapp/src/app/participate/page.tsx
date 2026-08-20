@@ -265,7 +265,7 @@ export default function ParticipatePage() {
         {/* Affiché sous le formulaire, et seulement avant la saisie : une fois
             le code envoyé, ces explications n'ont plus lieu d'être et
             distrairaient du résultat. Elles répondent aux deux questions qui
-            reviennent le plus — où est le code, et que se passe-t-il ensuite. */}
+            reviennent le plus - où est le code, et que se passe-t-il ensuite. */}
         {step === 'form' && (
           <div className="mt-8 border-t border-warm-beige pt-6 text-sm leading-relaxed text-stone-grey">
             <h2 className="font-display text-lg text-noir">Où trouver votre code ?</h2>

@@ -33,7 +33,7 @@ describe('HealthController', () => {
 
   // Aucune dépendance injectée : la sonde doit répondre même si la base ou
   // Redis sont indisponibles. Dans le cas contraire, une panne de base
-  // empêcherait tout redéploiement — y compris celui qui la corrigerait.
+  // empêcherait tout redéploiement - y compris celui qui la corrigerait.
   it('should answer without any injected dependency', () => {
     expect(() => controller.check()).not.toThrow();
   });

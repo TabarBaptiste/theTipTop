@@ -47,7 +47,7 @@ export function formatFrenchDateTime(date: Date): string {
 /**
  * « Du 1er au 30 septembre 2026 ».
  *
- * Le mois et l'année ne sont pas répétés quand les deux bornes les partagent —
+ * Le mois et l'année ne sont pas répétés quand les deux bornes les partagent -
  * l'usage en français, et quinze caractères de moins, ce qui évite un retour à
  * la ligne disgracieux sur les largeurs intermédiaires. Si les bornes changent
  * de mois, on retombe sur les deux dates entières.

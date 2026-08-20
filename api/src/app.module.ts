@@ -31,7 +31,7 @@ import { HealthModule } from './modules/health/health.module';
     }),
 
     // Rate limiting par IP, sur trois paliers : la rafale, la minute, l'heure
-    // de pointe. Les plafonds sont configurables — sans quoi une campagne de
+    // de pointe. Les plafonds sont configurables - sans quoi une campagne de
     // charge, émise depuis une seule adresse, ne mesurerait que le limiteur.
     // Les valeurs par défaut sont celles de production.
     ThrottlerModule.forRootAsync({

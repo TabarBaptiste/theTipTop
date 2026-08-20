@@ -201,7 +201,7 @@ async function verifierCycleDeVie(): Promise<string[]> {
         const avant = await service.canDraw();
         constats.push(
           avant.canDraw === false && avant.reason?.includes('pas encore terminé')
-            ? 'OK|jeu en cours : tirage refusé — ' + avant.reason
+            ? 'OK|jeu en cours : tirage refusé - ' + avant.reason
             : `KO|jeu en cours : tirage autorisé à tort (${JSON.stringify(avant)})`,
         );
 
@@ -233,7 +233,7 @@ async function verifierCycleDeVie(): Promise<string[]> {
           const message = error instanceof Error ? error.message : String(error);
           constats.push(
             message.includes('déjà')
-              ? `OK|second tirage refusé — ${message}`
+              ? `OK|second tirage refusé - ${message}`
               : `KO|second tirage refusé pour une mauvaise raison : ${message}`,
           );
         }
@@ -338,7 +338,7 @@ function main() {
     if (biaisDetecte) {
       ko('un profil est avantagé : la règle du règlement n’est pas respectée');
     } else {
-      ok('aucun profil avantagé — 40 participations ne valent pas plus qu’une');
+      ok('aucun profil avantagé - 40 participations ne valent pas plus qu’une');
     }
 
     // --- Garantie 4 : un seul gagnant, même en concurrence ----------------

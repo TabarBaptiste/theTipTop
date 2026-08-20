@@ -2,7 +2,7 @@
 // Tests unitaires - Participation d'un compte deja connecte
 // ===========================================
 // Chemin le plus court du jeu : l'identite est deja etablie, seul le code est
-// demande. Le ticket est consomme des la soumission — une saisie invalide qui
+// demande. Le ticket est consomme des la soumission - une saisie invalide qui
 // passerait ferait perdre un code au participant.
 
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';

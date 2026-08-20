@@ -3,7 +3,7 @@
 // ===========================================
 // Les noms d'evenements sont un contrat avec Google Analytics : les tableaux de
 // bord, les objectifs de conversion et les rapports du cahier des charges s'y
-// referent. En renommer un ne casse rien visiblement — la mesure s'arrete
+// referent. En renommer un ne casse rien visiblement - la mesure s'arrete
 // simplement, et l'historique devient incomparable.
 
 import {

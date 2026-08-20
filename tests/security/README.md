@@ -1,7 +1,7 @@
 # Tests de sécurité
 
-Le protocole complet — quand chaque contrôle est déclenché, ce qui bloque, et
-comment traiter une découverte — est dans
+Le protocole complet - quand chaque contrôle est déclenché, ce qui bloque, et
+comment traiter une découverte - est dans
 [docs/05-PROTOCOLES-DE-TESTS.md](../../docs/05-PROTOCOLES-DE-TESTS.md). Ce
 fichier ne couvre que la mise en œuvre.
 
@@ -26,7 +26,7 @@ lisible dans le répertoire monté.
 ### Le fichier de règles
 
 `zap-baseline.tsv` classe chaque règle en IGNORE, WARN ou FAIL, avec sa
-justification. Trois colonnes séparées par des **tabulations** — un fichier mal
+justification. Trois colonnes séparées par des **tabulations** - un fichier mal
 formé fait sortir ZAP en code 3 sans message explicite.
 
 Règle de tenue : une alerte n'est écartée qu'après avoir été comprise, et la
@@ -45,7 +45,7 @@ qui est réellement déployé de l'outillage de développement :
 npm audit --omit=dev
 ```
 
-Une vulnérabilité dans un outil de test n'expose pas la plateforme — la
+Une vulnérabilité dans un outil de test n'expose pas la plateforme - la
 distinction est le premier réflexe de tri.
 
 ## Secrets
@@ -56,5 +56,5 @@ Aucune action manuelle n'est requise ; un secret détecté annule le commit.
 ## Images Docker
 
 Trivy s'exécute dans le pipeline Jenkins à chaque build d'image. Les CVE non
-actionnables — système de l'image de base, dépendances vendorisées dans Next —
+actionnables - système de l'image de base, dépendances vendorisées dans Next -
 sont listées et justifiées dans `.trivyignore` à la racine.

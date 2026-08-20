@@ -1,5 +1,5 @@
 // ===========================================
-// Profil 4 — Stress
+// Profil 4 - Stress
 // ===========================================
 // « Pousse délibérément la plateforme au-delà de ses limites pour identifier
 // son point de rupture et vérifier qu'elle se dégrade gracieusement plutôt que
@@ -7,7 +7,7 @@
 //
 // Ce profil est le seul dont l'échec applicatif est attendu : on cherche le
 // point de rupture. Lui appliquer les seuils nominaux ferait échouer le test
-// pour la raison même de son existence — d'où des seuils desserrés, qui ne
+// pour la raison même de son existence - d'où des seuils desserrés, qui ne
 // vérifient qu'une chose : que la dégradation reste graduelle.
 
 import { SEUILS_RUPTURE, SMOKE, STATS, parcoursParticipant, resumeVers } from './config.js';

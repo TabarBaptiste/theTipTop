@@ -55,7 +55,7 @@ export class MailService {
   async sendVerificationCode(to: string, code: string, expiresAt: Date): Promise<boolean> {
     return this.send({
       to,
-      subject: `${code} — votre code de participation Thé Tip Top`,
+      subject: `${code} - votre code de participation Thé Tip Top`,
       debugCode: code,
       html: this.layout(
         'Confirmez votre participation',
@@ -98,7 +98,7 @@ export class MailService {
   async sendEmailConfirmation(to: string, code: string, expiresAt: Date): Promise<boolean> {
     return this.send({
       to,
-      subject: `${code} — confirmez votre adresse Thé Tip Top`,
+      subject: `${code} - confirmez votre adresse Thé Tip Top`,
       debugCode: code,
       html: this.layout(
         'Confirmez votre adresse',
@@ -127,7 +127,7 @@ export class MailService {
     code: string,
     claimEndDate?: Date | null,
   ): Promise<boolean> {
-    const value = prize.value ? ` — d'une valeur de ${prize.value}` : '';
+    const value = prize.value ? ` - d'une valeur de ${prize.value}` : '';
 
     return this.send({
       to,
@@ -149,8 +149,8 @@ export class MailService {
   /**
    * Le délai de confirmation est écoulé.
    *
-   * Le ticket n'a jamais été consommé — il ne l'est qu'à la confirmation de
-   * l'email — donc rien n'est perdu. Le message indique le temps restant pour
+   * Le ticket n'a jamais été consommé - il ne l'est qu'à la confirmation de
+   * l'email - donc rien n'est perdu. Le message indique le temps restant pour
    * recommencer, borné par la fin de la période de réclamation du jeu.
    */
   async sendExpirationNotice(to: string, claimEndDate?: Date | null): Promise<boolean> {
@@ -206,7 +206,7 @@ export class MailService {
    * À ce stade le lead est créé et le ticket réservé : faire échouer la requête
    * HTTP afficherait une erreur à l'utilisateur alors que sa participation est
    * bien enregistrée, et l'inciterait à recommencer sur un ticket désormais
-   * bloqué. On journalise en erreur — le monitoring le voit — et l'utilisateur
+   * bloqué. On journalise en erreur - le monitoring le voit - et l'utilisateur
    * dispose du bouton de renvoi.
    */
   private async send(payload: MailPayload): Promise<boolean> {
@@ -245,7 +245,7 @@ export class MailService {
         return false;
       }
 
-      this.logger.log(`Email envoyé à ${this.maskEmail(payload.to)} — ${payload.subject}`);
+      this.logger.log(`Email envoyé à ${this.maskEmail(payload.to)} - ${payload.subject}`);
       return true;
     } catch (error) {
       this.logger.error(

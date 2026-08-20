@@ -10,11 +10,22 @@ import { ConditionalAnalytics } from '@/components/layout/conditional-analytics'
 import { StructuredData } from '@/components/seo/structured-data';
 import { ORGANIZATION_SCHEMA, WEBSITE_SCHEMA } from '@/lib/organization-schema';
 
+// 'optional' et non 'swap' : la substitution de Montserrat, qui porte tout le
+// texte courant, reflue les paragraphes et pousse le bloc de boutons du hero.
+// Elle comptait a elle seule pour 0,188 du CLS de 0,19 mesure sur l'accueil.
+//
+// Avec 'optional', la police n'est utilisee que si elle arrive a temps ; sinon
+// le rendu reste sur la police de repli, dont next/font ajuste deja les
+// metriques. Elle est prechargee et mise en cache des la premiere visite, donc
+// le cas de repli reste marginal.
+//
+// Playfair garde 'swap' : elle porte les titres, son decalage mesure est
+// negligeable (0,0015), et c'est elle qui porte l'identite de la marque.
 const montserrat = Montserrat({
   subsets: ['latin'],
   variable: '--font-montserrat',
   weight: ['400', '600', '700'],
-  display: 'swap',
+  display: 'optional',
 });
 
 const playfair = Playfair_Display({
@@ -124,8 +135,12 @@ export default function RootLayout({
                 error: 'border-terracotta-warm text-terracotta-warm',
                 warning: 'border-gold-600 text-gold-600',
                 info: 'border-terracotta-500 text-terracotta-500',
+                // terracotta-600 et non 500 : sur fond 500, le texte blanc
+                // plafonne a 4,11:1, sous le minimum de 4,5:1 exige par WCAG AA
+                // pour du texte normal. C'est aussi la teinte du systeme de
+                // boutons, ce bouton n'avait pas de raison d'en differer.
                 actionButton:
-                  'rounded-full bg-terracotta-500 px-sm py-2xs text-ui font-bold uppercase tracking-widest text-white',
+                  'rounded-full bg-terracotta-600 px-sm py-2xs text-ui font-bold uppercase tracking-widest text-white',
                 cancelButton: 'rounded-full bg-warm-beige px-sm py-2xs text-ui font-bold uppercase tracking-widest text-noir',
                 closeButton: 'border-warm-beige text-stone',
               },

@@ -1,5 +1,5 @@
 // ===========================================
-// Profil 1 — Montée en charge
+// Profil 1 - Montée en charge
 // ===========================================
 // « De 10 à 500 utilisateurs simultanés en dix minutes, pour identifier le
 // seuil à partir duquel les temps de réponse se dégradent et les premiers

@@ -73,7 +73,7 @@ export function AccountSidebar() {
                   'flex items-center gap-3 rounded-soft px-3 py-2.5 text-sm transition-colors',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-terracotta-deep focus-visible:ring-offset-2',
                   // La maquette distingue l'entrée active par la graisse, sans
-                  // pastille de fond — un terracotta-50 sur ce panneau crème
+                  // pastille de fond - un terracotta-50 sur ce panneau crème
                   // serait de toute façon indiscernable (1.03 d'écart).
                   // terracotta-600 et non deep : #BA6905 tombe à 3.89:1 ici,
                   // sous le seuil AA.

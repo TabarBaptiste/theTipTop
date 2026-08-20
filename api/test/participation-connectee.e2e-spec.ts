@@ -1,9 +1,9 @@
 // ===========================================
-// UC-06 — Soumettre un code depuis son espace personnel
+// UC-06 - Soumettre un code depuis son espace personnel
 // ===========================================
 // Couvre le second chemin de participation : celui d'un compte deja actif, qui
 // poste un code sans repasser par la verification email. On y verifie aussi les
-// deux garde-fous qui n'existent qu'a ce niveau — le verrou transactionnel sur
+// deux garde-fous qui n'existent qu'a ce niveau - le verrou transactionnel sur
 // le ticket, et le refus des comptes sans adresse joignable.
 
 import request from 'supertest';
@@ -11,7 +11,7 @@ import { PrizeType } from '@prisma/client';
 
 import { Contexte, MARQUEUR, adresse, creerTicket, demarrer, nettoyer, ouvrirLeJeu } from './utils';
 
-describe('UC-06 — Participation depuis l espace personnel', () => {
+describe('UC-06 - Participation depuis l espace personnel', () => {
   let ctx: Contexte;
   let refermerLeJeu: () => Promise<void>;
   let http: () => request.Agent;
@@ -209,7 +209,7 @@ describe('UC-06 — Participation depuis l espace personnel', () => {
   describe('Fenetre de jeu', () => {
     /**
      * Deplace la fenetre de jeu le temps d'une verification, puis la remet en
-     * place — y compris si l'assertion echoue, la configuration etant partagee
+     * place - y compris si l'assertion echoue, la configuration etant partagee
      * avec l'environnement de developpement.
      */
     async function avecFenetre(

@@ -21,8 +21,8 @@ export const API_URL = __ENV.API_URL || 'http://host.docker.internal:3001/api/v1
 /**
  * Réduit chaque profil à quelques secondes.
  *
- * Sert à vérifier qu'un scénario s'exécute — syntaxe, cibles joignables,
- * seuils bien nommés — avant de lancer une campagne de trente minutes. Ce
+ * Sert à vérifier qu'un scénario s'exécute - syntaxe, cibles joignables,
+ * seuils bien nommés - avant de lancer une campagne de trente minutes. Ce
  * n'est pas une mesure : les chiffres produits sous SMOKE n'ont aucune valeur.
  */
 export const SMOKE = __ENV.SMOKE === '1';
@@ -82,8 +82,8 @@ export const dureeVerification = new Trend('duree_verification', true);
  *
  * Un test de charge ne doit consommer aucun ticket : le parcours complet
  * brûlerait des lots réels à chaque exécution. La vérification d'un code
- * absent emprunte le même chemin — validation du format, lecture indexée du
- * ticket, chargement de la table des lots depuis Redis — sans rien écrire.
+ * absent emprunte le même chemin - validation du format, lecture indexée du
+ * ticket, chargement de la table des lots depuis Redis - sans rien écrire.
  * Seule la branche finale d'attribution n'est pas couverte, et elle relève des
  * tests fonctionnels, pas de la mesure de charge.
  */
@@ -98,7 +98,7 @@ function codeInexistant() {
 
 /**
  * Une itération de participant : il arrive sur le site, consulte les lots,
- * puis tente un code. Proportions volontairement simples — l'objet est de
+ * puis tente un code. Proportions volontairement simples - l'objet est de
  * charger les trois tiers (rendu Next, API, PostgreSQL/Redis), pas de
  * reproduire une pyramide d'audience.
  */
@@ -128,7 +128,7 @@ export function parcoursParticipant() {
     dureeVerification.add(r.timings.duration);
 
     // 200 attendu : l'endpoint répond toujours, en signalant dans son corps
-    // que le code est inconnu. Un 4xx/5xx signifierait une défaillance — un
+    // que le code est inconnu. Un 4xx/5xx signifierait une défaillance - un
     // 429 en particulier, qui indiquerait que la limitation de débit fausse la
     // mesure (voir docs/05-PROTOCOLES-DE-TESTS.md).
     check(r, {

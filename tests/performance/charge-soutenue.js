@@ -1,5 +1,5 @@
 // ===========================================
-// Profil 2 — Charge soutenue
+// Profil 2 - Charge soutenue
 // ===========================================
 // « Maintient un niveau de trafic constant correspondant à l'usage nominal
 // prévu pendant trente minutes, pour détecter les dégradations progressives

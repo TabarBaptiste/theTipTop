@@ -29,7 +29,7 @@ trois profils qu'une série de quinze sur un seul.
 
 | Profil | Nombre | Pourquoi lui |
 |---|---|---|
-| Cœur de cible — femmes 28-45 ans, CSP++, urbaines | 5 | Segment prioritaire en valeur et en prescription. C'est son verdict qui décide de la diffusion organique. |
+| Cœur de cible - femmes 28-45 ans, CSP++, urbaines | 5 | Segment prioritaire en valeur et en prescription. C'est son verdict qui décide de la diffusion organique. |
 | Jeunes actifs 22-30 ans | 3 | Fort potentiel viral, mais faible tolérance à la lenteur. Révèle les frictions mobiles. |
 | Employé en boutique | 3 | Utilise le back-office en situation réelle : debout, entre deux clients, sur tablette. |
 | Personne utilisant un lecteur d'écran | 2 | La conformité WCAG AA est vérifiée par des outils ; l'utilisabilité réelle ne l'est que par l'usage. |
@@ -39,7 +39,7 @@ trois profils qu'une série de quinze sur un seul.
 **À privilégier** : usage quotidien du smartphone, achats en boutique
 physique, aucune participation au projet.
 
-**À exclure absolument** : toute personne ayant déjà vu la plateforme —
+**À exclure absolument** : toute personne ayant déjà vu la plateforme -
 collègues, proches de l'équipe, parties prenantes du projet. Quelqu'un qui sait
 où cliquer ne teste rien.
 
@@ -48,7 +48,7 @@ où cliquer ne teste rien.
 Le parcours de participation est **mobile d'abord** : le code est saisi depuis
 le ticket de caisse, souvent en boutique ou juste après. Au moins **quatre
 participants sur cinq testent sur leur propre téléphone**, pas sur un appareil
-fourni — un téléphone inconnu ajoute une difficulté qui n'est pas celle qu'on
+fourni - un téléphone inconnu ajoute une difficulté qui n'est pas celle qu'on
 mesure.
 
 L'employé teste sur tablette, comme en boutique.
@@ -116,18 +116,18 @@ Le taux de réussite se mesure **sans aide**. Une tâche réussie après un indi
 de l'observateur est une tâche échouée : en production, personne ne sera là
 pour donner l'indice.
 
-## 6. Déroulement d'une séance — 45 minutes
+## 6. Déroulement d'une séance - 45 minutes
 
 | Durée | Étape |
 |---|---|
-| 5 min | Accueil. Expliquer qu'on teste **le site, pas la personne** — et le dire vraiment, la nuance change les résultats. Recueillir le consentement d'enregistrement par écrit. |
+| 5 min | Accueil. Expliquer qu'on teste **le site, pas la personne** - et le dire vraiment, la nuance change les résultats. Recueillir le consentement d'enregistrement par écrit. |
 | 5 min | Questions de contexte : usage du téléphone, habitudes d'achat, jeux-concours déjà faits. |
 | 25 min | Les tâches, dans l'ordre. Chronomètre discret. |
 | 5 min | Questionnaire SUS. |
 | 5 min | Questions ouvertes : ce qui a surpris, ce qui manquait, recommanderiez-vous. |
 
 **Enregistrement** : écran et voix, jamais le visage. Consentement écrit
-préalable, conservation limitée à la durée de l'analyse, suppression ensuite —
+préalable, conservation limitée à la durée de l'analyse, suppression ensuite -
 la conformité RGPD vaut aussi pour les données du test.
 
 ## 7. Grille d'observation
@@ -158,7 +158,7 @@ Un rapport par campagne, contenant :
 - la grille complète, brute ;
 - les difficultés classées par gravité, avec le nombre de participants
   concernés ;
-- les extraits vidéo des blocages — trente secondes valent mieux qu'un
+- les extraits vidéo des blocages - trente secondes valent mieux qu'un
   paragraphe pour convaincre qu'un problème existe ;
 - les décisions prises pour chaque difficulté majeure ou bloquante.
 
@@ -169,5 +169,5 @@ la semaine qui suit.
 
 Toute difficulté bloquante corrigée est **revérifiée auprès de deux nouveaux
 participants** du même profil. Une correction non retestée est une hypothèse,
-pas une résolution — et c'est souvent en corrigeant une friction qu'on en crée
+pas une résolution - et c'est souvent en corrigeant une friction qu'on en crée
 une autre.

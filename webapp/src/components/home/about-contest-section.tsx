@@ -11,8 +11,8 @@ import { formatFrenchDate, formatFrenchDateRange } from '@/lib/french-date';
 /**
  * Section de clôture de la page d'accueil.
  *
- * Elle répond à trois questions que les visiteurs posent réellement — qui peut
- * jouer, ce qu'on gagne, comment on récupère son lot — et renvoie vers le
+ * Elle répond à trois questions que les visiteurs posent réellement - qui peut
+ * jouer, ce qu'on gagne, comment on récupère son lot - et renvoie vers le
  * règlement et la FAQ, qui les traitent en détail.
  *
  * Elle sert aussi le référencement, sans être écrite pour lui : la page
@@ -49,8 +49,8 @@ export function AboutContestSection() {
           </p>
 
           <p>
-            Chaque participant est par ailleurs inscrit au tirage au sort du grand prix — un an de
-            thé d&apos;une valeur de 360 € — effectué sous le contrôle de Maître Arnaud Rick,
+            Chaque participant est par ailleurs inscrit au tirage au sort du grand prix - un an de
+            thé d&apos;une valeur de 360 € - effectué sous le contrôle de Maître Arnaud Rick,
             commissaire de justice. Jouer plusieurs fois n&apos;augmente pas vos chances à ce
             tirage : chacun y dispose d&apos;une seule chance, quel que soit son nombre de
             participations.

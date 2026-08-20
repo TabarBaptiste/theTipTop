@@ -45,7 +45,7 @@ function AuthCallbackHandler() {
         // consumePostAuthDestination doit être appelée dans tous les cas : elle
         // vide la destination mémorisée. Son défaut étant /dashboard, une
         // demande explicite se reconnaît à ce qu'elle en diffère, et c'est elle
-        // qui l'emporte — l'utilisateur a voulu cette page-là. Sinon le rôle
+        // qui l'emporte - l'utilisateur a voulu cette page-là. Sinon le rôle
         // tranche, lu dans le store que handleOAuthCallback vient d'hydrater
         // plutôt qu'à une valeur figée au rendu.
         const destination = consumePostAuthDestination();

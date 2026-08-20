@@ -6,7 +6,7 @@ import type { Metadata } from 'next';
  *
  * L'interdiction d'indexation est posee ici en plus du Disallow de
  * robots.txt : ce dernier empeche l'exploration, pas l'indexation d'une URL
- * decouverte par un lien externe. La balise, elle, est sans ambiguite —
+ * decouverte par un lien externe. La balise, elle, est sans ambiguite -
  * l'espace personnel n'expose que des donnees propres au compte connecte.
  */
 export const metadata: Metadata = {
