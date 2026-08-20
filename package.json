@@ -11,7 +11,7 @@
     "build": "npm run build --workspaces",
     "test": "npm test --workspaces",
     "lint": "npm run lint --workspaces",
-    "test:regression": "npm run lint --workspaces && npm test --workspaces && npm run test:e2e:ci --workspace api",
+    "test:regression": "npm run lint --workspaces && npm test --workspaces && npm run build --workspaces && npm run test:e2e:ci --workspace api",
     "test:securite": "npm audit --audit-level=high",
     "check-updates": "echo '--- webapp ---' && npx npm-check-updates --packageFile webapp/package.json --format group && echo '' && echo '--- api ---' && npx npm-check-updates --packageFile api/package.json --format group",
     "check-updates:json": "npx npm-check-updates --packageFile webapp/package.json --jsonAll && npx npm-check-updates --packageFile api/package.json --jsonAll",
