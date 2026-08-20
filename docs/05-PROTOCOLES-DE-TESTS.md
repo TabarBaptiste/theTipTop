@@ -164,6 +164,30 @@ Elle enchaîne lint, tests unitaires des deux côtés, puis tests fonctionnels s
 services éphémères. C'est la vérification à passer avant d'ouvrir une merge
 request.
 
+**Exécuter Cypress sans installer son binaire.** `.npmrc` fixe
+`CYPRESS_INSTALL_BINARY=0` pour contourner une erreur de certificat derrière le
+proxy : `npx cypress run` échoue donc sur un poste ainsi configuré. L'image
+officielle embarque le binaire et le navigateur, et ne demande rien d'autre que
+Docker. Il faut monter **la racine du dépôt** et non `webapp/` : le monorepo
+hisse `node_modules` à la racine, et `cypress.config.ts` ne résoudrait pas
+autrement le paquet `cypress`.
+
+```bash
+docker run --rm -v "$PWD:/e2e" -w /e2e/webapp cypress/included:14.5.4 \
+  --config baseUrl=http://host.docker.internal:3000 \
+  --env API_URL=http://host.docker.internal:3001/api/v1
+```
+
+L'application et l'API doivent tourner sur la machine hôte, base seedée.
+
+**Les parcours Cypress modifient l'environnement qu'ils visent.** Ceux de
+`parcours-complets.cy.ts` traversent la vraie API sans rien simuler : ils
+déplacent la fenêtre de jeu le temps de la suite puis la remettent en place,
+consomment un à deux codes du stock, et créent un compte qu'ils suppriment. Ils
+s'exécutent donc sur un environnement de test aux données représentatives,
+jamais sur la production. C'est le prix de ce qu'ils prouvent : un code simulé
+ne dirait rien de l'accord entre le front et le back.
+
 **Ne rien exécuter d'autre en parallèle.** Certaines suites — le hachage de
 mots de passe en particulier — approchent leur délai d'expiration sous forte
 contention processeur. Lancée en même temps qu'une campagne de charge ou qu'un

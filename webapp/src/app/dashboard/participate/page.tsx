@@ -91,9 +91,13 @@ export default function ParticipatePage() {
       queryClient.invalidateQueries({ queryKey: ['participations'] });
       toast.success('Félicitations ! Vous avez gagné !');
     },
-    onError: () => {
+    // L'API distingue les motifs de refus : code inconnu, code déjà joué, jeu
+    // pas encore ouvert, jeu terminé. Les remplacer tous par « code invalide »
+    // conduirait un participant venu avant l'ouverture à croire son ticket
+    // sans valeur, et à le jeter.
+    onError: (error: { response?: { data?: { message?: string } } }) => {
       trackParticipateFailure('invalid_or_used_code');
-      toast.error('Code invalide ou déjà utilisé');
+      toast.error(error?.response?.data?.message || 'Code invalide ou déjà utilisé');
     },
   });
 
@@ -134,7 +138,7 @@ export default function ParticipatePage() {
               </p>
               <p className="mt-2 text-xs text-stone-grey">
                 <Sparkles className="mr-1 inline h-3 w-3 text-gold-500" />
-                Vous etes automatiquement inscrit au tirage au sort du grand prix !
+                Vous êtes automatiquement inscrit au tirage au sort du grand prix !
               </p>
             </div>
 
@@ -164,7 +168,7 @@ export default function ParticipatePage() {
             Participez et gagnez !
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-sm text-stone-grey">
-            Testez votre code et decouvrez immediatement votre lot. 100% des tickets sont gagnants,
+            Testez votre code et découvrez immédiatement votre lot. 100% des tickets sont gagnants,
             alors n&apos;attendez plus !
           </p>
         </div>

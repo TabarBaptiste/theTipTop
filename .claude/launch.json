@@ -15,6 +15,13 @@
       "runtimeArgs": ["run", "start:dev"],
       "port": 3001,
       "cwd": "api"
+    },
+    {
+      "name": "webapp-prod",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["serve-4000.js"],
+      "port": 4000,
+      "cwd": "webapp/.next-prod/standalone/webapp"
     }
   ]
 }
