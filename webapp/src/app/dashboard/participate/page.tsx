@@ -175,7 +175,7 @@ export default function ParticipatePage() {
         <section className="mx-auto max-w-xl">
           <h2 className="font-display text-h2 text-noir">Soumettre votre code</h2>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
+          <form noValidate onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
             <div>
               <Label htmlFor="code">Code du ticket</Label>
               <Input

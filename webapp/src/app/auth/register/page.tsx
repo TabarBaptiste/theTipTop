@@ -156,7 +156,7 @@ export default function RegisterPage() {
           Inscrivez-vous pour participer au jeu-concours
         </p>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
+        <form noValidate onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
           {/* Nom / Prenom */}
           <div className="grid gap-4 sm:grid-cols-2">
             <div>

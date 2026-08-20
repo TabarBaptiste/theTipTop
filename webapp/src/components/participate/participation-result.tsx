@@ -109,7 +109,7 @@ export function ParticipationResult({
             Choisissez un mot de passe pour retrouver vos participations plus tard.
           </p>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="mt-4 space-y-4">
+          <form noValidate onSubmit={handleSubmit(onSubmit)} className="mt-4 space-y-4">
             <div>
               <Label htmlFor="password">Mot de passe</Label>
               <Input id="password" type="password" {...register('password')} />

@@ -102,7 +102,7 @@ export default function LoginPage() {
           Ravis de vous revoir !
         </p>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
+        <form noValidate onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
           <div>
             <Label htmlFor="email">Adresse e-mail</Label>
             <Input
