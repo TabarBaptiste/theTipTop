@@ -95,8 +95,10 @@ export class InitiateParticipationDto {
   // Recommandation CNIL du 14/04/2026 : distinct de consentEmail. Absent =
   // inconnu, on ne suppose jamais l'accord.
   @ApiPropertyOptional({
+    deprecated: true,
     example: false,
-    description: "Consentement au suivi d'ouverture des emails (distinct de consentEmail)",
+    description:
+      "Obsolete : la valeur est acceptee mais ignoree. Le pixel de suivi est desactive pour tous les envois, conformement a la recommandation CNIL du 14/04/2026 — ce consentement n'est donc plus demande ni enregistre. Le champ subsiste le temps que les clients en cache cessent de l'envoyer : la validation refusant les proprietes inconnues, le retirer maintenant repondrait 400 a une participation en cours.",
   })
   @IsOptional()
   @IsBoolean()

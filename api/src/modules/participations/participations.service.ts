@@ -184,8 +184,6 @@ export class ParticipationsService {
         verifiedAt: now,
         rgpdConsentAt: now,
         consentEmail: dto.consentEmail ?? false,
-        pixelTrackingConsent: dto.pixelTrackingConsent ?? null,
-        pixelTrackingConsentAt: dto.pixelTrackingConsent === undefined ? null : now,
         userId: user.id,
         // Le ticket visé, comme pour un lead du parcours classique : sans lui,
         // un lead arrivé par Social Login se lirait « aucun ticket visé ».

@@ -52,7 +52,6 @@ const participationSchema = z.object({
     errorMap: () => ({ message: 'Vous devez accepter pour participer' }),
   }),
   consentEmail: z.boolean().default(false),
-  pixelTrackingConsent: z.boolean().default(false),
   // Piège à robots : invisible à l'écran, donc toujours vide pour un humain.
   website: z.string().max(0).optional(),
 });
@@ -77,7 +76,7 @@ export function ParticipationForm({ onSubmit, isSubmitting }: Props) {
     formState: { errors },
   } = useForm<ParticipationFormData>({
     resolver: zodResolver(participationSchema),
-    defaultValues: { consentEmail: false, pixelTrackingConsent: false, website: '' },
+    defaultValues: { consentEmail: false, website: '' },
   });
 
   const today = new Date();
@@ -224,20 +223,6 @@ export function ParticipationForm({ onSubmit, isSubmitting }: Props) {
           />
           <label htmlFor="consentEmail" className="text-xs leading-relaxed text-stone-grey">
             Je souhaite recevoir les offres et nouveautés de Thé Tip Top
-          </label>
-        </div>
-
-        {/* Consentement distinct du précédent : recommandation CNIL du
-            14/04/2026. Accepter la newsletter ne vaut pas accepter le suivi. */}
-        <div className="flex items-start gap-3">
-          <input
-            type="checkbox"
-            id="pixelTrackingConsent"
-            className="mt-1 h-4 w-4 rounded-sharp border-warm-beige accent-terracotta-deep"
-            {...register('pixelTrackingConsent')}
-          />
-          <label htmlFor="pixelTrackingConsent" className="text-xs leading-relaxed text-stone-grey">
-            J&apos;accepte la mesure d&apos;ouverture des emails qui me sont adressés
           </label>
         </div>
       </div>
