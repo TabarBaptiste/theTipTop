@@ -151,18 +151,27 @@ interdiction de passer outre.
 | Lint | Les deux workspaces | `npm run lint --workspaces` |
 | Unitaires API | 29 suites | `npm test --workspace api` |
 | Unitaires WebApp | Composants, stores, utilitaires | `npm test --workspace webapp` |
+| **Build** | **Les deux workspaces** | **`npm run build --workspaces`** |
 | Fonctionnels API | 4 suites, parcours complets | `npm run test:e2e:ci --workspace api` |
 | E2E WebApp | Cypress, parcours navigateur | `npm run test:e2e --workspace webapp` |
 
-Les quatre premiers niveaux sont réunis sous une commande unique :
+Les cinq premiers niveaux sont réunis sous une commande unique :
 
 ```bash
 npm run test:regression
 ```
 
-Elle enchaîne lint, tests unitaires des deux côtés, puis tests fonctionnels sur
-services éphémères. C'est la vérification à passer avant d'ouvrir une merge
-request.
+C'est la vérification à passer avant d'ouvrir une merge request.
+
+**Le build en fait partie, et ce n'était pas le cas au départ.** Cette omission
+a laissé passer un build cassé : la régression était verte, la merge request
+partait, et l'échec n'apparaissait qu'au pipeline. Une vérification qui prétend
+autoriser une MR doit couvrir **tout** ce qui bloque le déploiement, sans quoi
+elle donne une assurance qu'elle ne tient pas.
+
+Le type-check est précisément l'étape que les tests ne couvrent pas : Jest
+compile chaque fichier isolément, sans jamais vérifier la cohérence de
+l'ensemble. Un conflit de types global passe donc les tests et casse le build.
 
 **Exécuter Cypress sans installer son binaire.** `.npmrc` fixe
 `CYPRESS_INSTALL_BINARY=0` pour contourner une erreur de certificat derrière le

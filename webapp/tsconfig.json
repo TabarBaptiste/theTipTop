@@ -39,6 +39,16 @@
   ],
   "exclude": [
     "node_modules",
-    ".next"
+    ".next",
+    // Cypress embarque les types de Chai, qui declarent un `expect` global
+    // concurrent de celui de Jest. Il suffisait que `cypress.config.ts` importe
+    // `cypress` - et il etait capte par le motif `**/*.ts` ci-dessus - pour que
+    // ce `expect` gagne dans tout le projet : chaque `expect(...).toBe(...)` de
+    // test unitaire cessait de compiler, et le build de production echouait.
+    //
+    // Ces fichiers restent types, mais par cypress/tsconfig.json, qui leur
+    // donne le bon contexte sans contaminer l'application.
+    "cypress",
+    "cypress.config.ts"
   ]
 }
