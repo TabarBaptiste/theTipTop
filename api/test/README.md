@@ -8,21 +8,38 @@ savoir si un service isolé se comporte bien.
 
 ## Lancer les tests
 
+### Sur des services éphémères (recommandé, et ce que fait la CI)
+
+```bash
+npm run test:e2e:ci --workspace api
+```
+
+Provisionne PostgreSQL et Redis via `api/docker-compose.e2e.yml`, applique les
+migrations, seede, lance les suites, puis démonte tout. Rien d'autre que Docker
+n'est requis, et la base de développement n'est jamais touchée : conteneurs,
+ports (15432 / 16379) et stockage sont distincts, et les données vivent en
+tmpfs.
+
+C'est la commande à privilégier — elle repart d'un état connu, là où une base
+de développement accumule les particularités.
+
+### Sur vos services de développement
+
 ```bash
 npm run test:e2e --workspace api
 ```
 
-### Prérequis
+Suppose PostgreSQL et Redis joignables avec les valeurs de `api/.env`
+(`docker compose up -d postgres redis`), et la base migrée et seedée : les
+suites s'appuient sur la configuration de jeu active et sur la table des lots.
 
-PostgreSQL et Redis doivent être joignables avec les valeurs de `api/.env`
-(`docker compose up -d postgres redis`), et la base doit être migrée et seedée :
-les suites s'appuient sur la configuration de jeu active et sur la table des
-lots.
+### Rattachement au pipeline
 
-C'est aussi la raison pour laquelle ces tests ne sont pas rattachés à l'étape
-`npm test` du pipeline : celle-ci s'exécute sans service de base de données.
-Les y ajouter suppose de provisionner PostgreSQL et Redis sur l'agent Jenkins —
-décision d'infrastructure, pas de test.
+Ces suites ne tournent pas dans l'étape `npm test` du pipeline, qui s'exécute
+sans service de base de données. `test:e2e:ci` étant autonome, les y ajouter ne
+demande plus qu'une ligne côté `ciPipeline` — l'agent Jenkins dispose déjà de
+Docker, puisqu'il construit les images. Cette ligne vit dans la shared library
+`furious-ducks-shared-library`, hors de ce dépôt.
 
 ## Ce qui est couvert
 

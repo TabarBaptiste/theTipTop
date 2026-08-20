@@ -1,0 +1,38 @@
+# ===========================================
+# Services éphémères pour les tests fonctionnels
+# ===========================================
+# Volontairement distincts de ceux de docker-compose.yml : noms de conteneurs,
+# ports et stockage. Les tests écrivent, migrent et seedent — les faire pointer
+# vers la base de développement effacerait le travail en cours.
+#
+# Les données vivent en tmpfs : rien ne survit à l'arrêt, et les suites
+# repartent d'un état connu à chaque exécution.
+
+name: thetiptop-e2e
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: thetiptop
+      POSTGRES_PASSWORD: thetiptop_e2e
+      POSTGRES_DB: thetiptop_e2e
+    tmpfs:
+      - /var/lib/postgresql/data
+    ports:
+      - '15432:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U thetiptop -d thetiptop_e2e']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  redis:
+    image: redis:8-alpine
+    ports:
+      - '16379:6379'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 2s
+      timeout: 3s
+      retries: 30

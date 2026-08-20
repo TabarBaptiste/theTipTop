@@ -186,6 +186,7 @@ npm test --workspaces
 | Périmètre | Commandes |
 |-----------|-----------|
 | API — unitaires | `cd api && npm test` / `npm run test:cov` |
+| API — fonctionnels | `cd api && npm run test:e2e:ci` (provisionne ses propres Postgres + Redis, cf. `api/test/README.md`) |
 | WebApp — unitaires | `cd webapp && npm test` |
 | WebApp — E2E | `cd webapp && npm run test:e2e` (Cypress ; nécessite app + API + DB seedée en marche) |
 
