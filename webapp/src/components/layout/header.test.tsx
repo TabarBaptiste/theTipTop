@@ -113,7 +113,12 @@ describe('Header', () => {
 
     expect(screen.queryByRole('link', { name: 'Connexion' })).not.toBeInTheDocument();
     expect(screen.getAllByRole('link', { name: 'Participer' }).length).toBeGreaterThan(0);
-    screen.getAllByRole('link', { name: 'Jean' }).forEach((link) => {
+
+    // Le compte n'est plus un lien direct vers le profil mais un contrôle
+    // ouvrant un menu : c'est ce qui evite de disperser les destinations
+    // personnelles dans la barre de navigation.
+    expect(screen.getByRole('button', { name: /Jean/ })).toBeInTheDocument();
+    screen.getAllByRole('link', { name: 'Mon profil' }).forEach((link) => {
       expect(link).toHaveAttribute('href', '/dashboard/profile');
     });
   });
