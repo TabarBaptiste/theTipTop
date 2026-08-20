@@ -142,7 +142,7 @@ export default function ProfilePage() {
             {/* Grille à deux colonnes de bout en bout, comme la maquette. Les
                 champs d'adresse qu'elle montre ne sont pas repris : ils
                 n'existent pas au modèle de données. */}
-            <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
+            <form noValidate onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
               <div className="grid gap-5 sm:grid-cols-2">
                 <div>
                   <Label htmlFor="firstName">Prénom*</Label>

@@ -98,41 +98,33 @@ describe('ParticipationForm', () => {
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
-  // Ce champ est en type=email et le formulaire ne porte pas noValidate : la
-  // validation native du navigateur bloque l'envoi avant que React ne voie la
-  // soumission. Le refus est donc reel, mais il s'exprime par une bulle native
-  // au lieu du message rouge de l'application — d'ou l'assertion sur
-  // checkValidity plutot que sur un texte affiche.
-  it('refuse une adresse email invalide', async () => {
+  // Le formulaire porte noValidate : la validation native du navigateur est
+  // ecartee au profit de zod, pour que toutes les erreurs s'affichent de la
+  // meme facon. Ce test verifie le message de l'application, pas une bulle
+  // native que rien ne permettrait de styler ni de traduire.
+  it('refuse une adresse email invalide avec le message de l’application', async () => {
     render(<ParticipationForm onSubmit={onSubmit} isSubmitting={false} />);
     remplir({ 'Adresse email *': 'pas-une-adresse' });
     accepterLeReglement();
-
-    const champ = screen.getByLabelText('Adresse email *') as HTMLInputElement;
-    expect(champ.checkValidity()).toBe(false);
-
     fireEvent.click(screen.getByRole('button', { name: /participer/i }));
-    await new Promise((resoudre) => setTimeout(resoudre, 50));
+
+    expect(await screen.findByText('Adresse email invalide')).toBeInTheDocument();
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
   // Le reglement depose exige la majorite. Sans ce refus, un mineur pourrait
   // remporter un lot qu'il ne pourrait pas reclamer.
-  // Meme mecanisme : le champ porte min et max, donc la borne des 18 ans est
-  // d'abord appliquee par le navigateur. La regle zod reste le filet de
-  // securite, et l'API la controle une troisieme fois.
-  it('refuse une date de naissance de mineur', async () => {
+  // Le reglement depose exige la majorite. L'API la controle egalement : ce
+  // refus-ci sert a le dire tout de suite, dans la langue du site.
+  it('refuse une date de naissance de mineur avec le message de l’application', async () => {
     render(<ParticipationForm onSubmit={onSubmit} isSubmitting={false} />);
     const mineur = `${new Date().getFullYear() - 15}-01-01`;
     remplir();
-    const champ = screen.getByLabelText(/date de naissance/i) as HTMLInputElement;
-    fireEvent.change(champ, { target: { value: mineur } });
+    fireEvent.change(screen.getByLabelText(/date de naissance/i), { target: { value: mineur } });
     accepterLeReglement();
-
-    expect(champ.checkValidity()).toBe(false);
-
     fireEvent.click(screen.getByRole('button', { name: /participer/i }));
-    await new Promise((resoudre) => setTimeout(resoudre, 50));
+
+    expect(await screen.findByText(/majeur pour participer/i)).toBeInTheDocument();
     expect(onSubmit).not.toHaveBeenCalled();
   });
 

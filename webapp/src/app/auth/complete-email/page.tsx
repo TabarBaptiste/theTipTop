@@ -106,7 +106,7 @@ export default function CompleteEmailPage() {
               vous prévenir si vous gagnez un lot, ni vous rappeler le délai pour le retirer.
             </p>
 
-            <form onSubmit={emailForm.handleSubmit(onSubmitEmail)} className="mt-8 space-y-5">
+            <form noValidate onSubmit={emailForm.handleSubmit(onSubmitEmail)} className="mt-8 space-y-5">
               <div>
                 <Label htmlFor="email">Votre adresse e-mail</Label>
                 <Input
@@ -137,7 +137,7 @@ export default function CompleteEmailPage() {
               rattacher cette adresse à votre compte.
             </p>
 
-            <form onSubmit={codeForm.handleSubmit(onSubmitCode)} className="mt-8 space-y-5">
+            <form noValidate onSubmit={codeForm.handleSubmit(onSubmitCode)} className="mt-8 space-y-5">
               <div>
                 <Label htmlFor="code">Code de confirmation</Label>
                 {/* inputMode et autoComplete permettent aux téléphones de

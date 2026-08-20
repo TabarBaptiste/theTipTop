@@ -161,7 +161,7 @@ export default function EmployeePage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit(onSearch)} className="space-y-4">
+              <form noValidate onSubmit={handleSubmit(onSearch)} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="code">Code du ticket</Label>
                   <div className="flex gap-2">

@@ -91,7 +91,7 @@ export function ParticipationForm({ onSubmit, isSubmitting }: Props) {
   );
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
+    <form noValidate onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
       <div>
         <Label htmlFor="code">Code du ticket *</Label>
         <Input
