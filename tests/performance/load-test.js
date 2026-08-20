@@ -4,6 +4,13 @@
 // Les VUs et la duree sont passes en CLI par le pipeline
 // (ex: k6 run --vus 10 --duration 30s), volontairement absents
 // de `options` pour rester pilotables par environnement.
+//
+// Point d'entree du pipeline, et lui seul : ce fichier reste un smoke, dont le
+// role est de detecter une regression grossiere a chaque deploiement. Les cinq
+// profils du cahier des clauses techniques - montee en charge, charge
+// soutenue, pic, stress, recuperation - vivent a cote et se lancent
+// explicitement, campagne par campagne. Voir README.md et
+// docs/05-PROTOCOLES-DE-TESTS.md.
 
 import http from 'k6/http';
 import { check } from 'k6';
