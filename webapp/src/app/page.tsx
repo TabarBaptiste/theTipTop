@@ -4,6 +4,7 @@ import { GrandPrizeSection } from '@/components/home/grand-prize-section';
 import { HowItWorksSection } from '@/components/home/how-it-works-section';
 import { PrizesSection } from '@/components/home/prizes-section';
 import { WhyUsSection } from '@/components/home/why-us-section';
+import { AboutContestSection } from '@/components/home/about-contest-section';
 
 export default function HomePage() {
   return (
@@ -16,6 +17,9 @@ export default function HomePage() {
       <HowItWorksSection />
       <PrizesSection />
       <WhyUsSection />
+      {/* En clôture : reprend les regles essentielles pour le visiteur arrive
+          en bas de page, et renvoie vers le reglement et la FAQ. */}
+      <AboutContestSection />
     </div>
   );
 }

@@ -30,7 +30,13 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_SITE_URL || 'https://thetiptop.dsp5-archi-o24a-4-5-g1.fr'
   ),
   title: {
-    default: 'Thé Tip Top - Jeu Concours',
+    // Le mot-clé ouvre le titre, la marque le referme : « Thé Tip Top » ne se
+    // cherche pas encore, « jeu-concours thé » oui. Le CDC impose d'ailleurs le
+    // mot-clé principal en début de balise.
+    //
+    // Ce libellé est celui de la page d'accueil : `default` s'applique aux
+    // pages qui ne déclarent pas de titre, et toutes les autres en ont un.
+    default: 'Jeu-concours thé bio : 100 % de tickets gagnants | Thé Tip Top',
     template: '%s | Thé Tip Top',
   },
   // Canonique de l'accueil. Les pages qui en ont une la remplacent ; celles
@@ -38,7 +44,7 @@ export const metadata: Metadata = {
   // seules les pages publiques sont indexables.
   alternates: { canonical: '/' },
   description:
-    'Participez au grand jeu-concours Thé Tip Top ! 100% des tickets sont gagnants. Tentez de remporter un an de thé gratuit !',
+    'Participez au jeu-concours Thé Tip Top : 100 % des tickets sont gagnants. Infuseurs, thés détox, coffrets premium et un an de thé à gagner au tirage au sort.',
   keywords: ['thé', 'jeu concours', 'bio', 'fait main', 'Nice', 'artisanal', 'méditerranéen'],
   authors: [{ name: 'Thé Tip Top' }],
   creator: 'Thé Tip Top',
@@ -47,9 +53,9 @@ export const metadata: Metadata = {
     locale: 'fr_FR',
     url: 'https://thetiptop.dsp5-archi-o24a-4-5-g1.fr',
     siteName: 'Thé Tip Top',
-    title: 'Thé Tip Top - Jeu Concours',
+    title: 'Jeu-concours thé bio : 100 % de tickets gagnants',
     description:
-      'Participez au grand jeu-concours Thé Tip Top ! 100% des tickets sont gagnants.',
+      'Participez au jeu-concours Thé Tip Top : 100 % des tickets sont gagnants. Un an de thé à gagner au tirage au sort.',
     images: [
       {
         url: '/og-image.png', // Sera résolu automatiquement en https://thetiptop.dsp5-archi-o24a-4-5-g1.fr/og-image.png
@@ -61,9 +67,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Thé Tip Top - Jeu Concours',
+    title: 'Jeu-concours thé bio : 100 % de tickets gagnants',
     description:
-      'Participez au grand jeu-concours Thé Tip Top ! 100% des tickets sont gagnants.',
+      'Participez au jeu-concours Thé Tip Top : 100 % des tickets sont gagnants. Un an de thé à gagner au tirage au sort.',
     images: ['/og-image.png'],
   },
   robots: {

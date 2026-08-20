@@ -6,7 +6,8 @@ export const metadata: Metadata = {
   // URL de reference : evite qu'un parametre de campagne ou une variante
   // avec barre finale soit traite comme une page distincte.
   alternates: { canonical: '/faq' },
-  title: 'FAQ',
+  // « FAQ » seul ne correspond à aucune recherche : le titre nomme le sujet.
+  title: 'Questions fréquentes sur le jeu-concours',
   description:
     'Questions fréquentes sur le jeu-concours Thé Tip Top : participation, codes, lots, remise des gains et tirage au sort du grand prix.',
 };

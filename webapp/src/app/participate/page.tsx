@@ -261,6 +261,28 @@ export default function ParticipatePage() {
             userId={result.user.id}
           />
         )}
+
+        {/* Affiché sous le formulaire, et seulement avant la saisie : une fois
+            le code envoyé, ces explications n'ont plus lieu d'être et
+            distrairaient du résultat. Elles répondent aux deux questions qui
+            reviennent le plus — où est le code, et que se passe-t-il ensuite. */}
+        {step === 'form' && (
+          <div className="mt-8 border-t border-warm-beige pt-6 text-sm leading-relaxed text-stone-grey">
+            <h2 className="font-display text-lg text-noir">Où trouver votre code ?</h2>
+            <p className="mt-2">
+              Votre code figure en bas de votre ticket de caisse, sous le montant payé. Il compte
+              dix caractères mêlant chiffres et lettres majuscules, sans espace ni tiret. Seuls les
+              achats de plus de 49 € donnent droit à un code.
+            </p>
+            <h2 className="mt-5 font-display text-lg text-noir">Et ensuite ?</h2>
+            <p className="mt-2">
+              Votre lot s&apos;affiche immédiatement : il est attribué au code dès sa génération,
+              il n&apos;y a donc rien à attendre. Vous recevez ensuite un e-mail récapitulatif
+              contenant votre code, à présenter en boutique pour retirer votre gain. Chaque
+              participation vous inscrit par ailleurs au tirage au sort du grand prix.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
