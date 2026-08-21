@@ -1,0 +1,48 @@
+# ===========================================
+# Contexte de build Docker
+# ===========================================
+# Docker ne lit que le .dockerignore situé à la racine du contexte. Les images
+# étant construites depuis la racine du monorepo - `docker build -f
+# webapp/Dockerfile .` -, ceux placés dans api/ et webapp/ ne sont jamais pris
+# en compte. Sans ce fichier, le contexte transféré atteignait 1,09 Go et la
+# copie a fini par saturer le disque de l'agent d'intégration.
+#
+# node_modules n'y figure délibérément pas : l'étape de construction n'installe
+# que les dépendances de la racine, avant de copier le reste. Les paquets des
+# deux espaces de travail arrivent par cette copie, et les exclure ferait
+# échouer la compilation.
+
+# Artefacts de compilation, regénérés par le build
+.next
+out
+dist
+build
+*.tsbuildinfo
+
+# Historique Git : les métadonnées de version sont passées en arguments de
+# build par le pipeline, l'image n'a pas besoin du dépôt.
+.git
+.gitignore
+.gitattributes
+
+# Rapports produits par les tests
+coverage
+.nyc_output
+junit.xml
+tests/performance/resultats
+webapp/cypress/videos
+webapp/cypress/screenshots
+webapp/cypress/downloads
+
+# Secrets : jamais dans une image. Les variables sont injectées au déploiement.
+.env
+.env.*
+!.env.example
+
+# Divers
+*.log
+npm-debug.log*
+.vscode
+.idea
+.DS_Store
+Thumbs.db
