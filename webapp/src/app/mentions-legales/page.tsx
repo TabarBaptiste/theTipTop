@@ -43,7 +43,7 @@ export default function MentionsLegalesPage() {
             en l&apos;économie numérique (LCEN), les présentes mentions légales identifient
             l&apos;éditeur du site internet Thé Tip Top.
           </p>
-          <p className="mt-4 text-sm text-stone-grey/70">
+          <p className="mt-4 text-sm text-stone-grey/80">
             Dernière mise à jour : {formatFrenchDate(LEGAL_UPDATED_AT.mentionsLegales)}
           </p>
         </div>

@@ -53,7 +53,7 @@ export default function CGUPage() {
             l&apos;utilisation du site internet Thé Tip Top ainsi que la participation au
             jeu-concours organisé par la société.
           </p>
-          <p className="mt-4 text-sm text-stone-grey/70">
+          <p className="mt-4 text-sm text-stone-grey/80">
             Dernière mise à jour : {formatFrenchDate(LEGAL_UPDATED_AT.cgu)}
           </p>
         </div>
@@ -336,7 +336,7 @@ export default function CGUPage() {
                     </tbody>
                   </table>
                 </div>
-                <p className="text-sm text-stone-grey/70">
+                <p className="text-sm text-stone-grey/80">
                   Les probabilités indiquées sont approximatives et données à titre indicatif. Le
                   résultat exact dépend du nombre total de tickets émis et de leur répartition.
                 </p>
