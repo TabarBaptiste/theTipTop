@@ -18,7 +18,9 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
     super({
       clientID: configService.getOrThrow<string>('FACEBOOK_APP_ID'),
       clientSecret: configService.getOrThrow<string>('FACEBOOK_APP_SECRET'),
-      callbackURL: configService.getOrThrow<string>('FACEBOOK_CALLBACK_URL'),
+      // Relative par défaut, pour la même raison que côté Google.
+      callbackURL:
+        configService.get<string>('FACEBOOK_CALLBACK_URL') || '/api/v1/auth/facebook/callback',
       scope: ['email'],
       profileFields: ['id', 'email', 'name', 'picture'],
     } as any);
