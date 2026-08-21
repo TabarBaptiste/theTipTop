@@ -45,7 +45,7 @@ export default function PolitiqueConfidentialitePage() {
             respect du Règlement Général sur la Protection des Données (RGPD - UE 2016/679) et
             de la loi Informatique et Libertés.
           </p>
-          <p className="mt-4 text-sm text-stone-grey/70">
+          <p className="mt-4 text-sm text-stone-grey/80">
             Dernière mise à jour : {formatFrenchDate(LEGAL_UPDATED_AT.politiqueConfidentialite)}
           </p>
         </div>
@@ -486,7 +486,7 @@ export default function PolitiqueConfidentialitePage() {
                         </span>
                       </div>
                       <p className="mt-2 text-sm text-stone-grey">{desc}</p>
-                      <p className="mt-2 text-xs text-stone-grey/70">
+                      <p className="mt-2 text-xs text-stone-grey/80">
                         Exemples : {exemples.join(', ')}
                       </p>
                     </div>

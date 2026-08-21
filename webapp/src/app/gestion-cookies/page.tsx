@@ -128,7 +128,7 @@ export default function GestionCookiesPage() {
             sur votre appareil. Cette page vous explique ce que sont ces cookies, lesquels nous
             utilisons et comment gérer vos préférences.
           </p>
-          <p className="mt-4 text-sm text-stone-grey/70">
+          <p className="mt-4 text-sm text-stone-grey/80">
             Dernière mise à jour : {formatFrenchDate(LEGAL_UPDATED_AT.gestionCookies)}
           </p>
         </div>
