@@ -7,6 +7,7 @@ import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
+import { RedisService } from '../../redis/redis.service';
 import { ConflictException, ForbiddenException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { UsersService } from '../users/users.service';
@@ -62,6 +63,11 @@ describe('AuthService', () => {
     }),
   };
 
+  const mockRedisService = {
+    set: jest.fn(),
+    getDel: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -70,6 +76,7 @@ describe('AuthService', () => {
         { provide: UsersService, useValue: mockUsersService },
         { provide: JwtService, useValue: mockJwtService },
         { provide: ConfigService, useValue: mockConfigService },
+        { provide: RedisService, useValue: mockRedisService },
       ],
     }).compile();
 
@@ -266,6 +273,67 @@ describe('AuthService', () => {
         where: { userId: '1', token: 'some-token' },
         data: { revokedAt: expect.any(Date) },
       });
+    });
+  });
+
+  // ===========================================
+  // Code d'echange OAuth
+  // ===========================================
+  describe('code d echange OAuth', () => {
+    const jetons = {
+      user: { id: '1' },
+      accessToken: 'acces',
+      refreshToken: 'rafraichissement',
+      expiresIn: 900,
+    } as never;
+
+    it('produit un code imprevisible et le range avec une duree de vie courte', async () => {
+      const code = await service.createOAuthExchangeCode(jetons);
+
+      // 32 octets en hexadecimal : un code devinable donnerait une session
+      // complete a qui le trouverait.
+      expect(code).toMatch(/^[a-f0-9]{64}$/);
+
+      const [cle, charge, ttl] = mockRedisService.set.mock.calls[0];
+      expect(cle).toBe(`oauth:exchange:${code}`);
+      expect(JSON.parse(charge)).toEqual(jetons);
+      expect(ttl).toBe(60);
+    });
+
+    it('ne produit jamais deux fois le meme code', async () => {
+      const premier = await service.createOAuthExchangeCode(jetons);
+      const second = await service.createOAuthExchangeCode(jetons);
+
+      expect(premier).not.toBe(second);
+    });
+
+    it('rend les jetons et consomme le code dans la meme operation', async () => {
+      mockRedisService.getDel.mockResolvedValue(JSON.stringify(jetons));
+
+      const resultat = await service.consumeOAuthExchangeCode('a'.repeat(64));
+
+      expect(resultat).toEqual(jetons);
+      // getDel et non get puis del : deux requetes simultanees ne doivent pas
+      // pouvoir obtenir les memes jetons.
+      expect(mockRedisService.getDel).toHaveBeenCalledWith(`oauth:exchange:${'a'.repeat(64)}`);
+    });
+
+    it('refuse un code inconnu, expire ou deja consomme', async () => {
+      mockRedisService.getDel.mockResolvedValue(null);
+
+      await expect(service.consumeOAuthExchangeCode('b'.repeat(64))).rejects.toThrow(
+        ForbiddenException,
+      );
+    });
+
+    it('refuse plutot que de laisser passer quand le magasin est injoignable', async () => {
+      mockRedisService.getDel.mockRejectedValue(new Error('redis indisponible'));
+
+      // Sans magasin, l'usage unique n'est plus garanti : laisser passer
+      // reviendrait a accepter un code rejouable.
+      await expect(service.consumeOAuthExchangeCode('c'.repeat(64))).rejects.toThrow(
+        ForbiddenException,
+      );
     });
   });
 

@@ -272,6 +272,48 @@ describe('UC-01 / UC-02 - Comptes et controle d acces', () => {
   });
 
   // ===========================================
+  // Retour OAuth
+  // ===========================================
+  // Le parcours complet passe par Google ou Facebook et ne peut pas etre
+  // automatise. Ce qui l'est ici, c'est le second temps : l'echange du code
+  // contre les jetons, entierement sous notre controle.
+  describe('Echange du code OAuth', () => {
+    it('refuse un code inconnu', async () => {
+      const r = await http()
+        .post('/api/v1/auth/oauth/exchange')
+        .send({ code: 'a'.repeat(64) });
+
+      expect(r.status).toBe(403);
+      expect(r.body.accessToken).toBeUndefined();
+    });
+
+    it('refuse un code au mauvais format sans consulter le magasin', async () => {
+      await http().post('/api/v1/auth/oauth/exchange').send({ code: 'trop-court' }).expect(400);
+    });
+
+    it('refuse un champ non prevu par le contrat', async () => {
+      await http()
+        .post('/api/v1/auth/oauth/exchange')
+        .send({ code: 'a'.repeat(64), userId: 'quelqu-un-d-autre' })
+        .expect(400);
+    });
+
+    it('donne le meme refus pour un code inconnu et un code deja consomme', async () => {
+      // Distinguer les deux renseignerait un attaquant sur ce qu'il a devine
+      // juste.
+      const inconnu = await http()
+        .post('/api/v1/auth/oauth/exchange')
+        .send({ code: 'b'.repeat(64) });
+      const autre = await http()
+        .post('/api/v1/auth/oauth/exchange')
+        .send({ code: 'c'.repeat(64) });
+
+      expect(inconnu.status).toBe(autre.status);
+      expect(inconnu.body.message).toBe(autre.body.message);
+    });
+  });
+
+  // ===========================================
   // Cycle de vie des jetons
   // ===========================================
   describe('Cycle de vie des jetons', () => {
