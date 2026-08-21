@@ -30,9 +30,30 @@ RUN npm install
 
 COPY . .
 
-# Variables d'environnement pour le build
+# Variables d'environnement pour le build.
+#
+# Les variables NEXT_PUBLIC_* sont inlinees dans les bundles a la compilation,
+# jamais lues a l'execution : les poser sur le conteneur de production n'a
+# aucun effet. Toute variable de ce prefixe doit donc etre declaree ici ET
+# passee en argument de build par le pipeline.
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+
+# Domaine public. Un repli sur le domaine de production existe dans le code,
+# mais la preproduction doit annoncer le sien pour ne pas emettre des URL
+# canoniques pointant vers la production.
+ARG NEXT_PUBLIC_SITE_URL
+ENV NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
+
+# Mesure d'audience. Sans valeur, le composant analytics n'est pas monte du
+# tout : aucune mesure ne remonte, silencieusement.
+ARG NEXT_PUBLIC_GA_ID
+ENV NEXT_PUBLIC_GA_ID=${NEXT_PUBLIC_GA_ID}
+
+# Balise de verification Search Console. Sans valeur, elle n'est pas emise et
+# la propriete ne peut pas etre validee.
+ARG NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+ENV NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION=${NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION}
 
 RUN npm run build
 

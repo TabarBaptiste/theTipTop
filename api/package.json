@@ -19,12 +19,15 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:e2e:ci": "node scripts/e2e-ci.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:migrate:prod": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
     "prisma:seed": "ts-node prisma/seed.ts",
-    "db:reset": "prisma migrate reset --force && npm run prisma:seed"
+    "db:reset": "prisma migrate reset --force && npm run prisma:seed",
+    "images:upload": "ts-node scripts/upload-images.ts",
+    "draw:simulate": "ts-node scripts/simulate-grand-prize-draw.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.24",
@@ -65,6 +68,7 @@
     "@types/passport-google-oauth20": "^2.0.17",
     "@types/passport-jwt": "^4.0.1",
     "@types/passport-local": "^1.0.38",
+    "@types/supertest": "^7.2.1",
     "@typescript-eslint/eslint-plugin": "^8.60.1",
     "@typescript-eslint/parser": "^8.60.1",
     "eslint": "^9.28.0",

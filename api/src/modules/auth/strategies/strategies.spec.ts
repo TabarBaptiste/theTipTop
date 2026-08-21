@@ -164,6 +164,10 @@ describe('GoogleStrategy', () => {
 describe('FacebookStrategy', () => {
   const strategy = new FacebookStrategy(mockConfigService, mockAuthService);
 
+  beforeEach(() => {
+    mockAuthService.validateOAuthUser.mockReset();
+  });
+
   it('should create/find the user with the profile email', async () => {
     mockAuthService.validateOAuthUser.mockResolvedValue({ id: 'u1' });
     const done = jest.fn();
@@ -186,14 +190,48 @@ describe('FacebookStrategy', () => {
     expect(done).toHaveBeenCalledWith(null, { id: 'u1' });
   });
 
-  it('should fall back to a substitution email when Facebook provides none', async () => {
+  // Refuser bloquerait toute inscription depuis ces comptes. On les laisse
+  // entrer avec une adresse de substitution ; une vraie adresse sera reclamee
+  // avant la premiere participation.
+  it('should fall back to a placeholder email when Facebook provides none', async () => {
     mockAuthService.validateOAuthUser.mockResolvedValue({ id: 'u1' });
     const done = jest.fn();
 
     await strategy.validate('access', 'refresh', { id: 'f1', _json: {} } as never, done);
 
     expect(mockAuthService.validateOAuthUser).toHaveBeenCalledWith(
-      expect.objectContaining({ email: 'fb_f1@facebook-noreply.local' }),
+      expect.objectContaining({ email: 'fb_f1@facebook-noreply.invalid' }),
+    );
+    expect(done).toHaveBeenCalledWith(null, { id: 'u1' });
+  });
+
+  // .invalid est reserve par la RFC 2606 aux noms jamais resolvables. .local,
+  // utilise auparavant, est reserve au mDNS : un serveur de messagerie mal
+  // configure pourrait tenter de le router.
+  it('should use a domain that can never be routed', async () => {
+    mockAuthService.validateOAuthUser.mockResolvedValue({ id: 'u1' });
+    const done = jest.fn();
+
+    await strategy.validate('access', 'refresh', { id: 'f1', _json: {} } as never, done);
+
+    const { email } = mockAuthService.validateOAuthUser.mock.calls[0][0];
+    expect(email).toMatch(/\.invalid$/);
+    expect(email).not.toMatch(/\.local$/);
+  });
+
+  it('should read the email from _json when the profile has no emails array', async () => {
+    mockAuthService.validateOAuthUser.mockResolvedValue({ id: 'u1' });
+    const done = jest.fn();
+
+    await strategy.validate(
+      'access',
+      'refresh',
+      { id: 'f1', _json: { email: 'jean@fb.com' } } as never,
+      done,
+    );
+
+    expect(mockAuthService.validateOAuthUser).toHaveBeenCalledWith(
+      expect.objectContaining({ email: 'jean@fb.com' }),
     );
   });
 

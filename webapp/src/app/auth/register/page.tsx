@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { useIsHydrated } from '@/lib/hooks/use-is-hydrated';
 import { trackRegisterSuccess, trackRegisterFailure, trackCTAClick } from '@/lib/analytics';
+import { toDateInputValue } from '@/lib/utils';
 
 const MIN_AGE = 18;
 const MAX_AGE = 120;
@@ -36,7 +37,10 @@ const registerSchema = z.object({
     .regex(/[A-Z]/, 'Le mot de passe doit contenir au moins une majuscule')
     .regex(/[a-z]/, 'Le mot de passe doit contenir au moins une minuscule')
     .regex(/[0-9]/, 'Le mot de passe doit contenir au moins un chiffre')
-    .regex(/[@$!%*?&]/, 'Le mot de passe doit contenir au moins un caractère spécial (@$!%*?&)'),
+    .regex(
+      /[@$!%*?&#]/,
+      'Le mot de passe doit contenir au moins un caractère spécial (@$!%*?&#)'
+    ),
   confirmPassword: z.string(),
   firstName: z.string().min(2, 'Le prénom doit faire au moins 2 caractères'),
   lastName: z.string().min(2, 'Le nom doit faire au moins 2 caractères'),
@@ -128,12 +132,15 @@ export default function RegisterPage() {
   };
 
   const today = new Date();
-  const maxBirthDate = new Date(today.getFullYear() - MIN_AGE, today.getMonth(), today.getDate())
-    .toISOString()
-    .split('T')[0];
-  const minBirthDate = new Date(today.getFullYear() - MAX_AGE, today.getMonth(), today.getDate())
-    .toISOString()
-    .split('T')[0];
+  // toDateInputValue lit les composants en heure locale. toISOString() convertit
+  // en UTC, ou minuit heure de Paris devient la veille : la borne tombait un jour
+  // trop tot et bloquait la personne ayant 18 ans le jour meme.
+  const maxBirthDate = toDateInputValue(
+    new Date(today.getFullYear() - MIN_AGE, today.getMonth(), today.getDate()),
+  );
+  const minBirthDate = toDateInputValue(
+    new Date(today.getFullYear() - MAX_AGE, today.getMonth(), today.getDate()),
+  );
 
   const handleOAuthLogin = (provider: 'google' | 'facebook') => {
     trackCTAClick(`S'inscrire avec ${provider}`, 'register_page');
@@ -149,7 +156,7 @@ export default function RegisterPage() {
           Inscrivez-vous pour participer au jeu-concours
         </p>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
+        <form noValidate onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
           {/* Nom / Prenom */}
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
@@ -269,16 +276,16 @@ export default function RegisterPage() {
               <input
                 type="checkbox"
                 id="consentData"
-                className="mt-1 h-4 w-4 rounded-sharp border-warm-beige text-terracotta-deep accent-terracotta-deep"
+                className="mt-1 h-4 w-4 rounded-sharp border-warm-beige text-terracotta-600 accent-terracotta-deep"
                 {...register('consentData')}
               />
               <label htmlFor="consentData" className="text-xs leading-relaxed text-stone-grey">
                 J&apos;accepte les{' '}
-                <Link href="/cgu" className="text-terracotta-deep hover:underline">
+                <Link href="/cgu" className="text-terracotta-600 hover:underline">
                   Conditions d&apos;utilisation
                 </Link>{' '}
                 et la{' '}
-                <Link href="/politique-confidentialite" className="text-terracotta-deep hover:underline">
+                <Link href="/politique-confidentialite" className="text-terracotta-600 hover:underline">
                   Politique de confidentialité
                 </Link>{' '}
                 *
@@ -292,11 +299,11 @@ export default function RegisterPage() {
               <input
                 type="checkbox"
                 id="consentEmail"
-                className="mt-1 h-4 w-4 rounded-sharp border-warm-beige text-terracotta-deep accent-terracotta-deep"
+                className="mt-1 h-4 w-4 rounded-sharp border-warm-beige text-terracotta-600 accent-terracotta-deep"
                 {...register('consentEmail')}
               />
               <label htmlFor="consentEmail" className="text-xs leading-relaxed text-stone-grey">
-                Je souhaite recevoir les offres et nouveautes de The Tip Top
+                Je souhaite recevoir les offres et nouveautés de Thé Tip Top
               </label>
             </div>
           </div>
@@ -343,7 +350,7 @@ export default function RegisterPage() {
 
         <p className="mt-8 text-center text-sm text-stone-grey">
           Déjà un compte ?{' '}
-          <Link href="/auth/login" className="font-semibold text-terracotta-deep hover:underline">
+          <Link href="/auth/login" className="font-semibold text-terracotta-600 hover:underline">
             Se connecter
           </Link>
         </p>

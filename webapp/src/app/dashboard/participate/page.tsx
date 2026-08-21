@@ -17,7 +17,7 @@ import { trackParticipateSubmit, trackParticipateSuccess, trackParticipateFailur
 const participateSchema = z.object({
   code: z
     .string()
-    .length(10, 'Le code doit contenir exactement 10 caracteres')
+    .length(10, 'Le code doit contenir exactement 10 caractères')
     .regex(/^[A-Z0-9]+$/, 'Le code ne doit contenir que des lettres majuscules et des chiffres'),
 });
 
@@ -46,9 +46,9 @@ interface PrizeApi {
 }
 
 const rules = [
-  { color: 'bg-moss', text: 'Le jeu-concours est ouvert a toute personne ayant effectue un achat superieur a 49€ en magasin.' },
-  { color: 'bg-terracotta-deep', text: 'Les participants disposent de 30 jours apres la fin du jeu pour reclamer leur lot.' },
-  { color: 'bg-red-500', text: 'Le reglement complet est disponible aupres de Maitre Arnaud Rick, huissier de justice.' },
+  { color: 'bg-moss', text: 'Le jeu-concours est ouvert a toute personne ayant effectué un achat supérieur a 49€ en magasin.' },
+  { color: 'bg-terracotta-600', text: 'Les participants disposent de 30 jours après la fin du jeu pour réclamer leur lot.' },
+  { color: 'bg-red-500', text: 'Le règlement complet est disponible auprès de Maître Arnaud Rick, huissier de justice.' },
 ];
 
 export default function ParticipatePage() {
@@ -89,11 +89,15 @@ export default function ParticipatePage() {
       trackParticipateSuccess(data.prizeType, data.prize.value);
       setResult(data);
       queryClient.invalidateQueries({ queryKey: ['participations'] });
-      toast.success('Felicitations ! Vous avez gagne !');
+      toast.success('Félicitations ! Vous avez gagné !');
     },
-    onError: () => {
+    // L'API distingue les motifs de refus : code inconnu, code déjà joué, jeu
+    // pas encore ouvert, jeu terminé. Les remplacer tous par « code invalide »
+    // conduirait un participant venu avant l'ouverture à croire son ticket
+    // sans valeur, et à le jeter.
+    onError: (error: { response?: { data?: { message?: string } } }) => {
       trackParticipateFailure('invalid_or_used_code');
-      toast.error('Code invalide ou deja utilise');
+      toast.error(error?.response?.data?.message || 'Code invalide ou déjà utilisé');
     },
   });
 
@@ -110,31 +114,31 @@ export default function ParticipatePage() {
     return (
       <div className="min-h-[calc(100vh-5rem)] bg-cream py-12">
         <div className="container mx-auto max-w-xl px-6">
-          <div className="rounded-card border-2 border-terracotta-deep bg-white p-8 text-center">
+          <div className="rounded-card border-2 border-terracotta-600 bg-white p-8 text-center">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-terracotta-50">
-              <PartyPopper className="h-8 w-8 text-terracotta-deep" strokeWidth={1.5} />
+              <PartyPopper className="h-8 w-8 text-terracotta-600" strokeWidth={1.5} />
             </div>
 
-            <h1 className="mt-6 font-display text-h2 text-noir">Felicitations !</h1>
-            <p className="mt-2 text-sm text-stone-grey">Vous avez gagne :</p>
+            <h1 className="mt-6 font-display text-h2 text-noir">Félicitations !</h1>
+            <p className="mt-2 text-sm text-stone-grey">Vous avez gagné :</p>
 
             <div className="mt-6 rounded-card bg-terracotta-50 p-6">
-              <Gift className="mx-auto h-10 w-10 text-terracotta-deep" strokeWidth={1.5} />
+              <Gift className="mx-auto h-10 w-10 text-terracotta-600" strokeWidth={1.5} />
               <h2 className="mt-3 font-display text-xl font-bold text-noir">
                 {result.prize.name}
               </h2>
-              <p className="mt-1 font-functional text-lg font-bold text-terracotta-deep">
+              <p className="mt-1 font-functional text-lg font-bold text-terracotta-600">
                 Valeur : {result.prize.value}
               </p>
             </div>
 
             <div className="mt-6 rounded-soft bg-cream p-4 text-left">
               <p className="text-xs text-stone-grey">
-                <strong>Code utilise :</strong> {result.code}
+                <strong>Code utilisé :</strong> {result.code}
               </p>
               <p className="mt-2 text-xs text-stone-grey">
                 <Sparkles className="mr-1 inline h-3 w-3 text-gold-500" />
-                Vous etes automatiquement inscrit au tirage au sort du grand prix !
+                Vous êtes automatiquement inscrit au tirage au sort du grand prix !
               </p>
             </div>
 
@@ -157,14 +161,14 @@ export default function ParticipatePage() {
       {/* Hero */}
       <section className="bg-white py-12 text-center">
         <div className="container mx-auto px-6">
-          <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-deep">
-            Jeu-concours The Tip Top
+          <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-600">
+            Jeu-concours Thé Tip Top
           </p>
           <h1 className="mt-3 font-display text-h1 text-noir">
             Participez et gagnez !
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-sm text-stone-grey">
-            Testez votre code et decouvrez immediatement votre lot. 100% des tickets sont gagnants,
+            Testez votre code et découvrez immédiatement votre lot. 100% des tickets sont gagnants,
             alors n&apos;attendez plus !
           </p>
         </div>
@@ -175,7 +179,7 @@ export default function ParticipatePage() {
         <section className="mx-auto max-w-xl">
           <h2 className="font-display text-h2 text-noir">Soumettre votre code</h2>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
+          <form noValidate onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
             <div>
               <Label htmlFor="code">Code du ticket</Label>
               <Input
@@ -269,7 +273,7 @@ export default function ParticipatePage() {
                   key={prize.code}
                   className="rounded-card border border-warm-beige bg-white p-5"
                 >
-                  <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-deep">
+                  <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-600">
                     {prize.name}
                   </p>
                   <p className="mt-2 font-functional text-sm font-semibold text-noir">
@@ -278,7 +282,7 @@ export default function ParticipatePage() {
                   <div className="mt-2 flex items-center justify-between">
                     <span className="text-xs text-stone-grey">Chance : {prize.percentage}%</span>
                     {prize.value && (
-                      <span className="font-functional text-sm font-bold text-terracotta-deep">
+                      <span className="font-functional text-sm font-bold text-terracotta-600">
                         {prize.value}
                       </span>
                     )}
@@ -288,9 +292,9 @@ export default function ParticipatePage() {
           </div>
         </section>
 
-        {/* Reglement du concours */}
+        {/* Règlement du concours */}
         <section className="mt-16">
-          <h2 className="font-display text-h2 text-noir">Reglement du concours</h2>
+          <h2 className="font-display text-h2 text-noir">Règlement du concours</h2>
           <div className="mt-6 space-y-3 rounded-card bg-terracotta-50 p-6">
             {rules.map((rule, idx) => (
               <div key={idx} className="flex items-start gap-3">
@@ -305,7 +309,7 @@ export default function ParticipatePage() {
         <section className="mt-16 text-center">
           <h2 className="font-display text-h2 text-noir">Votre engagement</h2>
           <p className="mt-2 text-xs text-stone-grey">
-            The Tip Top s&apos;engage dans une demarche responsable
+            Thé Tip Top s&apos;engage dans une démarche responsable
           </p>
 
           <div className="mt-8 flex justify-center gap-8">
@@ -319,10 +323,10 @@ export default function ParticipatePage() {
             </div>
             <div className="flex flex-col items-center">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-terracotta-50">
-                <ShieldCheck className="h-7 w-7 text-terracotta-deep" strokeWidth={1.5} />
+                <ShieldCheck className="h-7 w-7 text-terracotta-600" strokeWidth={1.5} />
               </div>
               <span className="mt-2 font-functional text-[10px] font-semibold uppercase tracking-[1px] text-noir">
-                Certifie bio
+                Certifié bio
               </span>
             </div>
             <div className="flex flex-col items-center">

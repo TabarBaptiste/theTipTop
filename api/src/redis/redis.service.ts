@@ -42,6 +42,21 @@ export class RedisService implements OnModuleDestroy {
     }
   }
 
+  /**
+   * Lit une clé et la supprime dans la même opération.
+   *
+   * Indispensable pour un jeton à usage unique : un GET suivi d'un DEL laisse
+   * une fenêtre pendant laquelle deux requêtes simultanées lisent toutes deux
+   * la valeur avant que l'une n'efface. GETDEL est atomique côté serveur.
+   *
+   * Contrairement aux autres méthodes de ce service, l'erreur n'est pas avalée :
+   * un appelant qui garantit l'usage unique doit refuser plutôt que de laisser
+   * passer quand le magasin est indisponible.
+   */
+  async getDel(key: string): Promise<string | null> {
+    return this.client.getdel(key);
+  }
+
   async set(key: string, value: string, ttlSeconds?: number): Promise<void> {
     try {
       if (ttlSeconds) {

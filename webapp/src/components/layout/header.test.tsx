@@ -51,13 +51,41 @@ describe('Header', () => {
 
   // La nav est rendue deux fois (desktop + menu mobile) : on interroge donc
   // toujours avec getAllByRole plutot que getByRole.
-  it('liste les entrees de navigation attendues', () => {
+  it('liste les entrees de navigation publiques', () => {
     signedOut();
     render(<Header />);
 
-    ['Le jeu', 'Lots', 'Mon concours', 'FAQ'].forEach((label) => {
+    ['Le jeu', 'Lots', 'Règlement', 'FAQ'].forEach((label) => {
       expect(screen.getAllByRole('link', { name: label }).length).toBeGreaterThan(0);
     });
+  });
+
+  // /dashboard est protege par le middleware : proposer ce lien a un visiteur
+  // anonyme le renverrait vers la connexion depuis une nav censee mener
+  // quelque part.
+  it('masque l espace personnel a un visiteur anonyme', () => {
+    signedOut();
+    render(<Header />);
+
+    expect(screen.queryByRole('link', { name: 'Mes participations' })).not.toBeInTheDocument();
+  });
+
+  it('expose l espace personnel a un compte connecte', () => {
+    signedInAs('CLIENT');
+    render(<Header />);
+
+    const liens = screen.getAllByRole('link', { name: 'Mes participations' });
+    expect(liens.length).toBeGreaterThan(0);
+    expect(liens[0]).toHaveAttribute('href', '/dashboard');
+  });
+
+  // L ancien libelle etait un hapax : la page s appelle « Mes participations »
+  // partout ailleurs dans l application.
+  it('n emploie plus l ancien libelle Mon concours', () => {
+    signedInAs('CLIENT');
+    render(<Header />);
+
+    expect(screen.queryByRole('link', { name: 'Mon concours' })).not.toBeInTheDocument();
   });
 
   it('n expose aucun lien vers la route inexistante /boutiques', () => {
@@ -73,7 +101,7 @@ describe('Header', () => {
     render(<Header />);
 
     screen.getAllByRole('link', { name: 'Participer' }).forEach((link) => {
-      expect(link).toHaveAttribute('href', '/dashboard/participate');
+      expect(link).toHaveAttribute('href', '/participate');
     });
     expect(screen.getAllByRole('link', { name: 'Connexion' }).length).toBeGreaterThan(0);
     expect(screen.queryByRole('link', { name: 'Jean' })).not.toBeInTheDocument();
@@ -85,7 +113,12 @@ describe('Header', () => {
 
     expect(screen.queryByRole('link', { name: 'Connexion' })).not.toBeInTheDocument();
     expect(screen.getAllByRole('link', { name: 'Participer' }).length).toBeGreaterThan(0);
-    screen.getAllByRole('link', { name: 'Jean' }).forEach((link) => {
+
+    // Le compte n'est plus un lien direct vers le profil mais un contrôle
+    // ouvrant un menu : c'est ce qui evite de disperser les destinations
+    // personnelles dans la barre de navigation.
+    expect(screen.getByRole('button', { name: /Jean/ })).toBeInTheDocument();
+    screen.getAllByRole('link', { name: 'Mon profil' }).forEach((link) => {
       expect(link).toHaveAttribute('href', '/dashboard/profile');
     });
   });
@@ -102,7 +135,7 @@ describe('Header', () => {
     signedInAs('ADMIN');
     render(<Header />);
 
-    const links = screen.getAllByRole('link', { name: 'Admin' });
+    const links = screen.getAllByRole('link', { name: 'Administration' });
     expect(links.length).toBeGreaterThan(0);
     links.forEach((link) => expect(link).toHaveAttribute('href', '/admin'));
   });
@@ -114,5 +147,33 @@ describe('Header', () => {
     const links = screen.getAllByRole('link', { name: 'Espace employé' });
     expect(links.length).toBeGreaterThan(0);
     links.forEach((link) => expect(link).toHaveAttribute('href', '/employee'));
+  });
+
+  // Le personnel pilote l'opération, il n'y joue pas : lui proposer l'espace
+  // personnel l'enverrait sur une page vide.
+  it.each(['ADMIN', 'EMPLOYEE'] as const)(
+    'ne propose pas Mes participations a un compte %s',
+    (role) => {
+      signedInAs(role);
+      render(<Header />);
+
+      expect(screen.queryByRole('link', { name: 'Mes participations' })).not.toBeInTheDocument();
+    },
+  );
+
+  it('propose Mes participations a un compte CLIENT', () => {
+    signedInAs('CLIENT');
+    render(<Header />);
+
+    expect(screen.getAllByRole('link', { name: 'Mes participations' }).length).toBeGreaterThan(0);
+  });
+
+  // Le compte du personnel ouvre un menu au lieu de mener directement au
+  // profil : c'est ce qui evite un second bouton dans la barre.
+  it('replie le backoffice sous un bouton pour le personnel', () => {
+    signedInAs('ADMIN');
+    render(<Header />);
+
+    expect(screen.getByRole('button', { name: /Jean/ })).toBeInTheDocument();
   });
 });

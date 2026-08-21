@@ -137,7 +137,7 @@ export class ParticipationsController {
   })
   @ApiResponse({ status: 400, description: 'Code invalide ou déjà utilisé' })
   async participate(@CurrentUser() user: User, @Body() dto: CreateParticipationDto) {
-    return this.participationsService.participate(user.id, dto.code);
+    return this.participationsService.participate(user, dto);
   }
 
   // ===========================================

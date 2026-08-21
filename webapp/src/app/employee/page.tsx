@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -12,6 +12,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SkeletonList } from '@/components/ui/skeleton';
+import { Pagination } from '@/components/ui/pagination';
+import { DeliveredPrizesList } from '@/components/gains/delivered-prizes-list';
 import { api } from '@/lib/api';
 import { formatDateTime } from '@/lib/utils';
 
@@ -20,6 +22,8 @@ const searchSchema = z.object({
 });
 
 type SearchFormData = z.infer<typeof searchSchema>;
+
+const PAGE_SIZE = 20;
 
 // Réponse de GET /gains/pending (structure plate)
 interface PendingDelivery {
@@ -38,6 +42,11 @@ interface PendingDelivery {
     phone?: string;
   };
   participatedAt: string;
+}
+
+interface PaginatedPendingDeliveries {
+  data: PendingDelivery[];
+  meta: { total: number; page: number; limit: number; totalPages: number };
 }
 
 // Réponse de GET /participations/by-code/:code
@@ -61,6 +70,7 @@ interface SearchResult {
 export default function EmployeePage() {
   const queryClient = useQueryClient();
   const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
+  const [pendingPage, setPendingPage] = useState(1);
 
   const {
     register,
@@ -71,15 +81,16 @@ export default function EmployeePage() {
     resolver: zodResolver(searchSchema),
   });
 
-  // Récupérer les lots en attente (réponse paginée → on prend .data)
-  const { data: pendingDeliveries, isLoading } = useQuery<PendingDelivery[]>({
-    queryKey: ['pending-deliveries'],
-    queryFn: async () => {
-      const response = await api.get('/gains/pending');
-      // L'API retourne { data: [...], meta: {...} }
-      return response.data.data;
-    },
+  // Lots en attente. La réponse est paginée : sans page ni limite explicites,
+  // l'API en renvoyait 20 et tous les suivants restaient hors d'atteinte.
+  const { data: pending, isLoading } = useQuery<PaginatedPendingDeliveries>({
+    queryKey: ['pending-deliveries', pendingPage],
+    queryFn: async () =>
+      (await api.get('/gains/pending', { params: { page: pendingPage, limit: PAGE_SIZE } })).data,
+    placeholderData: keepPreviousData,
   });
+
+  const pendingDeliveries = pending?.data ?? [];
 
   // Recherche par code → GET /participations/by-code/:code
   const searchMutation = useMutation({
@@ -110,6 +121,9 @@ export default function EmployeePage() {
     onSuccess: () => {
       toast.success('Lot remis avec succès !');
       queryClient.invalidateQueries({ queryKey: ['pending-deliveries'] });
+      // Une remise fait passer le lot d'une liste à l'autre : sans cette
+      // invalidation, l'historique restait figé jusqu'au rechargement.
+      queryClient.invalidateQueries({ queryKey: ['delivered-prizes'] });
       setSearchResult(null);
       reset();
     },
@@ -147,7 +161,7 @@ export default function EmployeePage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit(onSearch)} className="space-y-4">
+              <form noValidate onSubmit={handleSubmit(onSearch)} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="code">Code du ticket</Label>
                   <div className="flex gap-2">
@@ -272,7 +286,7 @@ export default function EmployeePage() {
             <CardContent>
               {isLoading ? (
                 <SkeletonList count={3} />
-              ) : pendingDeliveries && pendingDeliveries.length > 0 ? (
+              ) : pendingDeliveries.length > 0 ? (
                 <div className="max-h-96 space-y-3 overflow-y-auto">
                   {pendingDeliveries.map((delivery) => (
                     <div
@@ -312,8 +326,22 @@ export default function EmployeePage() {
                   </p>
                 </div>
               )}
+
+              {pending && pending.meta.total > 0 && (
+                <Pagination
+                  page={pending.meta.page}
+                  totalPages={pending.meta.totalPages}
+                  total={pending.meta.total}
+                  onPageChange={setPendingPage}
+                  label="lots en attente"
+                />
+              )}
             </CardContent>
           </Card>
+
+          {/* Historique des remises, sur toute la largeur : une liste paginée
+              respire mal dans une demi-colonne. */}
+          <DeliveredPrizesList className="lg:col-span-2" />
         </div>
       </div>
     </div>

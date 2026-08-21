@@ -13,25 +13,30 @@ export function HeroSection() {
         <div className="grid items-center gap-12 lg:grid-cols-2">
           {/* Content */}
           <div>
-            <p className="mb-3 font-functional text-ui uppercase tracking-[2px] text-terracotta-deep">
+            <p className="mb-3 font-functional text-ui uppercase tracking-[2px] text-terracotta-600">
               Jeu-concours exclusif
             </p>
 
+            {/* « Bienvenue » ouvrait le titre principal de la page la plus
+                importante du site sans porter aucune valeur de recherche.
+                L'argument différenciant y prend sa place : il était jusqu'ici
+                relégué dans un badge. */}
             <h1 className="font-display text-h1 text-noir">
-              Bienvenue au jeu-concours{' '}
-              <span className="text-terracotta-deep">The Tip Top</span>
+              Jeu-concours <span className="text-terracotta-600">Thé Tip Top</span> : 100 % des
+              tickets sont gagnants
             </h1>
 
             <p className="mt-6 text-body leading-relaxed text-stone-grey">
-              A l&apos;occasion de l&apos;ouverture de notre 10eme boutique a Nice,
-              participez a notre grand jeu-concours et tentez de remporter de
-              nombreux lots. 100% des tickets sont gagnants !
+              À l&apos;occasion de l&apos;ouverture de notre 10<sup>e</sup> boutique à Nice,
+              participez à notre grand jeu-concours : <strong className="text-noir">100 % des
+              tickets sont gagnants</strong>, et chaque participation vous inscrit au tirage
+              au sort d&apos;<strong className="text-noir">un an de thé</strong>.
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">
               <Badge variant="bio">
                 <Leaf className="h-4 w-4" strokeWidth={1.5} />
-                Bio certifie
+                Bio certifié
               </Badge>
               <Badge variant="location">
                 <Ticket className="h-4 w-4" strokeWidth={1.5} />

@@ -5,6 +5,14 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+
+    /* WCAG 2.2, critère 2.4.11 « Focus non masqué ». L'en-tête est collant et
+       occupe 5rem : sans cette réserve, tout défilement provoqué par une ancre
+       ou par la mise au point au clavier amène la cible pile derrière lui, et
+       l'utilisateur au clavier perd de vue l'élément qu'il vient d'atteindre.
+       Les 43 « scroll-mt-* » disséminés dans les pages traitaient le symptôme
+       section par section ; cette règle traite la cause. */
+    scroll-padding-top: 5.5rem;
   }
 
   :root {
@@ -21,7 +29,7 @@
     --color-gold: #C9A96E;
     --color-terracotta-pale: #F2E0D0;
     --color-terracotta-warm: #C76C3A;
-    --color-stone-grey: #8A8378;
+    --color-stone-grey: #4A463E;
 
     /* === DESIGN.md - Semantiques === */
     --color-bg: var(--color-cream);
@@ -142,4 +150,55 @@
   pointer-events: none;
   position: absolute;
   inset: 0;
+}
+
+/* ===========================================
+   Formulaires sur mobile
+   =========================================== */
+
+@layer base {
+  /* Safari sur iOS dimensionne input[type=date] d'apres son contenu et ignore
+     la largeur du conteneur : le champ s'affiche nettement plus etroit que ses
+     voisins, et desaligne la grille du formulaire.
+
+     appearance: none retire ce dimensionnement natif. La hauteur minimale
+     reprend celle du composant Input (h-10, 2.5rem) : sans elle, le champ
+     s'ecrase une fois le style natif retire. */
+  input[type='date'] {
+    -webkit-appearance: none;
+    appearance: none;
+    min-height: 2.5rem;
+  }
+
+  /* iOS Safari zoome automatiquement des qu'un champ recoit le focus avec une
+     police inferieure a 16px. Notre token text-body vaut 14px, ce qui declenche
+     le zoom a chaque champ, et la page reste zoomee ensuite.
+
+     On corrige la police plutot que de brider le viewport avec
+     maximum-scale=1 ou user-scalable=no : ces derniers empechent aussi le zoom
+     volontaire, dont dependent les personnes malvoyantes. C'est un echec
+     WCAG 1.4.4 pour un confort de developpeur.
+
+     La regle cible les appareils tactiles, non une largeur. Elle s'arretait
+     auparavant a 767px, ce qui laissait passer les tablettes : un iPad en
+     portrait fait exactement 768px, et iOS zoome sous 16px quelle que soit la
+     largeur de l'ecran. Le zoom est un comportement du tactile, pas de la
+     taille de fenetre - la requete le dit desormais. Une souris sur petit ecran
+     garde donc les 14px de la charte.
+
+     !important est ici necessaire, et non un raccourci : la taille vient de la
+     classe utilitaire .text-body posee par le composant Input. Un selecteur
+     d'element ne peut pas battre une classe, quelle que soit la couche dans
+     laquelle on l'ecrit. L'alternative serait de porter text-base md:text-body
+     sur chaque champ de chaque formulaire, en n'en oubliant aucun.
+
+     Les cases a cocher et boutons radio sont exclus : ils ne declenchent aucun
+     zoom et leur taille ne depend pas de la police. */
+  @media (hover: none) and (pointer: coarse) {
+    input:not([type='checkbox']):not([type='radio']),
+    select,
+    textarea {
+      font-size: 16px !important;
+    }
+  }
 }

@@ -18,11 +18,12 @@ describe('LeadsService', () => {
     ticket: { updateMany: jest.fn(), findUnique: jest.fn() },
     user: { findUnique: jest.fn(), create: jest.fn() },
     participation: { create: jest.fn() },
+    gameConfig: { findFirst: jest.fn() },
     $transaction: jest.fn(),
   };
 
   const mockRedis = { incr: jest.fn(), expire: jest.fn() };
-  const mockMail = { sendVerificationCode: jest.fn() };
+  const mockMail = { sendVerificationCode: jest.fn(), sendPrizeWon: jest.fn() };
   const mockTickets = { verifyCode: jest.fn(), getPrizesMap: jest.fn() };
   const mockAuth = { login: jest.fn() };
 
@@ -44,6 +45,8 @@ describe('LeadsService', () => {
       mockAuth as unknown as AuthService,
     );
     mockRedis.incr.mockResolvedValue(1);
+    mockPrisma.gameConfig.findFirst.mockResolvedValue({ claimEndDate: new Date('2026-10-30') });
+    mockMail.sendPrizeWon.mockResolvedValue(true);
     // Par défaut la transaction exécute simplement le callback avec les mocks.
     mockPrisma.$transaction.mockImplementation(async (cb: never) =>
       (cb as unknown as (tx: unknown) => unknown)(mockPrisma),
@@ -175,6 +178,55 @@ describe('LeadsService', () => {
       // Option A : le mot de passe reste à définir après la validation.
       expect(result.passwordRequired).toBe(true);
       expect(mockAuth.login).toHaveBeenCalled();
+    });
+
+    // Le participant doit retrouver son lot et son code dans sa boite : l ecran
+    // de resultat disparait des qu il ferme l onglet.
+    it('annonce le lot par email, avec le code et la date limite de reclamation', async () => {
+      mockPrisma.lead.findUnique.mockResolvedValue(pendingLead);
+      mockPrisma.ticket.findUnique.mockResolvedValue({
+        id: 't1',
+        code: 'ABCDEFGH23',
+        prizeType: 'INFUSER',
+      });
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockPrisma.user.create.mockResolvedValue({
+        id: 'u1',
+        email: 'jean@email.fr',
+        password: null,
+      });
+      mockPrisma.ticket.updateMany.mockResolvedValue({ count: 1 });
+      mockPrisma.participation.create.mockResolvedValue({ id: 'p1', createdAt: new Date() });
+      mockTickets.getPrizesMap.mockResolvedValue({
+        INFUSER: { name: 'Infuseur à thé', value: null },
+      });
+      mockAuth.login.mockResolvedValue({ accessToken: 'jwt' });
+
+      await service.verify({ leadId: 'l1', code: '123456' });
+
+      expect(mockMail.sendPrizeWon).toHaveBeenCalledWith(
+        'jean@email.fr',
+        { name: 'Infuseur à thé', value: null },
+        'ABCDEFGH23',
+        new Date('2026-10-30'),
+      );
+    });
+
+    // La participation est acquise avant l envoi : une panne de messagerie ne
+    // doit pas la faire echouer ni priver l utilisateur de son resultat.
+    it('rend le resultat meme si l annonce du gain echoue', async () => {
+      mockPrisma.lead.findUnique.mockResolvedValue(pendingLead);
+      mockPrisma.ticket.findUnique.mockResolvedValue({ id: 't1', code: 'C', prizeType: 'INFUSER' });
+      mockPrisma.user.findUnique.mockResolvedValue({ id: 'u1', password: 'hash' });
+      mockPrisma.ticket.updateMany.mockResolvedValue({ count: 1 });
+      mockPrisma.participation.create.mockResolvedValue({ id: 'p1', createdAt: new Date() });
+      mockTickets.getPrizesMap.mockResolvedValue({ INFUSER: { name: 'Infuseur' } });
+      mockAuth.login.mockResolvedValue({ accessToken: 'jwt' });
+      mockMail.sendPrizeWon.mockResolvedValue(false);
+
+      const result = await service.verify({ leadId: 'l1', code: '123456' });
+
+      expect(result.participation.prize.name).toBe('Infuseur');
     });
 
     it('rattache un compte existant au lieu de le dupliquer', async () => {

@@ -89,8 +89,6 @@ export class LeadsService {
         lastCodeSentAt: new Date(),
         rgpdConsentAt: new Date(),
         consentEmail: dto.consentEmail ?? false,
-        pixelTrackingConsent: dto.pixelTrackingConsent ?? null,
-        pixelTrackingConsentAt: dto.pixelTrackingConsent === undefined ? null : new Date(),
       },
     });
 
@@ -188,6 +186,23 @@ export class LeadsService {
 
     const prizesMap = await this.ticketsService.getPrizesMap();
     const tokens = await this.authService.login(result.user);
+    const prize = prizesMap[result.ticket.prizeType];
+
+    // Annonce du gain. Volontairement hors de la transaction : la participation
+    // est acquise, un incident d'envoi ne doit pas l'annuler. Le service avale
+    // ses erreurs et signale l'echec par sa valeur de retour, ici sans
+    // consequence puisque le lot s'affiche aussi a l'ecran.
+    const gameConfig = await this.prisma.gameConfig.findFirst({
+      where: { isActive: true },
+      select: { claimEndDate: true },
+    });
+
+    await this.mail.sendPrizeWon(
+      result.user.email,
+      prize,
+      result.ticket.code,
+      gameConfig?.claimEndDate ?? null,
+    );
 
     return {
       ...tokens,
@@ -197,7 +212,7 @@ export class LeadsService {
         id: result.participation.id,
         code: result.ticket.code,
         prizeType: result.ticket.prizeType,
-        prize: prizesMap[result.ticket.prizeType],
+        prize,
         participatedAt: result.participation.createdAt,
       },
     };

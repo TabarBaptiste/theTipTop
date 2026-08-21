@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useIsHydrated } from '@/lib/hooks/use-is-hydrated';
+import { toDateInputValue } from '@/lib/utils';
 
 const MIN_AGE = 18;
 const MAX_AGE = 120;
@@ -51,7 +52,6 @@ const participationSchema = z.object({
     errorMap: () => ({ message: 'Vous devez accepter pour participer' }),
   }),
   consentEmail: z.boolean().default(false),
-  pixelTrackingConsent: z.boolean().default(false),
   // Piège à robots : invisible à l'écran, donc toujours vide pour un humain.
   website: z.string().max(0).optional(),
 });
@@ -76,19 +76,22 @@ export function ParticipationForm({ onSubmit, isSubmitting }: Props) {
     formState: { errors },
   } = useForm<ParticipationFormData>({
     resolver: zodResolver(participationSchema),
-    defaultValues: { consentEmail: false, pixelTrackingConsent: false, website: '' },
+    defaultValues: { consentEmail: false, website: '' },
   });
 
   const today = new Date();
-  const maxBirthDate = new Date(today.getFullYear() - MIN_AGE, today.getMonth(), today.getDate())
-    .toISOString()
-    .split('T')[0];
-  const minBirthDate = new Date(today.getFullYear() - MAX_AGE, today.getMonth(), today.getDate())
-    .toISOString()
-    .split('T')[0];
+  // toDateInputValue lit les composants en heure locale. toISOString() convertit
+  // en UTC, ou minuit heure de Paris devient la veille : la borne tombait un jour
+  // trop tot et bloquait la personne ayant 18 ans le jour meme.
+  const maxBirthDate = toDateInputValue(
+    new Date(today.getFullYear() - MIN_AGE, today.getMonth(), today.getDate()),
+  );
+  const minBirthDate = toDateInputValue(
+    new Date(today.getFullYear() - MAX_AGE, today.getMonth(), today.getDate()),
+  );
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
+    <form noValidate onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
       <div>
         <Label htmlFor="code">Code du ticket *</Label>
         <Input
@@ -201,7 +204,7 @@ export function ParticipationForm({ onSubmit, isSubmitting }: Props) {
           />
           <label htmlFor="consentData" className="text-xs leading-relaxed text-stone-grey">
             J&apos;accepte le traitement de mes données et le{' '}
-            <Link href="/reglement" className="text-terracotta-deep hover:underline">
+            <Link href="/reglement" className="text-terracotta-600 hover:underline">
               règlement du jeu
             </Link>{' '}
             *
@@ -220,20 +223,6 @@ export function ParticipationForm({ onSubmit, isSubmitting }: Props) {
           />
           <label htmlFor="consentEmail" className="text-xs leading-relaxed text-stone-grey">
             Je souhaite recevoir les offres et nouveautés de Thé Tip Top
-          </label>
-        </div>
-
-        {/* Consentement distinct du précédent : recommandation CNIL du
-            14/04/2026. Accepter la newsletter ne vaut pas accepter le suivi. */}
-        <div className="flex items-start gap-3">
-          <input
-            type="checkbox"
-            id="pixelTrackingConsent"
-            className="mt-1 h-4 w-4 rounded-sharp border-warm-beige accent-terracotta-deep"
-            {...register('pixelTrackingConsent')}
-          />
-          <label htmlFor="pixelTrackingConsent" className="text-xs leading-relaxed text-stone-grey">
-            J&apos;accepte la mesure d&apos;ouverture des emails qui me sont adressés
           </label>
         </div>
       </div>

@@ -4,6 +4,7 @@
 
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { EmailChangeService } from './email-change.service';
 import { User } from '@prisma/client';
 import { type Response } from 'express';
 
@@ -15,6 +16,8 @@ describe('AuthController', () => {
     login: jest.fn(),
     refreshToken: jest.fn(),
     logout: jest.fn(),
+    createOAuthExchangeCode: jest.fn(),
+    consumeOAuthExchangeCode: jest.fn(),
   };
 
   const user = {
@@ -26,12 +29,20 @@ describe('AuthController', () => {
     role: 'CLIENT',
   } as User;
 
+  const mockEmailChangeService = {
+    request: jest.fn(),
+    confirm: jest.fn(),
+  };
+
   const tokens = { accessToken: 'at', refreshToken: 'rt', expiresIn: 900, user };
 
   const createRes = () => ({ redirect: jest.fn() }) as unknown as Response;
 
   beforeEach(() => {
-    controller = new AuthController(mockAuthService as unknown as AuthService);
+    controller = new AuthController(
+      mockAuthService as unknown as AuthService,
+      mockEmailChangeService as unknown as EmailChangeService,
+    );
     jest.clearAllMocks();
     process.env.FRONTEND_URL = 'http://localhost:3000';
   });
@@ -82,26 +93,45 @@ describe('AuthController', () => {
     await expect(controller.facebookAuth()).resolves.toBeUndefined();
   });
 
-  it('googleAuthCallback should redirect to the frontend with the tokens', async () => {
+  it('googleAuthCallback redirige avec un code d echange, jamais avec les jetons', async () => {
     mockAuthService.login.mockResolvedValue(tokens);
+    mockAuthService.createOAuthExchangeCode.mockResolvedValue('code-opaque');
     const res = createRes();
 
     await controller.googleAuthCallback({ user } as never, res);
 
+    expect(mockAuthService.createOAuthExchangeCode).toHaveBeenCalledWith(tokens);
     expect(res.redirect).toHaveBeenCalledWith(
-      'http://localhost:3000/auth/callback?accessToken=at&refreshToken=rt',
+      'http://localhost:3000/auth/callback?code=code-opaque',
     );
+
+    // Le point essentiel : une URL de redirection entre dans l'historique du
+    // navigateur, l'en-tete Referer et les journaux des intermediaires. Aucun
+    // jeton ne doit s'y trouver.
+    const url = (res.redirect as jest.Mock).mock.calls[0][0] as string;
+    expect(url).not.toContain(tokens.accessToken);
+    expect(url).not.toContain(tokens.refreshToken);
   });
 
-  it('facebookAuthCallback should redirect with the tokens when a user is present', async () => {
+  it('facebookAuthCallback redirige lui aussi avec un code d echange', async () => {
     mockAuthService.login.mockResolvedValue(tokens);
+    mockAuthService.createOAuthExchangeCode.mockResolvedValue('autre-code');
     const res = createRes();
 
     await controller.facebookAuthCallback({ user } as never, res);
 
-    expect(res.redirect).toHaveBeenCalledWith(
-      expect.stringContaining('/auth/callback?accessToken=at'),
-    );
+    const url = (res.redirect as jest.Mock).mock.calls[0][0] as string;
+    expect(url).toContain('/auth/callback?code=autre-code');
+    expect(url).not.toContain(tokens.refreshToken);
+  });
+
+  it('echange le code contre les jetons', async () => {
+    mockAuthService.consumeOAuthExchangeCode.mockResolvedValue(tokens);
+
+    const resultat = await controller.exchangeOAuthCode({ code: 'a'.repeat(64) });
+
+    expect(resultat).toEqual(tokens);
+    expect(mockAuthService.consumeOAuthExchangeCode).toHaveBeenCalledWith('a'.repeat(64));
   });
 
   it('facebookAuthCallback should redirect to the login page when no user (email missing)', async () => {

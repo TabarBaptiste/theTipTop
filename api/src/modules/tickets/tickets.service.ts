@@ -85,9 +85,19 @@ export class TicketsService {
       return { isValid: false, error: "Le jeu-concours n'est pas actif." };
     }
 
+    // La fenêtre de participation est celle du règlement : de l'ouverture à la
+    // clôture du jeu. Le délai de réclamation, plus tardif, ne borne que le
+    // retrait des lots déjà gagnés. Les confondre revenait à laisser jouer un
+    // code un mois après la fin du concours - et, avant, à laisser jouer avant
+    // même son ouverture, aucune des deux bornes n'étant contrôlée ici.
     const now = new Date();
-    if (now > gameConfig.claimEndDate) {
-      return { isValid: false, error: 'La période de réclamation des lots est terminée.' };
+
+    if (now < gameConfig.startDate) {
+      return { isValid: false, error: "Le jeu-concours n'a pas encore commencé." };
+    }
+
+    if (now > gameConfig.endDate) {
+      return { isValid: false, error: 'Le jeu-concours est terminé.' };
     }
 
     const prizesMap = await this.getPrizesMap();

@@ -87,9 +87,13 @@ module.exports = {
           800: '#7F6638',
           900: '#644F2A',
         },
+        // Texte secondaire. L'ancienne valeur #8A8378 ne donnait que 3.48:1 sur
+        // le creme, sous le minimum WCAG AA de 4.5:1. Cette nuance assombrie
+        // garde la chaleur de la palette, atteint 8.71:1, et reste distincte du
+        // noir #1A1A1A : passer le secondaire en noir supprimerait la hierarchie.
         stone: {
-          DEFAULT: '#8A8378',
-          grey: '#8A8378',
+          DEFAULT: '#4A463E',
+          grey: '#4A463E',
         },
         // Backward compat for admin/employee pages
         tea: {

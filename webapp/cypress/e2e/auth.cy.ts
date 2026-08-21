@@ -22,26 +22,35 @@ describe('Authentification', () => {
     });
 
     it('valide les champs obligatoires', () => {
-      cy.get('button[type="submit"]').click();
-      cy.contains('Le prenom doit faire au moins 2 caracteres').should('be.visible');
+      cy.get('form').first().find('button[type="submit"]').click();
+      cy.contains('Le prénom doit faire au moins 2 caractères').should('be.visible');
     });
 
     it('valide le format email', () => {
       cy.get('input[name="email"]').type('invalid-email');
-      cy.get('button[type="submit"]').click();
+      cy.get('form').first().find('button[type="submit"]').click();
       cy.contains('Email invalide').should('be.visible');
     });
 
     it('valide la robustesse du mot de passe', () => {
       cy.get('input[name="password"]').type('weak');
-      cy.get('button[type="submit"]').click();
-      cy.contains('Le mot de passe doit faire au moins 8 caracteres').should('be.visible');
+      cy.get('form').first().find('button[type="submit"]').click();
+      cy.contains('Le mot de passe doit faire au moins 8 caractères').should('be.visible');
     });
 
     it('vérifie la correspondance des mots de passe', () => {
+      // Tous les champs sont renseignés : la correspondance des mots de passe
+      // est vérifiée par un refine au niveau de l'objet, que zod n'exécute que
+      // si le reste du schéma passe. Avec des champs vides, ce message ne peut
+      // pas apparaître.
+      cy.get('input[name="firstName"]').type('Camille');
+      cy.get('input[name="lastName"]').type('Martin');
+      cy.get('input[name="email"]').type('camille.martin@simulation.invalid');
+      cy.get('input[name="birthDate"]').type('1990-05-15');
+      cy.get('input[name="consentData"]').check({ force: true });
       cy.get('input[name="password"]').type('Password123!');
       cy.get('input[name="confirmPassword"]').type('Differente123!');
-      cy.get('button[type="submit"]').click();
+      cy.get('form').first().find('button[type="submit"]').click();
       cy.contains('Les mots de passe ne correspondent pas').should('be.visible');
     });
 
@@ -51,7 +60,7 @@ describe('Authentification', () => {
       cy.get('input[name="email"]').type('test@example.com');
       cy.get('input[name="password"]').type('Password123!');
       cy.get('input[name="confirmPassword"]').type('Password123!');
-      cy.get('button[type="submit"]').click();
+      cy.get('form').first().find('button[type="submit"]').click();
       cy.contains('Vous devez accepter les conditions').should('be.visible');
     });
   });
@@ -64,7 +73,7 @@ describe('Authentification', () => {
     it('affiche le formulaire de connexion', () => {
       cy.get('input[name="email"]').should('be.visible');
       cy.get('input[name="password"]').should('be.visible');
-      cy.get('button[type="submit"]').contains('Se connecter').should('be.visible');
+      cy.get('form').first().find('button[type="submit"]').contains('Se connecter').should('be.visible');
     });
 
     it('affiche les boutons OAuth', () => {
@@ -73,16 +82,16 @@ describe('Authentification', () => {
     });
 
     it('affiche le lien mot de passe oublié (contact support)', () => {
-      cy.contains('Mot de passe oublie').should('be.visible');
+      cy.contains('Mot de passe oublié').should('be.visible');
     });
 
     it('affiche le lien vers l\'inscription', () => {
       cy.contains('Pas encore de compte').should('be.visible');
-      cy.contains('Creer un compte').should('be.visible');
+      cy.contains('Créer un compte').should('be.visible');
     });
 
     it('valide les champs obligatoires', () => {
-      cy.get('button[type="submit"]').click();
+      cy.get('form').first().find('button[type="submit"]').click();
       cy.contains('Email invalide').should('be.visible');
     });
   });

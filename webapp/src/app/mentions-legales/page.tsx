@@ -1,10 +1,16 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { GAME_START_DATE, GAME_END_DATE, CLAIM_END_DATE } from '@/lib/game-dates';
+import { formatFrenchDate, formatFrenchDateTime } from '@/lib/french-date';
+import { LEGAL_UPDATED_AT } from '@/lib/legal-dates';
 
 export const metadata: Metadata = {
+  // URL de reference : evite qu'un parametre de campagne ou une variante
+  // avec barre finale soit traite comme une page distincte.
+  alternates: { canonical: '/mentions-legales' },
   title: 'Mentions Légales',
   description:
-    'Mentions légales obligatoires du site The Tip Top - identification de l\'éditeur, hébergeur et informations réglementaires.',
+    'Mentions légales obligatoires du site Thé Tip Top - identification de l\'éditeur, hébergeur et informations réglementaires.',
 };
 
 const ARTICLES = [
@@ -26,7 +32,7 @@ export default function MentionsLegalesPage() {
       {/* En-tête */}
       <section className="border-b border-warm-beige bg-white">
         <div className="container mx-auto px-6 py-12 md:py-16">
-          <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-deep">
+          <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-600">
             Informations légales
           </p>
           <h1 className="mt-3 font-display text-h1 text-noir">
@@ -38,7 +44,7 @@ export default function MentionsLegalesPage() {
             l&apos;éditeur du site internet Thé Tip Top.
           </p>
           <p className="mt-4 text-sm text-stone-grey/70">
-            Dernière mise à jour : 9 juin 2026
+            Dernière mise à jour : {formatFrenchDate(LEGAL_UPDATED_AT.mentionsLegales)}
           </p>
         </div>
       </section>
@@ -56,7 +62,7 @@ export default function MentionsLegalesPage() {
                   <a
                     key={a.id}
                     href={`#${a.id}`}
-                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-deep"
+                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-600"
                   >
                     {a.label}
                   </a>
@@ -69,19 +75,19 @@ export default function MentionsLegalesPage() {
                 <nav className="mt-3 space-y-1">
                   <Link
                     href="/cgu"
-                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-deep"
+                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-600"
                   >
                     CGU
                   </Link>
                   <Link
                     href="/politique-confidentialite"
-                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-deep"
+                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-600"
                   >
                     Politique de confidentialité
                   </Link>
                   <Link
                     href="/gestion-cookies"
-                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-deep"
+                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-600"
                   >
                     Gestion des cookies
                   </Link>
@@ -103,7 +109,14 @@ export default function MentionsLegalesPage() {
                   Le site internet accessible à l&apos;adresse{' '}
                   <strong>thetiptop.dsp5-archi-o24a-4-5-g1.fr</strong> est édité par :
                 </p>
-                <div className="overflow-hidden rounded-card border border-warm-beige bg-white">
+                <div
+                  // Defilable plutot que coupe : a 375 px ces tableaux depassent
+                  // le cadre, et overflow-hidden rendait la derniere colonne
+                  // inatteignable. tabIndex rend la zone defilable au clavier,
+                  // sans quoi son contenu resterait hors de portee sans souris.
+                  tabIndex={0}
+                  className="overflow-x-auto rounded-card border border-warm-beige bg-white"
+                >
                   <table className="w-full text-sm">
                     <tbody className="divide-y divide-warm-beige">
                       {[
@@ -124,7 +137,7 @@ export default function MentionsLegalesPage() {
                             {label === 'Email' ? (
                               <a
                                 href="mailto:contact@thetiptop.fr"
-                                className="text-terracotta-deep underline underline-offset-2"
+                                className="text-terracotta-600 underline underline-offset-2"
                               >
                                 {value}
                               </a>
@@ -149,7 +162,14 @@ export default function MentionsLegalesPage() {
               <h2 className="font-display text-h2 text-noir">Article 2 - Hébergeur</h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
                 <p>Le site est hébergé par :</p>
-                <div className="overflow-hidden rounded-card border border-warm-beige bg-white">
+                <div
+                  // Defilable plutot que coupe : a 375 px ces tableaux depassent
+                  // le cadre, et overflow-hidden rendait la derniere colonne
+                  // inatteignable. tabIndex rend la zone defilable au clavier,
+                  // sans quoi son contenu resterait hors de portee sans souris.
+                  tabIndex={0}
+                  className="overflow-x-auto rounded-card border border-warm-beige bg-white"
+                >
                   <table className="w-full text-sm">
                     <tbody className="divide-y divide-warm-beige">
                       {[
@@ -189,7 +209,7 @@ export default function MentionsLegalesPage() {
                   Pour tout contact relatif au contenu éditorial du site :{' '}
                   <a
                     href="mailto:contact@thetiptop.fr"
-                    className="text-terracotta-deep underline underline-offset-2"
+                    className="text-terracotta-600 underline underline-offset-2"
                   >
                     contact@thetiptop.fr
                   </a>
@@ -215,11 +235,20 @@ export default function MentionsLegalesPage() {
                   commissaire de justice assermenté. Son règlement complet est consultable{' '}
                   <Link
                     href="/reglement"
-                    className="text-terracotta-deep underline underline-offset-2"
+                    className="text-terracotta-600 underline underline-offset-2"
                   >
                     ici
                   </Link>
                   .
+                </p>
+                <p>
+                  {/* Les espaces autour des expressions sont explicites : JSX
+                      supprime l'espace de tête d'un bloc de texte qui court sur
+                      plusieurs lignes, ce qui collait « 23h59inclus ». */}
+                  <strong>Période du jeu-concours :</strong> du {formatFrenchDate(GAME_START_DATE)}{' '}
+                  à 00h00 au {formatFrenchDateTime(GAME_END_DATE)}{' '}
+                  inclus. Les lots restent réclamables jusqu&apos;au{' '}
+                  {formatFrenchDateTime(CLAIM_END_DATE)}.
                 </p>
               </div>
             </section>
@@ -302,7 +331,7 @@ export default function MentionsLegalesPage() {
                   doit être adressée à{' '}
                   <a
                     href="mailto:contact@thetiptop.fr"
-                    className="text-terracotta-deep underline underline-offset-2"
+                    className="text-terracotta-600 underline underline-offset-2"
                   >
                     contact@thetiptop.fr
                   </a>
@@ -327,7 +356,7 @@ export default function MentionsLegalesPage() {
                   consultez notre{' '}
                   <Link
                     href="/politique-confidentialite"
-                    className="text-terracotta-deep underline underline-offset-2"
+                    className="text-terracotta-600 underline underline-offset-2"
                   >
                     Politique de confidentialité
                   </Link>
@@ -338,7 +367,7 @@ export default function MentionsLegalesPage() {
                   portabilité) en contactant :{' '}
                   <a
                     href="mailto:rgpd@thetiptop.fr"
-                    className="text-terracotta-deep underline underline-offset-2"
+                    className="text-terracotta-600 underline underline-offset-2"
                   >
                     rgpd@thetiptop.fr
                   </a>
@@ -351,7 +380,7 @@ export default function MentionsLegalesPage() {
                     href="https://www.cnil.fr"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-terracotta-deep underline underline-offset-2"
+                    className="text-terracotta-600 underline underline-offset-2"
                   >
                     www.cnil.fr
                   </a>).
@@ -364,7 +393,7 @@ export default function MentionsLegalesPage() {
               <h2 className="font-display text-h2 text-noir">Article 9 - Cookies</h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
                 <p>
-                  Le site utilise des cookies afin d&apos;assurer son bon fonctionnement et
+                  Le site utilisé des cookies afin d&apos;assurer son bon fonctionnement et
                   d&apos;améliorer l&apos;expérience utilisateur. Certains cookies sont
                   strictement nécessaires (session, authentification) ; d&apos;autres sont soumis
                   à votre consentement préalable (mesure d&apos;audience via Google Analytics).
@@ -374,7 +403,7 @@ export default function MentionsLegalesPage() {
                   page de{' '}
                   <Link
                     href="/gestion-cookies"
-                    className="text-terracotta-deep underline underline-offset-2"
+                    className="text-terracotta-600 underline underline-offset-2"
                   >
                     gestion des cookies
                   </Link>
@@ -403,7 +432,7 @@ export default function MentionsLegalesPage() {
                   sur simple demande à{' '}
                   <a
                     href="mailto:contact@thetiptop.fr"
-                    className="text-terracotta-deep underline underline-offset-2"
+                    className="text-terracotta-600 underline underline-offset-2"
                   >
                     contact@thetiptop.fr
                   </a>
@@ -432,21 +461,21 @@ export default function MentionsLegalesPage() {
                 Pour toute question relative aux présentes mentions légales, contactez-nous à{' '}
                 <a
                   href="mailto:contact@thetiptop.fr"
-                  className="font-medium text-terracotta-deep underline underline-offset-2"
+                  className="font-medium text-terracotta-600 underline underline-offset-2"
                 >
                   contact@thetiptop.fr
                 </a>
                 . Consultez également nos{' '}
                 <Link
                   href="/cgu"
-                  className="font-medium text-terracotta-deep underline underline-offset-2"
+                  className="font-medium text-terracotta-600 underline underline-offset-2"
                 >
                   CGU
                 </Link>{' '}
                 et notre{' '}
                 <Link
                   href="/politique-confidentialite"
-                  className="font-medium text-terracotta-deep underline underline-offset-2"
+                  className="font-medium text-terracotta-600 underline underline-offset-2"
                 >
                   Politique de confidentialité
                 </Link>

@@ -74,8 +74,15 @@ export class ParticipationJobsService {
         },
       });
 
+      // Lu une seule fois, et seulement s'il y a des leads a notifier : le
+      // balayage tourne toutes les dix minutes, la plupart du temps a vide.
+      const gameConfig = await this.prisma.gameConfig.findFirst({
+        where: { isActive: true },
+        select: { claimEndDate: true },
+      });
+
       for (const lead of expiring) {
-        await this.mail.sendExpirationNotice(lead.email);
+        await this.mail.sendExpirationNotice(lead.email, gameConfig?.claimEndDate ?? null);
       }
     }
 
@@ -111,20 +118,40 @@ export class ParticipationJobsService {
       });
 
       for (const lead of due) {
-        // On réserve la relance AVANT de l'envoyer : si deux exécutions se
-        // chevauchent, une seule voit count = 1 et l'utilisateur ne reçoit pas
-        // deux fois le même email.
+        if (!lead.verificationCode) {
+          continue;
+        }
+
+        // On envoie AVANT d'incrementer, et non l'inverse.
+        //
+        // L'ordre precedent reservait la relance d'abord : aucun doublon
+        // possible, mais un envoi echoue etait definitivement perdu puisque le
+        // compteur affirmait le contraire. C'est exactement ce qui s'est
+        // produit tant que le service d'envoi etait un simple stub : trois
+        // relances comptees, aucun email parti.
+        //
+        // Le compromis est assume : si deux executions se chevauchent, les deux
+        // peuvent envoyer avant que l'une n'incremente, et le destinataire
+        // recoit deux fois le meme message. Un doublon se pardonne, une relance
+        // silencieusement perdue non.
+        const delivered = await this.mail.sendVerificationReminder(
+          lead.email,
+          lead.verificationCode,
+          step.hoursBefore,
+        );
+
+        if (!delivered) {
+          // Le compteur reste en l'etat : le prochain balayage retentera.
+          continue;
+        }
+
+        // La condition sur remindersSent protege encore du double increment.
         const claimed = await this.prisma.lead.updateMany({
           where: { id: lead.id, remindersSent: step.alreadySent },
           data: { remindersSent: step.alreadySent + 1 },
         });
 
-        if (claimed.count === 1 && lead.verificationCode) {
-          await this.mail.sendVerificationReminder(
-            lead.email,
-            lead.verificationCode,
-            step.hoursBefore,
-          );
+        if (claimed.count === 1) {
           sent += 1;
         }
       }

@@ -1,10 +1,22 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import {
+  GAME_START_DATE,
+  GAME_END_DATE,
+  CLAIM_END_DATE,
+  GAME_DURATION_DAYS,
+  CLAIM_DURATION_DAYS,
+} from '@/lib/game-dates';
+import { formatFrenchDate, formatFrenchDateTime } from '@/lib/french-date';
+import { LEGAL_UPDATED_AT } from '@/lib/legal-dates';
 
 export const metadata: Metadata = {
+  // URL de reference : evite qu'un parametre de campagne ou une variante
+  // avec barre finale soit traite comme une page distincte.
+  alternates: { canonical: '/cgu' },
   title: "Conditions Générales d'Utilisation",
   description:
-    "Conditions générales d'utilisation du site The Tip Top et règlement du jeu-concours.",
+    "Conditions générales d'utilisation du site Thé Tip Top et règlement du jeu-concours.",
 };
 
 const ARTICLES = [
@@ -30,7 +42,7 @@ export default function CGUPage() {
       {/* En-tête */}
       <section className="border-b border-warm-beige bg-white">
         <div className="container mx-auto px-6 py-12 md:py-16">
-          <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-deep">
+          <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-600">
             Informations légales
           </p>
           <h1 className="mt-3 font-display text-h1 text-noir">
@@ -42,7 +54,7 @@ export default function CGUPage() {
             jeu-concours organisé par la société.
           </p>
           <p className="mt-4 text-sm text-stone-grey/70">
-            Dernière mise à jour : 9 juin 2026
+            Dernière mise à jour : {formatFrenchDate(LEGAL_UPDATED_AT.cgu)}
           </p>
         </div>
       </section>
@@ -60,7 +72,7 @@ export default function CGUPage() {
                   <a
                     key={a.id}
                     href={`#${a.id}`}
-                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-deep"
+                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-600"
                   >
                     {a.label}
                   </a>
@@ -73,19 +85,19 @@ export default function CGUPage() {
                 <nav className="mt-3 space-y-1">
                   <Link
                     href="/mentions-legales"
-                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-deep"
+                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-600"
                   >
                     Mentions légales
                   </Link>
                   <Link
                     href="/politique-confidentialite"
-                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-deep"
+                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-600"
                   >
                     Politique de confidentialité
                   </Link>
                   <Link
                     href="/gestion-cookies"
-                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-deep"
+                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-600"
                   >
                     Gestion des cookies
                   </Link>
@@ -128,7 +140,7 @@ export default function CGUPage() {
                     <strong>Email :</strong>{' '}
                     <a
                       href="mailto:contact@thetiptop.fr"
-                      className="text-terracotta-deep underline underline-offset-2"
+                      className="text-terracotta-600 underline underline-offset-2"
                     >
                       contact@thetiptop.fr
                     </a>
@@ -248,9 +260,10 @@ export default function CGUPage() {
                   qu&apos;un lot au cours de la période du jeu-concours.
                 </p>
                 <p>
-                  <strong>Période du jeu-concours :</strong> du 24 août 2026 à 00h01 au 23 octobre
-                  2026 à 23h59 inclus (60 jours civils). Toute participation en dehors de cette
-                  période sera rejetée.
+                  <strong>Période du jeu-concours :</strong> du{' '}
+                  {formatFrenchDate(GAME_START_DATE)} à 00h00 au {formatFrenchDateTime(GAME_END_DATE)}{' '}
+                  inclus, soit {GAME_DURATION_DAYS} jours civils. Toute participation en dehors de
+                  cette période sera rejetée.
                 </p>
                 <p>
                   Pour participer, l&apos;utilisateur doit :
@@ -284,7 +297,14 @@ export default function CGUPage() {
                   début du jeu-concours, sous le contrôle d&apos;un huissier de justice. La
                   répartition des lots est la suivante :
                 </p>
-                <div className="overflow-hidden rounded-card border border-warm-beige">
+                <div
+                  // Defilable plutot que coupe : a 375 px ces tableaux depassent
+                  // le cadre, et overflow-hidden rendait la derniere colonne
+                  // inatteignable. tabIndex rend la zone defilable au clavier,
+                  // sans quoi son contenu resterait hors de portee sans souris.
+                  tabIndex={0}
+                  className="overflow-x-auto rounded-card border border-warm-beige"
+                >
                   <table className="w-full text-sm">
                     <thead className="bg-noir text-white">
                       <tr>
@@ -310,7 +330,7 @@ export default function CGUPage() {
                         <tr key={lot} className="bg-white even:bg-cream">
                           <td className="px-4 py-3 text-stone-grey">{lot}</td>
                           <td className="px-4 py-3 text-stone-grey">{valeur}</td>
-                          <td className="px-4 py-3 font-medium text-terracotta-deep">{proba}</td>
+                          <td className="px-4 py-3 font-medium text-terracotta-600">{proba}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -383,8 +403,9 @@ export default function CGUPage() {
                   <li>De la confirmation de gain reçue par email (version numérique acceptée).</li>
                 </ul>
                 <p>
-                  Les lots doivent être réclamés au plus tard le <strong>22 novembre 2026</strong>
-                  (30 jours après la clôture du jeu). Passé ce délai, une clause de forclusion
+                  Les lots doivent être réclamés au plus tard le{' '}
+                  <strong>{formatFrenchDateTime(CLAIM_END_DATE)}</strong> ({CLAIM_DURATION_DAYS}{' '}
+                  jours après la clôture du jeu). Passé ce délai, une clause de forclusion
                   s&apos;applique automatiquement : les lots standard restent la propriété de la
                   marque, tandis que les lots majeurs sont réintégrés dans un tirage au sort final
                   supervisé par le commissaire de justice.
@@ -502,7 +523,7 @@ export default function CGUPage() {
                   Ces droits peuvent être exercés par email à{' '}
                   <a
                     href="mailto:rgpd@thetiptop.fr"
-                    className="text-terracotta-deep underline underline-offset-2"
+                    className="text-terracotta-600 underline underline-offset-2"
                   >
                     rgpd@thetiptop.fr
                   </a>{' '}
@@ -510,7 +531,7 @@ export default function CGUPage() {
                   consultez notre{' '}
                   <Link
                     href="/politique-confidentialite"
-                    className="text-terracotta-deep underline underline-offset-2"
+                    className="text-terracotta-600 underline underline-offset-2"
                   >
                     Politique de confidentialité
                   </Link>
@@ -524,7 +545,7 @@ export default function CGUPage() {
               <h2 className="font-display text-h2 text-noir">Article 13 - Cookies</h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
                 <p>
-                  Le Site utilise des cookies afin d&apos;améliorer l&apos;expérience utilisateur
+                  Le Site utilisé des cookies afin d&apos;améliorer l&apos;expérience utilisateur
                   et d&apos;assurer le bon fonctionnement des services proposés. Certains cookies
                   sont strictement nécessaires au fonctionnement du Site (session, authentification) ;
                   d&apos;autres sont utilisés à des fins d&apos;analyse d&apos;audience
@@ -535,7 +556,7 @@ export default function CGUPage() {
                   notre page de{' '}
                   <Link
                     href="/gestion-cookies"
-                    className="text-terracotta-deep underline underline-offset-2"
+                    className="text-terracotta-600 underline underline-offset-2"
                   >
                     gestion des cookies
                   </Link>
@@ -577,14 +598,14 @@ export default function CGUPage() {
                 vous pouvez nous contacter à{' '}
                 <a
                   href="mailto:contact@thetiptop.fr"
-                  className="font-medium text-terracotta-deep underline underline-offset-2"
+                  className="font-medium text-terracotta-600 underline underline-offset-2"
                 >
                   contact@thetiptop.fr
                 </a>{' '}
                 ou consulter notre page de{' '}
                 <Link
                   href="/mentions-legales"
-                  className="font-medium text-terracotta-deep underline underline-offset-2"
+                  className="font-medium text-terracotta-600 underline underline-offset-2"
                 >
                   mentions légales
                 </Link>
