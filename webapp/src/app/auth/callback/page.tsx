@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
+import { api } from '@/lib/api';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { landingRouteFor } from '@/lib/landing-route';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -11,9 +12,20 @@ import { isPlaceholderEmail } from '@/lib/placeholder-email';
 
 /**
  * Point d'atterrissage après le flux OAuth (Google / Facebook).
- * Le back-end redirige ici avec les tokens en query params :
- *   /auth/callback?accessToken=...&refreshToken=...
- * On les stocke dans le store, on hydrate le profil, puis on redirige.
+ *
+ * Le back-end redirige ici avec un code à usage unique :
+ *   /auth/callback?code=...
+ *
+ * Ce code est échangé contre les jetons par une requête POST, puis la session
+ * est ouverte comme après une connexion classique.
+ *
+ * Les jetons transitaient auparavant dans cette URL. Une URL de redirection
+ * entre dans l'historique du navigateur, part dans l'en-tête Referer vers les
+ * ressources tierces de la page, et s'inscrit dans les journaux de chaque
+ * intermédiaire traversé. Le jeton de rafraîchissement étant valable
+ * longtemps, quiconque l'y récupérait pouvait rouvrir une session — même
+ * après une déconnexion. Le corps d'une requête POST ne laisse aucune de ces
+ * traces.
  */
 function AuthCallbackHandler() {
   const router = useRouter();
@@ -25,17 +37,18 @@ function AuthCallbackHandler() {
     if (handled.current) return;
     handled.current = true;
 
-    const accessToken = params.get('accessToken');
-    const refreshToken = params.get('refreshToken');
+    const code = params.get('code');
     const error = params.get('error');
 
-    if (error || !accessToken || !refreshToken) {
+    if (error || !code) {
       toast.error('La connexion a échoué. Veuillez réessayer.');
       router.replace('/auth/login');
       return;
     }
 
-    handleOAuthCallback(accessToken, refreshToken)
+    api
+      .post('/auth/oauth/exchange', { code })
+      .then(({ data }) => handleOAuthCallback(data.accessToken, data.refreshToken))
       .then(() => {
         toast.success('Connexion réussie !');
         // Deux règles à concilier : revenir là d'où l'utilisateur est parti, et

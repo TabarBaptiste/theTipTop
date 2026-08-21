@@ -16,11 +16,12 @@ import {
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { type Request, type Response } from 'express';
 
-import { AuthService } from './auth.service';
+import { AuthService, type TokenResponse } from './auth.service';
 import { EmailChangeService } from './email-change.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { OAuthExchangeDto } from './dto/oauth-exchange.dto';
 import { RequestEmailChangeDto, ConfirmEmailChangeDto } from './dto/email-change.dto';
 
 // Guards
@@ -176,6 +177,35 @@ export class AuthController {
   }
 
   // ===========================================
+  // ÉCHANGE DU CODE OAUTH
+  // ===========================================
+  // Second temps du retour OAuth : la redirection ne porte qu'un code opaque,
+  // le front l'échange ici contre les jetons. Le corps d'une requête POST
+  // n'entre ni dans l'historique du navigateur, ni dans l'en-tête Referer, ni
+  // dans les journaux des intermédiaires — contrairement à une URL.
+  @Public()
+  @Post('oauth/exchange')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Échanger le code de retour OAuth contre les jetons de session' })
+  @ApiBody({ type: OAuthExchangeDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Jetons de session',
+    schema: {
+      properties: {
+        accessToken: { type: 'string' },
+        refreshToken: { type: 'string' },
+        expiresIn: { type: 'number' },
+      },
+    },
+  })
+  @ApiResponse({ status: 400, description: 'Code au format invalide' })
+  @ApiResponse({ status: 403, description: 'Code inconnu, expiré ou déjà consommé' })
+  async exchangeOAuthCode(@Body() dto: OAuthExchangeDto) {
+    return this.authService.consumeOAuthExchangeCode(dto.code);
+  }
+
+  // ===========================================
   // OAUTH GOOGLE
   // ===========================================
   @Public()
@@ -193,7 +223,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Callback Google OAuth' })
   async googleAuthCallback(@Req() req: OAuthRequest, @Res() res: Response) {
     const tokens = await this.authService.login(req.user);
-    return this.redirectToFrontend(res, tokens.accessToken, tokens.refreshToken);
+    return this.redirectToFrontend(res, tokens);
   }
 
   // ===========================================
@@ -218,13 +248,27 @@ export class AuthController {
       return res.redirect(`${frontendUrl}/auth/login?error=facebook_no_email`);
     }
     const tokens = await this.authService.login(req.user);
-    return this.redirectToFrontend(res, tokens.accessToken, tokens.refreshToken);
+    return this.redirectToFrontend(res, tokens);
   }
 
-  private redirectToFrontend(res: Response, accessToken: string, refreshToken: string) {
+  /**
+   * Renvoie le navigateur vers le front avec un code d'échange.
+   *
+   * Les jetons ne figurent plus dans l'URL. Une redirection laisse en effet
+   * son URL dans l'historique du navigateur, dans l'en-tête Referer transmis
+   * aux ressources tierces de la page d'arrivée, et dans les journaux de
+   * chaque intermédiaire traversé — reverse proxy, CDN, pare-feu applicatif.
+   * Le jeton de rafraîchissement étant une crédence à longue durée de vie,
+   * quiconque l'y récupérait pouvait rouvrir une session, y compris après une
+   * déconnexion.
+   *
+   * Le code, lui, n'a aucune valeur en soi : il expire en soixante secondes et
+   * ne peut être échangé qu'une fois.
+   */
+  private async redirectToFrontend(res: Response, tokens: TokenResponse) {
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    const redirectUrl = `${frontendUrl}/auth/callback?accessToken=${accessToken}&refreshToken=${refreshToken}`;
+    const code = await this.authService.createOAuthExchangeCode(tokens);
 
-    return res.redirect(redirectUrl);
+    return res.redirect(`${frontendUrl}/auth/callback?code=${code}`);
   }
 }
