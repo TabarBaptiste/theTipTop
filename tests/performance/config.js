@@ -49,6 +49,22 @@ export const SEUILS = {
   http_req_failed: ['rate<0.01'],
   http_req_duration: ['p(99)<2000'],
   'http_req_duration{parcours:verification}': ['p(95)<500'],
+
+  // Les deux seuils qui suivent ne servent pas a qualifier la plateforme : ils
+  // existent pour que k6 produise la sous-metrique correspondante.
+  //
+  // Une etiquette seule ne suffit pas. k6 n'agrege un tag dans son resume que
+  // si un seuil le nomme ; sans cela, les mesures du front et du catalogue se
+  // fondent dans la moyenne globale et deviennent illisibles separement. Une
+  // premiere campagne l'a montre a nos depens : le rapport ne contenait que la
+  // verification de code, et le comportement du front - la seule partie
+  // mesurable quand le limiteur de debit n'a pas ete releve - etait perdu.
+  //
+  // Les valeurs sont volontairement larges : c'est la separation par tier qui
+  // est recherchee, pas un critere d'acceptation supplementaire. Les vrais
+  // criteres restent les trois du cahier des clauses techniques.
+  'http_req_duration{parcours:accueil}': ['p(95)<30000'],
+  'http_req_duration{parcours:lots}': ['p(95)<30000'],
 };
 
 /**
@@ -185,6 +201,13 @@ function resumeLisible(data) {
   afficher('duree p95         ', stat('http_req_duration', 'p(95)'), 'ms');
   afficher('duree p99         ', stat('http_req_duration', 'p(99)'), 'ms', '  (seuil 2000)');
   afficher('verification p95  ', stat('duree_verification', 'p(95)'), 'ms', '  (seuil 500)');
+
+  // Lecture par tier. Quand le limiteur de debit n'a pas ete releve sur la
+  // cible, l'API sature et ses chiffres ne decrivent que lui : le front reste
+  // alors la seule ligne exploitable.
+  lignes.push('');
+  afficher('front p95         ', stat('http_req_duration{parcours:accueil}', 'p(95)'), 'ms');
+  afficher('catalogue p95     ', stat('http_req_duration{parcours:lots}', 'p(95)'), 'ms');
 
   const echecs = stat('http_req_failed', 'rate');
   afficher('taux d echec      ', echecs === null ? null : echecs * 100, '%', '  (seuil 1)');
