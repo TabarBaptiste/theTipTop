@@ -229,8 +229,8 @@ documente le travail.
 
 | Constat | Gravité | État |
 |---|---|---|
-| Jetons OAuth dans l'URL | Bloquant | **Ouvert** - approche retenue : code d'échange à usage unique |
-| Content-Security-Policy absente | Majeur | **Ouvert** - à déployer d'abord en `Report-Only` |
+| Jetons OAuth dans l'URL | Bloquant | **Traité** - remplacés par un code d'échange à usage unique. Connexion réelle Google et Facebook restant à vérifier sur préproduction |
+| Content-Security-Policy absente | Majeur | **En place en `Report-Only`** - balayage complet sans violation ; bascule en mode bloquant après observation sur préproduction (cf. [05-PROTOCOLES-DE-TESTS.md](05-PROTOCOLES-DE-TESTS.md), §3.3) |
 | Dépendances de production vulnérables | Majeur | **Traité** - 12 vulnérabilités dont 9 élevées → 1 modérée |
 | Variables d'environnement de production | Majeur | **Traité côté code** - les `ARG` manquaient au Dockerfile ; reste à les passer depuis Jenkins |
 | Décalage de mise en page du hero | Majeur | **Traité** - CLS 0,190 → 0,001 |
