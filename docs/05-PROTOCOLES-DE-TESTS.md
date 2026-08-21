@@ -265,7 +265,69 @@ exposée.
 À quoi s'ajoute l'analyse statique SonarQube, qui détecte injections, secrets
 et mauvaises pratiques dans le code source lui-même.
 
-### 3.3. Scan OWASP ZAP
+### 3.3. Content-Security-Policy : passer en mode bloquant
+
+La politique est en place en `Content-Security-Policy-Report-Only` : les
+violations sont signalées dans la console du navigateur, rien n'est bloqué.
+C'est un état transitoire, pas une destination — une CSP en mode rapport ne
+protège de rien.
+
+#### Ce qui a déjà été vérifié
+
+Balayage complet sur un build de production local, avec API jointe et
+consentement analytics accordé. Aucune violation sur :
+
+| Surface | Détail |
+|---|---|
+| Pages publiques | Accueil, participation, connexion, inscription, règlement, FAQ, mentions légales, gestion des cookies |
+| Google Tag Manager | Script réellement chargé, `gtag` défini, `dataLayer` alimenté |
+| Parcours authentifiés | Tableau de bord, participation, profil, paramètres — connexion par le formulaire, pas par injection de session |
+| Back-office | Administration et espace employé |
+| Retour OAuth | POST d'échange du code : préflight 204, refus 403 attendu |
+
+Une seule violation a été trouvée pendant la mise au point, et elle valide
+l'approche : les visuels des lots sont servis par Cloudinary, dont les URL ne
+figurent nulle part dans le code — elles viennent de la base. Une lecture des
+sources ne pouvait pas les voir. Sans cette origine, les images de lots
+disparaissaient de l'accueil.
+
+#### Ce qui reste à observer, et pourquoi
+
+Le risque résiduel n'est plus applicatif mais **environnemental** : un domaine
+présent en préproduction et absent en développement. Un CDN de polices
+configuré côté infrastructure, une balise injectée par Traefik, ou des visuels
+de lots pointant vers un autre compte Cloudinary que celui de la base locale.
+
+Le cas Cloudinary montre exactement ce qu'on cherche : une origine qui
+n'apparaît qu'à l'exécution, et seulement dans l'environnement concerné.
+
+#### Procédure
+
+1. Déployer en préproduction, la politique restant en `Report-Only`.
+2. Observer **plusieurs jours**, en couvrant au minimum un parcours de
+   participation complet, une connexion Google et une connexion Facebook —
+   ces deux dernières n'ont jamais pu être automatisées.
+3. Relever les violations dans la console du navigateur. Il n'y a pas de
+   collecteur : `report-uri` n'est pas configuré, et l'ajouter supposerait un
+   service tiers de plus.
+4. Pour chaque violation, **comprendre l'origine avant d'élargir la
+   politique**. Ajouter un domaine sans savoir ce qu'il sert revient à
+   désactiver la directive.
+5. Basculer en `Content-Security-Policy` une fois la période écoulée sans
+   violation.
+
+#### Deux points de mise en œuvre
+
+Next évalue `headers()` **à la compilation** : le nom de l'en-tête est figé
+dans le manifeste de routes. Le passage en mode bloquant demande donc une
+modification de code et un redéploiement, pas une variable d'environnement.
+
+Et `'unsafe-inline'` reste autorisé sur les scripts. L'alternative est un
+*nonce* par requête posé par le middleware, qui rendrait chaque page dynamique
+et ferait perdre le prérendu statique de toutes les pages publiques. Ce
+compromis est à trancher séparément, à froid.
+
+### 3.4. Scan OWASP ZAP
 
 Le scan baseline parcourt l'application déployée sans l'attaquer activement :
 il analyse les réponses, les en-têtes et les formulaires. C'est un contrôle
@@ -296,7 +358,7 @@ donc pas nécessairement corrigée, elle peut simplement ne pas avoir été
 atteinte. C'est la raison pour laquelle le scan complète les tests
 fonctionnels, sans les remplacer - eux visitent un parcours déterminé.
 
-### 3.4. Première application du protocole
+### 3.5. Première application du protocole
 
 Exécuté contre l'environnement local, à titre d'étalonnage :
 **0 FAIL, 9 WARN, 3 IGNORE, 55 PASS**.
@@ -321,7 +383,7 @@ Ces constats relèvent de l'audit du site et y sont traités. Ils figurent ici
 parce qu'un protocole dont on n'a jamais publié la première mesure reste une
 intention.
 
-### 3.5. Contrôles applicatifs vérifiés par ailleurs
+### 3.6. Contrôles applicatifs vérifiés par ailleurs
 
 Plusieurs propriétés de sécurité ne relèvent pas d'un scanner mais des tests
 fonctionnels, qui les vérifient à chaque exécution :
@@ -343,7 +405,7 @@ fonctionnels, qui les vérifient à chaque exécution :
 Ces vérifications vivent dans `api/test/` et sont détaillées dans
 [api/test/README.md](../api/test/README.md).
 
-### 3.6. Traitement des vulnérabilités de dépendances
+### 3.7. Traitement des vulnérabilités de dépendances
 
 `npm audit` remonte régulièrement des vulnérabilités qui ne sont pas toutes
 actionnables ni toutes exposées. La grille de lecture :
@@ -360,7 +422,7 @@ Toute mise à jour se fait depuis la racine et pour les deux workspaces à la
 fois - `npm run upgrade:patch` ou `upgrade:minor` - jamais sur un seul côté :
 le hoisting npm mélangerait les versions.
 
-### 3.7. En cas de découverte
+### 3.8. En cas de découverte
 
 | Gravité | Délai de traitement | Effet |
 |---|---|---|
