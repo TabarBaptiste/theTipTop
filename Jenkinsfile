@@ -45,7 +45,9 @@ ciPipeline(
     dockerfile    : 'webapp/Dockerfile',
 
     // Backend API (NestJS), déployé aux côtés du frontend.
-    // Câblé pour DEV et PREPROD.
+    // Le domaine de production suit le nommage des deux autres, sans suffixe
+    // d'environnement. Il reste sur la zone wk : la zone dsp5 n'accueille que
+    // le front et n'a pas de wildcard, alors que wk en a un.
     apiDockerfile  : 'api/Dockerfile',
     apiPort        : 3001,
     apiHealthPath  : '/api/v1/health',
@@ -53,6 +55,7 @@ ciPipeline(
 
     devApiDomain    : "${projectName}-api-dev.wk-archi-o24a-4-5-g1.fr",
     preprodApiDomain: "${projectName}-api-preprod.wk-archi-o24a-4-5-g1.fr",
+    prodApiDomain   : "${projectName}-api.wk-archi-o24a-4-5-g1.fr",
 
     // FRONTEND_URL et CORS_ORIGINS sont dérivés par la shared library
     // à partir du domaine front de l'environnement ciblé.
