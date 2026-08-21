@@ -10,6 +10,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
@@ -17,7 +18,23 @@ import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // L'API n'est jamais exposée directement : Traefik la précède sur les trois
+  // environnements. Sans cette ligne, Express ne lit pas les en-têtes
+  // X-Forwarded-* et deux comportements en dépendent.
+  //
+  // La limitation de débit d'abord : faute de tracker personnalisé, le
+  // throttler identifie l'appelant par `req.ips[0]` ou `req.ip`. Tous les
+  // visiteurs se présentaient donc sous l'adresse du proxy et partageaient un
+  // seul compteur - vingt requêtes par dix secondes pour le site entier, et
+  // non par participant.
+  //
+  // La reconstruction d'URL ensuite : Passport résout une URL de retour
+  // relative contre la requête d'origine. Sans confiance accordée au proxy,
+  // il reconstruirait une adresse interne en clair, que le fournisseur
+  // d'identité rejetterait.
+  app.set('trust proxy', 1);
 
   // Sécurité
   app.use(helmet());

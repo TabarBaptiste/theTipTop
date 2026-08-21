@@ -17,7 +17,12 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     super({
       clientID: configService.getOrThrow<string>('GOOGLE_CLIENT_ID'),
       clientSecret: configService.getOrThrow<string>('GOOGLE_CLIENT_SECRET'),
-      callbackURL: configService.getOrThrow<string>('GOOGLE_CALLBACK_URL'),
+      // Relative par défaut : Passport la résout contre la requête entrante,
+      // ce qui donne la bonne adresse publique sur chaque environnement sans
+      // valeur distincte à configurer. La configuration Jenkins est commune
+      // aux trois, elle ne pourrait pas porter trois URL absolues.
+      callbackURL:
+        configService.get<string>('GOOGLE_CALLBACK_URL') || '/api/v1/auth/google/callback',
       scope: ['email', 'profile'],
     } as any);
   }

@@ -11,20 +11,22 @@ import { GoogleStrategy } from './google.strategy';
 import { FacebookStrategy } from './facebook.strategy';
 import { AuthService } from '../auth.service';
 
+const config: Record<string, string> = {
+  JWT_SECRET: 'test-secret',
+  JWT_REFRESH_SECRET: 'test-refresh-secret',
+  GOOGLE_CLIENT_ID: 'google-id',
+  GOOGLE_CLIENT_SECRET: 'google-secret',
+  GOOGLE_CALLBACK_URL: 'http://localhost:3001/api/v1/auth/google/callback',
+  FACEBOOK_APP_ID: 'fb-id',
+  FACEBOOK_APP_SECRET: 'fb-secret',
+  FACEBOOK_CALLBACK_URL: 'http://localhost:3001/api/v1/auth/facebook/callback',
+};
+
 const mockConfigService = {
-  getOrThrow: jest.fn((key: string) => {
-    const config: Record<string, string> = {
-      JWT_SECRET: 'test-secret',
-      JWT_REFRESH_SECRET: 'test-refresh-secret',
-      GOOGLE_CLIENT_ID: 'google-id',
-      GOOGLE_CLIENT_SECRET: 'google-secret',
-      GOOGLE_CALLBACK_URL: 'http://localhost:3001/api/v1/auth/google/callback',
-      FACEBOOK_APP_ID: 'fb-id',
-      FACEBOOK_APP_SECRET: 'fb-secret',
-      FACEBOOK_CALLBACK_URL: 'http://localhost:3001/api/v1/auth/facebook/callback',
-    };
-    return config[key];
-  }),
+  getOrThrow: jest.fn((key: string) => config[key]),
+  // Les URL de retour sont désormais lues par `get`, avec repli sur un chemin
+  // relatif quand la variable est absente.
+  get: jest.fn((key: string) => config[key]),
 } as unknown as ConfigService;
 
 const mockAuthService = {
