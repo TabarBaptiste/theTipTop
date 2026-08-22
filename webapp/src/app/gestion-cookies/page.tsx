@@ -52,7 +52,7 @@ const COOKIES_LIST = [
   {
     category: "Cookies de mesure d'audience",
     badge: 'Soumis au consentement',
-    badgeClass: 'bg-gold-500/20 text-gold-700',
+    badgeClass: 'bg-gold-500/20 text-gold-900',
     headerClass: 'bg-gold-50 border-gold-100',
     items: [
       {
@@ -236,7 +236,7 @@ export default function GestionCookiesPage() {
                       className="h-5 w-5 text-gold-600"
                       strokeWidth={1.5}
                     />
-                    <p className="mt-3 font-functional text-ui uppercase tracking-[2px] text-gold-700">
+                    <p className="mt-3 font-functional text-ui uppercase tracking-[2px] text-gold-900">
                       Analytiques
                     </p>
                     <p className="mt-2 text-sm text-stone-grey">
