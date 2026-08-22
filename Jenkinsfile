@@ -73,5 +73,24 @@ ciPipeline(
         [envVar: 'GOOGLE_CLIENT_SECRET', credentialId: 'thetiptop-google-client-secret'],
         [envVar: 'FACEBOOK_APP_ID', credentialId: 'thetiptop-facebook-app-id'],
         [envVar: 'FACEBOOK_APP_SECRET', credentialId: 'thetiptop-facebook-app-secret']
+    ],
+
+    // PROD always uses its own dedicated DB + JWT secrets, never the shared
+    // DEV/PREPROD set above: a compromised DEV/PREPROD credential must never
+    // grant access to the PROD database or let anyone sign valid PROD JWTs.
+    // Google/Facebook OAuth apps stay shared across environments (single app
+    // registration, see apiSecretEnv above).
+    dbCredentialsByEnv: [
+        prod: 'thetiptop-db-credentials-prod'
+    ],
+    apiSecretEnvByEnv : [
+        prod: [
+            [envVar: 'JWT_SECRET', credentialId: 'thetiptop-jwt-secret-prod'],
+            [envVar: 'JWT_REFRESH_SECRET', credentialId: 'thetiptop-jwt-refresh-secret-prod'],
+            [envVar: 'GOOGLE_CLIENT_ID', credentialId: 'thetiptop-google-client-id'],
+            [envVar: 'GOOGLE_CLIENT_SECRET', credentialId: 'thetiptop-google-client-secret'],
+            [envVar: 'FACEBOOK_APP_ID', credentialId: 'thetiptop-facebook-app-id'],
+            [envVar: 'FACEBOOK_APP_SECRET', credentialId: 'thetiptop-facebook-app-secret']
+        ]
     ]
 )
