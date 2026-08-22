@@ -465,7 +465,7 @@ export default function PolitiqueConfidentialitePage() {
                       type: 'Cookies analytiques',
                       color: 'border-gold-100 bg-gold-50',
                       badge: 'Soumis au consentement',
-                      badgeColor: 'bg-gold-100 text-gold-700',
+                      badgeColor: 'bg-gold-100 text-gold-900',
                       desc: 'Permettent de mesurer l\'audience du site et d\'analyser le comportement des visiteurs afin d\'améliorer nos services (Google Analytics). Aucune donnée personnellement identifiable n\'est transmise à Google si l\'anonymisation IP est activée.',
                       exemples: ['_ga', '_gid', '_gat'],
                     },
