@@ -106,7 +106,18 @@ export default function CompleteEmailPage() {
               vous prévenir si vous gagnez un lot, ni vous rappeler le délai pour le retirer.
             </p>
 
-            <form noValidate onSubmit={emailForm.handleSubmit(onSubmitEmail)} className="mt-8 space-y-5">
+            {/* La clé n'est pas décorative. Les deux étapes rendent la même
+                structure - un formulaire, un champ, un bouton - et React
+                réutilisait alors le même nœud <input> d'une étape à l'autre :
+                le champ « Code de confirmation » s'affichait déjà rempli avec
+                l'adresse e-mail saisie juste avant. Des clés distinctes
+                forcent le démontage. */}
+            <form
+              key="etape-email"
+              noValidate
+              onSubmit={emailForm.handleSubmit(onSubmitEmail)}
+              className="mt-8 space-y-5"
+            >
               <div>
                 <Label htmlFor="email">Votre adresse e-mail</Label>
                 <Input
@@ -137,7 +148,12 @@ export default function CompleteEmailPage() {
               rattacher cette adresse à votre compte.
             </p>
 
-            <form noValidate onSubmit={codeForm.handleSubmit(onSubmitCode)} className="mt-8 space-y-5">
+            <form
+              key="etape-code"
+              noValidate
+              onSubmit={codeForm.handleSubmit(onSubmitCode)}
+              className="mt-8 space-y-5"
+            >
               <div>
                 <Label htmlFor="code">Code de confirmation</Label>
                 {/* inputMode et autoComplete permettent aux téléphones de

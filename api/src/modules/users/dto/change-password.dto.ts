@@ -1,14 +1,17 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, MinLength, MaxLength, Matches } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, MinLength, MaxLength, Matches, IsOptional } from 'class-validator';
 
 export class ChangePasswordDto {
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'MotDePasseActuel123!',
     description:
-      'Mot de passe actuel, exigé pour prouver que la session appartient bien au titulaire',
+      'Mot de passe actuel, exigé pour prouver que la session appartient bien au titulaire. ' +
+      "Omis lorsque le compte n'en a pas encore : créé par Google ou Facebook, il en définit " +
+      'un pour la première fois.',
   })
+  @IsOptional()
   @IsString()
-  currentPassword: string;
+  currentPassword?: string;
 
   @ApiProperty({
     example: 'NouveauMotDePasse123!',

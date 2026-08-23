@@ -136,8 +136,12 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Profil utilisateur' })
   @ApiResponse({ status: 403, description: 'Non authentifié' })
   async getProfile(@CurrentUser() user: User) {
-    const { password: _password, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    const { password, ...userWithoutPassword } = user;
+
+    // Le hachage ne sort jamais, mais l'interface doit savoir s'il en existe
+    // un : un compte créé par Google ou Facebook n'en a pas, et sa page de
+    // paramètres propose alors d'en définir un plutôt que d'en changer.
+    return { ...userWithoutPassword, hasPassword: password !== null };
   }
 
   // ===========================================
