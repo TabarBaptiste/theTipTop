@@ -26,6 +26,7 @@ const ENV = {
 
 /** Exécute une commande en héritant du terminal, et interrompt tout si elle échoue. */
 function executer(commande, arguments_, { tolerant = false } = {}) {
+  // nosemgrep: javascript.lang.security.audit.spawn-shell-true.spawn-shell-true, javascript.lang.security.detect-child-process.detect-child-process -- script CI/dev uniquement, commande et arguments toujours codes en dur dans ce fichier, jamais d'entree utilisateur.
   const resultat = spawnSync(commande, arguments_, {
     cwd: RACINE,
     env: ENV,

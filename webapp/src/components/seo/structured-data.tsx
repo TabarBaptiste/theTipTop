@@ -18,6 +18,7 @@ export function StructuredData({ data }: Props) {
       // jamais d'une saisie utilisateur. Les chevrons sont malgré tout échappés :
       // un « </script> » présent dans une valeur fermerait la balise par
       // anticipation et ferait passer la suite pour du script exécutable.
+      // nosemgrep: typescript.react.security.audit.react-dangerouslysetinnerhtml.react-dangerouslysetinnerhtml -- data provient uniquement de constantes internes, jamais d'une entree utilisateur.
       dangerouslySetInnerHTML={{ __html: JSON.stringify(data).replace(/</g, '\\u003c') }}
     />
   );

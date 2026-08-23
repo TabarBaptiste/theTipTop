@@ -19,6 +19,7 @@ RUN npm install
 COPY . .
 
 EXPOSE 3000
+# nosemgrep: dockerfile.security.missing-user.missing-user -- stage dev local uniquement (bind mount ./webapp:/app), jamais deploye ; le stage de production plus bas fixe USER nextjs.
 CMD ["npm", "run", "dev"]
 
 # --- Stage 3: Build ---

@@ -13,7 +13,9 @@ describe('dates de révision des documents légaux', () => {
     gestionCookies: 'src/app/gestion-cookies/page.tsx',
   };
 
-  const lirePage = (chemin: string) => readFileSync(join(__dirname, '../..', chemin), 'utf8');
+  const lirePage = (chemin: string) =>
+    // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal -- chemin vient uniquement des valeurs litterales de PAGES ci-dessus, jamais d'une entree externe.
+    readFileSync(join(__dirname, '../..', chemin), 'utf8');
 
   it.each(Object.entries(PAGES))('%s ne doit pas écrire sa date en dur', (_cle, chemin) => {
     const source = lirePage(chemin);
