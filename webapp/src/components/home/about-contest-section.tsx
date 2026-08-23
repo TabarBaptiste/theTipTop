@@ -33,19 +33,19 @@ export function AboutContestSection() {
           <p>
             Le jeu-concours Thé Tip Top se déroule{' '}
             {formatFrenchDateRange(GAME_START_DATE, GAME_END_DATE).toLowerCase()}, à
-            l&apos;occasion de l&apos;ouverture de notre dixième boutique à Nice. Il est ouvert à
+            l&apos;occasion de l&apos;ouverture de notre 10e boutique à Nice. Il est ouvert à
             toute personne majeure résidant en France ayant effectué un achat de plus de 49 € dans
             l&apos;une de nos boutiques. Chaque ticket de caisse éligible porte un code unique de
-            dix caractères, à saisir sur ce site.
+            10 caractères, à saisir sur ce site.
           </p>
 
           <p>
-            <strong className="text-noir">Cent pour cent des tickets sont gagnants</strong>, et ce
-            n&apos;est pas une formule : le lot est attribué au code dès sa génération, avant même
-            le début du jeu. Six tickets sur dix donnent un infuseur à thé, deux sur dix une boîte
-            de thé détox ou d&apos;infusion, un sur dix une boîte de thé signature. Les six et
-            quatre pour cent restants offrent un coffret découverte, d&apos;une valeur de 39 € ou
-            de 69 €. Aucune participation ne repart les mains vides.
+            <strong className="text-noir">100 % des tickets sont gagnants</strong>, et ce n&apos;est
+            pas une formule : le lot est attribué au code dès sa génération, avant même le début du
+            jeu. 60 % des tickets donnent un infuseur à thé, 20 % une boîte de thé détox ou
+            d&apos;infusion, 10 % une boîte de thé signature. Les 6 % et 4 % restants offrent un
+            coffret découverte, d&apos;une valeur de 39 € ou de 69 €. Aucune participation ne repart
+            les mains vides.
           </p>
 
           <p>
