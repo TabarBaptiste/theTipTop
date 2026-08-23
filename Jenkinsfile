@@ -24,15 +24,15 @@ ciPipeline(
     // Comité de pilotage (cf. cahier des charges)
     notifyRecipients: [
         preprod: 'alexandre.petit@thetiptop.fr,' +
-                 'nathalie.dubois@thetiptop.fr,' +
-                 'harenaandriamananjaramandimby@furiousducks.fr,' +
-                 'baptistetabarlabonne@furiousducks.com',
+                'nathalie.dubois@thetiptop.fr,' +
+                'harenaandriamananjaramandimby@furiousducks.fr,' +
+                'baptistetabarlabonne@furiousducks.com',
         prod   : 'eric.bourdon@thetiptop.fr,' +
-                 'nathalie.dubois@thetiptop.fr,' +
-                 'alexandre.petit@thetiptop.fr,' +
-                 'guido.brasletti@furiousducks.com,' +
-                 'harenaandriamananjaramandimby@furiousducks.fr,' +
-                 'baptistetabarlabonne@furiousducks.com'
+                'nathalie.dubois@thetiptop.fr,' +
+                'alexandre.petit@thetiptop.fr,' +
+                'guido.brasletti@furiousducks.com,' +
+                'harenaandriamananjaramandimby@furiousducks.fr,' +
+                'baptistetabarlabonne@furiousducks.com'
     ],
 
     devDomain     : "${projectName}-dev.wk-archi-o24a-4-5-g1.fr",
@@ -91,6 +91,12 @@ ciPipeline(
             [envVar: 'GOOGLE_CLIENT_SECRET', credentialId: 'thetiptop-google-client-secret'],
             [envVar: 'FACEBOOK_APP_ID', credentialId: 'thetiptop-facebook-app-id'],
             [envVar: 'FACEBOOK_APP_SECRET', credentialId: 'thetiptop-facebook-app-secret']
+        ]
+    ],
+
+    webappBuildArgsByEnv: [
+        prod: [
+            NEXT_PUBLIC_GA_ID: 'G-1DD9XREP7H'
         ]
     ]
 )
