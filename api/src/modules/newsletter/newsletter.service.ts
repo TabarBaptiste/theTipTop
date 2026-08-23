@@ -2,7 +2,7 @@
 // Inscription à la newsletter
 // ===========================================
 
-import { randomBytes } from 'crypto';
+import { randomBytes } from 'node:crypto';
 
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';

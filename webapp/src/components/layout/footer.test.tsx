@@ -102,5 +102,29 @@ describe('Footer', () => {
 
       expect(mockedPost).not.toHaveBeenCalled();
     });
+
+    it('signale une adresse invalide sur un rejet 400', async () => {
+      mockedPost.mockRejectedValueOnce({ response: { status: 400 } });
+      const { toast } = jest.requireMock('sonner');
+
+      // Format syntaxiquement valide : le champ est de type "email" et le
+      // rejet testé ici est un refus serveur, pas la validation du navigateur.
+      saisirEtEnvoyer('invalide@email.fr');
+
+      await waitFor(() => {
+        expect(toast.error).toHaveBeenCalledWith("Cette adresse e-mail n'est pas valide");
+      });
+    });
+
+    it('signale une panne sur toute autre erreur', async () => {
+      mockedPost.mockRejectedValueOnce(new Error('network down'));
+      const { toast } = jest.requireMock('sonner');
+
+      saisirEtEnvoyer('jean@email.fr');
+
+      await waitFor(() => {
+        expect(toast.error).toHaveBeenCalledWith("L'inscription a échoué, réessayez dans un instant");
+      });
+    });
   });
 });
