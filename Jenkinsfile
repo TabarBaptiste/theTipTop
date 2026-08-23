@@ -60,7 +60,13 @@ ciPipeline(
     // FRONTEND_URL et CORS_ORIGINS sont dérivés par la shared library
     // à partir du domaine front de l'environnement ciblé.
     apiEnv         : [
-        API_PREFIX: 'api'
+        API_PREFIX: 'api',
+
+        // Expéditeur des courriels transactionnels. Sans ces deux valeurs le
+        // service retombe sur ses défauts ; c'est la clé, plus bas, qui décide
+        // si un courriel part réellement ou reste journalisé.
+        BREVO_SENDER_EMAIL: 'noreply@thetiptop.fr',
+        BREVO_SENDER_NAME : 'Thé Tip Top'
     ],
     // Les URL de retour OAuth ne figurent pas ici : les stratégies retombent
     // sur un chemin relatif, que Passport résout contre la requête entrante.
@@ -72,7 +78,12 @@ ciPipeline(
         [envVar: 'GOOGLE_CLIENT_ID', credentialId: 'thetiptop-google-client-id'],
         [envVar: 'GOOGLE_CLIENT_SECRET', credentialId: 'thetiptop-google-client-secret'],
         [envVar: 'FACEBOOK_APP_ID', credentialId: 'thetiptop-facebook-app-id'],
-        [envVar: 'FACEBOOK_APP_SECRET', credentialId: 'thetiptop-facebook-app-secret']
+        [envVar: 'FACEBOOK_APP_SECRET', credentialId: 'thetiptop-facebook-app-secret'],
+
+        // Sans cette clé, MailService journalise les courriels au lieu de les
+        // envoyer. Le code de confirmation d'adresse n'atteignait donc jamais
+        // son destinataire, sur aucun environnement deploye.
+        [envVar: 'BREVO_API_KEY', credentialId: 'thetiptop-brevo-api-key']
     ],
 
     // PROD always uses its own dedicated DB + JWT secrets, never the shared
@@ -90,7 +101,8 @@ ciPipeline(
             [envVar: 'GOOGLE_CLIENT_ID', credentialId: 'thetiptop-google-client-id'],
             [envVar: 'GOOGLE_CLIENT_SECRET', credentialId: 'thetiptop-google-client-secret'],
             [envVar: 'FACEBOOK_APP_ID', credentialId: 'thetiptop-facebook-app-id'],
-            [envVar: 'FACEBOOK_APP_SECRET', credentialId: 'thetiptop-facebook-app-secret']
+            [envVar: 'FACEBOOK_APP_SECRET', credentialId: 'thetiptop-facebook-app-secret'],
+            [envVar: 'BREVO_API_KEY', credentialId: 'thetiptop-brevo-api-key']
         ]
     ],
 
