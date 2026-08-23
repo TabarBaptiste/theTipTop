@@ -6,15 +6,36 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { AccountSidebar } from './account-sidebar';
 
 const mockPathname = jest.fn();
+const mockReplace = jest.fn();
 jest.mock('next/navigation', () => ({
   usePathname: () => mockPathname(),
+  useRouter: () => ({ replace: mockReplace }),
 }));
 
+const mockLogout = jest.fn();
 jest.mock('@/lib/stores/auth-store', () => ({
-  useAuthStore: () => ({ logout: jest.fn() }),
+  useAuthStore: () => ({ logout: mockLogout }),
 }));
 
 describe('AccountSidebar', () => {
+  beforeEach(() => {
+    mockLogout.mockReset();
+    mockReplace.mockReset();
+  });
+
+  // La protection des routes privees vit dans le middleware, qui ne s'execute
+  // qu'a la navigation : sans redirection, on restait sur la page apres avoir
+  // ete deconnecte.
+  it('renvoie a la connexion apres une deconnexion', () => {
+    mockPathname.mockReturnValue('/dashboard');
+    render(<AccountSidebar />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Déconnexion/ }));
+
+    expect(mockLogout).toHaveBeenCalled();
+    expect(mockReplace).toHaveBeenCalledWith('/auth/login');
+  });
+
   it('liste les trois entrees de l espace personnel', () => {
     mockPathname.mockReturnValue('/dashboard/profile');
     render(<AccountSidebar />);

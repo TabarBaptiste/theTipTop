@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Menu, X, User, ShieldCheck, Store, ChevronDown, Gift, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -29,9 +29,26 @@ const navigation = [
 
 export function Header() {
   const pathname = usePathname();
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const isHydrated = useIsHydrated();
   const { user, isAuthenticated, logout } = useAuthStore();
+
+  /**
+   * Déconnexion puis retour à la page de connexion.
+   *
+   * Vider le magasin ne suffit pas : la protection des routes privées vit dans
+   * le middleware, qui ne s'exécute qu'à la navigation. Sans redirection, un
+   * administrateur restait donc sur son tableau de bord, déconnecté mais
+   * toujours face au contenu.
+   *
+   * `replace` et non `push` : le pas précédent est la page privée qu'on vient
+   * de quitter, et le bouton Retour ne doit pas y ramener.
+   */
+  const seDeconnecter = () => {
+    logout();
+    router.replace('/auth/login');
+  };
 
   // Un membre du personnel vient piloter l'opération, pas y jouer : son entrée
   // de menu mène à son back-office, et non à l'espace personnel.
@@ -137,7 +154,7 @@ export function Header() {
                         compte : un visiteur connecté sur une page publique
                         devait d'abord naviguer ailleurs pour se déconnecter. */}
                     <DropdownMenuItem
-                      onSelect={logout}
+                      onSelect={seDeconnecter}
                       className="text-red-700 data-[highlighted]:text-red-700"
                     >
                       <LogOut className="h-4 w-4" strokeWidth={1.5} />
@@ -234,7 +251,7 @@ export function Header() {
                       type="button"
                       onClick={() => {
                         setMobileMenuOpen(false);
-                        logout();
+                        seDeconnecter();
                       }}
                       className="flex w-full items-center justify-center gap-2 rounded-full border-[1.5px] border-red-700 px-6 py-2 font-functional text-ui font-bold uppercase tracking-[2px] text-red-700 transition-colors hover:bg-red-50"
                     >
