@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { User, SlidersHorizontal, Gift, LogOut, ChevronDown, ChevronRight } from 'lucide-react';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { cn } from '@/lib/utils';
@@ -27,8 +27,17 @@ const links = [
  */
 export function AccountSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { logout } = useAuthStore();
   const [isOpen, setIsOpen] = useState(false);
+
+  // Vider le magasin ne suffit pas à quitter une page privée : la protection
+  // vit dans le middleware, qui ne s'exécute qu'à la navigation. `replace`
+  // évite que le bouton Retour ramène sur l'espace qu'on vient de quitter.
+  const seDeconnecter = () => {
+    logout();
+    router.replace('/auth/login');
+  };
 
   return (
     <aside>
@@ -91,7 +100,7 @@ export function AccountSidebar() {
 
         <div className="mt-4 border-t border-warm-beige pt-4">
           <button
-            onClick={logout}
+            onClick={seDeconnecter}
             // red-700 et non red-600 : ce dernier plafonne a 4.41:1 sur red-50.
             className="inline-flex items-center gap-2 rounded-pill bg-red-50 px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700 focus-visible:ring-offset-2"
           >
