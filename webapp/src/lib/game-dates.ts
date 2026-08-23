@@ -17,13 +17,20 @@
 // qui décide si une participation est acceptée. Ces constantes ne servent qu'à
 // l'affichage. Pour les écrire, voir lib/french-date.
 
-export const GAME_START_DATE = new Date('2026-08-31T22:00:00.000Z');
-export const GAME_END_DATE = new Date('2026-09-30T21:59:59.999Z');
-export const CLAIM_END_DATE = new Date('2026-10-30T22:59:59.999Z');
+// Instants UTC, exprimés depuis l'heure de Paris. Le 23 octobre 2026 précède
+// encore le retour à l'heure d'hiver, fixé au 25 : les trois dates sont donc
+// en UTC+2.
+export const GAME_START_DATE = new Date('2026-08-22T22:00:00.000Z');
+export const GAME_END_DATE = new Date('2026-09-23T21:59:59.999Z');
+export const CLAIM_END_DATE = new Date('2026-10-23T21:59:59.999Z');
 
 /**
- * Durées annoncées par le règlement déposé : 30 jours de jeu, puis 30 jours
- * pour réclamer à compter de la clôture.
+ * Durées annoncées par le règlement : 32 jours civils de jeu, du 23 août au
+ * 23 septembre inclus, puis 30 jours pour réclamer à compter de la clôture.
+ *
+ * Ces nombres sont écrits tels quels dans les CGU et le règlement. Les laisser
+ * dériver des dates ci-dessus produirait un document juridique qui se
+ * contredit — c'est déjà arrivé.
  */
-export const GAME_DURATION_DAYS = 30;
+export const GAME_DURATION_DAYS = 32;
 export const CLAIM_DURATION_DAYS = 30;
