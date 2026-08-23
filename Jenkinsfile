@@ -62,10 +62,13 @@ ciPipeline(
     apiEnv         : [
         API_PREFIX: 'api',
 
-        // Expéditeur des courriels transactionnels. Sans ces deux valeurs le
-        // service retombe sur ses défauts ; c'est la clé, plus bas, qui décide
-        // si un courriel part réellement ou reste journalisé.
-        BREVO_SENDER_EMAIL: 'noreply@thetiptop.fr',
+        // Expéditeur des courriels transactionnels.
+        //
+        // Cette adresse doit être validée dans Brevo, qui rejette tout envoi
+        // émis au nom d'une autre. C'est celle du compte de l'équipe : le
+        // domaine thetiptop.fr est fictif et ne peut donc pas être authentifié
+        // par les enregistrements DNS que Brevo réclame.
+        BREVO_SENDER_EMAIL: 'nomaworkecoworking@gmail.com',
         BREVO_SENDER_NAME : 'Thé Tip Top'
     ],
     // Les URL de retour OAuth ne figurent pas ici : les stratégies retombent
