@@ -62,6 +62,19 @@ ciPipeline(
     apiEnv         : [
         API_PREFIX: 'api',
 
+        // Fenêtre officielle du jeu-concours.
+        //
+        // Sans ces trois valeurs, le seed calcule les bornes à partir de
+        // l'instant où il s'exécute : chaque environnement s'est ainsi inventé
+        // sa propre fenêtre le jour de son initialisation, pendant que les
+        // mentions légales en annonçaient une autre. Elles répliquent
+        // webapp/src/lib/game-dates.ts, et un test compare les deux.
+        //
+        // UTC+2 : le 23 octobre 2026 précède le retour à l'heure d'hiver.
+        GAME_START_DATE: '2026-08-22T22:00:00.000Z',
+        GAME_END_DATE  : '2026-09-23T21:59:59.999Z',
+        CLAIM_END_DATE : '2026-10-23T21:59:59.999Z',
+
         // Expéditeur des courriels transactionnels.
         //
         // Cette adresse doit être validée dans Brevo, qui rejette tout envoi
