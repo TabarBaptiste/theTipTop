@@ -309,6 +309,11 @@ model NewsletterSubscriber {
   // Motif du dernier echec, pour diagnostiquer sans relire les journaux.
   brevoError    String?
 
+  // Jeton opaque du lien de desinscription. Un abonne n'a pas de compte : sans
+  // lui, il faudrait accepter une desinscription sur simple adresse, et
+  // n'importe qui pourrait desabonner n'importe qui.
+  unsubscribeToken String  @unique
+
   unsubscribedAt DateTime?
 
   @@index([brevoSyncedAt])

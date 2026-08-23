@@ -4,6 +4,7 @@
 
 import { Test } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
+import { NotFoundException } from '@nestjs/common';
 
 import { NewsletterService } from './newsletter.service';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -56,7 +57,7 @@ describe('NewsletterService', () => {
     expect(mockPrisma.newsletterSubscriber.upsert).toHaveBeenCalledWith({
       where: { email: 'jean.dupont@email.fr' },
       update: { unsubscribedAt: null },
-      create: { email: 'jean.dupont@email.fr' },
+      create: expect.objectContaining({ email: 'jean.dupont@email.fr' }),
       select: { id: true },
     });
   });
@@ -142,6 +143,78 @@ describe('NewsletterService', () => {
 
     expect(mockPrisma.newsletterSubscriber.upsert).toHaveBeenCalled();
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  describe('desinscription', () => {
+    const JETON = 'a'.repeat(64);
+
+    it('refuse un jeton inconnu', async () => {
+      mockPrisma.newsletterSubscriber.findUnique.mockResolvedValue(null);
+      const service = await construire();
+
+      await expect(service.unsubscribe(JETON)).rejects.toThrow(NotFoundException);
+    });
+
+    it('horodate la desinscription et retire le contact de la liste', async () => {
+      mockPrisma.newsletterSubscriber.findUnique.mockResolvedValue({
+        id: 'n1',
+        email: 'jean@email.fr',
+        unsubscribedAt: null,
+      });
+      const service = await construire();
+
+      await expect(service.unsubscribe(JETON)).resolves.toEqual({ email: 'jean@email.fr' });
+
+      const { data } = mockPrisma.newsletterSubscriber.update.mock.calls[0][0];
+      expect(data.unsubscribedAt).toBeInstanceOf(Date);
+
+      const [url, options] = fetchMock.mock.calls[0];
+      expect(url).toBe('https://api.brevo.com/v3/contacts/lists/7/contacts/remove');
+      expect(JSON.parse(options.body)).toEqual({ emails: ['jean@email.fr'] });
+    });
+
+    // Un lien de desinscription vit dans une boite mail et sera cliqué deux
+    // fois. La seconde ne doit pas afficher d'erreur.
+    it('reste sans effet sur une adresse deja desinscrite', async () => {
+      mockPrisma.newsletterSubscriber.findUnique.mockResolvedValue({
+        id: 'n1',
+        email: 'jean@email.fr',
+        unsubscribedAt: new Date(),
+      });
+      const service = await construire();
+
+      await expect(service.unsubscribe(JETON)).resolves.toEqual({ email: 'jean@email.fr' });
+
+      expect(mockPrisma.newsletterSubscriber.update).not.toHaveBeenCalled();
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    // Retenir quelqu'un qui a demande a partir parce que Brevo est indisponible
+    // serait le pire des comportements.
+    it('aboutit meme si le retrait Brevo echoue', async () => {
+      mockPrisma.newsletterSubscriber.findUnique.mockResolvedValue({
+        id: 'n1',
+        email: 'jean@email.fr',
+        unsubscribedAt: null,
+      });
+      fetchMock.mockRejectedValue(new Error('injoignable'));
+      const service = await construire();
+
+      await expect(service.unsubscribe(JETON)).resolves.toEqual({ email: 'jean@email.fr' });
+
+      const { data } = mockPrisma.newsletterSubscriber.update.mock.calls[0][0];
+      expect(data.unsubscribedAt).toBeInstanceOf(Date);
+    });
+  });
+
+  it('attribue un jeton de desinscription a la creation', async () => {
+    mockPrisma.newsletterSubscriber.findUnique.mockResolvedValue(null);
+    const service = await construire();
+
+    await service.subscribe('jean@email.fr');
+
+    const { create } = mockPrisma.newsletterSubscriber.upsert.mock.calls[0][0];
+    expect(create.unsubscribeToken).toMatch(/^[a-f0-9]{64}$/);
   });
 
   it('leve une desinscription anterieure et resynchronise', async () => {

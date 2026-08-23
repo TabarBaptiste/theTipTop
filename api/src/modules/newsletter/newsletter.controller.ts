@@ -7,6 +7,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 
 import { NewsletterService } from './newsletter.service';
 import { SubscribeNewsletterDto } from './dto/subscribe-newsletter.dto';
+import { UnsubscribeNewsletterDto } from './dto/unsubscribe-newsletter.dto';
 import { Public } from '../auth/decorators/public.decorator';
 
 @ApiTags('newsletter')
@@ -40,5 +41,26 @@ export class NewsletterController {
   @ApiResponse({ status: 400, description: 'Adresse invalide' })
   async subscribe(@Body() dto: SubscribeNewsletterDto) {
     return this.newsletterService.subscribe(dto.email);
+  }
+
+  @Public()
+  @Post('unsubscribe')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Désinscrire le porteur d’un jeton',
+    description:
+      "Le jeton du lien fait foi : un abonné n'a pas de compte. L'opération est " +
+      'idempotente, un lien reçu par courriel étant souvent cliqué deux fois.',
+  })
+  @ApiBody({ type: UnsubscribeNewsletterDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Adresse désinscrite',
+    schema: { properties: { email: { type: 'string' } } },
+  })
+  @ApiResponse({ status: 400, description: 'Jeton au format invalide' })
+  @ApiResponse({ status: 404, description: 'Jeton inconnu' })
+  async unsubscribe(@Body() dto: UnsubscribeNewsletterDto) {
+    return this.newsletterService.unsubscribe(dto.token);
   }
 }

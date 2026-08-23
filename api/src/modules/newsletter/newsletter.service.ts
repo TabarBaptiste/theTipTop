@@ -2,7 +2,9 @@
 // Inscription à la newsletter
 // ===========================================
 
-import { Injectable, Logger } from '@nestjs/common';
+import { randomBytes } from 'crypto';
+
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { PrismaService } from '../../prisma/prisma.service';
@@ -64,7 +66,7 @@ export class NewsletterService {
     const abonne = await this.prisma.newsletterSubscriber.upsert({
       where: { email: normalise },
       update: { unsubscribedAt: null },
-      create: { email: normalise },
+      create: { email: normalise, unsubscribeToken: randomBytes(32).toString('hex') },
       select: { id: true },
     });
 
@@ -76,6 +78,71 @@ export class NewsletterService {
     }
 
     return { dejaInscrit };
+  }
+
+  /**
+   * Désinscrit le porteur d'un jeton, puis le retire de la liste Brevo.
+   *
+   * Le jeton fait foi : un abonné n'a pas de compte, et accepter une simple
+   * adresse laisserait n'importe qui désabonner n'importe qui.
+   *
+   * L'opération est idempotente. Un lien de désinscription vit dans une boîte
+   * mail et sera cliqué deux fois ; la seconde ne doit pas afficher d'erreur.
+   */
+  async unsubscribe(token: string): Promise<{ email: string }> {
+    const abonne = await this.prisma.newsletterSubscriber.findUnique({
+      where: { unsubscribeToken: token },
+      select: { id: true, email: true, unsubscribedAt: true },
+    });
+
+    if (!abonne) {
+      throw new NotFoundException('Ce lien de désinscription n’est plus valide.');
+    }
+
+    if (abonne.unsubscribedAt) {
+      return { email: abonne.email };
+    }
+
+    await this.prisma.newsletterSubscriber.update({
+      where: { id: abonne.id },
+      data: { unsubscribedAt: new Date() },
+    });
+
+    await this.retirerDeBrevo(abonne.email);
+
+    return { email: abonne.email };
+  }
+
+  /**
+   * Retire le contact de la liste Brevo.
+   *
+   * Un échec ici ne remonte pas : la désinscription est déjà enregistrée de
+   * notre côté, et c'est elle qui fait foi. Refuser la demande parce que Brevo
+   * est indisponible reviendrait à retenir quelqu'un qui a demandé à partir.
+   */
+  private async retirerDeBrevo(email: string): Promise<void> {
+    if (!this.apiKey || !this.listId) return;
+
+    try {
+      const response = await fetch(
+        `${BREVO_CONTACTS_ENDPOINT}/lists/${this.listId}/contacts/remove`,
+        {
+          method: 'POST',
+          headers: {
+            'api-key': this.apiKey,
+            'content-type': 'application/json',
+            accept: 'application/json',
+          },
+          body: JSON.stringify({ emails: [email] }),
+        },
+      );
+
+      if (!response.ok) {
+        this.logger.error(`Retrait Brevo refusé (${response.status}) : ${await response.text()}`);
+      }
+    } catch (error) {
+      this.logger.error(`Retrait Brevo impossible : ${(error as Error).message}`);
+    }
   }
 
   /**
