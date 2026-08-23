@@ -3,8 +3,10 @@
 import Link from 'next/link';
 import { Mail, Instagram, Facebook, Youtube, Linkedin, Music2 } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { SOCIAL_LINKS } from '@/lib/social-links';
+import { api } from '@/lib/api';
 
 /** Adresse officielle d'un reseau, par son nom. */
 const lienSocial = (nom: string) => SOCIAL_LINKS.find((r) => r.nom === nom)!.url;
@@ -12,14 +14,30 @@ const lienSocial = (nom: string) => SOCIAL_LINKS.find((r) => r.nom === nom)!.url
 export function Footer() {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleNewsletterSubmit = (e: React.FormEvent) => {
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) {
-      // TODO: Implement newsletter subscription API
+    if (!email || isSubmitting) return;
+
+    setIsSubmitting(true);
+    try {
+      await api.post('/newsletter', { email });
       setSubscribed(true);
       setEmail('');
       setTimeout(() => setSubscribed(false), 3000);
+    } catch (error) {
+      // Le refus vient de la validation de l'adresse dans l'immense majorité
+      // des cas ; le reste est une panne, sur laquelle l'utilisateur ne peut
+      // rien. On distingue les deux plutôt que d'afficher « erreur ».
+      const status = (error as { response?: { status?: number } })?.response?.status;
+      toast.error(
+        status === 400
+          ? "Cette adresse e-mail n'est pas valide"
+          : "L'inscription a échoué, réessayez dans un instant",
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -175,10 +193,11 @@ export function Footer() {
                 <Button
                   type="submit"
                   size="icon"
+                  disabled={isSubmitting}
                   className="shrink-0 bg-warm-beige text-noir hover:bg-warm-beige/90 active:bg-terracotta-600 active:text-white"
                   aria-label="S'abonner à la newsletter"
                 >
-                  →
+                  {isSubmitting ? '…' : '→'}
                 </Button>
               </div>
               <p className="text-xs text-white/70">

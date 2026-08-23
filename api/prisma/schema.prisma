@@ -289,3 +289,28 @@ model RefreshToken {
   @@index([token])
   @@map("refresh_tokens")
 }
+
+// ===========================================
+// ABONNES A LA NEWSLETTER
+// ===========================================
+// Le formulaire du pied de page alimente une liste Brevo. L'adresse est
+// d'abord conservee ici, puis poussee : si Brevo est injoignable ou mal
+// configure, l'inscription n'est pas perdue et reste rattrapable.
+model NewsletterSubscriber {
+  id            String    @id @default(uuid())
+  email         String    @unique
+
+  // Horodatage du consentement, base legale de la conservation (RGPD).
+  subscribedAt  DateTime  @default(now())
+
+  // null tant que la synchronisation vers Brevo n'a pas abouti.
+  brevoSyncedAt DateTime?
+
+  // Motif du dernier echec, pour diagnostiquer sans relire les journaux.
+  brevoError    String?
+
+  unsubscribedAt DateTime?
+
+  @@index([brevoSyncedAt])
+  @@map("newsletter_subscribers")
+}

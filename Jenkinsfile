@@ -69,7 +69,13 @@ ciPipeline(
         // domaine thetiptop.fr est fictif et ne peut donc pas être authentifié
         // par les enregistrements DNS que Brevo réclame.
         BREVO_SENDER_EMAIL: 'nomaworkecoworking@gmail.com',
-        BREVO_SENDER_NAME : 'Thé Tip Top'
+        BREVO_SENDER_NAME : 'Thé Tip Top',
+
+        // Liste Brevo alimentée par le formulaire du pied de page. Ce n'est pas
+        // un secret : l'identifiant ne donne accès à rien sans la clé d'API.
+        // Sans lui, les inscriptions restent enregistrées en base, en attente
+        // de synchronisation.
+        BREVO_NEWSLETTER_LIST_ID: '' // TODO renseigner l'identifiant de la liste
     ],
     // Les URL de retour OAuth ne figurent pas ici : les stratégies retombent
     // sur un chemin relatif, que Passport résout contre la requête entrante.
