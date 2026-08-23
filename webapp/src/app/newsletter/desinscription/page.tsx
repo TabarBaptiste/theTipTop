@@ -41,9 +41,9 @@ function Desinscription() {
         setEmail(reponse.data.email);
         setEtat('desinscrit');
       })
-      .catch((erreur) => {
+      .catch((error_) => {
         if (abandonne) return;
-        const status = (erreur as { response?: { status?: number } })?.response?.status;
+        const status = (error_ as { response?: { status?: number } })?.response?.status;
         setEtat(status === 404 || status === 400 ? 'lien-invalide' : 'echec');
       });
 
