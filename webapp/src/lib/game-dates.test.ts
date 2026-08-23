@@ -10,6 +10,7 @@ describe('accord des dates du jeu avec la configuration de l’API', () => {
   const envExample = readFileSync(join(__dirname, '../../../api/.env.example'), 'utf8');
 
   const lire = (cle: string): string => {
+    // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp -- cle vient uniquement des cles litterales listees plus bas dans ce fichier de test.
     const trouve = envExample.match(new RegExp(`^${cle}=(.+)$`, 'm'));
     if (!trouve) throw new Error(`${cle} introuvable dans api/.env.example`);
     return trouve[1].trim();

@@ -44,6 +44,7 @@ function sign(params: Record<string, string>, secret: string): string {
 
 async function upload(publicId: string): Promise<string> {
   const fileName = `${basename(publicId)}.webp`;
+  // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal -- basename() neutralise deja toute traversee de repertoire ; script d'admin execute manuellement, jamais expose en HTTP.
   const bytes = await readFile(join(IMAGES_DIR, fileName));
 
   // `overwrite` est signé, `file` et `api_key` ne le sont jamais.

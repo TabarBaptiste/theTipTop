@@ -21,6 +21,7 @@ COPY . .
 RUN npx prisma generate
 
 EXPOSE 3001
+# nosemgrep: dockerfile.security.missing-user.missing-user -- stage dev local uniquement (bind mount ./api:/app), jamais deploye ; le stage de production plus bas fixe USER nestjs.
 CMD ["npm", "run", "start:dev"]
 
 # --- Stage 3: Build ---
