@@ -50,6 +50,7 @@ RUN adduser --system --uid 1001 nestjs
 COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nestjs:nodejs /app/package*.json ./
 COPY --from=builder --chown=nestjs:nodejs /app/api ./api
+RUN chmod +x /app/api/docker-entrypoint.sh
 
 USER nestjs
 WORKDIR /app/api
@@ -57,4 +58,4 @@ WORKDIR /app/api
 EXPOSE 3001
 # prisma/seed.ts elargit le rootDir au dossier api/ : nest build emet donc
 # dist/src/main.js et non dist/main.js.
-CMD ["node", "dist/src/main.js"]
+ENTRYPOINT ["./docker-entrypoint.sh"]
