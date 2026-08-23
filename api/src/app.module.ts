@@ -20,6 +20,7 @@ import { StatsModule } from './modules/stats/stats.module';
 import { GrandPrizeModule } from './modules/grand-prize/grand-prize.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { GameConfigModule } from './modules/game-config/game-config.module';
+import { NewsletterModule } from './modules/newsletter/newsletter.module';
 import { HealthModule } from './modules/health/health.module';
 
 @Module({
@@ -79,6 +80,7 @@ import { HealthModule } from './modules/health/health.module';
     GrandPrizeModule,
     AuditModule,
     GameConfigModule,
+    NewsletterModule,
   ],
   providers: [
     // Rate limiting global

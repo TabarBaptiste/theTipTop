@@ -2,12 +2,14 @@
 // Tests unitaires - Header
 // ===========================================
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { Header } from './header';
 import type { User } from '@/lib/stores/auth-store';
 
+const mockReplace = jest.fn();
 jest.mock('next/navigation', () => ({
   usePathname: () => '/',
+  useRouter: () => ({ replace: mockReplace }),
 }));
 
 const mockAuthState = jest.fn();
@@ -24,21 +26,25 @@ const baseUser: User = {
   createdAt: '2026-01-01T00:00:00.000Z',
 };
 
+const mockLogout = jest.fn();
+
 function signedOut() {
-  mockAuthState.mockReturnValue({ user: null, isAuthenticated: false, logout: jest.fn() });
+  mockAuthState.mockReturnValue({ user: null, isAuthenticated: false, logout: mockLogout });
 }
 
 function signedInAs(role: User['role']) {
   mockAuthState.mockReturnValue({
     user: { ...baseUser, role },
     isAuthenticated: true,
-    logout: jest.fn(),
+    logout: mockLogout,
   });
 }
 
 describe('Header', () => {
   beforeEach(() => {
     mockAuthState.mockReset();
+    mockLogout.mockReset();
+    mockReplace.mockReset();
   });
 
   it('affiche le logo et le ramene a l accueil', () => {
@@ -175,5 +181,19 @@ describe('Header', () => {
     render(<Header />);
 
     expect(screen.getByRole('button', { name: /Jean/ })).toBeInTheDocument();
+  });
+
+  // Vider le magasin ne fait pas quitter la page : la protection des routes
+  // privees vit dans le middleware, qui ne s'execute qu'a la navigation. Sans
+  // cette redirection, un administrateur restait sur son tableau de bord,
+  // deconnecte mais toujours face au contenu.
+  it('renvoie a la connexion apres une deconnexion', () => {
+    signedInAs('ADMIN');
+    render(<Header />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Se déconnecter/ }));
+
+    expect(mockLogout).toHaveBeenCalled();
+    expect(mockReplace).toHaveBeenCalledWith('/auth/login');
   });
 });

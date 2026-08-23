@@ -24,15 +24,15 @@ ciPipeline(
     // Comité de pilotage (cf. cahier des charges)
     notifyRecipients: [
         preprod: 'alexandre.petit@thetiptop.fr,' +
-                 'nathalie.dubois@thetiptop.fr,' +
-                 'harenaandriamananjaramandimby@furiousducks.fr,' +
-                 'baptistetabarlabonne@furiousducks.com',
+                'nathalie.dubois@thetiptop.fr,' +
+                'harenaandriamananjaramandimby@furiousducks.fr,' +
+                'baptistetabarlabonne@furiousducks.com',
         prod   : 'eric.bourdon@thetiptop.fr,' +
-                 'nathalie.dubois@thetiptop.fr,' +
-                 'alexandre.petit@thetiptop.fr,' +
-                 'guido.brasletti@furiousducks.com,' +
-                 'harenaandriamananjaramandimby@furiousducks.fr,' +
-                 'baptistetabarlabonne@furiousducks.com'
+                'nathalie.dubois@thetiptop.fr,' +
+                'alexandre.petit@thetiptop.fr,' +
+                'guido.brasletti@furiousducks.com,' +
+                'harenaandriamananjaramandimby@furiousducks.fr,' +
+                'baptistetabarlabonne@furiousducks.com'
     ],
 
     devDomain     : "${projectName}-dev.wk-archi-o24a-4-5-g1.fr",
@@ -60,7 +60,35 @@ ciPipeline(
     // FRONTEND_URL et CORS_ORIGINS sont dérivés par la shared library
     // à partir du domaine front de l'environnement ciblé.
     apiEnv         : [
-        API_PREFIX: 'api'
+        API_PREFIX: 'api',
+
+        // Fenêtre officielle du jeu-concours.
+        //
+        // Sans ces trois valeurs, le seed calcule les bornes à partir de
+        // l'instant où il s'exécute : chaque environnement s'est ainsi inventé
+        // sa propre fenêtre le jour de son initialisation, pendant que les
+        // mentions légales en annonçaient une autre. Elles répliquent
+        // webapp/src/lib/game-dates.ts, et un test compare les deux.
+        //
+        // UTC+2 : le 23 octobre 2026 précède le retour à l'heure d'hiver.
+        GAME_START_DATE: '2026-08-22T22:00:00.000Z',
+        GAME_END_DATE  : '2026-09-23T21:59:59.999Z',
+        CLAIM_END_DATE : '2026-10-23T21:59:59.999Z',
+
+        // Expéditeur des courriels transactionnels.
+        //
+        // Cette adresse doit être validée dans Brevo, qui rejette tout envoi
+        // émis au nom d'une autre. C'est celle du compte de l'équipe : le
+        // domaine thetiptop.fr est fictif et ne peut donc pas être authentifié
+        // par les enregistrements DNS que Brevo réclame.
+        BREVO_SENDER_EMAIL: 'nomaworkecoworking@gmail.com',
+        BREVO_SENDER_NAME : 'Thé Tip Top',
+
+        // Liste Brevo alimentée par le formulaire du pied de page. Ce n'est pas
+        // un secret : l'identifiant ne donne accès à rien sans la clé d'API.
+        // Sans lui, les inscriptions restent enregistrées en base, en attente
+        // de synchronisation.
+        BREVO_NEWSLETTER_LIST_ID: '9'
     ],
     // Les URL de retour OAuth ne figurent pas ici : les stratégies retombent
     // sur un chemin relatif, que Passport résout contre la requête entrante.
@@ -72,7 +100,12 @@ ciPipeline(
         [envVar: 'GOOGLE_CLIENT_ID', credentialId: 'thetiptop-google-client-id'],
         [envVar: 'GOOGLE_CLIENT_SECRET', credentialId: 'thetiptop-google-client-secret'],
         [envVar: 'FACEBOOK_APP_ID', credentialId: 'thetiptop-facebook-app-id'],
-        [envVar: 'FACEBOOK_APP_SECRET', credentialId: 'thetiptop-facebook-app-secret']
+        [envVar: 'FACEBOOK_APP_SECRET', credentialId: 'thetiptop-facebook-app-secret'],
+
+        // Sans cette clé, MailService journalise les courriels au lieu de les
+        // envoyer. Le code de confirmation d'adresse n'atteignait donc jamais
+        // son destinataire, sur aucun environnement deploye.
+        [envVar: 'BREVO_API_KEY', credentialId: 'thetiptop-brevo-api-key']
     ],
 
     // PROD always uses its own dedicated DB + JWT secrets, never the shared
@@ -90,7 +123,14 @@ ciPipeline(
             [envVar: 'GOOGLE_CLIENT_ID', credentialId: 'thetiptop-google-client-id'],
             [envVar: 'GOOGLE_CLIENT_SECRET', credentialId: 'thetiptop-google-client-secret'],
             [envVar: 'FACEBOOK_APP_ID', credentialId: 'thetiptop-facebook-app-id'],
-            [envVar: 'FACEBOOK_APP_SECRET', credentialId: 'thetiptop-facebook-app-secret']
+            [envVar: 'FACEBOOK_APP_SECRET', credentialId: 'thetiptop-facebook-app-secret'],
+            [envVar: 'BREVO_API_KEY', credentialId: 'thetiptop-brevo-api-key']
+        ]
+    ],
+
+    webappBuildArgsByEnv: [
+        prod: [
+            NEXT_PUBLIC_GA_ID: 'G-1DD9XREP7H'
         ]
     ]
 )
