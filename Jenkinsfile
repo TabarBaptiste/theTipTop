@@ -75,7 +75,7 @@ ciPipeline(
         // un secret : l'identifiant ne donne accès à rien sans la clé d'API.
         // Sans lui, les inscriptions restent enregistrées en base, en attente
         // de synchronisation.
-        BREVO_NEWSLETTER_LIST_ID: '' // TODO renseigner l'identifiant de la liste
+        BREVO_NEWSLETTER_LIST_ID: '9'
     ],
     // Les URL de retour OAuth ne figurent pas ici : les stratégies retombent
     // sur un chemin relatif, que Passport résout contre la requête entrante.
