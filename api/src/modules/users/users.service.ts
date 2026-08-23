@@ -214,17 +214,24 @@ export class UsersService {
       throw new NotFoundException('Utilisateur non trouvé');
     }
 
-    // Compte créé par Social Login : il n'y a aucun mot de passe à comparer,
-    // donc aucun moyen de prouver ici que la demande vient bien du titulaire.
-    if (!user.password) {
-      throw new BadRequestException(
-        "Ce compte se connecte via Google ou Facebook et n'a pas de mot de passe à modifier.",
-      );
-    }
+    // Compte créé par Google ou Facebook : il n'a pas encore de mot de passe,
+    // et il en définit un ici pour la première fois. Exiger un « mot de passe
+    // actuel » inexistant n'apporterait aucune sécurité et l'enfermerait dans
+    // son fournisseur d'identité - un problème réel depuis que la connexion
+    // Facebook ne peut plus être proposée au public.
+    //
+    // La session suffit à prouver l'identité : la route est derrière
+    // JwtAuthGuard, et le contrôleur vérifie déjà que l'identifiant vise bien
+    // le titulaire du jeton.
+    if (user.password) {
+      if (!dto.currentPassword) {
+        throw new BadRequestException('Le mot de passe actuel est requis');
+      }
 
-    const isCurrentValid = await bcrypt.compare(dto.currentPassword, user.password);
-    if (!isCurrentValid) {
-      throw new ForbiddenException('Mot de passe actuel incorrect');
+      const isCurrentValid = await bcrypt.compare(dto.currentPassword, user.password);
+      if (!isCurrentValid) {
+        throw new ForbiddenException('Mot de passe actuel incorrect');
+      }
     }
 
     await this.prisma.user.update({

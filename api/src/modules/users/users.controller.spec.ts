@@ -121,9 +121,8 @@ describe('UsersController', () => {
   });
 
   describe('changePassword', () => {
-    it('should force a client to only change their own password', async () => {
+    it('should act on the token holder, never on the id in the URL', async () => {
       await controller.changePassword(
-        'autre-id',
         { currentPassword: 'Actuel123!', newPassword: 'Nouveau123!' },
         client,
       );
@@ -132,6 +131,18 @@ describe('UsersController', () => {
         currentPassword: 'Actuel123!',
         newPassword: 'Nouveau123!',
       });
+    });
+
+    // Un compte sans mot de passe peut en definir un sans fournir l'ancien.
+    // Si un administrateur pouvait viser autrui, il s'octroierait l'acces a
+    // tout compte cree par Google ou Facebook.
+    it('should not let an admin target another account', async () => {
+      await controller.changePassword({ newPassword: 'Nouveau123!' }, admin);
+
+      expect(mockUsersService.changePassword).toHaveBeenCalledWith(
+        admin.id,
+        expect.objectContaining({ newPassword: 'Nouveau123!' }),
+      );
     });
   });
 

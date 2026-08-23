@@ -131,23 +131,30 @@ export class UsersController {
   @Put(':id/password')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
-    summary: 'Changer son mot de passe',
+    summary: 'Changer ou définir son mot de passe',
     description:
-      "Exige le mot de passe actuel. C'est le seul chemin permettant à un client de " +
-      'changer son mot de passe : la mise à jour de profil le refuse.',
+      "Exige le mot de passe actuel, sauf lorsque le compte n'en a pas encore : créé par " +
+      "Google ou Facebook, il en définit un pour la première fois. C'est le seul chemin " +
+      'permettant de changer son mot de passe, la mise à jour de profil le refuse. ' +
+      "L'identifiant de l'URL est ignoré : la route agit toujours sur le titulaire du jeton.",
   })
-  @ApiResponse({ status: 204, description: 'Mot de passe changé' })
-  @ApiResponse({ status: 400, description: 'Compte sans mot de passe (Social Login)' })
+  @ApiResponse({ status: 204, description: 'Mot de passe changé ou défini' })
+  @ApiResponse({ status: 400, description: 'Mot de passe actuel manquant' })
   @ApiResponse({ status: 403, description: 'Mot de passe actuel incorrect' })
   @ApiResponse({ status: 404, description: 'Utilisateur non trouvé' })
-  async changePassword(
-    @Param('id') id: string,
-    @Body() dto: ChangePasswordDto,
-    @CurrentUser() currentUser: User,
-  ) {
-    // Un client ne peut changer que son propre mot de passe
-    const targetId = currentUser.role === 'CLIENT' ? currentUser.id : id;
-    await this.usersService.changePassword(targetId, dto);
+  async changePassword(@Body() dto: ChangePasswordDto, @CurrentUser() currentUser: User) {
+    // La route agit sur le titulaire du jeton, quel que soit son rôle.
+    //
+    // Auparavant, seul un client était ramené à son propre compte : un employé
+    // ou un administrateur pouvait viser l'identifiant d'autrui. C'était sans
+    // effet tant que l'ancien mot de passe était exigé. Depuis qu'un compte
+    // sans mot de passe peut en définir un sans le fournir, la même latitude
+    // permettrait de s'octroyer l'accès à n'importe quel compte créé par
+    // Google ou Facebook, puis de s'y connecter.
+    //
+    // Aucun usage légitime n'en dépend : l'interface n'appelle cette route
+    // qu'avec l'identifiant du titulaire.
+    await this.usersService.changePassword(currentUser.id, dto);
   }
 
   // ===========================================

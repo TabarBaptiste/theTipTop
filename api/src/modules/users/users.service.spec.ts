@@ -185,12 +185,30 @@ describe('UsersService', () => {
       await expect(service.changePassword('inconnu', dto)).rejects.toThrow(NotFoundException);
     });
 
-    // Un compte Social Login n'a pas de mot de passe : il n'existe alors aucun
-    // moyen de prouver ici que la demande vient du titulaire.
-    it('should reject an account created through social login', async () => {
+    // Un compte cree par Google ou Facebook n'a pas de mot de passe : il en
+    // definit un ici pour la premiere fois. Reclamer un « mot de passe
+    // actuel » inexistant n'apporterait aucune securite - la route est deja
+    // derriere le jeton, et le controleur la ramene au titulaire - mais
+    // l'enfermerait dans son fournisseur d'identite.
+    it('should let an account without a password define one', async () => {
       mockPrismaService.user.findUnique.mockResolvedValue({ id: 'u1', password: null });
+      mockPrismaService.user.update.mockResolvedValue({ id: 'u1' });
 
-      await expect(service.changePassword('u1', dto)).rejects.toThrow(BadRequestException);
+      await service.changePassword('u1', { newPassword: 'Nouveau123!' });
+
+      const { data } = mockPrismaService.user.update.mock.calls[0][0];
+      await expect(bcrypt.compare('Nouveau123!', data.password)).resolves.toBe(true);
+    });
+
+    // La dispense ne vaut que pour un compte qui n'a rien a proteger. Des
+    // qu'un mot de passe existe, l'omettre ne doit pas ouvrir un raccourci.
+    it('should still require the current password when one exists', async () => {
+      const hashed = await bcrypt.hash('LeVrai123!', 4);
+      mockPrismaService.user.findUnique.mockResolvedValue({ id: 'u1', password: hashed });
+
+      await expect(service.changePassword('u1', { newPassword: 'Nouveau123!' })).rejects.toThrow(
+        BadRequestException,
+      );
       expect(mockPrismaService.user.update).not.toHaveBeenCalled();
     });
 

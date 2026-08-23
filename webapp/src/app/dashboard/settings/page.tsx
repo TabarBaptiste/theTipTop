@@ -24,6 +24,14 @@ export default function SettingsPage() {
   const [passwords, setPasswords] = useState(EMPTY_PASSWORDS);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
 
+  // Un compte créé par Google ou Facebook n'a jamais eu de mot de passe : il en
+  // définit un, sans avoir d'ancien à fournir. L'API accepte alors la demande
+  // sans `currentPassword`, la session suffisant à prouver l'identité.
+  //
+  // Par défaut on considère qu'il en existe un : tant que le profil n'est pas
+  // chargé, mieux vaut demander l'ancien à tort que l'omettre à tort.
+  const aUnMotDePasse = user?.hasPassword !== false;
+
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       router.push('/auth/login');
@@ -67,11 +75,15 @@ export default function SettingsPage() {
     setIsChangingPassword(true);
     try {
       await api.put(`/users/${user.id}/password`, {
-        currentPassword: passwords.current,
+        // Omis pour un compte qui n'en a pas encore : le champ n'est alors pas
+        // affiché, et l'envoyer vide ferait échouer la validation.
+        ...(aUnMotDePasse ? { currentPassword: passwords.current } : {}),
         newPassword: passwords.next,
       });
       setPasswords(EMPTY_PASSWORDS);
-      toast.success('Votre mot de passe a été changé');
+      toast.success(
+        aUnMotDePasse ? 'Votre mot de passe a été changé' : 'Votre mot de passe a été défini',
+      );
     } catch (error: any) {
       const status = error?.response?.status;
       const apiMessage = error?.response?.data?.message;
@@ -164,24 +176,29 @@ export default function SettingsPage() {
 
             {/* --- Mot de passe --- */}
             <section className="mt-8 border-t border-warm-beige pt-6">
-              <h2 className="font-display text-h3 text-noir">Mot de passe</h2>
+              <h2 className="font-display text-h3 text-noir">
+                {aUnMotDePasse ? 'Mot de passe' : 'Définir un mot de passe'}
+              </h2>
               <p className="mt-1 text-sm text-stone-grey">
-                Le mot de passe actuel vous est demandé : c&apos;est ce qui empêche quelqu&apos;un
-                d&apos;autre de changer le vôtre depuis une session restée ouverte.
+                {aUnMotDePasse
+                  ? "Le mot de passe actuel vous est demandé : c'est ce qui empêche quelqu'un d'autre de changer le vôtre depuis une session restée ouverte."
+                  : "Votre compte a été créé via Google ou Facebook et n'a pas encore de mot de passe. En définir un vous permettra de vous connecter directement, sans passer par eux."}
               </p>
 
               <form onSubmit={handlePasswordChange} className="mt-4 max-w-sm space-y-4">
-                <div>
-                  <Label htmlFor="currentPassword">Mot de passe actuel</Label>
-                  <Input
-                    id="currentPassword"
-                    type="password"
-                    autoComplete="current-password"
-                    required
-                    value={passwords.current}
-                    onChange={(e) => setPasswords({ ...passwords, current: e.target.value })}
-                  />
-                </div>
+                {aUnMotDePasse && (
+                  <div>
+                    <Label htmlFor="currentPassword">Mot de passe actuel</Label>
+                    <Input
+                      id="currentPassword"
+                      type="password"
+                      autoComplete="current-password"
+                      required
+                      value={passwords.current}
+                      onChange={(e) => setPasswords({ ...passwords, current: e.target.value })}
+                    />
+                  </div>
+                )}
                 <div>
                   <Label htmlFor="newPassword">Nouveau mot de passe</Label>
                   <Input
@@ -211,7 +228,7 @@ export default function SettingsPage() {
 
                 <Button type="submit" disabled={isChangingPassword}>
                   {isChangingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Changer mon mot de passe
+                  {aUnMotDePasse ? 'Changer mon mot de passe' : 'Définir mon mot de passe'}
                 </Button>
               </form>
             </section>
