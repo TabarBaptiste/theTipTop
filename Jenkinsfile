@@ -17,9 +17,6 @@ ciPipeline(
     e2eFramework  : 'cypress',
     runZap        : true,   // scan OWASP ZAP baseline contre PREPROD
 
-    // Surveillance post-déploiement PREPROD avec rollback automatique
-    preprodMonitorMinutes: 5,
-
     // Comité de pilotage (cf. cahier des charges)
     notifyRecipients: [
         preprod: 'alexandre.petit@thetiptop.fr,' +

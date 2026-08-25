@@ -62,7 +62,11 @@ export function ParticipationResult({
   const onSubmit = async (data: PasswordFormData) => {
     setIsSaving(true);
     try {
-      await api.put(`/users/${userId}`, { password: data.password });
+      // Route dediee, et non PUT /users/:id : la mise a jour de profil refuse
+      // le champ mot de passe, precisement pour qu'il ne puisse pas etre change
+      // sans connaitre l'actuel. Le compte vient d'etre cree par le tunnel et
+      // n'en a aucun ; cette route accepte alors d'en definir un sans ancien.
+      await api.put(`/users/${userId}/password`, { newPassword: data.password });
       setPasswordSet(true);
       toast.success('Mot de passe enregistré');
       router.push('/dashboard');

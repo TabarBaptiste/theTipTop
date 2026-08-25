@@ -183,6 +183,28 @@ describe('Header', () => {
     expect(screen.getByRole('button', { name: /Jean/ })).toBeInTheDocument();
   });
 
+  // La variante « outline » du bouton passe son fond en terracotta au survol.
+  // Le header surchargeait la couleur du texte en terracotta lui aussi, ce qui
+  // ecrasait le hover:text-white de la variante : au survol comme a la
+  // pression, le libelle et l'icone devenaient invisibles, terracotta sur
+  // terracotta. Le fond et la couleur du texte doivent rester appaires.
+  it.each([['ADMIN'], ['EMPLOYEE'], ['CLIENT']] as const)(
+    'garde le libelle lisible au survol et au clic pour un compte %s',
+    (role) => {
+      signedInAs(role);
+      render(<Header />);
+
+      const declencheur = screen.getByRole('button', { name: /Jean/ });
+      expect(declencheur.className).toContain('hover:text-white');
+      expect(declencheur.className).not.toContain('hover:text-terracotta');
+
+      // Le blanc ne vaut que sur un fond sombre : l'annoncer sans imposer le
+      // fond donnerait du blanc sur creme, tout aussi illisible.
+      expect(declencheur.className).toContain('active:bg-terracotta-600');
+      expect(declencheur.className).toContain('active:text-white');
+    },
+  );
+
   // Vider le magasin ne fait pas quitter la page : la protection des routes
   // privees vit dans le middleware, qui ne s'execute qu'a la navigation. Sans
   // cette redirection, un administrateur restait sur son tableau de bord,
