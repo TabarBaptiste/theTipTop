@@ -22,7 +22,7 @@ Thé Tip Top est **L'Artisan Méditerranéen**. La marque ne vend pas du thé - 
 
 | Nom | Hex | RGB | Usage |
 |-----|-----|-----|-------|
-| Terracotta Profond | `#BA6905` | 186 / 105 / 5 | Couleur signature - identité de marque |
+| Terracotta Profond | `#BA6905` | 186 / 105 / 5 | Couleur signature - identité de marque. **Jamais en aplat sous du texte blanc** : 4.11:1, voir Accessibilité |
 | Terracotta Intermédiaire | `#C25F1F` | 194 / 95 / 31 | Hover states boutons |
 | Noir Institutionnel | `#1A1A1A` | 26 / 26 / 26 | Texte principal, fonds sombres |
 | Blanc Pur | `#FFFFFF` | 255 / 255 / 255 | Fond, respiration visuelle |
@@ -33,10 +33,20 @@ Thé Tip Top est **L'Artisan Méditerranéen**. La marque ne vend pas du thé - 
 | Nom | Hex | Usage |
 |-----|-----|-------|
 | Vert Mousse | `#5C6B3A` | Nature & bio, badges certification |
-| Beige Chaud | `#E8D5B0` | Textures organiques, séparateurs |
+| Beige Chaud | `#E8D5B0` | Textures organiques, séparateurs **décoratifs uniquement** |
 | Or Discret | `#C9A96E` | Accent premium, highlights |
 | Terracotta Pâle | `#F2E0D0` | Fonds de cards, surfaces douces |
-| Gris Pierre | `#8A8378` | Texte secondaire, placeholders |
+| Gris Pierre | `#4A463E` | Texte secondaire, placeholders |
+
+> **Deux valeurs de cette table ont été corrigées après mesure.**
+>
+> Le Gris Pierre valait `#8A8378`, qui ne donne que **3.48:1** sur le fond crème —
+> sous le minimum de 4.5:1 pour du texte. La nuance assombrie garde la chaleur de
+> la palette, atteint **8.71:1**, et reste distincte du noir : passer le texte
+> secondaire en noir supprimerait la hiérarchie.
+>
+> Le Beige Chaud ne doit jamais border un champ ni un bouton : voir la section
+> Accessibilité.
 
 ### Variables CSS
 
@@ -54,14 +64,21 @@ Thé Tip Top est **L'Artisan Méditerranéen**. La marque ne vend pas du thé - 
   --color-warm-beige:         #E8D5B0;
   --color-gold:               #C9A96E;
   --color-terracotta-pale:    #F2E0D0;
-  --color-stone-grey:         #8A8378;
+  --color-stone-grey:         #4A463E;
 
   /* Sémantiques */
   --color-bg:                 var(--color-cream);
   --color-bg-card:            var(--color-terracotta-pale);
   --color-text-primary:       var(--color-black);
   --color-text-secondary:     var(--color-stone-grey);
-  --color-cta:                var(--color-terracotta-deep);
+
+  /* Terracotta assombri : le #BA6905 de la palette ne porte que 4.11:1 en
+     blanc, sous le seuil. Voir la section Accessibilité. */
+  --color-cta:                #A85D04;
+
+  /* Bordure des champs et des contrôles à contour. Le beige chaud n'y suffit
+     pas : 1.44:1, quand 3:1 est exigé pour délimiter un composant. */
+  --color-border-field:       #9A7D48;
   --color-cta-hover:          var(--color-terracotta-hover);
   --color-accent:             var(--color-gold);
   --color-success:            var(--color-moss-green);
@@ -70,10 +87,46 @@ Thé Tip Top est **L'Artisan Méditerranéen**. La marque ne vend pas du thé - 
 
 ### Accessibilité (WCAG AA)
 
-- Blanc sur Terracotta Profond : **4.8:1** ✅
-- Blanc sur Noir Institutionnel : **18.7:1** ✅
-- Terracotta sur Blanc : **18.7:1** ✅
-- Ne jamais utiliser Gris Pierre (`#8A8378`) pour du texte sur fond crème sans vérification de contraste.
+Toutes les valeurs ci-dessous ont été **mesurées**, non estimées. Les chiffres
+qui figuraient ici auparavant étaient faux : « Terracotta sur Blanc : 18.7:1 »
+reprenait la valeur du noir sur blanc, recopiée d'une ligne à l'autre.
+
+#### Deux seuils, à ne pas confondre
+
+| Ce qu'on mesure | Seuil |
+|---|---|
+| Texte courant (< 18.66 px gras, < 24 px) | **4.5:1** |
+| Grand texte (≥ 24 px, ou ≥ 18.66 px en gras) | **3:1** |
+| Bordure d'un champ, d'un bouton, d'une case à cocher | **3:1** (WCAG 1.4.11) |
+
+Les libellés de boutons de cette charte font 11 px en gras : ils relèvent du
+texte courant, donc de 4.5:1. Un bouton n'est pas « du grand texte ».
+
+#### Combinaisons de référence
+
+| Combinaison | Rapport | Verdict |
+|---|---|---|
+| Blanc sur Terracotta CTA `#A85D04` | **4.96:1** | ✅ |
+| Blanc sur Noir `#1A1A1A` | **17.4:1** | ✅ |
+| Noir sur Blanc | **17.4:1** | ✅ |
+| Gris Pierre `#4A463E` sur crème | **8.71:1** | ✅ |
+| Bordure de champ `#9A7D48` sur blanc | **3.89:1** | ✅ |
+
+#### Combinaisons proscrites
+
+| Combinaison | Rapport | Pourquoi |
+|---|---|---|
+| Blanc sur Terracotta Profond `#BA6905` | 4.11:1 | Sous 4.5:1. Utiliser `#A85D04` pour tout aplat portant du texte blanc. |
+| Gris Pierre historique `#8A8378` sur crème | 3.48:1 | Sous 4.5:1. Remplacé par `#4A463E`. |
+| Beige Chaud `#E8D5B0` en bordure de champ | 1.44:1 | Sous 3:1. Le beige ne délimite rien de perceptible sur du blanc. |
+| Texte et fond de la même teinte, l'un en opacité réduite | 1.4 à 3.8:1 | Voir Tags et Badges : le procédé comprime mécaniquement le contraste. |
+
+#### Règle de méthode
+
+Un fond semi-transparent doit être **composé avec ce qui se trouve derrière**
+avant toute mesure. Un outil qui remonte au premier ancêtre opaque, comme le
+fait notre audit Cypress, surestime le contraste d'une pastille posée sur une
+teinte : il mesure contre le fond de page au lieu du fond réellement rendu.
 
 ---
 
@@ -222,29 +275,45 @@ Petit, très arrondi (pill shape), UPPERCASE, pour labels rapides.
 }
 ```
 
-**Règle** : fond = couleur du texte avec opacité réduite. Pas de bordure. Coins en capsule (pill).
+**Règle** : fond = **teinte claire** de la famille, texte = **nuance foncée** de la
+même famille. Pas de bordure. Coins en capsule (pill).
+
+> **Cette règle en remplace une autre, qui produisait des tags illisibles.**
+>
+> La version précédente posait « fond = couleur du texte en opacité réduite ».
+> Le procédé comprime mécaniquement le contraste : texte et fond partageant la
+> même teinte, seule l'opacité les sépare. Mesuré, aucune des sept variantes
+> n'atteignait 4.5:1 — de **3.79:1** pour la meilleure à **1.39:1** pour
+> `season`, du beige sur du beige. Le principe visuel est conservé : une
+> pastille teintée, discrète. Seul change le sens de l'écart, désormais obtenu
+> par la valeur plutôt que par la transparence.
 
 **Variantes**
 ```css
-/* fond = même couleur que le texte, opacité réduite */
-.tag-bio          { background: #5C6B3A40; color: #5C6B3A; } /* vert mousse 40% */
-.tag-detox        { background: #5C6B3A4D; color: #5C6B3A; } /* vert mousse 30% */
-.tag-handmade     { background: #BA690566; color: #BA6905; } /* terracotta 40% */
-.tag-premium      { background: #C9A96E4D; color: #C9A96E; } /* or 30% */
-.tag-neutral      { background: #8A83784D; color: #8A8378; } /* gris pierre 30% */
-.tag-mediteraneen { background: #C76C3A66; color: #C76C3A; } /* terracotta chaud 40% */
-.tag-season       { background: #E8D5B01A; color: #E8D5B0; } /* beige chaud 10% */
+/* fond = teinte claire, texte = nuance foncée de la même famille */
+.tag-bio          { background: #F2F5EC; color: #5C6B3A; } /* mousse   5.26:1 */
+.tag-detox        { background: #F2F5EC; color: #5C6B3A; } /* mousse   5.26:1 */
+.tag-handmade     { background: #F9EDD9; color: #8B4D03; } /* terracotta 5.74:1 */
+.tag-premium      { background: #F5E9D0; color: #644F2A; } /* or       6.48:1 */
+.tag-neutral      { background: #FAF6EF; color: #4A463E; } /* pierre   8.71:1 */
+.tag-mediteraneen { background: #F9EDD9; color: #8B4D03; } /* terracotta 5.74:1 */
+.tag-season       { background: #F5E9D0; color: #644F2A; } /* or       6.48:1 */
 ```
 
-| Variante | Texte | Fond | Opacité | Exemple |
+| Variante | Texte | Fond | Rapport | Exemple |
 |----------|-------|------|---------|---------|
-| `bio` | #5C6B3A | #5C6B3A | 40% | 100% BIO |
-| `detox` | #5C6B3A | #5C6B3A | 30% | DÉTOX |
-| `handmade` / `new` | #BA6905 | #BA6905 | 40% | HANDMADE |
-| `premium` | #C9A96E | #C9A96E | 30% | PREMIUM |
-| `neutral` | #8A8378 | #8A8378 | 30% | NOUVEAU |
-| `mediteraneen` | #C76C3A | #C76C3A | 40% | MÉDITERRANÉEN |
-| `season` | #E8D5B0 | #E8D5B0 | 10% | SAISON |
+| `bio` | `#5C6B3A` | `#F2F5EC` | 5.26:1 | 100% BIO |
+| `detox` | `#5C6B3A` | `#F2F5EC` | 5.26:1 | DÉTOX |
+| `handmade` / `new` | `#8B4D03` | `#F9EDD9` | 5.74:1 | HANDMADE |
+| `premium` | `#644F2A` | `#F5E9D0` | 6.48:1 | PREMIUM |
+| `neutral` | `#4A463E` | `#FAF6EF` | 8.71:1 | NOUVEAU |
+| `mediteraneen` | `#8B4D03` | `#F9EDD9` | 5.74:1 | MÉDITERRANÉEN |
+| `season` | `#644F2A` | `#F5E9D0` | 6.48:1 | SAISON |
+
+`bio` et `detox` partagent désormais leurs couleurs, de même que `mediteraneen`
+et `handmade` : seule l'opacité les distinguait, et c'est précisément ce qui
+faisait échouer le contraste. Si la distinction visuelle importe, elle doit
+passer par une icône ou un libellé, pas par une nuance de transparence.
 
 ---
 
@@ -270,23 +339,30 @@ Plus gros, rectangulaire avec coins arrondis, avec icônes optionnelles.
 }
 ```
 
-**Règle** : fond = couleur du texte/bordure à 40% d'opacité. Bordure unie de la même couleur. Coins légèrement arrondis (soft 4px).
+**Règle** : fond = **teinte claire** de la famille, texte et bordure = **nuance
+foncée** de la même famille. Coins légèrement arrondis (soft 4px).
+
+> Même correction que pour les tags, et pour la même raison. Les quatre
+> variantes plafonnaient entre **1.66:1** et **3.23:1**. La bordure, elle, doit
+> en outre se détacher du fond de page à 3:1 au titre de WCAG 1.4.11 — ce
+> qu'une bordure de la couleur du texte satisfait sans difficulté dès lors que
+> le texte est assez foncé.
 
 **Variantes**
 ```css
-/* fond = même couleur que bordure/texte, opacité 40% */
-.badge-bio       { border: 1.5px solid #5C6B3A; background: #5C6B3A66; color: #5C6B3A; }
-.badge-handmade  { border: 1.5px solid #BA6905; background: #BA690566; color: #BA6905; }
-.badge-location  { border: 1.5px solid #C9A96E; background: #C9A96E66; color: #C9A96E; }
-.badge-certified { border: 1.5px solid #C76C3A; background: #C76C3A66; color: #C76C3A; }
+/* fond = teinte claire ; texte et bordure = nuance foncée */
+.badge-bio       { border: 1.5px solid #5C6B3A; background: #F2F5EC; color: #5C6B3A; }
+.badge-handmade  { border: 1.5px solid #8B4D03; background: #F9EDD9; color: #8B4D03; }
+.badge-location  { border: 1.5px solid #644F2A; background: #F5E9D0; color: #644F2A; }
+.badge-certified { border: 1.5px solid #8B4D03; background: #F9EDD9; color: #8B4D03; }
 ```
 
-| Variante | Couleur | Exemple |
-|----------|---------|---------|
-| `bio` | #5C6B3A vert mousse | 100% BIO |
-| `handmade` | #BA6905 terracotta | HANDMADE |
-| `location` | #C9A96E or | NICE · 10E BOUTIQUE |
-| `certified` | #C76C3A terracotta chaud | ORIGINE CERTIFIÉE |
+| Variante | Texte et bordure | Fond | Texte / fond | Bordure / page | Exemple |
+|----------|------------------|------|--------------|----------------|---------|
+| `bio` | `#5C6B3A` | `#F2F5EC` | 5.26:1 | 5.80:1 | 100% BIO |
+| `handmade` | `#8B4D03` | `#F9EDD9` | 5.74:1 | 6.64:1 | HANDMADE |
+| `location` | `#644F2A` | `#F5E9D0` | 6.48:1 | 7.80:1 | NICE · 10E BOUTIQUE |
+| `certified` | `#8B4D03` | `#F9EDD9` | 5.74:1 | 6.64:1 | ORIGINE CERTIFIÉE |
 
 ---
 
@@ -408,12 +484,16 @@ reste terracotta deep. Jamais de fond, jamais de bordure, jamais un tag.
 ### Formulaire (jeu-concours)
 
 ```css
+/* La bordure porte var(--color-border-field), pas le beige chaud : celui-ci
+   ne donne que 1.44:1 sur du blanc, quand WCAG 1.4.11 exige 3:1 pour
+   délimiter un champ. Le beige reste réservé aux séparateurs décoratifs, que
+   ce critère ne vise pas. */
 .form-input {
   font-family: var(--font-functional);
   font-size: var(--text-body);
   color: var(--color-text-primary);
   background-color: var(--color-white);
-  border: 1.5px solid var(--color-warm-beige);
+  border: 1.5px solid var(--color-border-field);
   border-radius: var(--radius-soft);
   padding: var(--space-sm) var(--space-md);
   width: 100%;
@@ -589,6 +669,8 @@ Patterns de layout typiques :
 | Radius 999px sur les CTA principaux | Boutons carrés ou trop anguleux |
 | Tutoiement chaleureux dans les UI | Formules corporate froides |
 | Contrastes WCAG AA vérifiés | Texte gris sur fond crème sans vérification |
+| Bordure de champ à 3:1 du fond | Bordure beige, invisible sur du blanc |
+| Pastille : fond clair, texte foncé | Fond et texte de la même teinte, séparés par l'opacité |
 
 ---
 
