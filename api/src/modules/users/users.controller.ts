@@ -162,12 +162,33 @@ export class UsersController {
   // ===========================================
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Supprimer un utilisateur (anonymisation RGPD)' })
+  @ApiOperation({
+    summary: 'Supprimer un utilisateur (anonymisation RGPD)',
+    description:
+      'Un membre du personnel ne peut pas supprimer son propre compte : la demande doit ' +
+      'passer par un autre administrateur.',
+  })
   @ApiResponse({ status: 204, description: 'Utilisateur supprimé' })
+  @ApiResponse({ status: 403, description: 'Un membre du personnel vise son propre compte' })
   @ApiResponse({ status: 404, description: 'Utilisateur non trouvé' })
   async delete(@Param('id') id: string, @CurrentUser() currentUser: User) {
     // Un client ne peut supprimer que son propre compte
     const targetId = currentUser.role === 'CLIENT' ? currentUser.id : id;
+
+    // Un employé ou un administrateur ne se supprime pas lui-même.
+    //
+    // Le droit à l'effacement s'exerce sur un compte de participant, pas sur
+    // une habilitation d'exploitation : un employé emporterait avec lui la
+    // trace des lots qu'il a remis, et le dernier administrateur fermerait la
+    // porte du back-office derrière lui. La demande passe par un autre
+    // administrateur, qui reste libre de l'accorder.
+    if (currentUser.role !== 'CLIENT' && targetId === currentUser.id) {
+      throw new ForbiddenException(
+        'Un compte du personnel ne peut pas être supprimé par son titulaire. ' +
+          'Adressez la demande à un autre administrateur.',
+      );
+    }
+
     await this.usersService.delete(targetId);
   }
 

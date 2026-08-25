@@ -158,6 +158,33 @@ describe('UsersController', () => {
 
       expect(mockUsersService.delete).toHaveBeenCalledWith('u1');
     });
+
+    // Le droit a l'effacement porte sur un compte de participant, pas sur une
+    // habilitation d'exploitation : un employe emporterait la trace des lots
+    // qu'il a remis, et le dernier administrateur fermerait le back-office
+    // derriere lui.
+    it.each([['ADMIN'], ['EMPLOYEE']] as const)(
+      'should refuse a %s deleting their own account',
+      async (role) => {
+        const personnel = { id: 'p1', role } as User;
+
+        await expect(controller.delete('p1', personnel)).rejects.toThrow(ForbiddenException);
+        expect(mockUsersService.delete).not.toHaveBeenCalled();
+      },
+    );
+
+    // Le refus vise le compte, pas le chemin emprunte pour l'atteindre.
+    it('should refuse a client id in the URL when it is the staff account itself', async () => {
+      const employe = { id: 'e1', role: 'EMPLOYEE' } as User;
+
+      await expect(controller.delete('e1', employe)).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should still let a client delete their own account', async () => {
+      await controller.delete('u1', client);
+
+      expect(mockUsersService.delete).toHaveBeenCalledWith('u1');
+    });
   });
 
   it('exportData should scope a client to their own data', async () => {
