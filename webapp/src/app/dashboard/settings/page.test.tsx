@@ -27,17 +27,29 @@ jest.mock('@/lib/api', () => ({
   api: { put: jest.fn(), delete: jest.fn(), get: jest.fn() },
 }));
 
-const utilisateurDeBase = {
+// Le role n'est pas fige : la suppression de compte se comporte differemment
+// selon qu'il s'agit d'un participant ou d'un membre du personnel.
+type Utilisateur = {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: 'CLIENT' | 'EMPLOYEE' | 'ADMIN';
+  createdAt: string;
+  hasPassword?: boolean;
+};
+
+const utilisateurDeBase: Utilisateur = {
   id: 'u1',
   email: 'camille@thetiptop.fr',
   firstName: 'Camille',
   lastName: 'Tran',
-  role: 'CLIENT' as const,
+  role: 'CLIENT',
   createdAt: '2026-01-01T00:00:00.000Z',
 };
 
 // Rejoue à chaque rendu : les tests changent `hasPassword` avant de rendre.
-let utilisateurCourant: typeof utilisateurDeBase & { hasPassword?: boolean };
+let utilisateurCourant: Utilisateur;
 
 jest.mock('@/lib/stores/auth-store', () => ({
   useAuthStore: () => ({
@@ -121,6 +133,33 @@ describe('SettingsPage - bloc mot de passe', () => {
           newPassword: 'Premier123!',
         });
       });
+    });
+  });
+
+  // Le droit a l'effacement porte sur un compte de participant, pas sur une
+  // habilitation d'exploitation. L'API refuse la demande : afficher le bouton
+  // reviendrait a promettre une action vouee a echouer.
+  describe('suppression du compte', () => {
+    it.each([['ADMIN'], ['EMPLOYEE']] as const)(
+      'ne propose pas la suppression a un compte %s',
+      (role) => {
+        utilisateurCourant = { ...utilisateurDeBase, role, hasPassword: true };
+        render(<SettingsPage />);
+
+        expect(
+          screen.queryByRole('button', { name: /Supprimer mon compte/i }),
+        ).not.toBeInTheDocument();
+        expect(screen.getByText(/adressez la demande à un autre administrateur/i)).toBeInTheDocument();
+      },
+    );
+
+    it('la propose a un compte CLIENT', () => {
+      utilisateurCourant = { ...utilisateurDeBase, hasPassword: true };
+      render(<SettingsPage />);
+
+      expect(
+        screen.getByRole('button', { name: /Supprimer mon compte/i }),
+      ).toBeInTheDocument();
     });
   });
 
