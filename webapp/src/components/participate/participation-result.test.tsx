@@ -101,7 +101,14 @@ describe('ParticipationResult', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: /enregistrer/i }));
 
-    await waitFor(() => expect(put).toHaveBeenCalledWith('/users/u1', { password: 'Motdepasse1!' }));
+    // Route dediee, et non PUT /users/:id : la mise a jour de profil refuse le
+    // champ mot de passe pour un compte non administrateur, precisement pour
+    // qu'il ne puisse pas etre change sans connaitre l'actuel. Le test
+    // verrouillait auparavant cet appel, qui echouait donc en 403 des que le
+    // parcours etait joue pour de vrai.
+    await waitFor(() =>
+      expect(put).toHaveBeenCalledWith('/users/u1/password', { newPassword: 'Motdepasse1!' }),
+    );
     await waitFor(() => expect(push).toHaveBeenCalledWith('/dashboard'));
   });
 });

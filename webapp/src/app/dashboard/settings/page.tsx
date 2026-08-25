@@ -32,6 +32,11 @@ export default function SettingsPage() {
   // chargé, mieux vaut demander l'ancien à tort que l'omettre à tort.
   const aUnMotDePasse = user?.hasPassword !== false;
 
+  // Un compte du personnel ne se supprime pas lui-meme : le droit a
+  // l'effacement porte sur un compte de participant, pas sur une habilitation
+  // d'exploitation. L'API le refuse ; l'interface n'a donc pas a le proposer.
+  const estPersonnel = user?.role === 'ADMIN' || user?.role === 'EMPLOYEE';
+
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       router.push('/auth/login');
@@ -304,24 +309,38 @@ export default function SettingsPage() {
             {/* --- Suppression --- */}
             <section className="mt-8 border-t border-warm-beige pt-6">
               <h2 className="font-display text-h3 text-noir">Supprimer mon compte</h2>
-              <p className="mt-1 text-sm text-stone-grey">
-                Vos données personnelles seront anonymisées. Les participations déjà
-                enregistrées sont conservées de façon anonyme, le règlement du jeu-concours
-                imposant de pouvoir justifier des tirages auprès de l&apos;huissier.
-              </p>
 
-              <button
-                onClick={handleDeleteAccount}
-                disabled={isDeleting}
-                className="mt-4 flex items-center gap-2 rounded-full border-[1.5px] border-red-700 px-6 py-2 font-functional text-ui font-bold uppercase tracking-[2px] text-red-700 transition-colors hover:bg-red-700 hover:text-white disabled:opacity-50"
-              >
-                {isDeleting ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Trash2 className="h-4 w-4" strokeWidth={1.5} />
-                )}
-                Supprimer mon compte
-              </button>
+              {estPersonnel ? (
+                // L'API refuse cette suppression : afficher le bouton
+                // reviendrait a promettre une action vouee a echouer. On
+                // explique plutot la marche a suivre.
+                <p className="mt-1 text-sm text-stone-grey">
+                  Votre compte donne accès au back-office : il ne peut pas être supprimé depuis
+                  cet écran. Adressez la demande à un autre administrateur, qui procédera à la
+                  suppression.
+                </p>
+              ) : (
+                <>
+                  <p className="mt-1 text-sm text-stone-grey">
+                    Vos données personnelles seront anonymisées. Les participations déjà
+                    enregistrées sont conservées de façon anonyme, le règlement du jeu-concours
+                    imposant de pouvoir justifier des tirages auprès de l&apos;huissier.
+                  </p>
+
+                  <button
+                    onClick={handleDeleteAccount}
+                    disabled={isDeleting}
+                    className="mt-4 flex items-center gap-2 rounded-full border-[1.5px] border-red-700 px-6 py-2 font-functional text-ui font-bold uppercase tracking-[2px] text-red-700 transition-colors hover:bg-red-700 hover:text-white disabled:opacity-50"
+                  >
+                    {isDeleting ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+                    )}
+                    Supprimer mon compte
+                  </button>
+                </>
+              )}
             </section>
           </main>
         </div>

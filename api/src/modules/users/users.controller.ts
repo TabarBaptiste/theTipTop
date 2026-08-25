@@ -95,8 +95,11 @@ export class UsersController {
     @Body() dto: UpdateUserDto,
     @CurrentUser() currentUser: User,
   ) {
-    // Un client ne peut modifier que son propre profil
-    const targetId = currentUser.role === 'CLIENT' ? currentUser.id : id;
+    // Seul un administrateur agit sur le compte d'autrui. Le motif precedent
+    // - « client ? soi : id » - rangeait l'employe avec l'administrateur, ce
+    // qui lui laissait modifier n'importe quel profil, y compris celui d'un
+    // administrateur, dont l'adresse de connexion.
+    const targetId = currentUser.role === 'ADMIN' ? id : currentUser.id;
 
     // L'adresse identifie le compte et sert à la connexion. La laisser changer
     // sans revérification permettrait, depuis une session ouverte, de basculer
@@ -105,7 +108,7 @@ export class UsersController {
     //
     // Refus explicite plutôt que retrait silencieux du champ : ignorer l'envoi
     // renverrait un 200 laissant croire au changement.
-    if (currentUser.role === 'CLIENT' && dto.email !== undefined) {
+    if (currentUser.role !== 'ADMIN' && dto.email !== undefined) {
       throw new ForbiddenException(
         "L'adresse e-mail ne peut pas être modifiée depuis votre profil.",
       );
@@ -115,7 +118,7 @@ export class UsersController {
     // changer sans connaître l'actuel, donc de verrouiller le compte hors de
     // son titulaire depuis une session ouverte. Le passage obligé est
     // PUT :id/password, qui exige le mot de passe en cours.
-    if (currentUser.role === 'CLIENT' && dto.password !== undefined) {
+    if (currentUser.role !== 'ADMIN' && dto.password !== undefined) {
       throw new ForbiddenException(
         'Utilisez le changement de mot de passe dédié, qui exige le mot de passe actuel.',
       );
@@ -162,12 +165,33 @@ export class UsersController {
   // ===========================================
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Supprimer un utilisateur (anonymisation RGPD)' })
+  @ApiOperation({
+    summary: 'Supprimer un utilisateur (anonymisation RGPD)',
+    description:
+      'Un membre du personnel ne peut pas supprimer son propre compte : la demande doit ' +
+      'passer par un autre administrateur.',
+  })
   @ApiResponse({ status: 204, description: 'Utilisateur supprimé' })
+  @ApiResponse({ status: 403, description: 'Un membre du personnel vise son propre compte' })
   @ApiResponse({ status: 404, description: 'Utilisateur non trouvé' })
   async delete(@Param('id') id: string, @CurrentUser() currentUser: User) {
-    // Un client ne peut supprimer que son propre compte
-    const targetId = currentUser.role === 'CLIENT' ? currentUser.id : id;
+    // Seul un administrateur supprime le compte d'autrui.
+    const targetId = currentUser.role === 'ADMIN' ? id : currentUser.id;
+
+    // Un employé ou un administrateur ne se supprime pas lui-même.
+    //
+    // Le droit à l'effacement s'exerce sur un compte de participant, pas sur
+    // une habilitation d'exploitation : un employé emporterait avec lui la
+    // trace des lots qu'il a remis, et le dernier administrateur fermerait la
+    // porte du back-office derrière lui. La demande passe par un autre
+    // administrateur, qui reste libre de l'accorder.
+    if (currentUser.role !== 'CLIENT' && targetId === currentUser.id) {
+      throw new ForbiddenException(
+        'Un compte du personnel ne peut pas être supprimé par son titulaire. ' +
+          'Adressez la demande à un autre administrateur.',
+      );
+    }
+
     await this.usersService.delete(targetId);
   }
 
@@ -178,7 +202,10 @@ export class UsersController {
   @ApiOperation({ summary: 'Exporter les données personnelles (RGPD)' })
   @ApiResponse({ status: 200, description: 'Données exportées' })
   async exportData(@Param('id') id: string, @CurrentUser() currentUser: User) {
-    const targetId = currentUser.role === 'CLIENT' ? currentUser.id : id;
+    // L'export livre le dossier personnel complet - identite, telephone, date
+    // de naissance, genre, consentements, participations et tickets. Seul un
+    // administrateur peut l'obtenir pour autrui.
+    const targetId = currentUser.role === 'ADMIN' ? id : currentUser.id;
     return this.usersService.exportData(targetId);
   }
 
