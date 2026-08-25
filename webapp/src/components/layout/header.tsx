@@ -121,7 +121,7 @@ export function Header() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-600"
+                      className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-white active:bg-terracotta-600 active:text-white"
                     >
                       <AccountIcon className="h-4 w-4" strokeWidth={1.5} />
                       {user?.firstName || 'Mon compte'}
@@ -226,7 +226,7 @@ export function Header() {
                     <Button asChild variant="outline" className="w-full">
                       <Link
                         href={isStaff ? backofficeHref : '/dashboard'}
-                        className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-600"
+                        className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-white active:bg-terracotta-600 active:text-white"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         {isStaff ? (
@@ -240,7 +240,7 @@ export function Header() {
                     <Button asChild variant="outline" className="w-full">
                       <Link
                         href="/dashboard/profile"
-                        className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-terracotta-600"
+                        className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-white active:bg-terracotta-600 active:text-white"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         <User className="h-4 w-4" strokeWidth={1.5} />
