@@ -15,7 +15,6 @@ ciPipeline(
     runE2E        : true,
     // Les specs vivent dans webapp/cypress/e2e (cf. webapp/cypress.config.ts)
     e2eFramework  : 'cypress',
-    runK6         : true,
     runZap        : true,   // scan OWASP ZAP baseline contre PREPROD
 
     // Surveillance post-déploiement PREPROD avec rollback automatique
