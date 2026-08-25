@@ -22,6 +22,7 @@ describe('UsersController', () => {
 
   const client = { id: 'u1', role: 'CLIENT' } as User;
   const admin = { id: 'a1', role: 'ADMIN' } as User;
+  const employe = { id: 'e1', role: 'EMPLOYEE' } as User;
   const storedUser = {
     id: 'u1',
     email: 'jean@email.fr',
@@ -118,6 +119,27 @@ describe('UsersController', () => {
         email: 'nouvelle@thetiptop.fr',
       });
     });
+
+    // Le motif « client ? soi : id » rangeait l'employe avec l'administrateur :
+    // il pouvait modifier n'importe quel profil, dont celui d'un
+    // administrateur, et donc son adresse de connexion.
+    it('should force an employee back onto their own profile', async () => {
+      mockUsersService.update.mockResolvedValue(storedUser);
+
+      await controller.update('autre-id', { firstName: 'Jean' }, employe);
+
+      expect(mockUsersService.update).toHaveBeenCalledWith('e1', { firstName: 'Jean' });
+    });
+
+    // L'adresse est l'identifiant de connexion : le risque de reprise de compte
+    // depuis une session ouverte ne depend pas du role de qui la change.
+    it('should refuse an email change requested by an employee', async () => {
+      await expect(
+        controller.update('e1', { email: 'pirate@example.com' }, employe),
+      ).rejects.toThrow(ForbiddenException);
+
+      expect(mockUsersService.update).not.toHaveBeenCalled();
+    });
   });
 
   describe('changePassword', () => {
@@ -174,10 +196,16 @@ describe('UsersController', () => {
     );
 
     // Le refus vise le compte, pas le chemin emprunte pour l'atteindre.
-    it('should refuse a client id in the URL when it is the staff account itself', async () => {
-      const employe = { id: 'e1', role: 'EMPLOYEE' } as User;
-
+    it('should refuse a staff account whichever id the URL carries', async () => {
       await expect(controller.delete('e1', employe)).rejects.toThrow(ForbiddenException);
+    });
+
+    // Consequence des deux regles combinees : ramene sur son propre compte,
+    // puis refuse parce que c'est un compte du personnel, un employe ne peut
+    // supprimer aucun compte - ni le sien, ni celui d'autrui.
+    it('should leave an employee unable to delete any account', async () => {
+      await expect(controller.delete('autre-id', employe)).rejects.toThrow(ForbiddenException);
+      expect(mockUsersService.delete).not.toHaveBeenCalled();
     });
 
     it('should still let a client delete their own account', async () => {
@@ -185,6 +213,24 @@ describe('UsersController', () => {
 
       expect(mockUsersService.delete).toHaveBeenCalledWith('u1');
     });
+  });
+
+  // L'export livre identite, telephone, date de naissance, genre, consentements
+  // et participations. Un employe n'y accede que pour son propre compte.
+  it('exportData should scope an employee to their own data', async () => {
+    mockUsersService.exportData.mockResolvedValue({});
+
+    await controller.exportData('autre-id', employe);
+
+    expect(mockUsersService.exportData).toHaveBeenCalledWith('e1');
+  });
+
+  it('exportData should let an admin export any account', async () => {
+    mockUsersService.exportData.mockResolvedValue({});
+
+    await controller.exportData('autre-id', admin);
+
+    expect(mockUsersService.exportData).toHaveBeenCalledWith('autre-id');
   });
 
   it('exportData should scope a client to their own data', async () => {
