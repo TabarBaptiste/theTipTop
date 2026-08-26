@@ -2,9 +2,6 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Search, Gift, CheckCircle, Loader2, Package, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -16,12 +13,6 @@ import { Pagination } from '@/components/ui/pagination';
 import { DeliveredPrizesList } from '@/components/gains/delivered-prizes-list';
 import { api } from '@/lib/api';
 import { formatDateTime } from '@/lib/utils';
-
-const searchSchema = z.object({
-  code: z.string().length(10, 'Le code doit contenir 10 caractères'),
-});
-
-type SearchFormData = z.infer<typeof searchSchema>;
 
 const PAGE_SIZE = 20;
 
@@ -85,7 +76,7 @@ export default function EmployeePage() {
   // Deux états distincts : la saisie en cours, et le terme effectivement
   // soumis. Interroger l'API à chaque frappe multiplierait les requêtes sur une
   // recherche qui balaie trois colonnes.
-  const [clientInput, setClientInput] = useState('');
+  const [terme, setTerme] = useState('');
   const [clientQuery, setClientQuery] = useState('');
 
   const { data: clientResults, isFetching: clientsLoading } = useQuery<{
@@ -101,15 +92,6 @@ export default function EmployeePage() {
 
   const clients = clientResults?.data ?? [];
   const clientTotal = clientResults?.total ?? 0;
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = useForm<SearchFormData>({
-    resolver: zodResolver(searchSchema),
-  });
 
   // Lots en attente. La réponse est paginée : sans page ni limite explicites,
   // l'API en renvoyait 20 et tous les suivants restaient hors d'atteinte.
@@ -155,15 +137,30 @@ export default function EmployeePage() {
       // invalidation, l'historique restait figé jusqu'au rechargement.
       queryClient.invalidateQueries({ queryKey: ['delivered-prizes'] });
       setSearchResult(null);
-      reset();
+      setTerme('');
+      setClientQuery('');
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Erreur lors de la remise');
     },
   });
 
-  const onSearch = (data: SearchFormData) => {
-    searchMutation.mutate(data.code);
+  // Un code fait dix caracteres alphanumeriques, sans espace ni arobase. Une
+  // saisie de dix lettres pouvant aussi etre un nom, les deux recherches
+  // partent dans ce cas plutot que d'arbitrer a la place de l'employe.
+  const ressembleAUnCode = (valeur: string) => /^[A-Za-z0-9]{10}$/.test(valeur);
+
+  const onSearch = (event: React.FormEvent) => {
+    event.preventDefault();
+    const valeur = terme.trim();
+    if (valeur.length < 2) return;
+
+    setSearchResult(null);
+
+    if (ressembleAUnCode(valeur)) {
+      searchMutation.mutate(valeur.toUpperCase());
+    }
+    setClientQuery(valeur);
   };
 
   return (
@@ -179,45 +176,56 @@ export default function EmployeePage() {
         </div>
 
         <div className="grid gap-8 lg:grid-cols-2">
-          {/* Recherche par code */}
-          <Card>
+          {/* Recherche unique.
+
+              L'employé au comptoir n'a qu'une tâche : retrouver le lot d'un
+              client. Le code et le nom ne sont que deux portes vers ce même
+              but. Deux blocs distincts l'obligeaient à choisir sa porte avant
+              de chercher, c'est-à-dire à porter une distinction qui relève de
+              notre implémentation et non de son métier - alors qu'il sait
+              seulement ce que le client lui tend.
+
+              Un champ unique donc, et c'est la saisie qui décide : ce qui a la
+              forme d'un code interroge le ticket, le reste cherche parmi les
+              clients. Une saisie de dix lettres pouvant être l'un ou l'autre,
+              les deux recherches partent alors et les deux résultats
+              s'affichent. */}
+          <Card className="lg:col-span-2">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Search className="h-5 w-5" />
-                Rechercher un code
+                Rechercher
               </CardTitle>
               <CardDescription>
-                Entrez le code du ticket pour vérifier et remettre le lot
+                Un code de ticket, ou le nom, prénom ou e-mail du client s&apos;il ne l&apos;a pas
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form noValidate onSubmit={handleSubmit(onSearch)} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="code">Code du ticket</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="code"
-                      placeholder="ABC123DEF4"
-                      className="flex-1 text-center tracking-wider"
-                      maxLength={10}
-                      {...register('code', {
-                        onChange: (e) => {
-                          e.target.value = e.target.value.toUpperCase();
-                        },
-                      })}
-                    />
-                    <Button type="submit" disabled={searchMutation.isPending}>
-                      {searchMutation.isPending ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Search className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                  {errors.code && (
-                    <p className="text-sm text-red-500">{errors.code.message}</p>
-                  )}
+              <form noValidate onSubmit={onSearch} className="space-y-2">
+                <Label htmlFor="recherche">Code, nom ou e-mail</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="recherche"
+                    placeholder="ABC123DEF4, Dupont, jean@email.fr…"
+                    className="flex-1"
+                    value={terme}
+                    onChange={(e) => setTerme(e.target.value)}
+                  />
+                  <Button
+                    type="submit"
+                    disabled={terme.trim().length < 2 || searchMutation.isPending}
+                  >
+                    {searchMutation.isPending || clientsLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Search className="h-4 w-4" />
+                    )}
+                  </Button>
                 </div>
+                <p className="text-sm text-stone-grey">
+                  Un code comporte dix caractères. Toute autre saisie est cherchée parmi les
+                  clients.
+                </p>
               </form>
 
               {/* Résultat de recherche */}
@@ -299,6 +307,52 @@ export default function EmployeePage() {
                   )}
                 </div>
               )}
+
+              {/* Clients correspondants, sous le ticket : les deux reponses a
+                  une meme recherche se lisent d'affilee. */}
+              {clientQuery && !clientsLoading && (
+                <div className="mt-6">
+                  {clients.length === 0 ? (
+                    !searchResult && (
+                      <p className="text-sm text-stone-grey">
+                        Aucun résultat pour « {clientQuery} ».
+                      </p>
+                    )
+                  ) : (
+                    <>
+                      <h3 className="font-functional text-ui uppercase tracking-[2px] text-stone-grey">
+                        Clients correspondants
+                      </h3>
+                      <ul className="mt-3 space-y-3">
+                        {clients.map((client) => (
+                          <li
+                            key={client.id}
+                            className="flex items-center justify-between rounded-lg border border-gold-400 bg-white p-3"
+                          >
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate font-medium">
+                                {client.firstName} {client.lastName}
+                              </p>
+                              <p className="truncate text-sm text-stone-grey">{client.email}</p>
+                            </div>
+                            <p className="ml-4 shrink-0 text-sm text-stone-grey">
+                              {client._count.participations}{' '}
+                              {client._count.participations > 1 ? 'participations' : 'participation'}
+                            </p>
+                          </li>
+                        ))}
+                      </ul>
+
+                      {clientTotal > clients.length && (
+                        <p className="mt-3 text-sm text-stone-grey">
+                          {clients.length} résultats affichés sur {clientTotal}. Affinez votre
+                          recherche.
+                        </p>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -373,88 +427,6 @@ export default function EmployeePage() {
             </CardContent>
           </Card>
 
-          {/* Recherche d'un client, sur toute la largeur pour les mêmes
-              raisons que l'historique. */}
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                Rechercher un client
-              </CardTitle>
-              <CardDescription>
-                Par nom, prénom ou adresse e-mail, lorsque le client n&apos;a pas son code
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form
-                noValidate
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  setClientQuery(clientInput.trim());
-                }}
-                className="space-y-2"
-              >
-                <Label htmlFor="client-search">Nom, prénom ou e-mail</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="client-search"
-                    placeholder="Dupont, jean@email.fr…"
-                    className="flex-1"
-                    value={clientInput}
-                    onChange={(e) => setClientInput(e.target.value)}
-                  />
-                  <Button type="submit" disabled={clientInput.trim().length < 2}>
-                    {clientsLoading ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Search className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-              </form>
-
-              {clientQuery && !clientsLoading && (
-                <div className="mt-6">
-                  {clients.length === 0 ? (
-                    <p className="text-sm text-stone-grey">
-                      Aucun client ne correspond à « {clientQuery} ».
-                    </p>
-                  ) : (
-                    <>
-                      <ul className="space-y-3">
-                        {clients.map((client) => (
-                          <li
-                            key={client.id}
-                            className="flex items-center justify-between rounded-lg border border-gold-400 bg-white p-3"
-                          >
-                            <div className="min-w-0 flex-1">
-                              <p className="truncate font-medium">
-                                {client.firstName} {client.lastName}
-                              </p>
-                              <p className="truncate text-sm text-stone-grey">{client.email}</p>
-                            </div>
-                            <p className="ml-4 shrink-0 text-sm text-stone-grey">
-                              {client._count.participations}{' '}
-                              {client._count.participations > 1 ? 'participations' : 'participation'}
-                            </p>
-                          </li>
-                        ))}
-                      </ul>
-
-                      {/* Sans ce rappel, l'employe croirait avoir tout vu alors
-                          que sa recherche est trop large. */}
-                      {clientTotal > clients.length && (
-                        <p className="mt-3 text-sm text-stone-grey">
-                          {clients.length} résultats affichés sur {clientTotal}. Affinez votre
-                          recherche.
-                        </p>
-                      )}
-                    </>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
 
           {/* Historique des remises, sur toute la largeur : une liste paginée
               respire mal dans une demi-colonne. */}
