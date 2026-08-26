@@ -291,7 +291,11 @@ export default function EmployeePage() {
                   {pendingDeliveries.map((delivery) => (
                     <div
                       key={delivery.id}
-                      className="flex items-center justify-between rounded-lg border p-3 hover:bg-gray-50"
+                      // Fond blanc au repos, et non seulement au survol : sans
+                      // lui, la carte se confondait avec le fond de la liste et
+                      // ne se distinguait qu'au passage de la souris - donc
+                      // jamais sur un écran tactile.
+                      className="flex items-center justify-between rounded-lg border bg-white p-3 hover:bg-cream"
                     >
                       <div className="min-w-0 flex-1">
                         <p className="truncate font-medium">
