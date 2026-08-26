@@ -66,6 +66,15 @@ describe('Footer', () => {
     );
   });
 
+  // Le plan du site n'a d'utilite que s'il est atteignable : sans ce lien, il
+  // resterait une page orpheline, connue des seuls moteurs.
+  it('links to the human-readable sitemap', () => {
+    expect(screen.getByRole('link', { name: 'Plan du site' })).toHaveAttribute(
+      'href',
+      '/plan-du-site'
+    );
+  });
+
   it('shows the current year in the copyright', () => {
     const year = new Date().getFullYear().toString();
     expect(screen.getByText(new RegExp(year))).toBeInTheDocument();
