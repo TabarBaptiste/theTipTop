@@ -21,10 +21,20 @@ const buttonVariants = cva(
         link:
           'text-terracotta-600 underline-offset-4 hover:underline normal-case tracking-normal font-semibold',
       },
+      // Les libellés restaient à 11 px quelle que soit la taille : un « lg » ne
+      // se distinguait d'un « default » que par 8 px de hauteur, trop peu pour
+      // hiérarchiser deux actions côte à côte. La taille du texte varie
+      // désormais avec celle du bouton, ce qui creuse l'écart.
       size: {
-        default: 'h-10 px-8 py-3 text-ui',
+        // 44 px : la cible tactile recommandée, que les 40 px précédents
+        // n'atteignaient pas.
+        default: 'h-11 px-8 py-3 text-ui',
         sm: 'h-9 px-6 py-2 text-ui',
-        lg: 'h-12 px-10 py-3 text-ui',
+        lg: 'h-14 px-10 py-3 text-[13px]',
+        // Réservé à l'action principale d'un écran : une seule par vue.
+        // Le libellé ne se coupe pas (whitespace-nowrap) : sur les écrans
+        // étroits, c'est la marge intérieure qui cède.
+        xl: 'h-16 px-8 sm:px-12 py-4 text-[15px]',
         icon: 'h-10 w-10',
       },
     },
