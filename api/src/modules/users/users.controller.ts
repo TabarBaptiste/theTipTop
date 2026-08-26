@@ -55,6 +55,36 @@ export class UsersController {
   }
 
   // ===========================================
+  // RECHERCHE D'UN CLIENT (comptoir)
+  // ===========================================
+  // Declaree avant @Get(':id'), qui l'absorberait sinon : « search » serait
+  // pris pour un identifiant.
+  @Get('search')
+  @Roles('EMPLOYEE', 'ADMIN')
+  @ApiOperation({
+    summary: 'Rechercher un client par nom, prénom ou adresse',
+    description:
+      'Destinee au comptoir : ne rend que de quoi identifier une personne venue retirer ' +
+      'son lot. Bornee aux comptes clients, et limitee aux dix premieres correspondances - ' +
+      '`total` indique combien la recherche en compte au total.',
+  })
+  @ApiQuery({ name: 'q', required: true, type: String, description: 'Deux caractères minimum' })
+  @ApiResponse({
+    status: 200,
+    description: 'Clients correspondants',
+    schema: {
+      properties: {
+        data: { type: 'array', items: { type: 'object' } },
+        total: { type: 'number' },
+      },
+    },
+  })
+  @ApiResponse({ status: 403, description: 'Réservé au personnel' })
+  async searchClients(@Query('q') q?: string) {
+    return this.usersService.searchClients(q ?? '');
+  }
+
+  // ===========================================
   // DÉTAIL D'UN UTILISATEUR
   // ===========================================
   @Get(':id')
