@@ -14,7 +14,7 @@ import { LEGAL_UPDATED_AT } from '@/lib/legal-dates';
  * crawl par robots.txt, et les référencer ici serait contradictoire.
  */
 const BASE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || 'https://thetiptop.dsp5-archi-o24a-4-5-g1.fr';
+  process.env.NEXT_PUBLIC_SITE_URL || 'https://dsp5-archi-o24a-4-5-g1.fr';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [

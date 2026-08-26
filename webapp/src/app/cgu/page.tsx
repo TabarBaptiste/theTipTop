@@ -115,7 +115,7 @@ export default function CGUPage() {
               </h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
                 <p>
-                  Le site internet <strong>thetiptop.dsp5-archi-o24a-4-5-g1.fr</strong>{' '}
+                  Le site internet <strong>dsp5-archi-o24a-4-5-g1.fr</strong>{' '}
                   (ci-après « le Site ») est édité par la société <strong>Thé Tip Top</strong>,
                   Société Anonyme au capital social de 150 000€, entreprise spécialisée dans la
                   vente de thés biologiques et fait main.
