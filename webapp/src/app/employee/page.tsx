@@ -25,6 +25,16 @@ type SearchFormData = z.infer<typeof searchSchema>;
 
 const PAGE_SIZE = 20;
 
+// Réponse de GET /users/search : le strict nécessaire pour identifier une
+// personne au comptoir.
+interface ClientMatch {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  _count: { participations: number };
+}
+
 // Réponse de GET /gains/pending (structure plate)
 interface PendingDelivery {
   id: string;
@@ -71,6 +81,26 @@ export default function EmployeePage() {
   const queryClient = useQueryClient();
   const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
   const [pendingPage, setPendingPage] = useState(1);
+
+  // Deux états distincts : la saisie en cours, et le terme effectivement
+  // soumis. Interroger l'API à chaque frappe multiplierait les requêtes sur une
+  // recherche qui balaie trois colonnes.
+  const [clientInput, setClientInput] = useState('');
+  const [clientQuery, setClientQuery] = useState('');
+
+  const { data: clientResults, isFetching: clientsLoading } = useQuery<{
+    data: ClientMatch[];
+    total: number;
+  }>({
+    queryKey: ['client-search', clientQuery],
+    queryFn: async () => (await api.get('/users/search', { params: { q: clientQuery } })).data,
+    // Le service refuse déjà les termes trop courts ; ne pas l'appeler du tout
+    // évite un aller-retour inutile.
+    enabled: clientQuery.trim().length >= 2,
+  });
+
+  const clients = clientResults?.data ?? [];
+  const clientTotal = clientResults?.total ?? 0;
 
   const {
     register,
@@ -339,6 +369,89 @@ export default function EmployeePage() {
                   onPageChange={setPendingPage}
                   label="lots en attente"
                 />
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Recherche d'un client, sur toute la largeur pour les mêmes
+              raisons que l'historique. */}
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="h-5 w-5" />
+                Rechercher un client
+              </CardTitle>
+              <CardDescription>
+                Par nom, prénom ou adresse e-mail, lorsque le client n&apos;a pas son code
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form
+                noValidate
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  setClientQuery(clientInput.trim());
+                }}
+                className="space-y-2"
+              >
+                <Label htmlFor="client-search">Nom, prénom ou e-mail</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="client-search"
+                    placeholder="Dupont, jean@email.fr…"
+                    className="flex-1"
+                    value={clientInput}
+                    onChange={(e) => setClientInput(e.target.value)}
+                  />
+                  <Button type="submit" disabled={clientInput.trim().length < 2}>
+                    {clientsLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Search className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+              </form>
+
+              {clientQuery && !clientsLoading && (
+                <div className="mt-6">
+                  {clients.length === 0 ? (
+                    <p className="text-sm text-stone-grey">
+                      Aucun client ne correspond à « {clientQuery} ».
+                    </p>
+                  ) : (
+                    <>
+                      <ul className="space-y-3">
+                        {clients.map((client) => (
+                          <li
+                            key={client.id}
+                            className="flex items-center justify-between rounded-lg border border-gold-400 bg-white p-3"
+                          >
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate font-medium">
+                                {client.firstName} {client.lastName}
+                              </p>
+                              <p className="truncate text-sm text-stone-grey">{client.email}</p>
+                            </div>
+                            <p className="ml-4 shrink-0 text-sm text-stone-grey">
+                              {client._count.participations}{' '}
+                              {client._count.participations > 1 ? 'participations' : 'participation'}
+                            </p>
+                          </li>
+                        ))}
+                      </ul>
+
+                      {/* Sans ce rappel, l'employe croirait avoir tout vu alors
+                          que sa recherche est trop large. */}
+                      {clientTotal > clients.length && (
+                        <p className="mt-3 text-sm text-stone-grey">
+                          {clients.length} résultats affichés sur {clientTotal}. Affinez votre
+                          recherche.
+                        </p>
+                      )}
+                    </>
+                  )}
+                </div>
               )}
             </CardContent>
           </Card>
