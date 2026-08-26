@@ -58,6 +58,16 @@ export function PrizesSection() {
         <p className="mt-2 text-sm text-stone">
           100% des tickets sont gagnants
         </p>
+        {/* Sans ce rappel, ces cinq lots passent pour tout ce qu'il y a à
+            gagner : la section ne mentionnait pas le tirage, alors que la page
+            s'organise autour de lui. */}
+        <p className="mt-2 text-sm text-stone">
+          Et au-dessus de ces lots,{' '}
+          <a href="#grand-prize" className="text-terracotta-600 underline underline-offset-2">
+            le tirage au sort d&apos;un an de thé
+          </a>
+          , auquel chaque participation vous inscrit.
+        </p>
 
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {isLoading &&
