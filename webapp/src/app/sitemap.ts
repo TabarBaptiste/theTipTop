@@ -48,6 +48,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.6,
     },
     {
+      // Plan du site destiné aux visiteurs. Il évolue avec les pages qu'il
+      // recense, donc au même rythme qu'elles.
+      url: `${BASE_URL}/plan-du-site`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.4,
+    },
+    {
       url: `${BASE_URL}/cgu`,
       lastModified: LEGAL_UPDATED_AT.cgu,
       changeFrequency: 'yearly',
