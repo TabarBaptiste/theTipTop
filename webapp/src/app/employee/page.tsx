@@ -137,13 +137,13 @@ export default function EmployeePage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-gray-50 py-8">
+    <div className="min-h-[calc(100vh-5rem)] bg-cream py-8">
       <div className="container mx-auto px-4">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-noir">
             Espace Employé
           </h1>
-          <p className="mt-2 text-gray-600">
+          <p className="mt-2 text-stone-grey">
             Gérez la remise des lots aux participants
           </p>
         </div>
@@ -198,18 +198,18 @@ export default function EmployeePage() {
                       <div className="flex items-start justify-between">
                         <div>
                           <div className="flex items-center gap-2">
-                            <User className="h-4 w-4 text-gray-400" />
+                            <User className="h-4 w-4 text-stone-grey" />
                             <span className="font-medium">
                               {searchResult.participation.user.firstName}{' '}
                               {searchResult.participation.user.lastName}
                             </span>
                           </div>
-                          <p className="mt-1 text-sm text-gray-500">
+                          <p className="mt-1 text-sm text-stone-grey">
                             {searchResult.participation.user.email}
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm text-stone-grey">
                             Code : {searchResult.ticket.code}
                           </p>
                           {searchResult.participation.prizeDelivered && (
@@ -259,7 +259,7 @@ export default function EmployeePage() {
                     </>
                   ) : (
                     <div className="py-4 text-center">
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-stone-grey">
                         Ce code existe mais n&apos;a pas encore été utilisé par un client.
                       </p>
                       <p className="mt-1 text-sm font-medium text-tea-600">
@@ -295,13 +295,13 @@ export default function EmployeePage() {
                       // lui, la carte se confondait avec le fond de la liste et
                       // ne se distinguait qu'au passage de la souris - donc
                       // jamais sur un écran tactile.
-                      className="flex items-center justify-between rounded-lg border bg-white p-3 hover:bg-cream"
+                      className="flex items-center justify-between rounded-lg border border-gold-400 bg-white p-3 hover:bg-cream"
                     >
                       <div className="min-w-0 flex-1">
                         <p className="truncate font-medium">
                           {delivery.user.firstName} {delivery.user.lastName}
                         </p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-stone-grey">
                           {delivery.code}
                         </p>
                       </div>
@@ -325,7 +325,7 @@ export default function EmployeePage() {
               ) : (
                 <div className="py-8 text-center">
                   <CheckCircle className="mx-auto h-12 w-12 text-emerald-300" />
-                  <p className="mt-4 text-gray-500">
+                  <p className="mt-4 text-stone-grey">
                     Aucun lot en attente de remise
                   </p>
                 </div>
