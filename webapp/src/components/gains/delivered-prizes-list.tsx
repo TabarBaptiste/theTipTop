@@ -9,7 +9,11 @@ import { Pagination } from '@/components/ui/pagination';
 import { api } from '@/lib/api';
 import { formatDateTime } from '@/lib/utils';
 
-const PAGE_SIZE = 20;
+// Dix par page plutot que vingt : au-dela, la liste devient longue a
+// parcourir dans une carte du tableau de bord, et la pagination ne se
+// declenchait qu'a partir d'un volume que l'exploitation n'atteint pas
+// forcement.
+const PAGE_SIZE = 10;
 
 const DELIVERY_METHOD_LABELS: Record<string, string> = {
   IN_STORE: 'En boutique',
