@@ -144,6 +144,98 @@
   }
 }
 
+/* La vapeur monte, s'elargit et se dissipe. Les trois volutes partagent cette
+   animation et se decalent par animation-delay : sans decalage, elles
+   monteraient au meme rythme et se liraient comme un seul bloc. */
+.animate-vapeur {
+  animation: vapeur 4.5s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+@keyframes vapeur {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scaleX(0.9);
+  }
+  20% {
+    opacity: 0.55;
+  }
+  65% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-42px) scaleX(1.45);
+  }
+}
+
+/* La chute est decoupee en deux animations portees par deux elements
+   imbriques : la descente, reguliere, et le balancement lateral, qui a son
+   propre rythme. Reunies sur un seul element, elles se remplaceraient l'une
+   l'autre - une seule propriete transform - et la feuille tomberait droit. */
+.animate-chute {
+  animation-name: chute;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes chute {
+  from {
+    transform: translate3d(0, -14vh, 0);
+  }
+  to {
+    transform: translate3d(0, 104vh, 0);
+  }
+}
+
+.animate-balancement {
+  animation-name: balancement;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+@keyframes balancement {
+  from {
+    transform: translateX(-18px) rotate(-30deg);
+  }
+  to {
+    transform: translateX(18px) rotate(32deg);
+  }
+}
+
+/* Les feuilles du tas se posent une a une. On anime « translate » et non
+   « transform » : chaque feuille porte deja son inclinaison sur la propriete
+   « rotate », que transform ecraserait. */
+.animate-atterrissage {
+  animation: atterrissage 0.9s ease-out both;
+}
+
+@keyframes atterrissage {
+  from {
+    opacity: 0;
+    translate: 0 -30px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+/* Toute animation decorative de ce fichier tourne en boucle. Sans cette regle,
+   elle ne s'arreterait jamais pour qui a demande moins de mouvement - un
+   reglage souvent pose pour cause de vertiges ou de migraines. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* Motifs decoratifs DESIGN.md */
 .pattern-overlay {
   opacity: 0.12;

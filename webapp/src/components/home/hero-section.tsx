@@ -1,8 +1,7 @@
-import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { Leaf, Ticket, ShieldCheck } from 'lucide-react';
-import tassesHeroImg from '@/img/tasses_hero.webp';
 import { HeroCTAButtons } from '@/components/home/hero-cta-buttons';
+import { SteamingCup } from '@/components/home/steaming-cup';
 
 export function HeroSection() {
   return (
@@ -53,17 +52,12 @@ export function HeroSection() {
             <HeroCTAButtons />
           </div>
 
-          {/* Hero image */}
-          <div className="relative mx-auto aspect-[4/3] w-full max-w-lg overflow-hidden rounded-card lg:max-w-none">
-            <Image
-              src={tassesHeroImg}
-              alt="Tasses de thé Tip Top"
-              fill
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-cover"
-              priority
-              quality={90}
-            />
+          {/* La photo d'un service à thé japonais tenait cette place : elle
+              montrait un produit, là où un jeu-concours doit accrocher. La
+              tasse illustrée fume vraiment, ce qu'aucune de nos photos ne
+              permettait - toutes sont vues de dessus. */}
+          <div className="relative mx-auto aspect-square w-full max-w-md lg:max-w-none">
+            <SteamingCup />
           </div>
         </div>
       </div>
