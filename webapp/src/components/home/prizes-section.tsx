@@ -7,6 +7,7 @@ import boite100gDetoxImg from '@/img/boite_100g_detox.webp';
 import boite100gSignatureImg from '@/img/boite_100g_signature.webp';
 import coffret39Img from '@/img/coffret_decouverte_39.webp';
 import coffret69Img from '@/img/coffret_decouverte_69.webp';
+import { TornEdge } from '@/components/decor/torn-edge';
 import { PrizeCard, type PrizeCategory } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { api } from '@/lib/api';
@@ -50,8 +51,15 @@ export function PrizesSection() {
   });
 
   return (
-    <section id="prizes" className="bg-white py-16 md:py-20">
-      <div className="container mx-auto px-6">
+    <section id="prizes" className="relative overflow-hidden bg-white pb-16 pt-24 md:pb-20 md:pt-28">
+      {/* Même découpe qu'en tête de la section du tirage : le motif revient,
+          c'est ce qui en fait une signature plutôt qu'un ornement isolé. */}
+      <TornEdge
+        couleur="#FAF6EF"
+        className="pointer-events-none absolute inset-x-0 top-0 h-12 w-full md:h-20"
+      />
+
+      <div className="relative container mx-auto px-6">
         <h2 className="font-display text-h2 text-noir">
           Les lots à gagner
         </h2>

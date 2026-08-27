@@ -1,11 +1,17 @@
+import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { Leaf, Ticket, ShieldCheck } from 'lucide-react';
+import tassesHeroImg from '@/img/tasses_hero.webp';
 import { HeroCTAButtons } from '@/components/home/hero-cta-buttons';
 import { SteamingCup } from '@/components/home/steaming-cup';
+import { OrganicClip, TACHES } from '@/components/decor/organic-shape';
 
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden bg-white py-16 md:py-24">
+    // Le crème plutôt que le blanc : c'est le fond éditorial de la charte, et
+    // il donne à la composition l'assise chaude qu'un blanc pur lui refusait.
+    <section className="relative overflow-hidden bg-cream py-16 md:py-24">
+      <OrganicClip id="tache-hero" trace={TACHES.large} />
       <div className="pattern-overlay bg-gradient-to-br from-terracotta-100/20 to-gold-100/20" />
 
       <div className="container relative mx-auto px-6">
@@ -21,9 +27,13 @@ export function HeroSection() {
                 désormais dans l'ordre où ils agissent : le grand prix attire,
                 le ticket gagnant lève le risque. Les deux mots-clés imposés par
                 le cahier des charges restent dans le titre. */}
+            {/* Espaces insécables devant le deux-points et le signe pourcent :
+                sans elles, la ligne se coupe entre « 100 » et « % », et le
+                deux-points peut ouvrir une ligne. */}
             <h1 className="font-display text-h1 text-noir">
-              Jeu-concours <span className="text-terracotta-600">Thé Tip Top</span> : un an de thé
-              à gagner, 100 % des tickets gagnants
+              Jeu-concours{' '}
+              <span className="whitespace-nowrap text-terracotta-600">Thé Tip Top</span>&nbsp;: un
+              an de thé à gagner, 100&nbsp;% des tickets gagnants
             </h1>
 
             <p className="mt-6 text-body leading-relaxed text-stone-grey">
@@ -52,12 +62,27 @@ export function HeroSection() {
             <HeroCTAButtons />
           </div>
 
-          {/* La photo d'un service à thé japonais tenait cette place : elle
-              montrait un produit, là où un jeu-concours doit accrocher. La
-              tasse illustrée fume vraiment, ce qu'aucune de nos photos ne
-              permettait - toutes sont vues de dessus. */}
+          {/* Composition en deux plans : la photo découpée en tache tient le
+              fond, la tasse illustrée passe devant. Une photo seule montrait un
+              produit ; superposée, elle devient le décor d'une scène. */}
           <div className="relative mx-auto aspect-square w-full max-w-md lg:max-w-none">
-            <SteamingCup />
+            <div className="absolute right-0 top-0 h-[70%] w-[70%] [clip-path:url(#tache-hero)]">
+              <Image
+                src={tassesHeroImg}
+                alt=""
+                fill
+                sizes="(max-width: 1024px) 60vw, 30vw"
+                className="object-cover"
+                priority
+                quality={85}
+              />
+            </div>
+
+            {/* La tasse fume vraiment, ce qu'aucune de nos photos ne permettait
+                - toutes sont vues de dessus ou cadrent un contenant fermé. */}
+            <div className="absolute bottom-0 left-0 h-[80%] w-[80%]">
+              <SteamingCup />
+            </div>
           </div>
         </div>
       </div>
