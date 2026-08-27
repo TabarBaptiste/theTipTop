@@ -69,16 +69,21 @@ export function PrizesSection() {
           , auquel chaque participation vous inscrit.
         </p>
 
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Cinq colonnes sur grand écran : les cinq lots forment alors une seule
+            rangée, et l'ensemble se lit comme un catalogue plutôt que comme une
+            grille tronquée à trois. */}
+        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {isLoading &&
-            Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="flex flex-col">
-                <Skeleton className="aspect-[4/3] w-full rounded-card" />
-                <Skeleton className="mt-md h-3 w-1/3" />
-                <Skeleton className="mt-2xs h-5 w-2/3" />
-                <div className="mt-md flex items-center justify-between border-t border-warm-beige pt-sm">
-                  <Skeleton className="h-3 w-1/4" />
-                  <Skeleton className="h-3 w-1/5" />
+            Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex flex-col overflow-hidden rounded-card bg-cream">
+                <Skeleton className="aspect-[4/5] w-full rounded-none" />
+                <div className="flex flex-col p-md">
+                  <Skeleton className="h-3 w-1/3" />
+                  <Skeleton className="mt-2xs h-5 w-2/3" />
+                  <div className="mt-md flex items-center justify-between border-t border-warm-beige pt-sm">
+                    <Skeleton className="h-3 w-1/4" />
+                    <Skeleton className="h-3 w-1/5" />
+                  </div>
                 </div>
               </div>
             ))}
