@@ -157,6 +157,23 @@ teinte : il mesure contre le fond de page au lieu du fond réellement rendu.
 | Caption | Montserrat | 400 | 11px / 0.69rem | +0.3px | 1.5 | Légendes, annotations |
 | Bouton | Montserrat | 700 | 11px / 0.69rem | +2px | 1 | Texte de bouton - UPPERCASE |
 
+> **Les boutons d'appel à l'action dérogent à la ligne « Bouton ».**
+>
+> Un libellé de 11 px pour toutes les tailles ne permettait pas de hiérarchiser
+> deux actions côte à côte : entre un bouton principal et un bouton secondaire,
+> seuls 8 px de hauteur faisaient la différence. La taille du texte suit
+> désormais celle du bouton.
+>
+> | Taille | Hauteur | Texte | Usage |
+> |---|---|---|---|
+> | `sm` | 36 px | 11 px | Actions denses : tableaux, barres d'outils |
+> | `default` | 44 px | 11 px | Cas courant. 44 px est la cible tactile recommandée |
+> | `lg` | 56 px | 13 px | Action secondaire d'un écran, CTA de bandeau |
+> | `xl` | 64 px | 15 px | Action principale d'un écran — **une seule par vue** |
+>
+> Ces libellés restent en gras sous 18.66 px : ils relèvent du texte courant et
+> donc du seuil de 4.5:1, quelle que soit la taille.
+
 ### Variables CSS
 
 ```css

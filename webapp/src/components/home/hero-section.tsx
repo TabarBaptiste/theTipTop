@@ -17,20 +17,22 @@ export function HeroSection() {
               Jeu-concours exclusif
             </p>
 
-            {/* « Bienvenue » ouvrait le titre principal de la page la plus
-                importante du site sans porter aucune valeur de recherche.
-                L'argument différenciant y prend sa place : il était jusqu'ici
-                relégué dans un badge. */}
+            {/* « Bienvenue » ouvrait autrefois ce titre sans porter aucune
+                valeur de recherche. Les deux arguments du jeu s'y succèdent
+                désormais dans l'ordre où ils agissent : le grand prix attire,
+                le ticket gagnant lève le risque. Les deux mots-clés imposés par
+                le cahier des charges restent dans le titre. */}
             <h1 className="font-display text-h1 text-noir">
-              Jeu-concours <span className="text-terracotta-600">Thé Tip Top</span> : 100 % des
-              tickets sont gagnants
+              Jeu-concours <span className="text-terracotta-600">Thé Tip Top</span> : un an de thé
+              à gagner, 100 % des tickets gagnants
             </h1>
 
             <p className="mt-6 text-body leading-relaxed text-stone-grey">
               À l&apos;occasion de l&apos;ouverture de notre 10<sup>e</sup> boutique à Nice,
-              participez à notre grand jeu-concours : <strong className="text-noir">100 % des
-              tickets sont gagnants</strong>, et chaque participation vous inscrit au tirage
-              au sort d&apos;<strong className="text-noir">un an de thé</strong>.
+              chaque participation vous inscrit au tirage au sort d&apos;
+              <strong className="text-noir">un an de thé</strong>, d&apos;une valeur de 360 €. Et
+              vous ne repartez jamais les mains vides :{' '}
+              <strong className="text-noir">100 % des tickets sont gagnants</strong>.
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">

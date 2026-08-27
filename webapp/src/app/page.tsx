@@ -10,10 +10,17 @@ export default function HomePage() {
   return (
     <div className="flex flex-col">
       <HeroSection />
-      <CountdownSection />
-      {/* Placée avant « Comment participer ? » : c'est l'argument le plus fort
-          du jeu, il doit être lu avant la mécanique. */}
+
+      {/* La page s'organise autour du tirage. Il suit immédiatement le hero,
+          dont il développe la promesse : le visiteur lit l'argument le plus
+          fort avant toute mécanique, et la section noire lui donne le poids
+          visuel qui lui revient.
+
+          Le compte à rebours le suivait auparavant : il coupait le fil entre
+          l'annonce et son développement, alors qu'il n'a de sens qu'une fois
+          l'enjeu compris. */}
       <GrandPrizeSection />
+      <CountdownSection />
       <HowItWorksSection />
       <PrizesSection />
       <WhyUsSection />
