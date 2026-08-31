@@ -29,9 +29,9 @@ export function HeroSection() {
 
             <p className="mt-6 text-body leading-relaxed text-stone-grey">
               À l&apos;occasion de l&apos;ouverture de notre 10<sup>e</sup> boutique à Nice,
-              chaque participation vous inscrit au tirage au sort d&apos;
-              <strong className="text-noir">un an de thé</strong>, d&apos;une valeur de 360 €. Et
-              vous ne repartez jamais les mains vides :{' '}
+              chaque participation vous inscrit au tirage au sort
+              d&apos;<strong className="text-noir">un an de thé</strong>, d&apos;une valeur de 360
+              €. Et vous ne repartez jamais les mains vides :{' '}
               <strong className="text-noir">100 % des tickets sont gagnants</strong>.
             </p>
 

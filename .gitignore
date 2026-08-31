@@ -5,3 +5,4 @@ node_modules
 dist/
 .next/
 *tar.gz
+sonar-issues.json

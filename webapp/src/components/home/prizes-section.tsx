@@ -65,8 +65,7 @@ export function PrizesSection() {
           Et au-dessus de ces lots,{' '}
           <a href="#grand-prize" className="text-terracotta-600 underline underline-offset-2">
             le tirage au sort d&apos;un an de thé
-          </a>
-          , auquel chaque participation vous inscrit.
+          </a>, auquel chaque participation vous inscrit.
         </p>
 
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
