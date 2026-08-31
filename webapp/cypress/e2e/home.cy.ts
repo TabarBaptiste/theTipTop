@@ -11,7 +11,7 @@ describe('Page d\'accueil', () => {
     // Le titre porte l'argument différenciant, pas une formule de bienvenue :
     // c'est ce qui remonte dans les résultats de recherche.
     cy.get('h1').should('contain.text', 'Jeu-concours');
-    cy.get('h1').should('contain.text', '100 % des tickets sont gagnants');
+    cy.get('h1').should('contain.text', '100 % des tickets gagnants');
   });
 
   it('affiche le bandeau de temps restant (ou de fin de jeu)', () => {
