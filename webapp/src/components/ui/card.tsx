@@ -116,7 +116,7 @@ function PrizeCard({ image, imageAlt = '', category, title, value, odds, classNa
       </div>
 
       {/* Catégorie : label terracotta UPPERCASE, sans background */}
-      <p className="mt-md font-functional text-ui uppercase text-terracotta-deep">
+      <p className="mt-md font-functional text-ui uppercase text-terracotta-600">
         {CATEGORY_LABELS[category]}
       </p>
 
@@ -126,7 +126,7 @@ function PrizeCard({ image, imageAlt = '', category, title, value, odds, classNa
       {/* Footer : valeur (gauche) + pourcentage (droite), séparés par un filet */}
       <div className={cn('mt-md flex items-center border-t border-warm-beige pt-sm', value ? 'justify-between' : 'justify-end')}>
         {value && <span className="font-functional text-caption text-stone">Valeur {value}</span>}
-        <span className="font-functional text-caption font-semibold text-terracotta-deep">{odds}</span>
+        <span className="font-functional text-caption font-semibold text-terracotta-600">{odds}</span>
       </div>
     </article>
   );

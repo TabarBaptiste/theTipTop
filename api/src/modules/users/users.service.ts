@@ -2,10 +2,17 @@
 // Service Users
 // ===========================================
 
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { User, Role } from '@prisma/client';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import * as bcrypt from 'bcryptjs';
 
 @Injectable()
@@ -107,6 +114,57 @@ export class UsersService {
   }
 
   /**
+   * Recherche d'un client par nom, prénom ou adresse, pour le comptoir.
+   *
+   * Distincte de `findAll`, qui sert l'administration : celle-ci ne rend que de
+   * quoi identifier une personne venue retirer son lot, et rien de plus. Ni
+   * date de naissance, ni genre, ni consentement, ni rôle - un employé n'en a
+   * pas l'usage, et le RGPD demande de s'en tenir au nécessaire.
+   *
+   * Bornée aux comptes clients : un employé n'a pas à énumérer ceux du
+   * personnel.
+   */
+  async searchClients(query: string, limit = 10) {
+    const recherche = query.trim();
+
+    // Une recherche vide ramènerait toute la base, ce qui n'est pas une
+    // recherche mais un annuaire.
+    if (recherche.length < 2) {
+      return { data: [], total: 0 };
+    }
+
+    const where = {
+      deletedAt: null,
+      role: Role.CLIENT,
+      OR: [
+        { email: { contains: recherche, mode: 'insensitive' as const } },
+        { firstName: { contains: recherche, mode: 'insensitive' as const } },
+        { lastName: { contains: recherche, mode: 'insensitive' as const } },
+      ],
+    };
+
+    const [clients, total] = await Promise.all([
+      this.prisma.user.findMany({
+        where,
+        take: limit,
+        orderBy: { lastName: 'asc' },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          _count: { select: { participations: true } },
+        },
+      }),
+      this.prisma.user.count({ where }),
+    ]);
+
+    // `total` accompagne une liste tronquée : sans lui, l'employé croirait
+    // avoir tout vu alors que sa recherche est trop large.
+    return { data: clients, total };
+  }
+
+  /**
    * Met à jour un utilisateur
    */
   async update(id: string, dto: UpdateUserDto): Promise<User> {
@@ -189,6 +247,48 @@ export class UsersService {
 
     const { password: _password, ...userData } = user;
     return userData;
+  }
+
+  /**
+   * Change le mot de passe en exigeant l'actuel.
+   *
+   * Cette vérification est tout l'intérêt de la méthode : sans elle, une
+   * session ouverte suffirait à verrouiller le compte hors de son titulaire.
+   */
+  async changePassword(id: string, dto: ChangePasswordDto): Promise<void> {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: { id: true, password: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Utilisateur non trouvé');
+    }
+
+    // Compte créé par Google ou Facebook : il n'a pas encore de mot de passe,
+    // et il en définit un ici pour la première fois. Exiger un « mot de passe
+    // actuel » inexistant n'apporterait aucune sécurité et l'enfermerait dans
+    // son fournisseur d'identité - un problème réel depuis que la connexion
+    // Facebook ne peut plus être proposée au public.
+    //
+    // La session suffit à prouver l'identité : la route est derrière
+    // JwtAuthGuard, et le contrôleur vérifie déjà que l'identifiant vise bien
+    // le titulaire du jeton.
+    if (user.password) {
+      if (!dto.currentPassword) {
+        throw new BadRequestException('Le mot de passe actuel est requis');
+      }
+
+      const isCurrentValid = await bcrypt.compare(dto.currentPassword, user.password);
+      if (!isCurrentValid) {
+        throw new ForbiddenException('Mot de passe actuel incorrect');
+      }
+    }
+
+    await this.prisma.user.update({
+      where: { id },
+      data: { password: await bcrypt.hash(dto.newPassword, 12) },
+    });
   }
 
   /**

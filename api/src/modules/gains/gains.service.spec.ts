@@ -7,6 +7,7 @@ import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { GainsService } from './gains.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TicketsService } from '../tickets/tickets.service';
+import { RedisService } from '../../redis/redis.service';
 
 describe('GainsService', () => {
   let service: GainsService;
@@ -23,12 +24,19 @@ describe('GainsService', () => {
       findUnique: jest.fn(),
       groupBy: jest.fn(),
     },
+    user: {
+      findMany: jest.fn(),
+    },
   };
 
   const mockTicketsService = {
     getPrizesMap: jest.fn().mockResolvedValue({
       INFUSER: { name: 'Infuseur à thé', description: 'Un infuseur', value: null },
     }),
+  };
+
+  const mockRedisService = {
+    delByPattern: jest.fn(),
   };
 
   const user = { id: 'u1', email: 'c@t.fr', firstName: 'C', lastName: 'T' };
@@ -39,6 +47,7 @@ describe('GainsService', () => {
         GainsService,
         { provide: PrismaService, useValue: mockPrismaService },
         { provide: TicketsService, useValue: mockTicketsService },
+        { provide: RedisService, useValue: mockRedisService },
       ],
     }).compile();
 
@@ -87,6 +96,7 @@ describe('GainsService', () => {
 
       expect(result.prizeDelivered).toBe(true);
       expect(result.prize.name).toBe('Infuseur à thé');
+      expect(mockRedisService.delByPattern).toHaveBeenCalledWith('stats:*');
       expect(mockPrismaService.participation.update).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: 'p1' },
@@ -179,6 +189,52 @@ describe('GainsService', () => {
           where: { prizeDelivered: true, prizeDeliveredBy: 'emp1' },
         }),
       );
+    });
+
+    it('should resolve the delivering employee name in a single query', async () => {
+      const deliveredRow = {
+        prizeDeliveredAt: new Date(),
+        prizeDeliveredBy: 'emp1',
+        deliveryMethod: 'IN_STORE',
+        ticket: { code: 'ABCDEFGH23', prizeType: 'INFUSER' },
+        user,
+      };
+      mockPrismaService.participation.findMany.mockResolvedValue([
+        { id: 'p1', ...deliveredRow },
+        { id: 'p2', ...deliveredRow },
+      ]);
+      mockPrismaService.participation.count.mockResolvedValue(2);
+      mockPrismaService.user.findMany.mockResolvedValue([
+        { id: 'emp1', firstName: 'Marie', lastName: 'Dupont' },
+      ]);
+
+      const result = await service.getDeliveryHistory({});
+
+      expect(result.data[0].deliveredBy).toBe('Marie D.');
+      // Deux remises par le même employé ne doivent produire qu'un identifiant
+      // à résoudre : c'est tout l'intérêt de dédoublonner avant la requête.
+      expect(mockPrismaService.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { id: { in: ['emp1'] } } }),
+      );
+    });
+
+    it('should leave deliveredBy null and skip the lookup when no employee is recorded', async () => {
+      mockPrismaService.participation.findMany.mockResolvedValue([
+        {
+          id: 'p1',
+          prizeDeliveredAt: new Date(),
+          prizeDeliveredBy: null,
+          deliveryMethod: 'IN_STORE',
+          ticket: { code: 'ABCDEFGH23', prizeType: 'INFUSER' },
+          user,
+        },
+      ]);
+      mockPrismaService.participation.count.mockResolvedValue(1);
+
+      const result = await service.getDeliveryHistory({});
+
+      expect(result.data[0].deliveredBy).toBeNull();
+      expect(mockPrismaService.user.findMany).not.toHaveBeenCalled();
     });
   });
 

@@ -132,8 +132,8 @@ REDIS_HOST=redis
 REDIS_PORT=6379
 
 # JWT (générer des secrets uniques)
-JWT_SECRET=GENERER_CLE_256_BITS
-JWT_REFRESH_SECRET=GENERER_AUTRE_CLE_256_BITS
+JWT_SECRET=<à générer, voir commande ci-dessous>
+JWT_REFRESH_SECRET=<à générer, voir commande ci-dessous>
 JWT_EXPIRATION=15m
 JWT_REFRESH_EXPIRATION=7d
 

@@ -32,6 +32,7 @@ describe('TicketsService', () => {
   const mockRedisService = {
     getOrSet: jest.fn((_key: string, _ttl: number, fn: () => Promise<unknown>) => fn()),
     del: jest.fn(),
+    delByPattern: jest.fn(),
   };
 
   const prizes = [
@@ -148,7 +149,7 @@ describe('TicketsService', () => {
       expect(result.error).toContain('actif');
     });
 
-    it('should reject when the claim period is over', async () => {
+    it('should reject before the game opens', async () => {
       mockPrismaService.ticket.findUnique.mockResolvedValue({
         id: 't1',
         code: 'ABCDEFGH23',
@@ -156,13 +157,35 @@ describe('TicketsService', () => {
       });
       mockPrismaService.gameConfig.findFirst.mockResolvedValue({
         ...activeGameConfig,
-        claimEndDate: new Date(Date.now() - 1000),
+        startDate: new Date(Date.now() + 86400000),
+        endDate: new Date(Date.now() + 2 * 86400000),
       });
 
       const result = await service.verifyCode('ABCDEFGH23');
 
       expect(result.isValid).toBe(false);
-      expect(result.error).toContain('terminée');
+      expect(result.error).toContain('pas encore commencé');
+    });
+
+    it('should reject once the game is over', async () => {
+      mockPrismaService.ticket.findUnique.mockResolvedValue({
+        id: 't1',
+        code: 'ABCDEFGH23',
+        isUsed: false,
+      });
+      // Le délai de réclamation court toujours : c'est bien la clôture du jeu,
+      // et non ce délai, qui ferme la participation.
+      mockPrismaService.gameConfig.findFirst.mockResolvedValue({
+        ...activeGameConfig,
+        startDate: new Date(Date.now() - 2 * 86400000),
+        endDate: new Date(Date.now() - 1000),
+        claimEndDate: new Date(Date.now() + 30 * 86400000),
+      });
+
+      const result = await service.verifyCode('ABCDEFGH23');
+
+      expect(result.isValid).toBe(false);
+      expect(result.error).toContain('terminé');
     });
 
     it('should throw NotFoundException when prize metadata is missing', async () => {
@@ -226,6 +249,7 @@ describe('TicketsService', () => {
         where: { id: 't1' },
         data: { isDistributed: true },
       });
+      expect(mockRedisService.delByPattern).toHaveBeenCalledWith('stats:*');
     });
   });
 
@@ -245,6 +269,17 @@ describe('TicketsService', () => {
         where: { code: { in: ['AAAA', 'BBBB'] } },
         data: { isDistributed: true },
       });
+      expect(mockRedisService.delByPattern).toHaveBeenCalledWith('stats:*');
+    });
+
+    it('should not touch the cache when no codes are available', async () => {
+      mockPrismaService.ticket.findMany.mockResolvedValue([]);
+      mockPrismaService.ticket.updateMany.mockResolvedValue({ count: 0 });
+
+      const codes = await service.getAvailableCodes(5);
+
+      expect(codes).toEqual([]);
+      expect(mockRedisService.delByPattern).not.toHaveBeenCalled();
     });
   });
 

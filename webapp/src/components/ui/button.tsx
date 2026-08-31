@@ -9,22 +9,32 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          'bg-terracotta-deep text-white rounded-full hover:bg-terracotta-hover',
+          'bg-terracotta-600 text-white rounded-full hover:bg-terracotta-700',
         destructive:
           'bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90',
         outline:
-          'border-[1.5px] border-terracotta-deep text-terracotta-deep bg-transparent rounded-full hover:bg-terracotta-deep hover:text-white',
+          'border-[1.5px] border-terracotta-600 text-terracotta-600 bg-transparent rounded-full hover:bg-terracotta-600 hover:text-white',
         secondary:
           'bg-moss text-white rounded-full hover:bg-moss-light',
         ghost:
-          'hover:bg-terracotta-50 hover:text-terracotta-deep rounded-soft normal-case tracking-normal font-semibold',
+          'hover:bg-terracotta-50 hover:text-terracotta-600 rounded-soft normal-case tracking-normal font-semibold',
         link:
-          'text-terracotta-deep underline-offset-4 hover:underline normal-case tracking-normal font-semibold',
+          'text-terracotta-600 underline-offset-4 hover:underline normal-case tracking-normal font-semibold',
       },
+      // Les libellés restaient à 11 px quelle que soit la taille : un « lg » ne
+      // se distinguait d'un « default » que par 8 px de hauteur, trop peu pour
+      // hiérarchiser deux actions côte à côte. La taille du texte varie
+      // désormais avec celle du bouton, ce qui creuse l'écart.
       size: {
-        default: 'h-10 px-8 py-3 text-ui',
+        // 44 px : la cible tactile recommandée, que les 40 px précédents
+        // n'atteignaient pas.
+        default: 'h-11 px-8 py-3 text-ui',
         sm: 'h-9 px-6 py-2 text-ui',
-        lg: 'h-12 px-10 py-3 text-ui',
+        lg: 'h-14 px-10 py-3 text-[13px]',
+        // Réservé à l'action principale d'un écran : une seule par vue.
+        // Le libellé ne se coupe pas (whitespace-nowrap) : sur les écrans
+        // étroits, c'est la marge intérieure qui cède.
+        xl: 'h-16 px-8 sm:px-12 py-4 text-[15px]',
         icon: 'h-10 w-10',
       },
     },

@@ -3,7 +3,12 @@
 // ===========================================
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  NotFoundException,
+  ConflictException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { UsersService } from './users.service';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -168,6 +173,127 @@ describe('UsersService', () => {
         where: { id: 'u1' },
         data: { role: 'EMPLOYEE' },
       });
+    });
+  });
+
+  describe('searchClients', () => {
+    beforeEach(() => {
+      mockPrismaService.user.findMany.mockResolvedValue([]);
+      mockPrismaService.user.count.mockResolvedValue(0);
+    });
+
+    // Une recherche vide ou d'un seul caractere ramenerait toute la base : ce
+    // ne serait plus une recherche mais un annuaire.
+    it.each([[''], [' '], ['a']])('should return nothing for the query %p', async (q) => {
+      await expect(service.searchClients(q)).resolves.toEqual({ data: [], total: 0 });
+      expect(mockPrismaService.user.findMany).not.toHaveBeenCalled();
+    });
+
+    it('should search across last name, first name and email', async () => {
+      await service.searchClients('dupont');
+
+      const { where } = mockPrismaService.user.findMany.mock.calls[0][0];
+      expect(where.OR).toEqual([
+        { email: { contains: 'dupont', mode: 'insensitive' } },
+        { firstName: { contains: 'dupont', mode: 'insensitive' } },
+        { lastName: { contains: 'dupont', mode: 'insensitive' } },
+      ]);
+    });
+
+    // Un employe n'a pas a enumerer les comptes du personnel.
+    it('should restrict the search to client accounts', async () => {
+      await service.searchClients('dupont');
+
+      const { where } = mockPrismaService.user.findMany.mock.calls[0][0];
+      expect(where.role).toBe('CLIENT');
+      expect(where.deletedAt).toBeNull();
+    });
+
+    // Le RGPD demande de s'en tenir au necessaire : de quoi identifier une
+    // personne au comptoir, rien de plus.
+    it('should expose neither birth date, gender, consent nor role', async () => {
+      await service.searchClients('dupont');
+
+      const { select } = mockPrismaService.user.findMany.mock.calls[0][0];
+      expect(Object.keys(select).sort()).toEqual([
+        '_count',
+        'email',
+        'firstName',
+        'id',
+        'lastName',
+      ]);
+    });
+
+    // Sans le total, l'employe croirait avoir tout vu alors que sa recherche
+    // est trop large.
+    it('should report the full count alongside a truncated list', async () => {
+      mockPrismaService.user.findMany.mockResolvedValue([{ id: 'u1' }]);
+      mockPrismaService.user.count.mockResolvedValue(34);
+
+      await expect(service.searchClients('martin')).resolves.toEqual({
+        data: [{ id: 'u1' }],
+        total: 34,
+      });
+      expect(mockPrismaService.user.findMany.mock.calls[0][0].take).toBe(10);
+    });
+  });
+
+  describe('changePassword', () => {
+    const dto = { currentPassword: 'Actuel123!', newPassword: 'Nouveau123!' };
+
+    it('should reject an unknown user', async () => {
+      mockPrismaService.user.findUnique.mockResolvedValue(null);
+
+      await expect(service.changePassword('inconnu', dto)).rejects.toThrow(NotFoundException);
+    });
+
+    // Un compte cree par Google ou Facebook n'a pas de mot de passe : il en
+    // definit un ici pour la premiere fois. Reclamer un « mot de passe
+    // actuel » inexistant n'apporterait aucune securite - la route est deja
+    // derriere le jeton, et le controleur la ramene au titulaire - mais
+    // l'enfermerait dans son fournisseur d'identite.
+    it('should let an account without a password define one', async () => {
+      mockPrismaService.user.findUnique.mockResolvedValue({ id: 'u1', password: null });
+      mockPrismaService.user.update.mockResolvedValue({ id: 'u1' });
+
+      await service.changePassword('u1', { newPassword: 'Nouveau123!' });
+
+      const { data } = mockPrismaService.user.update.mock.calls[0][0];
+      await expect(bcrypt.compare('Nouveau123!', data.password)).resolves.toBe(true);
+    });
+
+    // La dispense ne vaut que pour un compte qui n'a rien a proteger. Des
+    // qu'un mot de passe existe, l'omettre ne doit pas ouvrir un raccourci.
+    it('should still require the current password when one exists', async () => {
+      const hashed = await bcrypt.hash('LeVrai123!', 4);
+      mockPrismaService.user.findUnique.mockResolvedValue({ id: 'u1', password: hashed });
+
+      await expect(service.changePassword('u1', { newPassword: 'Nouveau123!' })).rejects.toThrow(
+        BadRequestException,
+      );
+      expect(mockPrismaService.user.update).not.toHaveBeenCalled();
+    });
+
+    // Le coeur de la protection : sans le mot de passe actuel, une session
+    // ouverte suffirait a verrouiller le compte hors de son titulaire.
+    it('should reject a wrong current password without touching the record', async () => {
+      const hashed = await bcrypt.hash('LeVrai123!', 4);
+      mockPrismaService.user.findUnique.mockResolvedValue({ id: 'u1', password: hashed });
+
+      await expect(service.changePassword('u1', dto)).rejects.toThrow(ForbiddenException);
+      expect(mockPrismaService.user.update).not.toHaveBeenCalled();
+    });
+
+    it('should store a hash, never the new password itself', async () => {
+      const hashed = await bcrypt.hash(dto.currentPassword, 4);
+      mockPrismaService.user.findUnique.mockResolvedValue({ id: 'u1', password: hashed });
+      mockPrismaService.user.update.mockResolvedValue({ id: 'u1' });
+
+      await service.changePassword('u1', dto);
+
+      const { data } = mockPrismaService.user.update.mock.calls[0][0];
+      expect(data.password).not.toBe(dto.newPassword);
+      await expect(bcrypt.compare(dto.newPassword, data.password)).resolves.toBe(true);
     });
   });
 });

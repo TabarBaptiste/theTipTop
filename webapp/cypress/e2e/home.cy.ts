@@ -8,8 +8,10 @@ describe('Page d\'accueil', () => {
   });
 
   it('affiche le titre principal', () => {
-    cy.contains('Bienvenue au jeu-concours').should('be.visible');
-    cy.contains('The Tip Top').should('be.visible');
+    // Le titre porte l'argument différenciant, pas une formule de bienvenue :
+    // c'est ce qui remonte dans les résultats de recherche.
+    cy.get('h1').should('contain.text', 'Jeu-concours');
+    cy.get('h1').should('contain.text', '100 % des tickets sont gagnants');
   });
 
   it('affiche le bandeau de temps restant (ou de fin de jeu)', () => {
@@ -23,33 +25,46 @@ describe('Page d\'accueil', () => {
 
   it('affiche les étapes de participation', () => {
     cy.contains('Comment participer ?').should('be.visible');
-    cy.contains('Faites vos achats').should('be.visible');
-    cy.contains('Entrez votre code').should('be.visible');
-    cy.contains('Recuperez votre lot').should('be.visible');
+    cy.contains('Trouve ton code').should('be.visible');
+    cy.contains('Saisis ton code').should('be.visible');
+    cy.contains('Récupère ton lot').should('be.visible');
   });
 
   it('contient les liens de navigation', () => {
+    // La navigation publique ne porte que du contenu accessible à tous : les
+    // destinations personnelles se rangent sous le contrôle de compte.
     cy.get('header').within(() => {
       cy.contains('Le jeu').should('be.visible');
       cy.contains('Lots').should('be.visible');
+      cy.contains('Règlement').should('be.visible');
       cy.contains('FAQ').should('be.visible');
     });
   });
 
   it('affiche les boutons d\'authentification', () => {
-    cy.get('header').contains('Inscription').should('be.visible');
-    cy.get('header').contains('Connexion').should('be.visible');
+    cy.get('header').contains('Participer').should('be.visible');
+
+    // Délai allongé : ce bouton n'apparaît qu'une fois la page hydratée, et la
+    // compilation à la demande du serveur de développement repousse
+    // l'hydratation bien au-delà du délai par défaut. En production, où les
+    // bundles sont précompilés, elle est immédiate.
+    cy.get('header').contains('Connexion', { timeout: 30000 }).should('be.visible');
   });
 
-  it('redirige vers la page d\'inscription depuis le CTA du hero', () => {
+  it('mene au parcours de participation depuis le CTA du hero', () => {
+    // Le CTA ouvre le tunnel sans compte : exiger une inscription avant même
+    // d'avoir saisi son code ajouterait une friction que le parcours évite.
     cy.contains('Participer maintenant').first().click();
-    cy.url().should('include', '/auth/register');
+
+    // Délai allongé : la navigation passe par le routeur client, qui attend la
+    // compilation de la route côté serveur en développement.
+    cy.url({ timeout: 30000 }).should('include', '/participate');
   });
 
   it('affiche le footer avec les liens légaux', () => {
     cy.get('footer').within(() => {
-      cy.contains('Reglement du jeu').should('have.attr', 'href', '/reglement');
-      cy.contains('Mentions legales').should('have.attr', 'href', '/mentions-legales');
+      cy.contains('Règlement du jeu').should('have.attr', 'href', '/reglement');
+      cy.contains('Mentions légales').should('have.attr', 'href', '/mentions-legales');
     });
   });
 });

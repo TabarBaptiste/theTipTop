@@ -19,6 +19,22 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
+ * Formate une date au format attendu par un <input type="date"> (AAAA-MM-JJ).
+ *
+ * Les composants sont lus en heure locale, sans passer par toISOString() :
+ * celle-ci convertit en UTC, et minuit heure de Paris y devient la veille. Le
+ * decalage se voyait sur la borne de majorite, ou la personne ayant 18 ans le
+ * jour meme ne pouvait pas saisir sa date de naissance.
+ */
+export function toDateInputValue(date: Date): string {
+  return [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, '0'),
+    String(date.getDate()).padStart(2, '0'),
+  ].join('-');
+}
+
+/**
  * Formate une date en français
  */
 export function formatDate(date: Date | string): string {

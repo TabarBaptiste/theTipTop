@@ -5,6 +5,8 @@ node_modules/
 
 # Build
 .next/
+# Builds de production locaux, pour la mesure de performance (NEXT_DIST_DIR).
+.next-prod/
 out/
 build/
 dist/

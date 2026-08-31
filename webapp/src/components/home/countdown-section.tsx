@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { differenceInDays, differenceInHours, differenceInMinutes, differenceInSeconds } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
+import { formatFrenchDateTime, formatFrenchDateRange } from '@/lib/french-date';
 
 type GamePhase = 'not_started' | 'active' | 'claim_only' | 'ended';
 
@@ -57,14 +58,30 @@ export function CountdownSection() {
     return () => clearInterval(timer);
   }, [endDateStr]);
 
+  // Les dates viennent de l'API, seule autorité sur le déroulement du jeu. Les
+  // pages légales, elles, s'appuient sur les constantes de lib/game-dates :
+  // un document juridique doit rester lisible API éteinte.
+  const periode =
+    gameConfig?.startDate && gameConfig?.endDate
+      ? formatFrenchDateRange(new Date(gameConfig.startDate), new Date(gameConfig.endDate))
+      : null;
+
   // Jeu terminé (phase serveur ou countdown écoulé)
   const phase = gameConfig?.phase;
   if (isEnded || phase === 'claim_only' || phase === 'ended') {
     return (
-      <section className="bg-terracotta-deep py-6">
+      <section className="bg-terracotta-600 py-6">
         <div className="container mx-auto px-6 text-center">
-          <p className="font-display text-lg font-semibold text-white">
-            Le jeu-concours est termine ! Vous avez 30 jours pour recuperer vos lots.
+          {/* L'annonce et le délai tenaient dans un seul paragraphe, sans titre :
+              la section n'apparaissait nulle part dans la hiérarchie des titres
+              de la page. Séparés, l'un devient le titre, l'autre le détail. */}
+          <h2 className="font-display text-lg font-semibold text-white">
+            Le jeu-concours est terminé
+          </h2>
+          <p className="mt-1 text-sm text-white/90">
+            {gameConfig?.claimEndDate
+              ? `Vous pouvez réclamer vos lots jusqu'au ${formatFrenchDateTime(new Date(gameConfig.claimEndDate))}.`
+              : 'La période de réclamation des lots est en cours.'}
           </p>
         </div>
       </section>
@@ -73,10 +90,20 @@ export function CountdownSection() {
 
   return (
     <section className="border-y border-warm-beige bg-white py-6">
-      <div className="container mx-auto flex flex-col items-center justify-between gap-6 px-6 sm:flex-row">
-        <p className="font-functional text-ui uppercase tracking-[2px] text-stone-grey">
-          Temps restant pour participer
-        </p>
+      {/* Le passage en ligne se faisait dès 640 px. Le libellé, le décompte et
+          le bouton n'y tiennent pas ensemble - le bouton agrandi débordait de
+          la page. La ligne attend maintenant d'avoir la largeur pour ses trois
+          blocs ; en dessous, ils s'empilent. */}
+      <div className="container mx-auto flex flex-col items-center justify-between gap-6 px-6 lg:flex-row">
+        <div className="text-center lg:text-left">
+          {/* Ce libellé titrait déjà la section de fait, sans en avoir le
+              balisage : la page passait du h1 du hero au h2 du grand prix en
+              sautant ce bandeau. */}
+          <h2 className="font-functional text-ui font-bold uppercase tracking-[2px] text-stone-grey">
+            Temps restant pour participer
+          </h2>
+          {periode && <p className="mt-1 text-xs text-stone-grey">{periode}</p>}
+        </div>
 
         <div className="flex items-center gap-3">
           {/* Avant que la config arrive, les valeurs sont à 0 - flash imperceptible */}
@@ -89,8 +116,12 @@ export function CountdownSection() {
           <TimeBlock value={timeLeft.seconds} label="Secondes" />
         </div>
 
-        <Button asChild size="sm" variant="secondary">
-          <Link href="/dashboard/participate">Participer maintenant</Link>
+        {/* Ce bouton mène à la même page que le CTA du hero, mais il était le
+            plus petit du site et le seul en vert : la même action changeait
+            d'apparence selon l'endroit. Il reprend le terracotta des actions
+            principales et une taille visible depuis le bandeau. */}
+        <Button asChild size="lg">
+          <Link href="/participate">Participer maintenant</Link>
         </Button>
       </div>
     </section>
@@ -111,5 +142,7 @@ function TimeBlock({ value, label }: { value: number; label: string }) {
 }
 
 function Separator() {
-  return <span className="text-lg font-bold text-warm-beige">:</span>;
+  // Le beige chaud d'origine plafonnait à 1.44:1 sur blanc. Ces deux-points
+  // restent du texte au sens du critère 1.4.3, décoratifs ou non.
+  return <span className="text-lg font-bold text-stone-grey">:</span>;
 }

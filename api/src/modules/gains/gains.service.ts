@@ -6,12 +6,15 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { DeliveryMethod } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TicketsService } from '../tickets/tickets.service';
+import { RedisService } from '../../redis/redis.service';
+import { STATS_CACHE_PATTERN } from '../../redis/cache-keys';
 
 @Injectable()
 export class GainsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly ticketsService: TicketsService,
+    private readonly redis: RedisService,
   ) {}
 
   /**
@@ -64,6 +67,8 @@ export class GainsService {
       }),
       this.ticketsService.getPrizesMap(),
     ]);
+
+    await this.redis.delByPattern(STATS_CACHE_PATTERN);
 
     return {
       id: updated.id,
@@ -189,6 +194,26 @@ export class GainsService {
 
     type DeliveryHistoryParticipation = (typeof participations)[number];
 
+    // prizeDeliveredBy stocke un identifiant brut, sans relation Prisma : un
+    // include est donc impossible. Les noms sont résolus en une seule requête
+    // sur les identifiants de la page courante, soit au plus `limit` valeurs.
+    const employeeIds = [
+      ...new Set(
+        participations
+          .map((p: DeliveryHistoryParticipation) => p.prizeDeliveredBy)
+          .filter((id: string | null): id is string => id !== null),
+      ),
+    ];
+
+    const employees = employeeIds.length
+      ? await this.prisma.user.findMany({
+          where: { id: { in: employeeIds } },
+          select: { id: true, firstName: true, lastName: true },
+        })
+      : [];
+
+    const employeeById = new Map(employees.map((e) => [e.id, e]));
+
     return {
       data: participations.map((p: DeliveryHistoryParticipation) => ({
         id: p.id,
@@ -197,7 +222,9 @@ export class GainsService {
         prize: prizesMap[p.ticket.prizeType],
         user: p.user,
         prizeDeliveredAt: p.prizeDeliveredAt,
-        prizeDeliveredBy: p.prizeDeliveredBy,
+        deliveredBy: this.formatEmployeeName(
+          p.prizeDeliveredBy ? employeeById.get(p.prizeDeliveredBy) : undefined,
+        ),
         deliveryMethod: p.deliveryMethod,
       })),
       meta: {
@@ -207,6 +234,21 @@ export class GainsService {
         totalPages: Math.ceil(total / limit),
       },
     };
+  }
+
+  /**
+   * Nom d'affichage de l'employé ayant remis un lot : prénom et initiale du
+   * nom, comme partout ailleurs dans le projet.
+   *
+   * Renvoie null quand l'employé est introuvable - remise antérieure au suivi
+   * de l'auteur, ou compte supprimé depuis. L'historique reste alors lisible,
+   * seule la colonne est vide.
+   */
+  private formatEmployeeName(employee?: { firstName: string; lastName: string }): string | null {
+    if (!employee) {
+      return null;
+    }
+    return `${employee.firstName} ${employee.lastName.slice(0, 1)}.`;
   }
 
   /**

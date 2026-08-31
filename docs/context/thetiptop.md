@@ -18,7 +18,7 @@ Thé Tip Top est une société ayant pour activité la promotion de gammes de th
 
 ### Objectif
 
-Afin de fêter l'ouverture de leur 10ème boutique à Nice mais surtout afin d'attirer l'attention de nouveaux clients sur leurs produits, la société Thé Tip Top souhaite organiser un jeu-concours de type tirage au sort. 
+Afin de fêter l'ouverture de leur 10ème boutique à Nice mais surtout afin d'attirer l'attention de nouveaux clients sur leurs produits, la société Thé Tip Top souhaite organiser un jeu-concours de type tirage au sort.
 
 Ainsi tous les clients ayant un ticket de caisse ou une facture supérieure à **49€** retrouveront sur ces derniers un code à **10 caractères** comprenant des chiffres et des lettres permettant une participation.
 

@@ -1,11 +1,17 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Lock, BarChart2, Megaphone } from 'lucide-react';
+import { Lock, BarChart2 } from 'lucide-react';
+import { CookiePreferences } from '@/components/cookies/cookie-preferences';
+import { formatFrenchDate } from '@/lib/french-date';
+import { LEGAL_UPDATED_AT } from '@/lib/legal-dates';
 
 export const metadata: Metadata = {
+  // URL de reference : evite qu'un parametre de campagne ou une variante
+  // avec barre finale soit traite comme une page distincte.
+  alternates: { canonical: '/gestion-cookies' },
   title: 'Gestion des cookies',
   description:
-    'Politique de gestion des cookies du site Thé Tip Top — types de cookies utilisés, durée de conservation, gestion de vos préférences.',
+    'Politique de gestion des cookies du site Thé Tip Top - types de cookies utilisés, durée de conservation, gestion de vos préférences.',
 };
 
 const ARTICLES = [
@@ -26,31 +32,17 @@ const COOKIES_LIST = [
     headerClass: 'bg-moss-50 border-moss-100',
     items: [
       {
-        name: 'session_token',
+        name: 'refreshToken',
         emetteur: 'Thé Tip Top',
         finalite: 'Maintien de la session utilisateur authentifié',
-        duree: 'Durée de la session',
-        type: 'Session',
-      },
-      {
-        name: 'csrf_token',
-        emetteur: 'Thé Tip Top',
-        finalite: 'Protection contre les attaques CSRF',
-        duree: 'Durée de la session',
-        type: 'Session',
-      },
-      {
-        name: 'auth_state',
-        emetteur: 'Thé Tip Top',
-        finalite: "Maintien de l'état d'authentification OAuth",
-        duree: '1 heure',
+        durée: '7 jours',
         type: 'Fonctionnel',
       },
       {
         name: 'cookie_consent',
         emetteur: 'Thé Tip Top',
         finalite: 'Mémorisation de vos préférences de consentement',
-        duree: '13 mois',
+        durée: '13 mois',
         type: 'Fonctionnel',
       },
     ],
@@ -60,71 +52,40 @@ const COOKIES_LIST = [
   {
     category: "Cookies de mesure d'audience",
     badge: 'Soumis au consentement',
-    badgeClass: 'bg-gold-500/20 text-gold-700',
+    badgeClass: 'bg-gold-500/20 text-gold-900',
     headerClass: 'bg-gold-50 border-gold-100',
     items: [
       {
         name: '_ga',
         emetteur: 'Google Analytics',
         finalite: 'Distinguer les utilisateurs uniques',
-        duree: '2 ans',
+        durée: '2 ans',
         type: 'Analytique',
       },
       {
         name: '_ga_XXXXXXXX',
         emetteur: 'Google Analytics',
         finalite: 'Maintenir l\'état de la session Analytics',
-        duree: '2 ans',
+        durée: '2 ans',
         type: 'Analytique',
       },
       {
         name: '_gid',
         emetteur: 'Google Analytics',
         finalite: 'Distinguer les utilisateurs sur courte durée',
-        duree: '24 heures',
+        durée: '24 heures',
         type: 'Analytique',
       },
       {
         name: '_gat',
         emetteur: 'Google Analytics',
         finalite: 'Limiter le taux de requêtes vers les serveurs',
-        duree: '1 minute',
+        durée: '1 minute',
         type: 'Analytique',
       },
     ],
     description:
       "Ces cookies permettent de mesurer l'audience du site et d'analyser le comportement des visiteurs (pages consultées, durée de navigation, origine du trafic) afin d'améliorer nos services. Ils ne sont déposés que si vous donnez votre consentement.",
-  },
-  {
-    category: 'Cookies marketing et publicitaires',
-    badge: 'Soumis au consentement',
-    badgeClass: 'bg-terracotta-pale text-terracotta-deep',
-    headerClass: 'bg-terracotta-50 border-terracotta-100',
-    items: [
-      {
-        name: 'fr',
-        emetteur: 'Meta (Facebook)',
-        finalite: 'Mesure des publicités Facebook / Meta Pixel',
-        duree: '3 mois',
-        type: 'Marketing',
-      },
-      {
-        name: '_fbp',
-        emetteur: 'Meta (Facebook)',
-        finalite: 'Identification des navigateurs pour statistiques publicitaires',
-        duree: '3 mois',
-        type: 'Marketing',
-      },
-      {
-        name: 'G_AUTHUSER_H',
-        emetteur: 'Google',
-        finalite: 'Connexion via compte Google',
-        duree: 'Session',
-        type: 'Social',
-      },
-    ],
-    description:
-      "Ces cookies sont déposés par des services tiers (Meta, Google) lors de l'utilisation de fonctionnalités sociales ou de connexion. Ils permettent de mesurer l'efficacité des campagnes et de personnaliser des contenus. Ils ne sont déposés qu'avec votre consentement explicite.",
   },
 ];
 
@@ -154,11 +115,11 @@ const NAVIGATEURS = [
 
 export default function GestionCookiesPage() {
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-cream">
+    <div className="min-h-[calc(100vh-5rem)] bg-cream">
       {/* En-tête */}
       <section className="border-b border-warm-beige bg-white">
         <div className="container mx-auto px-6 py-12 md:py-16">
-          <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-deep">
+          <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-600">
             Informations légales
           </p>
           <h1 className="mt-3 font-display text-h1 text-noir">Gestion des cookies</h1>
@@ -167,7 +128,9 @@ export default function GestionCookiesPage() {
             sur votre appareil. Cette page vous explique ce que sont ces cookies, lesquels nous
             utilisons et comment gérer vos préférences.
           </p>
-          <p className="mt-4 text-sm text-stone-grey/70">Dernière mise à jour : 9 juin 2026</p>
+          <p className="mt-4 text-sm text-stone-grey/80">
+            Dernière mise à jour : {formatFrenchDate(LEGAL_UPDATED_AT.gestionCookies)}
+          </p>
         </div>
       </section>
 
@@ -184,7 +147,7 @@ export default function GestionCookiesPage() {
                   <a
                     key={a.id}
                     href={`#${a.id}`}
-                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-deep"
+                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-600"
                   >
                     {a.label}
                   </a>
@@ -197,13 +160,13 @@ export default function GestionCookiesPage() {
                 <nav className="mt-3 space-y-1">
                   <Link
                     href="/politique-confidentialite"
-                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-deep"
+                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-600"
                   >
                     Politique de confidentialité
                   </Link>
                   <Link
                     href="/mentions-legales"
-                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-deep"
+                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-600"
                   >
                     Mentions légales
                   </Link>
@@ -217,7 +180,7 @@ export default function GestionCookiesPage() {
             {/* Article 1 */}
             <section id="definition" className="scroll-mt-24">
               <h2 className="font-display text-h2 text-noir">
-                Article 1 — Qu&apos;est-ce qu&apos;un cookie ?
+                Article 1 - Qu&apos;est-ce qu&apos;un cookie ?
               </h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
                 <p>
@@ -247,14 +210,14 @@ export default function GestionCookiesPage() {
             {/* Article 2 */}
             <section id="types" className="scroll-mt-24">
               <h2 className="font-display text-h2 text-noir">
-                Article 2 — Types de cookies utilisés
+                Article 2 - Types de cookies utilisés
               </h2>
               <div className="mt-4 space-y-4 text-body text-stone-grey">
                 <p>
-                  Le site Thé Tip Top utilise trois catégories de cookies selon leur finalité
+                  Le site Thé Tip Top utilisé deux catégories de cookies selon leur finalité
                   et leur base légale :
                 </p>
-                <div className="grid gap-4 sm:grid-cols-3">
+                <div className="grid gap-4 sm:grid-cols-2">
                   <div className="rounded-card border border-moss-100 bg-moss-50 p-5">
                     <Lock
                       className="h-5 w-5 text-moss-500"
@@ -273,7 +236,7 @@ export default function GestionCookiesPage() {
                       className="h-5 w-5 text-gold-600"
                       strokeWidth={1.5}
                     />
-                    <p className="mt-3 font-functional text-ui uppercase tracking-[2px] text-gold-700">
+                    <p className="mt-3 font-functional text-ui uppercase tracking-[2px] text-gold-900">
                       Analytiques
                     </p>
                     <p className="mt-2 text-sm text-stone-grey">
@@ -281,26 +244,18 @@ export default function GestionCookiesPage() {
                       consentement.
                     </p>
                   </div>
-                  <div className="rounded-card border border-terracotta-100 bg-terracotta-50 p-5">
-                    <Megaphone
-                      className="h-5 w-5 text-terracotta-deep"
-                      strokeWidth={1.5}
-                    />
-                    <p className="mt-3 font-functional text-ui uppercase tracking-[2px] text-terracotta-deep">
-                      Marketing
-                    </p>
-                    <p className="mt-2 text-sm text-stone-grey">
-                      Publicité ciblée via Meta Pixel. Activés avec votre consentement.
-                    </p>
-                  </div>
                 </div>
+                <p className="text-sm text-stone-grey/80">
+                  Aucun cookie marketing ou publicitaire (ex. Meta Pixel) n&apos;est déposé par le
+                  site à ce jour.
+                </p>
               </div>
             </section>
 
             {/* Article 3 */}
             <section id="liste" className="scroll-mt-24">
               <h2 className="font-display text-h2 text-noir">
-                Article 3 — Liste détaillée des cookies
+                Article 3 - Liste détaillée des cookies
               </h2>
               <div className="mt-4 space-y-6">
                 {COOKIES_LIST.map((cat) => (
@@ -327,8 +282,10 @@ export default function GestionCookiesPage() {
                       <p className="text-sm text-stone-grey">{cat.description}</p>
                     </div>
 
-                    {/* Tableau */}
-                    <div className="overflow-x-auto bg-white">
+                    {/* Tableau. Ce conteneur defilait deja horizontalement,
+                        mais sans etre atteignable au clavier : son contenu
+                        debordant restait hors de portee sans souris. */}
+                    <div tabIndex={0} className="overflow-x-auto bg-white">
                       <table className="w-full text-sm">
                         <thead className="border-b border-warm-beige bg-cream">
                           <tr>
@@ -356,7 +313,7 @@ export default function GestionCookiesPage() {
                               </td>
                               <td className="px-4 py-3 text-stone-grey">{cookie.emetteur}</td>
                               <td className="px-4 py-3 text-stone-grey">{cookie.finalite}</td>
-                              <td className="px-4 py-3 text-stone-grey">{cookie.duree}</td>
+                              <td className="px-4 py-3 text-stone-grey">{cookie.durée}</td>
                               <td className="px-4 py-3 text-stone-grey">{cookie.type}</td>
                             </tr>
                           ))}
@@ -371,30 +328,35 @@ export default function GestionCookiesPage() {
             {/* Article 4 */}
             <section id="consentement" className="scroll-mt-24">
               <h2 className="font-display text-h2 text-noir">
-                Article 4 — Gestion du consentement
+                Article 4 - Gestion du consentement
               </h2>
+
+              {/* La commande précède le texte explicatif : c'est ce que vient
+                  chercher un visiteur arrivé ici depuis le bandeau, qui lui
+                  promet de pouvoir changer d'avis. */}
+              <div className="mt-4">
+                <CookiePreferences />
+              </div>
+
               <div className="mt-4 space-y-4 text-body text-stone-grey">
                 <p>
                   Lors de votre première visite sur le site, un bandeau de gestion des cookies
                   s&apos;affiche et vous permet de choisir vos préférences avant tout dépôt de
-                  cookie non essentiel.
+                  cookie non essentiel. Le site n&apos;utilisant qu&apos;une seule catégorie de
+                  cookie optionnelle (mesure d&apos;audience), le choix se limite à deux actions
+                  claires :
                 </p>
-                <div className="grid gap-3 sm:grid-cols-3">
+                <div className="grid gap-3 sm:grid-cols-2">
                   {[
                     {
                       action: 'Tout accepter',
-                      desc: 'Active tous les cookies : nécessaires, analytiques et marketing.',
+                      desc: 'Active tous les cookies : nécessaires et analytiques.',
                       style: 'border-moss-100 bg-moss-50',
                     },
                     {
                       action: 'Tout refuser',
                       desc: "N'active que les cookies strictement nécessaires au fonctionnement.",
                       style: 'border-warm-beige bg-cream',
-                    },
-                    {
-                      action: 'Personnaliser',
-                      desc: 'Choisissez catégorie par catégorie selon vos préférences.',
-                      style: 'border-gold-200 bg-gold-50',
                     },
                   ].map(({ action, desc, style }) => (
                     <div key={action} className={`rounded-card border p-4 ${style}`}>
@@ -412,7 +374,7 @@ export default function GestionCookiesPage() {
                   sollicité.
                 </p>
                 <div className="rounded-soft border border-warm-beige bg-white px-4 py-3 text-sm text-stone-grey">
-                  <strong>À noter :</strong> le refus des cookies analytiques et marketing
+                  <strong>À noter :</strong> le refus des cookies analytiques
                   n&apos;affecte pas votre accès au site ni votre participation au jeu-concours.
                   Seuls les cookies strictement nécessaires sont indispensables au bon
                   fonctionnement du service.
@@ -423,7 +385,7 @@ export default function GestionCookiesPage() {
             {/* Article 5 */}
             <section id="duree" className="scroll-mt-24">
               <h2 className="font-display text-h2 text-noir">
-                Article 5 — Durée de conservation
+                Article 5 - Durée de conservation
               </h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
                 <p>
@@ -431,7 +393,14 @@ export default function GestionCookiesPage() {
                   cookies déposés sur votre terminal ne dépasse pas <strong>13 mois</strong>.
                   Au-delà, votre consentement est à nouveau recueilli.
                 </p>
-                <div className="overflow-hidden rounded-card border border-warm-beige">
+                <div
+                  // Defilable plutot que coupe : a 375 px ces tableaux depassent
+                  // le cadre, et overflow-hidden rendait la derniere colonne
+                  // inatteignable. tabIndex rend la zone defilable au clavier,
+                  // sans quoi son contenu resterait hors de portee sans souris.
+                  tabIndex={0}
+                  className="overflow-x-auto rounded-card border border-warm-beige"
+                >
                   <table className="w-full text-sm">
                     <thead className="bg-noir text-white">
                       <tr>
@@ -449,24 +418,14 @@ export default function GestionCookiesPage() {
                     <tbody className="divide-y divide-warm-beige bg-white">
                       {[
                         [
-                          'Cookies de session',
-                          'Durée de la navigation',
-                          'Supprimés à la fermeture du navigateur',
-                        ],
-                        [
-                          'Cookies fonctionnels',
-                          "Jusqu'à 13 mois",
-                          'Prolongés au renouvellement du consentement',
+                          'Session (refreshToken)',
+                          '7 jours',
+                          'Renouvelé à chaque connexion, expire après inactivité',
                         ],
                         [
                           'Google Analytics',
                           '2 ans maximum',
-                          'Anonymisation IP activée — aucune donnée nominative transmise',
-                        ],
-                        [
-                          'Meta Pixel (_fbp, fr)',
-                          '3 mois',
-                          'Conformément à la politique Meta',
+                          'Anonymisation IP activée - aucune donnée nominative transmise',
                         ],
                         [
                           'Consentement enregistré',
@@ -489,7 +448,7 @@ export default function GestionCookiesPage() {
             {/* Article 6 */}
             <section id="navigateur" className="scroll-mt-24">
               <h2 className="font-display text-h2 text-noir">
-                Article 6 — Paramètres du navigateur
+                Article 6 - Paramètres du navigateur
               </h2>
               <div className="mt-4 space-y-4 text-body text-stone-grey">
                 <p>
@@ -510,7 +469,7 @@ export default function GestionCookiesPage() {
                         href={lien}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="mt-3 inline-block text-sm text-terracotta-deep underline underline-offset-2 transition-colors hover:text-terracotta-hover"
+                        className="mt-3 inline-block text-sm text-terracotta-600 underline underline-offset-2 transition-colors hover:text-terracotta-700"
                       >
                         Voir les instructions
                       </a>
@@ -527,14 +486,21 @@ export default function GestionCookiesPage() {
 
             {/* Article 7 */}
             <section id="contact" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">Article 7 — Contact</h2>
+              <h2 className="font-display text-h2 text-noir">Article 7 - Contact</h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
                 <p>
                   Pour toute question relative à l&apos;utilisation des cookies ou à la
                   protection de vos données personnelles, contactez le responsable du
                   traitement :
                 </p>
-                <div className="overflow-hidden rounded-card border border-warm-beige bg-white">
+                <div
+                  // Defilable plutot que coupe : a 375 px ces tableaux depassent
+                  // le cadre, et overflow-hidden rendait la derniere colonne
+                  // inatteignable. tabIndex rend la zone defilable au clavier,
+                  // sans quoi son contenu resterait hors de portee sans souris.
+                  tabIndex={0}
+                  className="overflow-x-auto rounded-card border border-warm-beige bg-white"
+                >
                   <table className="w-full text-sm">
                     <tbody className="divide-y divide-warm-beige">
                       {[
@@ -542,7 +508,7 @@ export default function GestionCookiesPage() {
                         ['Adresse', '18 rue Léon Frot, 75011 Paris - France'],
                         ['Email RGPD', 'rgpd@thetiptop.fr'],
                         ['Email contact', 'contact@thetiptop.fr'],
-                        ['Autorité de contrôle', 'CNIL — www.cnil.fr'],
+                        ['Autorité de contrôle', 'CNIL - www.cnil.fr'],
                       ].map(([label, value]) => (
                         <tr key={label} className="even:bg-cream">
                           <td className="px-4 py-3 font-medium text-noir">{label}</td>
@@ -550,14 +516,14 @@ export default function GestionCookiesPage() {
                             {label === 'Email RGPD' ? (
                               <a
                                 href="mailto:rgpd@thetiptop.fr"
-                                className="text-terracotta-deep underline underline-offset-2"
+                                className="text-terracotta-600 underline underline-offset-2"
                               >
                                 {value}
                               </a>
                             ) : label === 'Email contact' ? (
                               <a
                                 href="mailto:contact@thetiptop.fr"
-                                className="text-terracotta-deep underline underline-offset-2"
+                                className="text-terracotta-600 underline underline-offset-2"
                               >
                                 {value}
                               </a>
@@ -566,7 +532,7 @@ export default function GestionCookiesPage() {
                                 href="https://www.cnil.fr"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-terracotta-deep underline underline-offset-2"
+                                className="text-terracotta-600 underline underline-offset-2"
                               >
                                 {value}
                               </a>
@@ -588,21 +554,21 @@ export default function GestionCookiesPage() {
                 Pour en savoir plus sur la protection de vos données, consultez notre{' '}
                 <Link
                   href="/politique-confidentialite"
-                  className="font-medium text-terracotta-deep underline underline-offset-2"
+                  className="font-medium text-terracotta-600 underline underline-offset-2"
                 >
                   Politique de confidentialité
                 </Link>
                 , nos{' '}
                 <Link
                   href="/mentions-legales"
-                  className="font-medium text-terracotta-deep underline underline-offset-2"
+                  className="font-medium text-terracotta-600 underline underline-offset-2"
                 >
                   Mentions légales
                 </Link>{' '}
                 et nos{' '}
                 <Link
                   href="/cgu"
-                  className="font-medium text-terracotta-deep underline underline-offset-2"
+                  className="font-medium text-terracotta-600 underline underline-offset-2"
                 >
                   CGU
                 </Link>

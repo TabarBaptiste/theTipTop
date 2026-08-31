@@ -93,7 +93,7 @@ Ne créez jamais de fichiers à la racine du monorepo. Les Dockerfiles se situen
 - **HTTP 403** sur toutes les routes protégées — jamais 401. Convention du projet non négociable.
 - **Swagger requis** sur chaque endpoint de l'API.
 - **Pas de secrets en dur** — toujours via des variables d'environnement.
-- **Commits conventionnels** appliqués : `feat`, `fix`, `test`, `docs`, `refactor`, `chore`, `ci`
+- **Commits conventionnels** Avant de créer une branche ou un commit, lire et respecter les règles détaillées dans [.github/instructions/copilot-instructions.instructions.md](../.github/instructions/copilot-instructions.instructions.md) (stratégie de branches GitFlow, scopes, format des messages).
 
 ### Ports locaux
 

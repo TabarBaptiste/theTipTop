@@ -3,8 +3,9 @@
 // ===========================================
 
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ScheduleModule } from '@nestjs/schedule';
 import { APP_GUARD } from '@nestjs/core';
 
 // Modules internes
@@ -19,6 +20,8 @@ import { StatsModule } from './modules/stats/stats.module';
 import { GrandPrizeModule } from './modules/grand-prize/grand-prize.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { GameConfigModule } from './modules/game-config/game-config.module';
+import { NewsletterModule } from './modules/newsletter/newsletter.module';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
   imports: [
@@ -28,27 +31,41 @@ import { GameConfigModule } from './modules/game-config/game-config.module';
       envFilePath: ['.env.local', '.env'],
     }),
 
-    // Rate limiting (100 requêtes par minute par IP)
-    ThrottlerModule.forRoot([
-      {
-        name: 'short',
-        ttl: 1000,
-        limit: 3,
-      },
-      {
-        name: 'medium',
-        ttl: 10000,
-        limit: 20,
-      },
-      {
-        name: 'long',
-        ttl: 60000,
-        limit: 100,
-      },
-    ]),
+    // Rate limiting par IP, sur trois paliers : la rafale, la minute, l'heure
+    // de pointe. Les plafonds sont configurables - sans quoi une campagne de
+    // charge, émise depuis une seule adresse, ne mesurerait que le limiteur.
+    // Les valeurs par défaut sont celles de production.
+    ThrottlerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => [
+        {
+          name: 'short',
+          ttl: 1000,
+          limit: config.get<number>('THROTTLE_SHORT_LIMIT', 3),
+        },
+        {
+          name: 'medium',
+          ttl: 10000,
+          limit: config.get<number>('THROTTLE_MEDIUM_LIMIT', 20),
+        },
+        {
+          name: 'long',
+          // Exprimé en secondes dans l'environnement, en millisecondes par
+          // @nestjs/throttler depuis la v5.
+          ttl: config.get<number>('THROTTLE_TTL', 60) * 1000,
+          limit: config.get<number>('THROTTLE_LIMIT', 100),
+        },
+      ],
+    }),
+
+    // Jobs planifiés (libération des réservations, relances, purge RGPD)
+    ScheduleModule.forRoot(),
 
     // Database
     PrismaModule,
+
+    // Health check
+    HealthModule,
 
     // Cache
     RedisModule,
@@ -63,6 +80,7 @@ import { GameConfigModule } from './modules/game-config/game-config.module';
     GrandPrizeModule,
     AuditModule,
     GameConfigModule,
+    NewsletterModule,
   ],
   providers: [
     // Rate limiting global

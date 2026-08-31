@@ -12,6 +12,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuthStore } from '@/lib/stores/auth-store';
+import { useIsHydrated } from '@/lib/hooks/use-is-hydrated';
+import { landingRouteFor } from '@/lib/landing-route';
 import { trackLoginSuccess, trackLoginFailure, trackCTAClick } from '@/lib/analytics';
 
 const loginSchema = z.object({
@@ -27,13 +29,12 @@ function OAuthErrorHandler() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
+    // facebook_no_email n'est plus émis : un compte sans adresse est désormais
+    // accepté sous une adresse de substitution, puis invité à en renseigner une
+    // vraie. Seule une panne réelle refuse encore la connexion.
     const error = searchParams.get('error');
-    if (error === 'facebook_no_email') {
-      toast.error(
-        "Votre compte Facebook ne partage pas d'adresse e-mail. Connectez-vous avec email/mot de passe ou Google.",
-      );
-    } else if (error === 'facebook_failed') {
-      toast.error('La connexion Facebook a echoue. Veuillez reessayer.');
+    if (error === 'facebook_failed') {
+      toast.error('La connexion Facebook a échoué. Veuillez réessayer.');
     }
   }, [searchParams]);
 
@@ -44,6 +45,9 @@ export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
+  // Tant que React n'a pas pris la main, le formulaire reste un formulaire
+  // HTML : le soumettre enverrait email ET mot de passe dans l'URL.
+  const isHydrated = useIsHydrated();
 
   const {
     register,
@@ -58,8 +62,10 @@ export default function LoginPage() {
     try {
       await login(data.email, data.password);
       trackLoginSuccess('email');
-      toast.success('Connexion reussie !');
-      router.push('/dashboard');
+      toast.success('Connexion réussie !');
+      // getState() et non la valeur du hook : le rôle vient tout juste d'être
+      // écrit dans le store, celle capturée au rendu serait encore nulle.
+      router.push(landingRouteFor(useAuthStore.getState().user?.role));
     } catch (error: any) {
       const status = error?.response?.status;
       if (status === 401 || status === 403) {
@@ -67,10 +73,10 @@ export default function LoginPage() {
         toast.error('Email ou mot de passe incorrect');
       } else if (status === 429) {
         trackLoginFailure('email', 'rate_limited');
-        toast.error('Trop de tentatives. Reessayez dans quelques instants.');
+        toast.error('Trop de tentatives. Réessayez dans quelques instants.');
       } else {
         trackLoginFailure('email', 'server_error');
-        toast.error('Erreur lors de la connexion. Reessayez plus tard.');
+        toast.error('Erreur lors de la connexion. Réessayez plus tard.');
       }
     } finally {
       setIsLoading(false);
@@ -84,7 +90,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-cream px-4 py-12">
+    <div className="flex min-h-[calc(100vh-5rem)] items-center justify-center bg-cream px-4 py-12">
       {/* Gestionnaire d'erreurs OAuth - doit etre dans un Suspense boundary */}
       <Suspense fallback={null}>
         <OAuthErrorHandler />
@@ -93,10 +99,10 @@ export default function LoginPage() {
       <div className="w-full max-w-lg sm:rounded-card sm:border sm:border-warm-beige sm:bg-white sm:p-8 sm:shadow-sm">
         <h1 className="font-display text-h2 text-noir">Se connecter</h1>
         <p className="mt-2 text-sm text-stone-grey">
-          Connectez-vous pour participer au jeu-concours
+          Ravis de vous revoir !
         </p>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
+        <form noValidate onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
           <div>
             <Label htmlFor="email">Adresse e-mail</Label>
             <Input
@@ -116,9 +122,9 @@ export default function LoginPage() {
               {/* Pas de flux "mot de passe oublié" côté API : on oriente vers le support */}
               <a
                 href="mailto:contact@thetiptop.fr?subject=Mot%20de%20passe%20oubli%C3%A9"
-                className="text-xs text-terracotta-deep hover:underline"
+                className="text-xs text-terracotta-600 hover:underline"
               >
-                Mot de passe oublie ?
+                Mot de passe oublié ?
               </a>
             </div>
             <Input
@@ -132,7 +138,7 @@ export default function LoginPage() {
             )}
           </div>
 
-          <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+          <Button type="submit" className="w-full" size="lg" disabled={isLoading || !isHydrated}>
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -144,12 +150,19 @@ export default function LoginPage() {
           </Button>
         </form>
 
+        {/* Divider */}
+        <div className="mt-6 flex items-center gap-4">
+          <div className="flex-1 border-t border-warm-beige"></div>
+          <span className="text-sm text-stone-grey">OU</span>
+          <div className="flex-1 border-t border-warm-beige"></div>
+        </div>
+
         {/* OAuth */}
         <div className="mt-6 space-y-3">
           <button
             type="button"
             onClick={() => handleOAuthLogin('google')}
-            className="flex w-full items-center gap-3 rounded-soft border border-warm-beige bg-white px-4 py-3 text-sm font-medium text-noir transition-colors hover:bg-cream"
+            className="flex w-full items-center justify-center gap-3 rounded-soft border border-gold-700 bg-white px-4 py-3 text-sm font-medium text-noir transition-colors hover:bg-cream"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -163,7 +176,7 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={() => handleOAuthLogin('facebook')}
-            className="flex w-full items-center gap-3 rounded-soft border border-warm-beige bg-white px-4 py-3 text-sm font-medium text-noir transition-colors hover:bg-cream"
+            className="flex w-full items-center justify-center gap-3 rounded-soft border border-gold-700 bg-white px-4 py-3 text-sm font-medium text-noir transition-colors hover:bg-cream"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="#1877F2">
               <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.886v2.267h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z" />
@@ -174,8 +187,8 @@ export default function LoginPage() {
 
         <p className="mt-8 text-center text-sm text-stone-grey">
           Pas encore de compte ?{' '}
-          <Link href="/auth/register" className="font-semibold text-terracotta-deep hover:underline">
-            Creer un compte
+          <Link href="/auth/register" className="font-semibold text-terracotta-600 hover:underline">
+            Créer un compte
           </Link>
         </p>
       </div>

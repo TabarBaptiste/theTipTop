@@ -7,14 +7,17 @@ import {
   BadRequestException,
   NotFoundException,
   ConflictException,
+  ForbiddenException,
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, LeadStatus, User } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TicketsService } from '../tickets/tickets.service';
 import { RedisService } from '../../redis/redis.service';
+import { isPlaceholderEmail } from '../auth/placeholder-email';
 import { PRIZES_MAP_CACHE_KEY, STATS_CACHE_PATTERN } from '../../redis/cache-keys';
+import { CreateParticipationDto } from './dto/create-participation.dto';
 
 type ParticipationWithTicket = Prisma.ParticipationGetPayload<{ include: { ticket: true } }>;
 
@@ -42,11 +45,31 @@ export class ParticipationsService {
 
   /**
    * Créer une participation (utiliser un code)
+   *
+   * Emprunté par deux chemins : l'espace personnel d'un client déjà activé
+   * (UC-06), et la première participation via Social Login (UC-05, chemin A),
+   * où l'identité est certifiée par le fournisseur tiers et ne demande donc
+   * pas de code de vérification par email.
+   *
+   * Dans les deux cas le ticket est consommé au moment de la soumission, sous
+   * verrou transactionnel : le premier arrivé l'emporte, les autres reçoivent
+   * « ce code a déjà été utilisé ».
    */
-  async participate(userId: string, code: string) {
+  async participate(user: User, dto: CreateParticipationDto) {
+    // Verrou place avant toute autre verification : un compte sous adresse de
+    // substitution ne peut recevoir ni l'annonce du lot ni le rappel du delai
+    // de retrait. Le laisser participer consommerait definitivement son ticket
+    // pour un gain dont il ne serait jamais informe.
+    if (isPlaceholderEmail(user.email)) {
+      throw new ForbiddenException(
+        'Renseignez une adresse email valide avant de participer : sans elle, nous ne pourrions pas vous annoncer votre lot.',
+      );
+    }
+
+    const userId = user.id;
     await this.checkSubmitRateLimit(userId);
 
-    const normalizedCode = code.toUpperCase().trim();
+    const normalizedCode = dto.code.toUpperCase().trim();
 
     const verification = await this.ticketsService.verifyCode(normalizedCode);
     if (!verification.isValid || !verification.ticket) {
@@ -70,13 +93,22 @@ export class ParticipationsService {
         throw new ConflictException('Ce code a déjà été utilisé');
       }
 
-      await tx.ticket.update({
-        where: { id: ticketCheck.id },
+      // La condition isUsed fait partie du UPDATE, comme dans le parcours sans
+      // compte. La relire séparément ne suffit pas : deux soumissions
+      // simultanées voient toutes deux un ticket libre, et la seconde échouait
+      // alors sur la contrainte d'unicité - une erreur 500 au lieu du conflit
+      // métier. Ici la seconde ne touche aucune ligne et repart proprement.
+      const consumed = await tx.ticket.updateMany({
+        where: { id: ticketCheck.id, isUsed: false },
         data: {
           isUsed: true,
           usedAt: new Date(),
         },
       });
+
+      if (consumed.count === 0) {
+        throw new ConflictException('Ce code a déjà été utilisé');
+      }
 
       return tx.participation.create({
         data: {
@@ -97,6 +129,7 @@ export class ParticipationsService {
       });
     });
 
+    await this.ensureVerifiedLead(user, dto, ticket.id);
     await this.invalidateCachesAfterParticipation();
 
     return {
@@ -107,6 +140,65 @@ export class ParticipationsService {
       participatedAt: participation.createdAt,
       prizeDelivered: participation.prizeDelivered,
     };
+  }
+
+  /**
+   * Crée le lead « verifie » du chemin Social Login (UC-05, chemin A).
+   *
+   * Sans lui, un participant arrivé par Google ou Facebook n'existerait que
+   * dans la table users : il échapperait à la synchronisation Brevo et aux
+   * statistiques de conversion, qui reposent toutes deux sur les leads.
+   *
+   * Trois garde-fous :
+   * - sans consentement explicite, on ne crée rien. C'est ce qui préserve le
+   *   comportement historique de l'espace personnel, qui ne poste qu'un code ;
+   * - un lead actif existant n'est jamais dupliqué, ce que l'index unique
+   *   partiel de RG-01 interdirait de toute façon ;
+   * - un échec ici ne doit pas annuler la participation, déjà enregistrée et
+   *   transactionnelle : l'erreur est avalée et journalisée par l'appelant.
+   */
+  private async ensureVerifiedLead(
+    user: User,
+    dto: CreateParticipationDto,
+    ticketId: string,
+  ): Promise<void> {
+    if (dto.consentData !== true) {
+      return;
+    }
+
+    const existing = await this.prisma.lead.findFirst({
+      where: {
+        email: user.email,
+        status: { in: [LeadStatus.VERIFIE, LeadStatus.EN_ATTENTE_VERIFICATION] },
+      },
+      select: { id: true },
+    });
+
+    if (existing) {
+      return;
+    }
+
+    const now = new Date();
+    await this.prisma.lead.create({
+      data: {
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phone: user.phone,
+        birthDate: user.birthDate,
+        gender: user.gender,
+        // L'identité est certifiée par le fournisseur tiers : aucun code de
+        // vérification n'est généré et le lead naît directement vérifié.
+        status: LeadStatus.VERIFIE,
+        verifiedAt: now,
+        rgpdConsentAt: now,
+        consentEmail: dto.consentEmail ?? false,
+        userId: user.id,
+        // Le ticket visé, comme pour un lead du parcours classique : sans lui,
+        // un lead arrivé par Social Login se lirait « aucun ticket visé ».
+        ticketId,
+      },
+    });
   }
 
   /**

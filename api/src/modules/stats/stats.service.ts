@@ -313,26 +313,27 @@ export class StatsService {
 
   /**
    * Données pour export (emailing)
+   *
+   * RGPD : le consentement explicite est **toujours** exigé pour un export à
+   * des fins d'emailing (cf. cahier des charges). Les contacts sans
+   * `consentEmail` sont donc systématiquement exclus, quel que soit le segment
+   * demandé. Cette contrainte est appliquée côté serveur pour ne pas dépendre
+   * du client.
    */
-  async getEmailingData(options: { consentEmail?: boolean; hasParticipated?: boolean }) {
-    const cacheKey = `stats:emailing:${options.consentEmail ?? 'all'}:${options.hasParticipated ?? 'all'}`;
+  async getEmailingData(options: { hasParticipated?: boolean }) {
+    const cacheKey = `stats:emailing:${options.hasParticipated ?? 'all'}`;
     return this.redis.getOrSet(cacheKey, STATS_EMAILING_TTL, () =>
       this.computeEmailingData(options),
     );
   }
 
-  private async computeEmailingData(options: {
-    consentEmail?: boolean;
-    hasParticipated?: boolean;
-  }) {
+  private async computeEmailingData(options: { hasParticipated?: boolean }) {
     const where: Prisma.UserWhereInput = {
       role: 'CLIENT',
       deletedAt: null,
+      // RGPD : exclusion non négociable des contacts non consentants
+      consentEmail: true,
     };
-
-    if (options.consentEmail !== undefined) {
-      where.consentEmail = options.consentEmail;
-    }
 
     if (options.hasParticipated !== undefined) {
       where.participations = options.hasParticipated ? { some: {} } : { none: {} };

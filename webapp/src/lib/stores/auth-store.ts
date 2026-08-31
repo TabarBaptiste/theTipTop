@@ -17,6 +17,12 @@ export interface User {
   consentEmail?: boolean;
   consentData?: boolean;
   createdAt: string;
+  /**
+   * Faux pour un compte créé par Google ou Facebook, qui n'a jamais eu de mot
+   * de passe. Sa page de paramètres propose alors d'en définir un plutôt que
+   * d'en changer. Le hachage lui-même ne quitte jamais l'API.
+   */
+  hasPassword?: boolean;
 }
 
 interface AuthState {
@@ -140,7 +146,7 @@ export const useAuthStore = create<AuthState>()(
       checkAuth: async () => {
         const refreshToken = Cookies.get('refreshToken');
         if (!refreshToken) {
-          set({ isLoading: false });
+          get().logout();
           return;
         }
 

@@ -2,10 +2,15 @@
 // Service GameConfig (public)
 // ===========================================
 
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
-import { GAME_CONFIG_CACHE_KEY, GAME_CONFIG_TTL } from '../../redis/cache-keys';
+import {
+  GAME_CONFIG_CACHE_KEY,
+  GAME_CONFIG_TTL,
+  STATS_CACHE_PATTERN,
+} from '../../redis/cache-keys';
+import { UpdateGameConfigDto } from './dto/update-game-config.dto';
 
 export type GamePhase = 'not_started' | 'active' | 'claim_only' | 'ended';
 
@@ -59,5 +64,37 @@ export class GameConfigService {
       isActive: config.isActive,
       phase,
     };
+  }
+
+  /**
+   * Met à jour les dates de la configuration active (Admin) et invalide le
+   * cache Redis (game:config + stats:*) pour que le changement soit
+   * immédiatement visible, sans attendre l'expiration du TTL.
+   */
+  async updateConfig(dto: UpdateGameConfigDto): Promise<PublicGameConfig> {
+    const current = await this.prisma.gameConfig.findFirst({ where: { isActive: true } });
+    if (!current) {
+      throw new NotFoundException('Aucune configuration de jeu active');
+    }
+
+    const startDate = dto.startDate ? new Date(dto.startDate) : current.startDate;
+    const endDate = dto.endDate ? new Date(dto.endDate) : current.endDate;
+    const claimEndDate = dto.claimEndDate ? new Date(dto.claimEndDate) : current.claimEndDate;
+
+    if (startDate >= endDate || endDate >= claimEndDate) {
+      throw new BadRequestException(
+        'Les dates doivent être chronologiques : début < fin < fin de réclamation',
+      );
+    }
+
+    await this.prisma.gameConfig.update({
+      where: { id: current.id },
+      data: { startDate, endDate, claimEndDate },
+    });
+
+    await this.redis.del(GAME_CONFIG_CACHE_KEY);
+    await this.redis.delByPattern(STATS_CACHE_PATTERN);
+
+    return this.getPublicConfig() as Promise<PublicGameConfig>;
   }
 }

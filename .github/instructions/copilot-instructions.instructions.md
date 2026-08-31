@@ -1,3 +1,7 @@
+---
+applyTo: "**"
+---
+
 # Instructions AI pour Furious Ducks CI/CD
 
 **Projet** : Furious Ducks  
@@ -88,6 +92,10 @@ perf(api): implémenter caching Redis sur endpoints /stats
 ci(gitlab): exposer SSH sur port 443 pour école
 chore(deps): mettre à jour ioredis v9.x
 ```
+
+### Règle stricte : pas de co-auteur
+
+Ne jamais ajouter de ligne `Co-Authored-By` (ou équivalente) dans un message de commit, y compris lorsque le commit est généré par Claude Code ou Copilot.
 
 ### Breaking Changes
 

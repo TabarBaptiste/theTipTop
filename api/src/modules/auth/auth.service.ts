@@ -2,13 +2,14 @@
 // Service d'Authentification
 // ===========================================
 
-import { Injectable, UnauthorizedException, ConflictException, Logger } from '@nestjs/common';
+import { Injectable, ForbiddenException, ConflictException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { randomUUID } from 'crypto';
+import { randomBytes, randomUUID } from 'crypto';
 import * as bcrypt from 'bcryptjs';
 
 import { PrismaService } from '../../prisma/prisma.service';
+import { RedisService } from '../../redis/redis.service';
 import { UsersService } from '../users/users.service';
 import { RegisterDto } from './dto/register.dto';
 import { User, Role } from '@prisma/client';
@@ -37,7 +38,69 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly redis: RedisService,
   ) {}
+
+  // ===========================================
+  // Code d'échange OAuth
+  // ===========================================
+  // Le retour de Google et de Facebook est une redirection : le navigateur
+  // suit une URL, et tout ce qu'elle contient entre dans l'historique, part
+  // dans l'en-tête Referer vers les ressources tierces de la page d'arrivée,
+  // et s'inscrit dans les journaux de chaque intermédiaire traversé.
+  //
+  // Les jetons ne transitent donc plus par l'URL. Elle ne porte qu'un code
+  // opaque, sans valeur en soi, que le front échange contre les jetons par une
+  // requête POST — dont le corps n'est ni journalisé ni historisé.
+
+  /** Durée de vie du code. Le front l'échange dans la seconde qui suit. */
+  private static readonly EXCHANGE_TTL_SECONDS = 60;
+
+  private exchangeKey(code: string): string {
+    return `oauth:exchange:${code}`;
+  }
+
+  /**
+   * Met les jetons de côté et renvoie le code qui permettra de les retirer.
+   *
+   * 32 octets tirés du générateur cryptographique : un code devinable
+   * donnerait une session complète à qui le trouverait.
+   */
+  async createOAuthExchangeCode(tokens: TokenResponse): Promise<string> {
+    const code = randomBytes(32).toString('hex');
+    await this.redis.set(
+      this.exchangeKey(code),
+      JSON.stringify(tokens),
+      AuthService.EXCHANGE_TTL_SECONDS,
+    );
+    return code;
+  }
+
+  /**
+   * Échange le code contre les jetons, une seule fois.
+   *
+   * La lecture et la suppression sont atomiques : deux requêtes simultanées ne
+   * peuvent pas obtenir les mêmes jetons. Un code inconnu, expiré ou déjà
+   * consommé donne le même refus, sans distinction — la nuance renseignerait
+   * un attaquant sur ce qu'il a deviné juste.
+   */
+  async consumeOAuthExchangeCode(code: string): Promise<TokenResponse> {
+    let charge: string | null;
+    try {
+      charge = await this.redis.getDel(this.exchangeKey(code));
+    } catch (err) {
+      // Sans magasin joignable, l'usage unique n'est plus garanti : on refuse
+      // plutôt que de laisser passer.
+      this.logger.error(`Echange OAuth impossible : ${(err as Error).message}`);
+      throw new ForbiddenException('Connexion impossible. Veuillez réessayer.');
+    }
+
+    if (!charge) {
+      throw new ForbiddenException('Code de connexion invalide ou expiré.');
+    }
+
+    return JSON.parse(charge) as TokenResponse;
+  }
 
   /**
    * Valide les credentials d'un utilisateur
@@ -117,7 +180,8 @@ export class AuthService {
     });
 
     if (!storedToken) {
-      throw new UnauthorizedException('Refresh token invalide ou expiré');
+      // Convention projet : 403 et jamais 401, y compris hors des gardes.
+      throw new ForbiddenException('Refresh token invalide ou expiré');
     }
 
     // Révoquer l'ancien refresh token
@@ -128,7 +192,7 @@ export class AuthService {
 
     const user = await this.usersService.findById(userId);
     if (!user) {
-      throw new UnauthorizedException('Utilisateur non trouvé');
+      throw new ForbiddenException('Utilisateur non trouvé');
     }
 
     return this.generateTokens(user);

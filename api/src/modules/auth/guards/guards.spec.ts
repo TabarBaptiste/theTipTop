@@ -5,6 +5,8 @@
 import { ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { JwtRefreshGuard } from './jwt-refresh.guard';
+import { LocalAuthGuard } from './local-auth.guard';
 import { RolesGuard } from './roles.guard';
 
 function createContext(user: unknown): ExecutionContext {
@@ -50,6 +52,40 @@ describe('JwtAuthGuard', () => {
 
       expect(guard.handleRequest(null, user, null, createContext(user))).toBe(user);
     });
+  });
+});
+
+// La convention « jamais 401 » vaut pour toutes les gardes, pas seulement pour
+// celle du token d'accès : les stratégies Passport lèvent des
+// UnauthorizedException que chaque garde doit convertir.
+describe.each([
+  ['JwtRefreshGuard', () => new JwtRefreshGuard()],
+  ['LocalAuthGuard', () => new LocalAuthGuard()],
+])('%s', (_nom, fabriquer) => {
+  let guard: JwtRefreshGuard | LocalAuthGuard;
+
+  beforeEach(() => {
+    guard = fabriquer();
+  });
+
+  it('should throw HTTP 403 (convention projet, jamais 401) when no user', () => {
+    expect(() => guard.handleRequest(null, null, null, createContext(null))).toThrow(
+      ForbiddenException,
+    );
+  });
+
+  it('should preserve the strategy message', () => {
+    // Seul le statut change : le message reste celui de la stratégie, qui
+    // porte l'information utile au client.
+    expect(() =>
+      guard.handleRequest(new Error('Refresh token invalide'), null, null, createContext(null)),
+    ).toThrow('Refresh token invalide');
+  });
+
+  it('should return the user when authenticated', () => {
+    const user = { id: 'u1' };
+
+    expect(guard.handleRequest(null, user, null, createContext(user))).toBe(user);
   });
 });
 

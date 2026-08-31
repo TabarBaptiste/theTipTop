@@ -10,7 +10,10 @@ import { SignOptions } from 'jsonwebtoken';
 
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { EmailChangeService } from './email-change.service';
 import { UsersModule } from '../users/users.module';
+// Redis et Prisma sont globaux, MailModule ne l'est pas : il doit etre importe.
+import { MailModule } from '../../mail/mail.module';
 
 // Strategies
 import { LocalStrategy } from './strategies/local.strategy';
@@ -58,6 +61,7 @@ const FacebookStrategyFactory = {
 @Module({
   imports: [
     UsersModule,
+    MailModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -73,6 +77,7 @@ const FacebookStrategyFactory = {
   controllers: [AuthController],
   providers: [
     AuthService,
+    EmailChangeService,
     LocalStrategy,
     JwtStrategy,
     JwtRefreshStrategy,

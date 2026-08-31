@@ -2,11 +2,11 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { StaticImageData } from 'next/image';
-import boite100gImg from '@/img/boite_100g.jpeg';
-import infuseurPremiumImg from '@/img/Infuseur_premium.jpg';
-import coffret5thesImg from '@/img/coffret_5_thes.jpg';
-import theiereImg from '@/img/theiere.jpeg';
-import boiteMatchaImg from '@/img/boite_matcha.jpg';
+import infuseurPremiumImg from '@/img/infuseur_premium.webp';
+import boite100gDetoxImg from '@/img/boite_100g_detox.webp';
+import boite100gSignatureImg from '@/img/boite_100g_signature.webp';
+import coffret39Img from '@/img/coffret_decouverte_39.webp';
+import coffret69Img from '@/img/coffret_decouverte_69.webp';
 import { PrizeCard, type PrizeCategory } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { api } from '@/lib/api';
@@ -30,12 +30,13 @@ interface PrizeImageConfig {
 
 // Images locales par code de lot (optimisation Next.js)
 // La table Prize expose `imageUrl` pour un futur CDN ; en attendant, on mappe ici.
+// Chaque visuel est cadré en 4:3, comme les cartes, et pèse moins de 100 Ko.
 const PRIZE_IMAGES: Record<string, PrizeImageConfig> = {
-  INFUSER:       { src: infuseurPremiumImg, alt: 'Infuseur à thé',              category: 'accessoire' },
-  TEA_DETOX:     { src: boite100gImg,       alt: 'Boîte 100g thé détox',        category: 'signature'  },
-  TEA_SIGNATURE: { src: boiteMatchaImg,     alt: 'Boîte 100g thé signature',    category: 'signature'  },
-  GIFT_BOX_39:   { src: coffret5thesImg,    alt: 'Coffret découverte',          category: 'signature'  },
-  GIFT_BOX_69:   { src: theiereImg,         alt: 'Coffret découverte premium',  category: 'accessoire' },
+  INFUSER:       { src: infuseurPremiumImg,    alt: 'Infuseur à thé',                   category: 'accessoire' },
+  TEA_DETOX:     { src: boite100gDetoxImg,     alt: 'Boîte de 100 g de thé détox',      category: 'signature'  },
+  TEA_SIGNATURE: { src: boite100gSignatureImg, alt: 'Boîte de 100 g de thé signature',  category: 'signature'  },
+  GIFT_BOX_39:   { src: coffret39Img,          alt: 'Coffret découverte à 39 €',        category: 'signature'  },
+  GIFT_BOX_69:   { src: coffret69Img,          alt: 'Coffret découverte à 69 €',        category: 'accessoire' },
 };
 
 export function PrizesSection() {
@@ -57,6 +58,16 @@ export function PrizesSection() {
         <p className="mt-2 text-sm text-stone">
           100% des tickets sont gagnants
         </p>
+        {/* Sans ce rappel, ces cinq lots passent pour tout ce qu'il y a à
+            gagner : la section ne mentionnait pas le tirage, alors que la page
+            s'organise autour de lui. */}
+        <p className="mt-2 text-sm text-stone">
+          Et au-dessus de ces lots,{' '}
+          <a href="#grand-prize" className="text-terracotta-600 underline underline-offset-2">
+            le tirage au sort d&apos;un an de thé
+          </a>
+          , auquel chaque participation vous inscrit.
+        </p>
 
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {isLoading &&
@@ -75,9 +86,11 @@ export function PrizesSection() {
           {prizes?.map((prize) => {
             const imgConfig = PRIZE_IMAGES[prize.code];
 
-            // Sécurité : Si le code API n'existe pas localement, on évite le crash en utilisant
-            // l'imageUrl de l'API (si disponible) ou un fallback vide.
-            const imageSrc = imgConfig?.src ?? prize.imageUrl ?? '';
+            // L'URL distante d'abord : c'est elle qui permet de changer un
+            // visuel sans redéployer. L'image empaquetée reste en repli, et
+            // couvre trois cas - Cloudinary non configuré, lot absent du
+            // catalogue local, ou compte injoignable au moment du rendu.
+            const imageSrc = prize.imageUrl ?? imgConfig?.src ?? '';
             const imageAlt = imgConfig?.alt ?? prize.name;
 
             return (

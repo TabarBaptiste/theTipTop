@@ -2,7 +2,42 @@
 // Tests unitaires - lib/utils
 // ===========================================
 
-import { cn, formatDate, formatDateTime, getPrizeName } from './utils';
+import { cn, formatDate, formatDateTime, getPrizeName, toDateInputValue } from './utils';
+
+describe('toDateInputValue', () => {
+  it('rend la date locale au format AAAA-MM-JJ', () => {
+    expect(toDateInputValue(new Date(2008, 7, 17))).toBe('2008-08-17');
+  });
+
+  // La borne de majorite passait par toISOString(), qui convertit en UTC :
+  // minuit heure de Paris y devient la veille. La personne ayant 18 ans le jour
+  // meme ne pouvait alors pas saisir sa date de naissance, le calendrier
+  // s arretant un jour trop tot.
+  it('ne recule pas d un jour sur un fuseau en avance sur UTC', () => {
+    expect(toDateInputValue(new Date(2008, 7, 17))).not.toBe('2008-08-16');
+  });
+
+  it('complete les mois et jours a deux chiffres', () => {
+    expect(toDateInputValue(new Date(2008, 0, 5))).toBe('2008-01-05');
+  });
+
+  it('donne bien la borne des 18 ans a partir d aujourd hui', () => {
+    const aujourdhui = new Date();
+    const borne = new Date(
+      aujourdhui.getFullYear() - 18,
+      aujourdhui.getMonth(),
+      aujourdhui.getDate(),
+    );
+
+    const attendu = [
+      aujourdhui.getFullYear() - 18,
+      String(aujourdhui.getMonth() + 1).padStart(2, '0'),
+      String(aujourdhui.getDate()).padStart(2, '0'),
+    ].join('-');
+
+    expect(toDateInputValue(borne)).toBe(attendu);
+  });
+});
 
 describe('cn', () => {
   it('merges class names', () => {

@@ -12,7 +12,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuthStore } from '@/lib/stores/auth-store';
+import { useIsHydrated } from '@/lib/hooks/use-is-hydrated';
 import { trackRegisterSuccess, trackRegisterFailure, trackCTAClick } from '@/lib/analytics';
+import { toDateInputValue } from '@/lib/utils';
 
 const MIN_AGE = 18;
 const MAX_AGE = 120;
@@ -31,14 +33,17 @@ const registerSchema = z.object({
   email: z.string().email('Email invalide'),
   password: z
     .string()
-    .min(8, 'Le mot de passe doit faire au moins 8 caracteres')
+    .min(8, 'Le mot de passe doit faire au moins 8 caractères')
     .regex(/[A-Z]/, 'Le mot de passe doit contenir au moins une majuscule')
     .regex(/[a-z]/, 'Le mot de passe doit contenir au moins une minuscule')
     .regex(/[0-9]/, 'Le mot de passe doit contenir au moins un chiffre')
-    .regex(/[@$!%*?&]/, 'Le mot de passe doit contenir au moins un caractere special (@$!%*?&)'),
+    .regex(
+      /[@$!%*?&#]/,
+      'Le mot de passe doit contenir au moins un caractère spécial (@$!%*?&#)'
+    ),
   confirmPassword: z.string(),
-  firstName: z.string().min(2, 'Le prenom doit faire au moins 2 caracteres'),
-  lastName: z.string().min(2, 'Le nom doit faire au moins 2 caracteres'),
+  firstName: z.string().min(2, 'Le prénom doit faire au moins 2 caractères'),
+  lastName: z.string().min(2, 'Le nom doit faire au moins 2 caractères'),
   phone: z.string().optional(),
   birthDate: z
     .string()
@@ -81,6 +86,9 @@ export default function RegisterPage() {
   const router = useRouter();
   const { register: registerUser } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
+  // Même risque qu'à la connexion, aggravé : ce formulaire porte le mot de
+  // passe, sa confirmation, la date de naissance et le téléphone.
+  const isHydrated = useIsHydrated();
 
   const {
     register,
@@ -104,19 +112,19 @@ export default function RegisterPage() {
         birthDate: rest.birthDate || undefined,
       });
       trackRegisterSuccess('email');
-      toast.success('Inscription reussie ! Bienvenue !');
+      toast.success('Inscription réussie ! Bienvenue !');
       router.push('/dashboard');
     } catch (error: any) {
       const status = error?.response?.status;
       if (status === 409) {
         trackRegisterFailure('email', 'email_already_exists');
-        toast.error('Un compte existe deja avec cet email');
+        toast.error('Un compte existe déjà avec cet email');
       } else if (status === 400 || status === 422) {
         trackRegisterFailure('email', 'invalid_data');
-        toast.error('Donnees invalides. Verifiez le formulaire.');
+        toast.error('Données invalides. Vérifiez le formulaire.');
       } else {
         trackRegisterFailure('email', 'server_error');
-        toast.error("Erreur lors de l'inscription");
+        toast.error('Erreur lors de l\'inscription');
       }
     } finally {
       setIsLoading(false);
@@ -124,12 +132,15 @@ export default function RegisterPage() {
   };
 
   const today = new Date();
-  const maxBirthDate = new Date(today.getFullYear() - MIN_AGE, today.getMonth(), today.getDate())
-    .toISOString()
-    .split('T')[0];
-  const minBirthDate = new Date(today.getFullYear() - MAX_AGE, today.getMonth(), today.getDate())
-    .toISOString()
-    .split('T')[0];
+  // toDateInputValue lit les composants en heure locale. toISOString() convertit
+  // en UTC, ou minuit heure de Paris devient la veille : la borne tombait un jour
+  // trop tot et bloquait la personne ayant 18 ans le jour meme.
+  const maxBirthDate = toDateInputValue(
+    new Date(today.getFullYear() - MIN_AGE, today.getMonth(), today.getDate()),
+  );
+  const minBirthDate = toDateInputValue(
+    new Date(today.getFullYear() - MAX_AGE, today.getMonth(), today.getDate()),
+  );
 
   const handleOAuthLogin = (provider: 'google' | 'facebook') => {
     trackCTAClick(`S'inscrire avec ${provider}`, 'register_page');
@@ -138,27 +149,16 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-cream px-4 py-12">
+    <div className="flex min-h-[calc(100vh-5rem)] items-center justify-center bg-cream px-4 py-12">
       <div className="w-full max-w-xl sm:rounded-card sm:border sm:border-warm-beige sm:bg-white sm:p-8 sm:shadow-sm">
-        <h1 className="font-display text-h2 text-noir">Creer votre compte</h1>
+        <h1 className="font-display text-h2 text-noir">Créer votre compte</h1>
         <p className="mt-2 text-sm text-stone-grey">
           Inscrivez-vous pour participer au jeu-concours
         </p>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
-          {/* Prenom / Nom */}
+        <form noValidate onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
+          {/* Nom / Prenom */}
           <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="firstName">Prenom *</Label>
-              <Input
-                id="firstName"
-                placeholder="Jean"
-                {...register('firstName')}
-              />
-              {errors.firstName && (
-                <p className="mt-1 text-xs text-red-600">{errors.firstName.message}</p>
-              )}
-            </div>
             <div>
               <Label htmlFor="lastName">Nom *</Label>
               <Input
@@ -168,6 +168,17 @@ export default function RegisterPage() {
               />
               {errors.lastName && (
                 <p className="mt-1 text-xs text-red-600">{errors.lastName.message}</p>
+              )}
+            </div>
+            <div>
+              <Label htmlFor="firstName">Prénom *</Label>
+              <Input
+                id="firstName"
+                placeholder="Jean"
+                {...register('firstName')}
+              />
+              {errors.firstName && (
+                <p className="mt-1 text-xs text-red-600">{errors.firstName.message}</p>
               )}
             </div>
           </div>
@@ -192,21 +203,25 @@ export default function RegisterPage() {
             <Input
               id="password"
               type="password"
-              placeholder="Min. 8 caracteres"
+              placeholder="Min. 8 caractères"
               {...register('password')}
             />
-            {errors.password && (
+            {errors.password ? (
               <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>
+            ) : (
+              <p className="mt-1 text-xs text-stone-grey">
+                Min. 8 caractères, 1 majuscule, 1 chiffre, 1 caractère spécial
+              </p>
             )}
           </div>
 
-          {/* Confirm */}
+          {/* Confirmer mot de passe */}
           <div>
             <Label htmlFor="confirmPassword">Confirmer le mot de passe *</Label>
             <Input
               id="confirmPassword"
               type="password"
-              placeholder="Confirmez votre mot de passe"
+              placeholder="Retapez votre mot de passe"
               {...register('confirmPassword')}
             />
             {errors.confirmPassword && (
@@ -214,7 +229,10 @@ export default function RegisterPage() {
             )}
           </div>
 
-          {/* Date de naissance / Genre */}
+          {/* Divider optionnel */}
+          <div className="border-t border-warm-beige pt-4"></div>
+
+          {/* Date de naissance / Genre - Optionnel */}
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <Label htmlFor="birthDate">Date de naissance</Label>
@@ -233,11 +251,12 @@ export default function RegisterPage() {
               <Label htmlFor="gender">Genre</Label>
               <select
                 id="gender"
-                className="flex h-10 w-full rounded-soft border border-warm-beige bg-white px-3 text-sm text-noir focus:outline-none focus:ring-2 focus:ring-terracotta-deep"
+                className="flex h-10 w-full rounded-soft border border-gold-700 bg-white px-3 text-sm text-noir focus:outline-none focus:ring-2 focus:ring-terracotta-deep"
                 defaultValue=""
                 {...register('gender')}
               >
-                <option value="FEMALE">Femme</option>                
+                <option value="">Sélectionner</option>
+                <option value="FEMALE">Femme</option>
                 <option value="MALE">Homme</option>
                 <option value="OTHER">Autre</option>
                 <option value="PREFER_NOT_TO_SAY">Préfère ne pas le dire</option>
@@ -245,9 +264,11 @@ export default function RegisterPage() {
             </div>
           </div>
           <p className="text-xs text-stone-grey">
-            Champs facultatifs collectés uniquement à des fins statistiques pour le
-            jeu-concours. En les renseignant, vous consentez à cet usage.
+            Champs facultatifs collectés uniquement à des fins statistiques pour le jeu-concours.
           </p>
+
+          {/* Divider avant RGPD */}
+          <div className="border-t border-warm-beige pt-4"></div>
 
           {/* RGPD */}
           <div className="space-y-3">
@@ -255,17 +276,17 @@ export default function RegisterPage() {
               <input
                 type="checkbox"
                 id="consentData"
-                className="mt-1 h-4 w-4 rounded-sharp border-warm-beige text-terracotta-deep accent-terracotta-deep"
+                className="mt-1 h-4 w-4 rounded-sharp border-gold-700 text-terracotta-600 accent-terracotta-deep"
                 {...register('consentData')}
               />
               <label htmlFor="consentData" className="text-xs leading-relaxed text-stone-grey">
                 J&apos;accepte les{' '}
-                <Link href="/cgu" className="text-terracotta-deep hover:underline">
-                  conditions generales
+                <Link href="/cgu" className="text-terracotta-600 hover:underline">
+                  Conditions d&apos;utilisation
                 </Link>{' '}
                 et la{' '}
-                <Link href="/politique-confidentialite" className="text-terracotta-deep hover:underline">
-                  politique de confidentialite
+                <Link href="/politique-confidentialite" className="text-terracotta-600 hover:underline">
+                  Politique de confidentialité
                 </Link>{' '}
                 *
               </label>
@@ -278,23 +299,23 @@ export default function RegisterPage() {
               <input
                 type="checkbox"
                 id="consentEmail"
-                className="mt-1 h-4 w-4 rounded-sharp border-warm-beige text-terracotta-deep accent-terracotta-deep"
+                className="mt-1 h-4 w-4 rounded-sharp border-gold-700 text-terracotta-600 accent-terracotta-deep"
                 {...register('consentEmail')}
               />
               <label htmlFor="consentEmail" className="text-xs leading-relaxed text-stone-grey">
-                Je souhaite recevoir les offres et nouveautes de The Tip Top
+                Je souhaite recevoir les offres et nouveautés de Thé Tip Top
               </label>
             </div>
           </div>
 
-          <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+          <Button type="submit" className="w-full" size="lg" disabled={isLoading || !isHydrated}>
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Inscription...
               </>
             ) : (
-              'Creer mon compte'
+              'S\'inscrire'
             )}
           </Button>
         </form>
@@ -304,7 +325,7 @@ export default function RegisterPage() {
           <button
             type="button"
             onClick={() => handleOAuthLogin('google')}
-            className="flex w-full items-center justify-center gap-3 rounded-soft border border-warm-beige bg-white px-4 py-3 text-sm font-medium text-noir transition-colors hover:bg-cream"
+            className="flex w-full items-center justify-center gap-3 rounded-soft border border-gold-700 bg-white px-4 py-3 text-sm font-medium text-noir transition-colors hover:bg-cream"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -318,7 +339,7 @@ export default function RegisterPage() {
           <button
             type="button"
             onClick={() => handleOAuthLogin('facebook')}
-            className="flex w-full items-center justify-center gap-3 rounded-soft border border-warm-beige bg-white px-4 py-3 text-sm font-medium text-noir transition-colors hover:bg-cream"
+            className="flex w-full items-center justify-center gap-3 rounded-soft border border-gold-700 bg-white px-4 py-3 text-sm font-medium text-noir transition-colors hover:bg-cream"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="#1877F2">
               <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.886v2.267h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z" />
@@ -328,8 +349,8 @@ export default function RegisterPage() {
         </div>
 
         <p className="mt-8 text-center text-sm text-stone-grey">
-          Deja un compte ?{' '}
-          <Link href="/auth/login" className="font-semibold text-terracotta-deep hover:underline">
+          Déjà un compte ?{' '}
+          <Link href="/auth/login" className="font-semibold text-terracotta-600 hover:underline">
             Se connecter
           </Link>
         </p>

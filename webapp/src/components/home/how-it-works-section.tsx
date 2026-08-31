@@ -1,26 +1,21 @@
-import { ShoppingCart, Ticket, Gift } from 'lucide-react';
-
 const steps = [
   {
     number: '01',
-    icon: ShoppingCart,
-    title: 'Faites vos achats',
+    title: 'Trouve ton code',
     description:
-      'Effectuez un achat d\'un montant minimum de 49€ dans notre boutique de Nice ou sur notre site internet.',
+      'Cherche le code unique sur ton ticket de caisse auprès de ton vendeur Thé Tip Top.',
   },
   {
     number: '02',
-    icon: Ticket,
-    title: 'Entrez votre code',
+    title: 'Saisis ton code',
     description:
-      'Retrouvez le code a 10 caracteres sur votre ticket de caisse et saisissez-le sur notre site.',
+      'Entre ton code sur cette page et découvre instantanément ton résultat.',
   },
   {
     number: '03',
-    icon: Gift,
-    title: 'Recuperez votre lot',
+    title: 'Récupère ton lot',
     description:
-      'Decouvrez immediatement votre gain et recuperez-le en boutique ou en ligne !',
+      'Présente-toi en boutique avec ton code pour retirer ton lot dans les meilleurs délais.',
   },
 ];
 
@@ -28,24 +23,21 @@ export function HowItWorksSection() {
   return (
     <section id="how-it-works" className="bg-cream py-16 md:py-20">
       <div className="container mx-auto px-6">
-        <h2 className="font-display text-h2 text-noir">
+        <h2 className="border-b border-warm-beige pb-6 font-display text-h2 text-noir">
           Comment participer ?
         </h2>
 
-        <div className="mt-12 grid gap-8 md:grid-cols-3">
+        <div className="mt-8 grid gap-8 md:grid-cols-3">
           {steps.map((step) => (
             <div key={step.number} className="flex flex-col">
-              <span className="font-functional text-ui uppercase tracking-[2px] text-terracotta-deep">
+              <span className="font-functional text-ui uppercase tracking-[2px] text-terracotta-600">
                 {step.number}
               </span>
-              <div className="mt-3 flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-terracotta-50">
-                  <step.icon className="h-5 w-5 text-terracotta-deep" strokeWidth={1.5} />
-                </div>
-                <h3 className="font-display text-lg font-semibold not-italic text-noir">
-                  {step.title}
-                </h3>
-              </div>
+              {/* italic est volontaire : les titres d'etapes sont en italique
+                  sur la maquette Figma, contrairement au reste du site. */}
+              <h3 className="mt-3 font-display text-lg font-semibold italic text-noir">
+                {step.title}
+              </h3>
               <p className="mt-3 text-sm leading-relaxed text-stone-grey">
                 {step.description}
               </p>

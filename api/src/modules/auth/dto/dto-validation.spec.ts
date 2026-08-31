@@ -43,6 +43,17 @@ describe('RegisterDto', () => {
     expect(errors.some((e) => e.property === 'password')).toBe(true);
   });
 
+  // Le diese compte comme caractere special. Il figure dans les deux listes de
+  // l'expression : celle des caracteres speciaux acceptes, et celle qui regit
+  // le premier caractere du mot de passe.
+  it.each([
+    ['Motdepasse1#', 'comme unique caractère spécial'],
+    ['#Motdepasse1', 'en première position'],
+  ])('should accept a password using # (%s)', async (password) => {
+    const errors = await validateDto(RegisterDto, { ...validPayload, password });
+    expect(errors.some((e) => e.property === 'password')).toBe(false);
+  });
+
   it('should reject an invalid French phone number', async () => {
     const errors = await validateDto(RegisterDto, { ...validPayload, phone: '12345' });
     expect(errors.some((e) => e.property === 'phone')).toBe(true);

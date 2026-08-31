@@ -37,6 +37,7 @@ model User {
 
   // Relations
   participations Participation[]
+  leads          Lead[]                       // Leads confirmes ayant abouti a ce compte
 
   // Timestamps
   createdAt     DateTime  @default(now())
@@ -78,6 +79,9 @@ model Ticket {
 
   // Relation avec participation
   participation Participation?
+
+  // Leads ayant visé ce code sans avoir encore confirmé leur email
+  leads         Lead[]
 
   // Timestamps
   createdAt     DateTime  @default(now())
@@ -151,6 +155,76 @@ enum DeliveryMethod {
 }
 
 // ===========================================
+// LEADS (tunnel de participation - UC-05)
+// ===========================================
+// Un lead est un prospect ayant soumis le formulaire public sans compte.
+// Ce n'est PAS un utilisateur : tant que l'email n'est pas verifie, aucune
+// ligne users n'est creee. A la confirmation du code, on cree le compte et
+// la participation, puis on relie les deux via userId.
+model Lead {
+  id            String     @id @default(uuid())
+
+  // Donnees personnelles saisies au formulaire
+  email         String
+  firstName     String
+  lastName      String
+  phone         String?
+  birthDate     DateTime?
+  gender        Gender?
+
+  status        LeadStatus @default(EN_ATTENTE_VERIFICATION)
+
+  // Code de verification email : 6 chiffres, 48h (RG-06).
+  // Chaque renvoi invalide le precedent et repousse l'echeance (RG-07).
+  verificationCode String?   @db.VarChar(6)
+  codeExpiresAt    DateTime?
+  lastCodeSentAt   DateTime?                  // Verrou de 60 s entre deux envois (RG-07)
+  resendCount      Int       @default(0)      // Au-dela de 2, proposer de corriger l'email (RG-08)
+
+  // Relances automatiques a J+24h, J+36h et J+47h (RG-20)
+  remindersSent Int        @default(0)
+
+  // RGPD : horodatage du consentement, obligatoire (RG-02)
+  rgpdConsentAt DateTime
+  consentEmail  Boolean    @default(false)
+
+  // Recommandation CNIL du 14/04/2026 : le consentement au pixel de tracking
+  // est distinct du consentement a recevoir des emails. Accepter la newsletter
+  // ne vaut pas acceptation du suivi d'ouverture.
+  // null = inconnu (jamais demande), ce qui correspond au statut « unknown »
+  // de Brevo et se mappe sur contactPixelTrackingConsent.
+  pixelTrackingConsent   Boolean?
+  pixelTrackingConsentAt DateTime?
+
+  // Compte cree a la confirmation
+  userId        String?
+  user          User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  // Ticket vise par le lead. Aucune reservation : le code reste soumettable par
+  // d'autres tant que l'email n'est pas confirme, la consommation n'a lieu qu'a
+  // la verification.
+  ticketId      String?
+  ticket        Ticket?    @relation(fields: [ticketId], references: [id], onDelete: SetNull)
+
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  verifiedAt    DateTime?
+  purgeAfter    DateTime?                     // Expire + 30 j, puis suppression (RG-21)
+
+  @@index([email])
+  @@index([status])
+  @@index([codeExpiresAt])                    // Job d'expiration des leads (RG-21)
+  @@index([purgeAfter])                       // Job de purge (RG-21)
+  @@map("leads")
+}
+
+enum LeadStatus {
+  EN_ATTENTE_VERIFICATION  // Code envoye, en attente de saisie
+  VERIFIE                  // Email confirme, compte cree
+  EXPIRE                   // 48h depassees sans confirmation
+}
+
+// ===========================================
 // CONFIGURATION DU JEU-CONCOURS
 // ===========================================
 model GameConfig {
@@ -214,4 +288,34 @@ model RefreshToken {
   @@index([userId])
   @@index([token])
   @@map("refresh_tokens")
+}
+
+// ===========================================
+// ABONNES A LA NEWSLETTER
+// ===========================================
+// Le formulaire du pied de page alimente une liste Brevo. L'adresse est
+// d'abord conservee ici, puis poussee : si Brevo est injoignable ou mal
+// configure, l'inscription n'est pas perdue et reste rattrapable.
+model NewsletterSubscriber {
+  id            String    @id @default(uuid())
+  email         String    @unique
+
+  // Horodatage du consentement, base legale de la conservation (RGPD).
+  subscribedAt  DateTime  @default(now())
+
+  // null tant que la synchronisation vers Brevo n'a pas abouti.
+  brevoSyncedAt DateTime?
+
+  // Motif du dernier echec, pour diagnostiquer sans relire les journaux.
+  brevoError    String?
+
+  // Jeton opaque du lien de desinscription. Un abonne n'a pas de compte : sans
+  // lui, il faudrait accepter une desinscription sur simple adresse, et
+  // n'importe qui pourrait desabonner n'importe qui.
+  unsubscribeToken String  @unique
+
+  unsubscribedAt DateTime?
+
+  @@index([brevoSyncedAt])
+  @@map("newsletter_subscribers")
 }

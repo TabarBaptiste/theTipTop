@@ -7,7 +7,8 @@ import { ParticipationsService } from './participations.service';
 import { TicketsService } from '../tickets/tickets.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException } from '@nestjs/common';
+import { User } from '@prisma/client';
 
 describe('ParticipationsService', () => {
   let service: ParticipationsService;
@@ -17,6 +18,7 @@ describe('ParticipationsService', () => {
     ticket: {
       findUnique: jest.fn(),
       update: jest.fn(),
+      updateMany: jest.fn(),
     },
     participation: {
       create: jest.fn(),
@@ -27,6 +29,10 @@ describe('ParticipationsService', () => {
     },
     gameConfig: {
       findFirst: jest.fn(),
+    },
+    lead: {
+      findFirst: jest.fn(),
+      create: jest.fn(),
     },
   };
 
@@ -63,8 +69,20 @@ describe('ParticipationsService', () => {
   });
 
   describe('participate', () => {
-    const userId = 'user-1';
     const validCode = 'ABC123DEF4';
+    // participate reçoit désormais l'utilisateur complet : le chemin Social
+    // Login a besoin de son email et de son identité pour créer le lead.
+    const user = {
+      id: 'user-1',
+      email: 'user@test.fr',
+      firstName: 'Jean',
+      lastName: 'Dupont',
+      phone: null,
+      birthDate: null,
+      gender: null,
+      // `as unknown as User` et non `as never` : le second interdit d'etendre
+      // l'objet, ce dont les tests ont besoin pour varier un seul champ.
+    } as unknown as User;
 
     const mockGameConfig = {
       id: '1',
@@ -87,12 +105,12 @@ describe('ParticipationsService', () => {
         return callback({
           ticket: {
             findUnique: jest.fn().mockResolvedValue(mockTicket),
-            update: jest.fn().mockResolvedValue({ ...mockTicket, isUsed: true }),
+            updateMany: jest.fn().mockResolvedValue({ count: 1 }),
           },
           participation: {
             create: jest.fn().mockResolvedValue({
               id: 'participation-1',
-              userId,
+              userId: 'user-1',
               ticketId: mockTicket.id,
               ticket: mockTicket,
             }),
@@ -100,17 +118,44 @@ describe('ParticipationsService', () => {
         });
       });
 
-      const result = await service.participate(userId, validCode);
+      const result = await service.participate(user, { code: validCode });
 
       expect(result).toHaveProperty('id');
       expect(result).toHaveProperty('code', validCode);
+    });
+
+    // Cas de course : le ticket paraît libre à la lecture, mais une autre
+    // transaction l'a consommé avant l'UPDATE conditionnel. Aucune ligne n'est
+    // touchée, et la participation doit être refusée par un conflit métier.
+    it('refuse la participation quand le ticket a été consommé entre-temps', async () => {
+      mockTicketsService.verifyCode.mockResolvedValue({ isValid: true, ticket: mockTicket });
+      mockPrismaService.gameConfig.findFirst.mockResolvedValue(mockGameConfig);
+
+      const create = jest.fn();
+      mockPrismaService.$transaction.mockImplementation(async (callback) =>
+        callback({
+          ticket: {
+            findUnique: jest.fn().mockResolvedValue(mockTicket),
+            updateMany: jest.fn().mockResolvedValue({ count: 0 }),
+          },
+          participation: { create },
+        }),
+      );
+
+      await expect(service.participate(user, { code: validCode })).rejects.toThrow(
+        ConflictException,
+      );
+      // Et surtout : aucune participation n'est créée.
+      expect(create).not.toHaveBeenCalled();
     });
 
     it('should throw NotFoundException for invalid code', async () => {
       mockTicketsService.verifyCode.mockResolvedValue({ isValid: false, error: 'Invalid' });
       mockPrismaService.gameConfig.findFirst.mockResolvedValue(mockGameConfig);
 
-      await expect(service.participate(userId, 'INVALID123')).rejects.toThrow(BadRequestException);
+      await expect(service.participate(user, { code: 'INVALID123' })).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException for already used code', async () => {
@@ -120,7 +165,9 @@ describe('ParticipationsService', () => {
       });
       mockPrismaService.gameConfig.findFirst.mockResolvedValue(mockGameConfig);
 
-      await expect(service.participate(userId, validCode)).rejects.toThrow(BadRequestException);
+      await expect(service.participate(user, { code: validCode })).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException if game has not started', async () => {
@@ -133,7 +180,9 @@ describe('ParticipationsService', () => {
         startDate: new Date(Date.now() + 86400000), // demain
       });
 
-      await expect(service.participate(userId, validCode)).rejects.toThrow(BadRequestException);
+      await expect(service.participate(user, { code: validCode })).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException if game has ended', async () => {
@@ -146,15 +195,31 @@ describe('ParticipationsService', () => {
         endDate: new Date(Date.now() - 86400000), // hier
       });
 
-      await expect(service.participate(userId, validCode)).rejects.toThrow(BadRequestException);
+      await expect(service.participate(user, { code: validCode })).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw 429 when the hourly submit rate limit is exceeded', async () => {
       mockRedisService.incr.mockResolvedValueOnce(11);
 
-      await expect(service.participate(userId, validCode)).rejects.toThrow(
+      await expect(service.participate(user, { code: validCode })).rejects.toThrow(
         'Trop de tentatives, veuillez réessayer plus tard.',
       );
+      expect(mockTicketsService.verifyCode).not.toHaveBeenCalled();
+    });
+
+    // Un compte sous adresse de substitution ne recevrait ni l'annonce du lot
+    // ni le rappel du delai : son ticket serait consomme pour rien.
+    it('should refuse a participation from an unreachable account', async () => {
+      const unreachable = { ...user, email: 'fb_123@facebook-noreply.invalid' };
+
+      await expect(service.participate(unreachable, { code: validCode })).rejects.toThrow(
+        ForbiddenException,
+      );
+
+      // Le verrou tombe avant tout : ni compteur consomme, ni ticket touche.
+      expect(mockRedisService.incr).not.toHaveBeenCalled();
       expect(mockTicketsService.verifyCode).not.toHaveBeenCalled();
     });
 
@@ -162,9 +227,75 @@ describe('ParticipationsService', () => {
       mockRedisService.incr.mockResolvedValueOnce(1);
       mockTicketsService.verifyCode.mockResolvedValue({ isValid: false, error: 'Invalid' });
 
-      await expect(service.participate(userId, validCode)).rejects.toThrow(BadRequestException);
+      await expect(service.participate(user, { code: validCode })).rejects.toThrow(
+        BadRequestException,
+      );
 
       expect(mockRedisService.expire).toHaveBeenCalledWith(expect.any(String), 3600);
+    });
+
+    // Chemin A d'UC-05 : le lead « verifie » est ce qui rattache un
+    // participant arrivé par Google ou Facebook à la synchro Brevo et aux
+    // statistiques de conversion.
+    describe('création du lead (Social Login)', () => {
+      const mockSuccessfulTransaction = () => {
+        mockTicketsService.verifyCode.mockResolvedValue({ isValid: true, ticket: mockTicket });
+        mockPrismaService.$transaction.mockImplementation(async (callback) =>
+          callback({
+            ticket: {
+              findUnique: jest.fn().mockResolvedValue(mockTicket),
+              updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+            },
+            participation: {
+              create: jest.fn().mockResolvedValue({ id: 'p1', ticket: mockTicket }),
+            },
+          }),
+        );
+      };
+
+      // Garantit que l'espace personnel, qui ne poste qu'un code, continue de
+      // fonctionner exactement comme avant.
+      it('ne crée aucun lead sans consentement explicite', async () => {
+        mockSuccessfulTransaction();
+
+        await service.participate(user, { code: validCode });
+
+        expect(mockPrismaService.lead.findFirst).not.toHaveBeenCalled();
+        expect(mockPrismaService.lead.create).not.toHaveBeenCalled();
+      });
+
+      it('crée un lead déjà vérifié quand le consentement est fourni', async () => {
+        mockSuccessfulTransaction();
+        mockPrismaService.lead.findFirst.mockResolvedValue(null);
+
+        await service.participate(user, {
+          code: validCode,
+          consentData: true,
+          consentEmail: true,
+          pixelTrackingConsent: false,
+        });
+
+        const data = mockPrismaService.lead.create.mock.calls[0][0].data;
+        expect(data.status).toBe('VERIFIE');
+        expect(data.email).toBe('user@test.fr');
+        expect(data.userId).toBe('user-1');
+        // Le ticket visé est enregistré comme pour un lead du parcours
+        // classique, sans quoi ce lead se lirait « aucun ticket visé ».
+        expect(data.ticketId).toBe('ticket-1');
+        expect(data.rgpdConsentAt).toBeInstanceOf(Date);
+        expect(data.verifiedAt).toBeInstanceOf(Date);
+        // Aucun code de vérification : l'email est certifié par le fournisseur.
+        expect(data.verificationCode).toBeUndefined();
+      });
+
+      it('ne duplique pas un lead actif existant', async () => {
+        mockSuccessfulTransaction();
+        mockPrismaService.lead.findFirst.mockResolvedValue({ id: 'lead-existant' });
+
+        await service.participate(user, { code: validCode, consentData: true });
+
+        expect(mockPrismaService.lead.create).not.toHaveBeenCalled();
+      });
     });
   });
 
@@ -245,6 +376,7 @@ describe('ParticipationsService', () => {
 
       expect(result.participation).toBeNull();
       expect(result.ticket.prize.name).toBe('Infuseur à thé');
+      expect(result.ticket.isUsed).toBe(false);
     });
 
     it('should return the ticket with its participation when used', async () => {
@@ -266,6 +398,7 @@ describe('ParticipationsService', () => {
 
       expect(result.participation?.id).toBe('p1');
       expect(result.participation?.prizeDelivered).toBe(true);
+      expect(result.ticket.isUsed).toBe(true);
     });
   });
 
