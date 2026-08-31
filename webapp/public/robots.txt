@@ -5,4 +5,4 @@ Disallow: /admin
 Disallow: /employee
 Disallow: /auth/callback
 
-Sitemap: https://thetiptop.dsp5-archi-o24a-4-5-g1.fr/sitemap.xml
+Sitemap: https://dsp5-archi-o24a-4-5-g1.fr/sitemap.xml

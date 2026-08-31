@@ -44,7 +44,7 @@ describe('DeliveredPrizesList', () => {
     mockedGet.mockResolvedValue({
       data: {
         data: [deliveredPrize],
-        meta: { total: 234, page: 1, limit: 20, totalPages: 12 },
+        meta: { total: 234, page: 1, limit: 10, totalPages: 12 },
       },
     });
 
@@ -62,7 +62,7 @@ describe('DeliveredPrizesList', () => {
     mockedGet.mockResolvedValue({
       data: {
         data: [deliveredPrize],
-        meta: { total: 234, page: 1, limit: 20, totalPages: 12 },
+        meta: { total: 234, page: 1, limit: 10, totalPages: 12 },
       },
     });
 
@@ -73,14 +73,14 @@ describe('DeliveredPrizesList', () => {
 
     await waitFor(() => {
       expect(mockedGet).toHaveBeenLastCalledWith('/gains/history', {
-        params: { page: 2, limit: 20 },
+        params: { page: 2, limit: 10 },
       });
     });
   });
 
   it('annonce une liste vide plutot qu une carte muette', async () => {
     mockedGet.mockResolvedValue({
-      data: { data: [], meta: { total: 0, page: 1, limit: 20, totalPages: 0 } },
+      data: { data: [], meta: { total: 0, page: 1, limit: 10, totalPages: 0 } },
     });
 
     renderList();

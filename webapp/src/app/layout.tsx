@@ -38,7 +38,7 @@ const playfair = Playfair_Display({
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || 'https://thetiptop.dsp5-archi-o24a-4-5-g1.fr'
+    process.env.NEXT_PUBLIC_SITE_URL || 'https://dsp5-archi-o24a-4-5-g1.fr'
   ),
   title: {
     // Le mot-clé ouvre le titre, la marque le referme : « Thé Tip Top » ne se
@@ -62,14 +62,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'fr_FR',
-    url: 'https://thetiptop.dsp5-archi-o24a-4-5-g1.fr',
+    url: 'https://dsp5-archi-o24a-4-5-g1.fr',
     siteName: 'Thé Tip Top',
     title: 'Jeu-concours thé bio : 100 % de tickets gagnants',
     description:
       'Participez au jeu-concours Thé Tip Top : 100 % des tickets sont gagnants. Un an de thé à gagner au tirage au sort.',
     images: [
       {
-        url: '/og-image.png', // Sera résolu automatiquement en https://thetiptop.dsp5-archi-o24a-4-5-g1.fr/og-image.png
+        url: '/og-image.png', // Sera résolu automatiquement en https://dsp5-archi-o24a-4-5-g1.fr/og-image.png
         width: 1200,
         height: 630,
         alt: 'Thé Tip Top Jeu Concours',

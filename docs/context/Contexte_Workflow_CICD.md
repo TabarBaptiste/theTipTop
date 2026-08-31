@@ -4,7 +4,7 @@
 |---|---|---|
 | `develop` | DEV (auto) | `thetiptop-dev.wk-archi-o24a-4-5-g1.fr` |
 | `main` | PREPROD (auto) | `thetiptop-preprod.wk-archi-o24a-4-5-g1.fr` |
-| `main` + tag `vX.Y.Z` | PROD (validation manuelle) | `thetiptop.dsp5-archi-o24a-4-5-g1.fr` |
+| `main` + tag `vX.Y.Z` | PROD (validation manuelle) | `dsp5-archi-o24a-4-5-g1.fr` |
  
 ---
  

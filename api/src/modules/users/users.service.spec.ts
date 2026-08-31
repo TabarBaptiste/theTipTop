@@ -176,6 +176,68 @@ describe('UsersService', () => {
     });
   });
 
+  describe('searchClients', () => {
+    beforeEach(() => {
+      mockPrismaService.user.findMany.mockResolvedValue([]);
+      mockPrismaService.user.count.mockResolvedValue(0);
+    });
+
+    // Une recherche vide ou d'un seul caractere ramenerait toute la base : ce
+    // ne serait plus une recherche mais un annuaire.
+    it.each([[''], [' '], ['a']])('should return nothing for the query %p', async (q) => {
+      await expect(service.searchClients(q)).resolves.toEqual({ data: [], total: 0 });
+      expect(mockPrismaService.user.findMany).not.toHaveBeenCalled();
+    });
+
+    it('should search across last name, first name and email', async () => {
+      await service.searchClients('dupont');
+
+      const { where } = mockPrismaService.user.findMany.mock.calls[0][0];
+      expect(where.OR).toEqual([
+        { email: { contains: 'dupont', mode: 'insensitive' } },
+        { firstName: { contains: 'dupont', mode: 'insensitive' } },
+        { lastName: { contains: 'dupont', mode: 'insensitive' } },
+      ]);
+    });
+
+    // Un employe n'a pas a enumerer les comptes du personnel.
+    it('should restrict the search to client accounts', async () => {
+      await service.searchClients('dupont');
+
+      const { where } = mockPrismaService.user.findMany.mock.calls[0][0];
+      expect(where.role).toBe('CLIENT');
+      expect(where.deletedAt).toBeNull();
+    });
+
+    // Le RGPD demande de s'en tenir au necessaire : de quoi identifier une
+    // personne au comptoir, rien de plus.
+    it('should expose neither birth date, gender, consent nor role', async () => {
+      await service.searchClients('dupont');
+
+      const { select } = mockPrismaService.user.findMany.mock.calls[0][0];
+      expect(Object.keys(select).sort()).toEqual([
+        '_count',
+        'email',
+        'firstName',
+        'id',
+        'lastName',
+      ]);
+    });
+
+    // Sans le total, l'employe croirait avoir tout vu alors que sa recherche
+    // est trop large.
+    it('should report the full count alongside a truncated list', async () => {
+      mockPrismaService.user.findMany.mockResolvedValue([{ id: 'u1' }]);
+      mockPrismaService.user.count.mockResolvedValue(34);
+
+      await expect(service.searchClients('martin')).resolves.toEqual({
+        data: [{ id: 'u1' }],
+        total: 34,
+      });
+      expect(mockPrismaService.user.findMany.mock.calls[0][0].take).toBe(10);
+    });
+  });
+
   describe('changePassword', () => {
     const dto = { currentPassword: 'Actuel123!', newPassword: 'Nouveau123!' };
 

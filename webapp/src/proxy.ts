@@ -2,10 +2,10 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 // ===========================================
-// Middleware d'authentification (protection UX)
+// Proxy d'authentification (protection UX)
 // ===========================================
 // La sécurité réelle est assurée par le back-end (JwtAuthGuard / RolesGuard).
-// Ce middleware évite l'affichage des pages privées aux visiteurs non
+// Ce proxy évite l'affichage des pages privées aux visiteurs non
 // authentifiés et redirige selon le rôle (lu depuis le refresh token).
 
 // Routes nécessitant simplement une authentification
@@ -38,7 +38,7 @@ function decodeRole(token: string): string | null {
   }
 }
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   const roleRule = ROLE_RULES.find((rule) => matchesPrefix(pathname, rule.prefix));

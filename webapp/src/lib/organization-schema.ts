@@ -8,7 +8,7 @@
 import { SOCIAL_URLS } from './social-links';
 
 const BASE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || 'https://thetiptop.dsp5-archi-o24a-4-5-g1.fr';
+  process.env.NEXT_PUBLIC_SITE_URL || 'https://dsp5-archi-o24a-4-5-g1.fr';
 
 export const ORGANIZATION_SCHEMA = {
   '@context': 'https://schema.org',

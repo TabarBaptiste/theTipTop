@@ -33,7 +33,7 @@ ciPipeline(
 
     devDomain     : "${projectName}-dev.wk-archi-o24a-4-5-g1.fr",
     preprodDomain : "${projectName}-preprod.wk-archi-o24a-4-5-g1.fr",
-    prodDomain    : "${projectName}.dsp5-archi-o24a-4-5-g1.fr",
+    prodDomain    : 'dsp5-archi-o24a-4-5-g1.fr',
 
     appPort       : 3000,
 

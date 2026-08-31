@@ -161,6 +161,14 @@ export function Footer() {
                   Gestion des cookies
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/plan-du-site"
+                  className="text-sm text-white/70 transition-colors hover:text-terracotta-300"
+                >
+                  Plan du site
+                </Link>
+              </li>
             </ul>
           </div>
 

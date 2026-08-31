@@ -26,7 +26,7 @@ const customJestConfig = {
     // Les pages App Router et le middleware sont couverts par les tests E2E Cypress,
     // pas par les tests unitaires Jest.
     '!src/app/**',
-    '!src/middleware.ts',
+    '!src/proxy.ts',
   ],
   // Le pipeline Jenkins impose 70 % de couverture globale. Le déclarer ici
   // fait échouer les tests avant même le pipeline : le retour va au

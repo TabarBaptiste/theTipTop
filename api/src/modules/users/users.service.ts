@@ -114,6 +114,57 @@ export class UsersService {
   }
 
   /**
+   * Recherche d'un client par nom, prénom ou adresse, pour le comptoir.
+   *
+   * Distincte de `findAll`, qui sert l'administration : celle-ci ne rend que de
+   * quoi identifier une personne venue retirer son lot, et rien de plus. Ni
+   * date de naissance, ni genre, ni consentement, ni rôle - un employé n'en a
+   * pas l'usage, et le RGPD demande de s'en tenir au nécessaire.
+   *
+   * Bornée aux comptes clients : un employé n'a pas à énumérer ceux du
+   * personnel.
+   */
+  async searchClients(query: string, limit = 10) {
+    const recherche = query.trim();
+
+    // Une recherche vide ramènerait toute la base, ce qui n'est pas une
+    // recherche mais un annuaire.
+    if (recherche.length < 2) {
+      return { data: [], total: 0 };
+    }
+
+    const where = {
+      deletedAt: null,
+      role: Role.CLIENT,
+      OR: [
+        { email: { contains: recherche, mode: 'insensitive' as const } },
+        { firstName: { contains: recherche, mode: 'insensitive' as const } },
+        { lastName: { contains: recherche, mode: 'insensitive' as const } },
+      ],
+    };
+
+    const [clients, total] = await Promise.all([
+      this.prisma.user.findMany({
+        where,
+        take: limit,
+        orderBy: { lastName: 'asc' },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          _count: { select: { participations: true } },
+        },
+      }),
+      this.prisma.user.count({ where }),
+    ]);
+
+    // `total` accompagne une liste tronquée : sans lui, l'employé croirait
+    // avoir tout vu alors que sa recherche est trop large.
+    return { data: clients, total };
+  }
+
+  /**
    * Met à jour un utilisateur
    */
   async update(id: string, dto: UpdateUserDto): Promise<User> {

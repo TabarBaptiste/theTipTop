@@ -18,6 +18,7 @@ describe('UsersController', () => {
     delete: jest.fn(),
     exportData: jest.fn(),
     changeRole: jest.fn(),
+    searchClients: jest.fn(),
   };
 
   const client = { id: 'u1', role: 'CLIENT' } as User;
@@ -45,6 +46,33 @@ describe('UsersController', () => {
       limit: 10,
       role: 'CLIENT',
       search: 'jean',
+    });
+  });
+
+  describe('searchClients', () => {
+    it('should delegate the query', async () => {
+      mockUsersService.searchClients.mockResolvedValue({ data: [], total: 0 });
+
+      await controller.searchClients('dupont');
+
+      expect(mockUsersService.searchClients).toHaveBeenCalledWith('dupont');
+    });
+
+    it('should treat a missing query as empty rather than crash', async () => {
+      mockUsersService.searchClients.mockResolvedValue({ data: [], total: 0 });
+
+      await controller.searchClients(undefined);
+
+      expect(mockUsersService.searchClients).toHaveBeenCalledWith('');
+    });
+
+    // La restriction vit dans un decorateur : rien ne la protege d'un retrait
+    // accidentel, sinon cette assertion. Sans elle, la route deviendrait
+    // accessible a tout compte connecte, donc a n'importe quel participant.
+    it('should stay restricted to staff roles', () => {
+      const roles = Reflect.getMetadata('roles', UsersController.prototype.searchClients);
+
+      expect(roles).toEqual(['EMPLOYEE', 'ADMIN']);
     });
   });
 
