@@ -128,5 +128,15 @@ ciPipeline(
         prod: [
             NEXT_PUBLIC_GA_ID: 'G-1DD9XREP7H'
         ]
-    ]
+    ],
+
+    // L'image du front ne peut pas etre promue de PREPROD vers PROD : Next.js
+    // fige les NEXT_PUBLIC_* dans le bundle qu'il produit, si bien qu'une image
+    // construite pour PREPROD porte l'URL de l'API de PREPROD definitivement.
+    // La promouvoir ferait appeler l'API de preproduction par le site de
+    // production, et enverrait les participations des joueurs dans la base de
+    // preproduction. Le front est donc reconstruit pour PROD ; l'API, elle,
+    // lit toute sa configuration au demarrage et reste promue sans
+    // reconstruction. Voir docs/01-ecarts-vps-cst.md dans le depot infra.
+    webappIsEnvSpecific: true
 )
