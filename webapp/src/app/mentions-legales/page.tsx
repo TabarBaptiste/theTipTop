@@ -107,7 +107,7 @@ export default function MentionsLegalesPage() {
               <div className="mt-4 space-y-4 text-body text-stone-grey">
                 <p>
                   Le site internet accessible à l&apos;adresse{' '}
-                  <strong>thetiptop.dsp5-archi-o24a-4-5-g1.fr</strong> est édité par :
+                  <strong>dsp5-archi-o24a-4-5-g1.fr</strong> est édité par :
                 </p>
                 <div
                   // Defilable plutot que coupe : a 375 px ces tableaux depassent
