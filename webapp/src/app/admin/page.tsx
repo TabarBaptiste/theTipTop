@@ -213,7 +213,7 @@ export default function AdminPage() {
   const grandPrizeDrawn = globalStats?.game.grandPrizeDrawn ?? false;
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-cream py-8">
+    <div className="min-h-[calc(100vh-5rem)] bg-white py-8">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
