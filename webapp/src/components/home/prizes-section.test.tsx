@@ -69,13 +69,17 @@ describe('PrizesSection', () => {
     reponse([{ ...LOT_DISTANT, code: 'LOT_INEDIT', name: 'Lot inédit' }]);
     render(<PrizesSection />);
 
-    expect(screen.getByText('Lot inédit')).toBeInTheDocument();
+    // Le numero du lot ouvre desormais le titre - « 01. Lot inedit » - et le
+    // nom n'est plus un noeud de texte a lui seul.
+    expect(screen.getByText(/Lot inédit/)).toBeInTheDocument();
   });
 
   it('affiche le pourcentage de chances de chaque lot', () => {
     reponse([LOT_DISTANT]);
     render(<PrizesSection />);
 
-    expect(screen.getByText('60%')).toBeInTheDocument();
+    // Espace insecable entre le nombre et le signe pourcent, comme le veut la
+    // typographie francaise : la chaine exacte n'est plus « 60% ».
+    expect(screen.getByText(/60\s*%/)).toBeInTheDocument();
   });
 });
