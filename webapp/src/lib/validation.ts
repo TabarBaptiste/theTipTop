@@ -48,7 +48,10 @@ export const birthDateField = z
   .string()
   .optional()
   .refine((v) => !v || /^\d{4}-\d{2}-\d{2}$/.test(v), 'Date invalide (AAAA-MM-JJ)')
-  .refine((v) => !v || getAge(new Date(v)) >= MIN_AGE, 'Vous devez être majeur')
+  .refine(
+    (v) => !v || getAge(new Date(v)) >= MIN_AGE,
+    `Vous devez être majeur (${MIN_AGE} ans minimum) pour vous inscrire`,
+  )
   .refine((v) => !v || getAge(new Date(v)) <= MAX_AGE, 'Date de naissance invalide');
 
 export const phoneField = z
