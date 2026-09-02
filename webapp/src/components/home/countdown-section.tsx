@@ -127,9 +127,9 @@ export function CountdownSection() {
           <TimeBlock value={timeLeft.seconds} label="Secondes" />
         </div>
 
-        {/* Ce bouton mène à la même page que le CTA du hero, et reprend sa
-            taille exacte sur la maquette. */}
-        <Button asChild size="cta" className="w-full md:w-[246px]">
+        {/* Ce bouton mène à la même page que celui du hero, et prend sa
+            taille : les trois appels à participer de la page se ressemblent. */}
+        <Button asChild size="xl" className="w-full md:w-auto">
           <Link href="/participate">Participer maintenant</Link>
         </Button>
       </div>

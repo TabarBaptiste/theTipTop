@@ -139,7 +139,7 @@ export function GrandPrizeSection() {
             </ul>
 
             <div className="relative mt-12 flex flex-col items-center gap-3">
-              <Button asChild size="cta" className="w-full md:w-[246px]">
+              <Button asChild size="xl" className="w-full md:w-auto">
                 <Link href="/participate">Participer au tirage</Link>
               </Button>
               {showParticipants && (

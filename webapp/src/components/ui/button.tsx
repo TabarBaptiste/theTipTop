@@ -31,10 +31,6 @@ const buttonVariants = cva(
         default: 'h-11 px-8 py-3 text-ui',
         sm: 'h-9 px-6 py-2 text-ui',
         lg: 'h-14 px-10 py-3 text-[13px]',
-        // Taille des appels a l'action de la page d'accueil, relevee sur la
-        // maquette : 40 px de haut, libelle a 11 px. La hauteur remonte a
-        // 44 px sous md, ou le bouton est touche au doigt et non clique.
-        cta: 'h-11 md:h-10 px-8 text-ui',
         // En-tete : 28 px de haut, libelle a 10 px sur la maquette. Meme
         // reserve tactile en dessous de md.
         nav: 'h-9 md:h-7 px-5 text-[10px]',
