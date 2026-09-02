@@ -7,12 +7,12 @@
     scroll-behavior: smooth;
 
     /* WCAG 2.2, critère 2.4.11 « Focus non masqué ». L'en-tête est collant et
-       occupe 5rem : sans cette réserve, tout défilement provoqué par une ancre
+       occupe 3.75rem : sans cette réserve, tout défilement provoqué par une ancre
        ou par la mise au point au clavier amène la cible pile derrière lui, et
        l'utilisateur au clavier perd de vue l'élément qu'il vient d'atteindre.
        Les 43 « scroll-mt-* » disséminés dans les pages traitaient le symptôme
        section par section ; cette règle traite la cause. */
-    scroll-padding-top: 5.5rem;
+    scroll-padding-top: 4.25rem;
   }
 
   :root {
@@ -141,31 +141,6 @@
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-/* La vapeur monte, s'elargit et se dissipe. Les trois volutes partagent cette
-   animation et se decalent par animation-delay : sans decalage, elles
-   monteraient au meme rythme et se liraient comme un seul bloc. */
-.animate-vapeur {
-  animation: vapeur 4.5s ease-in-out infinite;
-  transform-origin: bottom center;
-}
-
-@keyframes vapeur {
-  0% {
-    opacity: 0;
-    transform: translateY(6px) scaleX(0.9);
-  }
-  20% {
-    opacity: 0.55;
-  }
-  65% {
-    opacity: 0.3;
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-42px) scaleX(1.45);
   }
 }
 

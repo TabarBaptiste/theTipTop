@@ -28,7 +28,7 @@ const ARTICLES = [
 
 export default function MentionsLegalesPage() {
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-cream">
+    <div className="min-h-[calc(100vh-3.75rem)] bg-cream">
       {/* En-tête */}
       <section className="border-b border-warm-beige bg-white">
         <div className="container mx-auto px-6 py-12 md:py-16">

@@ -67,10 +67,11 @@ export function Header() {
   const navLinks = navigation;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-warm-beige bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-      {/* h-20 : la nav est calee sur le logo. Si tu changes cette hauteur,
-          repercute-la sur les min-h-[calc(100vh-5rem)] des pages. */}
-      <nav className="container mx-auto flex h-20 items-center justify-between px-6">
+    <header className="sticky top-0 z-50 w-full border-b border-section-line bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+      {/* 60 px, hauteur de la maquette. Si tu changes cette valeur,
+          repercute-la sur les min-h-[calc(100vh-3.75rem)] des pages et sur le
+          scroll-padding-top de globals.css. */}
+      <nav className="container mx-auto flex h-[60px] items-center justify-between px-6">
         {/* Logo */}
         <Link href="/" className="flex items-center">
           {/* unoptimized : l'optimiseur de Next refuse les SVG sans dangerouslyAllowSVG,
@@ -80,23 +81,21 @@ export function Header() {
             alt="Thé Tip Top"
             width={152}
             height={64}
-            className="h-16 w-auto"
+            className="h-10 w-auto"
             unoptimized
             priority
           />
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden items-center gap-4 md:flex lg:gap-6">
+        <div className="hidden items-center gap-6 md:flex lg:gap-20">
           {navLinks.map((item) => (
             <Link
               key={item.name}
               href={item.href}
               className={cn(
-                'whitespace-nowrap font-functional text-[10px] uppercase tracking-[1.5px] transition-colors hover:text-terracotta-600 lg:text-ui lg:tracking-[2px]',
-                pathname === item.href
-                  ? 'text-terracotta-600'
-                  : 'text-noir'
+                'whitespace-nowrap font-functional text-ui uppercase transition-colors hover:text-terracotta-600',
+                pathname === item.href ? 'text-terracotta-600' : 'text-noir'
               )}
             >
               {item.name}
@@ -105,8 +104,8 @@ export function Header() {
         </div>
 
         {/* Auth Buttons */}
-        <div className="hidden items-center gap-3 md:flex">
-          <Button asChild size="sm">
+        <div className="hidden items-center gap-4 md:flex">
+          <Button asChild size="nav">
             <Link href="/participate">Participer</Link>
           </Button>
           {isHydrated && (
@@ -120,7 +119,7 @@ export function Header() {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="outline"
-                      size="sm"
+                      size="nav"
                       className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-white active:bg-terracotta-600 active:text-white"
                     >
                       <AccountIcon className="h-4 w-4" strokeWidth={1.5} />
@@ -163,7 +162,7 @@ export function Header() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Button asChild variant="outline" size="sm">
+                <Button asChild variant="outline" size="nav">
                   <Link href="/auth/login">Connexion</Link>
                 </Button>
               )}
@@ -261,7 +260,9 @@ export function Header() {
                   </>
                 ) : (
                   <Button asChild variant="outline" className="w-full">
-                    <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)}>Connexion</Link>
+                    <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)}>
+                      Connexion
+                    </Link>
                   </Button>
                 )}
               </>

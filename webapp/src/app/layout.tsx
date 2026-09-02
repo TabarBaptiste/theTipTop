@@ -5,7 +5,6 @@ import { Toaster } from 'sonner';
 import { Providers } from '@/components/providers';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
-import { FallingLeaves } from '@/components/decor/falling-leaves';
 import { CookieConsentBanner } from '@/components/layout/cookie-consent-banner';
 import { ConditionalAnalytics } from '@/components/layout/conditional-analytics';
 import { StructuredData } from '@/components/seo/structured-data';
@@ -123,11 +122,6 @@ export default function RootLayout({
             <main className="flex-1">{children}</main>
             <Footer />
           </div>
-          {/* Couche fixe : les feuilles continuent de tomber pendant le
-              défilement, au lieu de rester accrochées à un endroit de la page.
-              Hors du conteneur ci-dessus pour qu'aucune de ses colonnes ne la
-              rogne. */}
-          <FallingLeaves />
           <Toaster
             position="top-right"
             toastOptions={{

@@ -3,7 +3,12 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { differenceInDays, differenceInHours, differenceInMinutes, differenceInSeconds } from 'date-fns';
+import {
+  differenceInDays,
+  differenceInHours,
+  differenceInMinutes,
+  differenceInSeconds,
+} from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
 import { formatFrenchDateTime, formatFrenchDateRange } from '@/lib/french-date';
@@ -31,7 +36,12 @@ export function CountdownSection() {
   // On dépend de la string ISO pour éviter de recréer un objet Date à chaque render
   const endDateStr = gameConfig?.endDate ?? null;
 
-  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const [timeLeft, setTimeLeft] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+  });
   const [isEnded, setIsEnded] = useState(false);
 
   useEffect(() => {
@@ -46,8 +56,8 @@ export function CountdownSection() {
         return;
       }
       setTimeLeft({
-        days:    differenceInDays(endDate, now),
-        hours:   differenceInHours(endDate, now) % 24,
+        days: differenceInDays(endDate, now),
+        hours: differenceInHours(endDate, now) % 24,
         minutes: differenceInMinutes(endDate, now) % 60,
         seconds: differenceInSeconds(endDate, now) % 60,
       });
@@ -89,38 +99,37 @@ export function CountdownSection() {
   }
 
   return (
-    <section className="border-y border-warm-beige bg-white py-6">
+    // Fond blanc et filet gris en pied de section, comme sur la maquette : le
+    // beige chaud qui encadrait ce bandeau en haut et en bas n'y figure pas.
+    <section className="border-b border-section-line bg-white py-12">
       {/* Le passage en ligne se faisait dès 640 px. Le libellé, le décompte et
-          le bouton n'y tiennent pas ensemble - le bouton agrandi débordait de
-          la page. La ligne attend maintenant d'avoir la largeur pour ses trois
-          blocs ; en dessous, ils s'empilent. */}
-      <div className="container mx-auto flex flex-col items-center justify-between gap-6 px-6 lg:flex-row">
-        <div className="text-center lg:text-left">
+          le bouton n'y tiennent pas ensemble - le bouton débordait de la page.
+          La ligne attend maintenant d'avoir la largeur pour ses trois blocs ;
+          en dessous, ils s'empilent. */}
+      <div className="container mx-auto flex flex-col items-center justify-between gap-8 px-6 lg:flex-row">
+        <div className="flex flex-col gap-2 text-center lg:text-left">
           {/* Ce libellé titrait déjà la section de fait, sans en avoir le
               balisage : la page passait du h1 du hero au h2 du grand prix en
               sautant ce bandeau. */}
-          <h2 className="font-functional text-ui font-bold uppercase tracking-[2px] text-stone-grey">
+          <h2 className="font-functional text-[12px] font-bold uppercase leading-[18px] tracking-[2px] text-stone-grey">
             Temps restant pour participer
           </h2>
-          {periode && <p className="mt-1 text-xs text-stone-grey">{periode}</p>}
+          {periode && <p className="text-[12px] leading-[21px] text-noir">{periode}</p>}
         </div>
 
-        <div className="flex items-center gap-3">
+        {/* Les deux-points qui séparaient les blocs ne figurent pas sur la
+            maquette : le décompte s'y lit en quatre cases posées côte à côte. */}
+        <div className="flex items-start gap-6">
           {/* Avant que la config arrive, les valeurs sont à 0 - flash imperceptible */}
-          <TimeBlock value={timeLeft.days}    label="Jours" />
-          <Separator />
-          <TimeBlock value={timeLeft.hours}   label="Heures" />
-          <Separator />
+          <TimeBlock value={timeLeft.days} label="Jours" />
+          <TimeBlock value={timeLeft.hours} label="Heures" />
           <TimeBlock value={timeLeft.minutes} label="Minutes" />
-          <Separator />
           <TimeBlock value={timeLeft.seconds} label="Secondes" />
         </div>
 
-        {/* Ce bouton mène à la même page que le CTA du hero, mais il était le
-            plus petit du site et le seul en vert : la même action changeait
-            d'apparence selon l'endroit. Il reprend le terracotta des actions
-            principales et une taille visible depuis le bandeau. */}
-        <Button asChild size="lg">
+        {/* Ce bouton mène à la même page que le CTA du hero, et reprend sa
+            taille exacte sur la maquette. */}
+        <Button asChild size="cta" className="w-full md:w-[246px]">
           <Link href="/participate">Participer maintenant</Link>
         </Button>
       </div>
@@ -130,19 +139,13 @@ export function CountdownSection() {
 
 function TimeBlock({ value, label }: { value: number; label: string }) {
   return (
-    <div className="flex flex-col items-center">
-      <span className="font-display text-2xl font-bold text-noir">
+    <div className="flex w-16 flex-col items-center gap-2">
+      <span className="flex h-16 w-16 items-center justify-center rounded-soft bg-white font-display text-[36px] font-bold leading-[54px] text-noir">
         {String(value).padStart(2, '0')}
       </span>
-      <span className="font-functional text-[9px] uppercase tracking-[1px] text-stone-grey">
+      <span className="font-functional text-[10px] uppercase leading-[15px] text-stone-grey">
         {label}
       </span>
     </div>
   );
-}
-
-function Separator() {
-  // Le beige chaud d'origine plafonnait à 1.44:1 sur blanc. Ces deux-points
-  // restent du texte au sens du critère 1.4.3, décoratifs ou non.
-  return <span className="text-lg font-bold text-stone-grey">:</span>;
 }

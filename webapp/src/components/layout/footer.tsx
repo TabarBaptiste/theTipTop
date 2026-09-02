@@ -7,7 +7,6 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { SOCIAL_LINKS } from '@/lib/social-links';
 import { api } from '@/lib/api';
-import { LeafPile } from '@/components/decor/leaf-pile';
 
 /** Adresse officielle d'un reseau, par son nom. */
 const lienSocial = (nom: string) => SOCIAL_LINKS.find((r) => r.nom === nom)!.url;
@@ -44,10 +43,6 @@ export function Footer() {
 
   return (
     <footer className="relative bg-noir text-white">
-      {/* Les feuilles qui tombent s'arrêtent ici : le tas se construit sur le
-          bord haut du pied de page, au fil de la visite. */}
-      <LeafPile />
-
       {/* Main Footer */}
       <div className="container mx-auto px-6 py-12">
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
