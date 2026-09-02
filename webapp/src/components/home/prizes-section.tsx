@@ -194,7 +194,11 @@ export function PrizesSection() {
         <>
           <div className="container relative mx-auto grid items-center gap-10 px-6 pb-8 pt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)_auto] lg:gap-12 lg:pt-16">
             <div>
-              <p className="font-functional text-[10px] font-bold uppercase leading-[15px] tracking-[2px] text-terracotta-600">
+              {/* terracotta-800 et non 600 : a 10 px le seuil est de 4,5:1,
+                  et le 600 tombe entre 3,08 et 4,12 selon la teinte du lot -
+                  le pire etant l'or de l'infuseur. Le 800 tient de 5,58 a
+                  7,48 sur les cinq fonds. */}
+              <p className="font-functional text-[10px] font-bold uppercase leading-[15px] tracking-[2px] text-terracotta-800">
                 Lot {String(activeIndex + 1).padStart(2, '0')} sur {String(total).padStart(2, '0')}
               </p>
               {/* not-italic : la règle de base met les h3 en italique, ce qui
