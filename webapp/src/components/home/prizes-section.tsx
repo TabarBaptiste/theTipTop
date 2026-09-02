@@ -276,7 +276,7 @@ export function PrizesSection() {
                 </button>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center">
                 {prizes.map((prize, i) => (
                   <button
                     key={prize.code}
@@ -284,9 +284,13 @@ export function PrizesSection() {
                     onClick={() => allerA(i)}
                     aria-label={`Voir le lot ${i + 1} : ${prize.name}`}
                     aria-current={i === activeIndex}
-                    // La pastille ne fait que 10 px de haut ; la marge
-                    // transparente porte la zone cliquable à 34 px.
-                    className="group -my-3 py-3"
+                    // La pastille ne fait que 10 x 10 px. La marge transparente
+                    // porte la cible a 26 x 34, au-dela du minimum de 24 px du
+                    // critere 2.5.8, et c'est elle qui espace les pastilles
+                    // plutot qu'un gap : deux cibles de 24 px separees de 8 px
+                    // se recouvriraient, et l'exception d'espacement tomberait
+                    // avec.
+                    className="group -my-3 px-2 py-3"
                   >
                     <span
                       className={cn(

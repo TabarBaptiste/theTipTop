@@ -212,7 +212,7 @@ export function Footer() {
                 Nous respectons votre vie privée. Consultez notre{' '}
                 <Link
                   href="/politique-confidentialite"
-                  className="text-terracotta-300 hover:underline"
+                  className="text-terracotta-300 underline underline-offset-2"
                 >
                   politique de confidentialité
                 </Link>

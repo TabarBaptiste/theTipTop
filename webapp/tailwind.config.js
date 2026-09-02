@@ -73,6 +73,10 @@ module.exports = {
           50: '#F2F5EC',
           100: '#E0E8D0',
           500: '#5C6B3A',
+          // Bout sombre de la gamme, pour du texte pose sur les deux teintes
+          // claires ci-dessus. Le 500 n'y donne que 4,02:1, sous le minimum AA.
+          // Celui-ci atteint 6,5:1. Pendant du gold-900, qui joue le meme role.
+          900: '#3F4A28',
         },
         'warm-beige': '#E8D5B0',
         // Filet gris des separations de section sur la maquette : sous les

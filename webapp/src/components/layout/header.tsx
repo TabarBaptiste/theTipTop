@@ -176,6 +176,8 @@ export function Header() {
           className="md:hidden"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           aria-label={mobileMenuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+          aria-expanded={mobileMenuOpen}
+          aria-controls="menu-mobile"
         >
           {mobileMenuOpen ? (
             <X className="h-6 w-6 text-noir" strokeWidth={1.5} />
@@ -186,7 +188,20 @@ export function Header() {
       </nav>
 
       {/* Mobile Menu */}
+      {/* `max-h-0` masque le menu a l'oeil mais le laisse dans l'ordre de
+          tabulation : au clavier, une tabulation depuis le bouton amenait sur
+          « Le jeu », dont l'anneau de focus se dessinait dans un conteneur haut
+          d'un pixel. `inert` retire tout le sous-arbre de la tabulation et de
+          l'arbre d'accessibilite, sans toucher a la mise en page - l'animation
+          de repli continue de jouer.
+
+          React 18.3 traite `inert` comme un attribut booleen : lui passer la
+          chaine vide revient a le rendre faux, et l'attribut n'atteignait pas
+          le DOM. On lui passe donc un booleen, que ses types ne declarent pas
+          encore. */}
       <div
+        id="menu-mobile"
+        {...({ inert: !mobileMenuOpen } as unknown as { inert?: boolean })}
         className={cn(
           'overflow-hidden border-t border-warm-beige bg-white transition-all duration-300 ease-in-out md:hidden',
           // Hauteur calée sur le cas le plus haut : nav + bouton backoffice + profil + Jouer

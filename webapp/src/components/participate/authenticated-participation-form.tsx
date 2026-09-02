@@ -99,7 +99,7 @@ export function AuthenticatedParticipationForm({
             />
             <label htmlFor="consentData" className="text-xs leading-relaxed text-stone-grey">
               J&apos;accepte le traitement de mes données et le{' '}
-              <Link href="/reglement" className="text-terracotta-600 hover:underline">
+              <Link href="/reglement" className="text-terracotta-600 underline underline-offset-2">
                 règlement du jeu
               </Link>{' '}
               *

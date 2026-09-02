@@ -28,7 +28,7 @@ const COOKIES_LIST = [
   {
     category: 'Cookies strictement nécessaires',
     badge: 'Toujours actifs',
-    badgeClass: 'bg-moss-500/20 text-moss-500',
+    badgeClass: 'bg-moss-500/20 text-moss-900',
     headerClass: 'bg-moss-50 border-moss-100',
     items: [
       {
