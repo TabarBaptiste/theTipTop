@@ -28,6 +28,11 @@ interface Props {
   isResending: boolean;
   /** RG-08 : passé deux renvois, on propose de corriger l'adresse. */
   offerEmailCorrection: boolean;
+  /**
+   * L'écran sert les deux parcours : confirmer une participation, ou créer un
+   * compte. Seul le bouton en dit la différence.
+   */
+  submitLabel?: string;
   onVerify: (code: string) => void;
   onResend: (newEmail?: string) => void;
 }
@@ -38,6 +43,7 @@ export function VerificationStep({
   isVerifying,
   isResending,
   offerEmailCorrection,
+  submitLabel = 'Confirmer ma participation',
   onVerify,
   onResend,
 }: Props) {
@@ -116,7 +122,7 @@ export function VerificationStep({
               Vérification...
             </>
           ) : (
-            'Confirmer ma participation'
+            submitLabel
           )}
         </Button>
       </form>

@@ -73,8 +73,11 @@ export default function ParticipatePage() {
       // Un champ facultatif laissé vide arrive ici en chaîne vide. Côté API,
       // @IsOptional() ne saute que undefined : une chaîne vide serait validée
       // comme une date ou un téléphone, et rejetée. On les retire donc.
+      // confirmPassword ne sert qu'à l'écran : le DTO refuse les propriétés
+      // inconnues, l'envoyer ferait échouer la participation.
+      const { confirmPassword: _confirmPassword, ...payload } = data;
       const { data: response } = await api.post<InitiateResponse>('/participations/initiate', {
-        ...data,
+        ...payload,
         phone: data.phone || undefined,
         birthDate: data.birthDate || undefined,
         gender: data.gender || undefined,
@@ -200,8 +203,8 @@ export default function ParticipatePage() {
           <>
             <h1 className="font-display text-h2 text-noir">Participer au jeu-concours</h1>
             <p className="mt-2 text-sm text-stone-grey">
-              Saisissez le code de votre ticket de caisse. Aucun compte n&apos;est nécessaire
-              pour commencer.
+              Saisissez le code de votre ticket de caisse : votre compte est créé dans la
+              foulée, une fois votre adresse confirmée.
             </p>
 
             {/* Placés avant le formulaire : l'ordre naturel devient alors

@@ -10,31 +10,40 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useIsHydrated } from '@/lib/hooks/use-is-hydrated';
 import {
+  PASSWORD_HINT,
   birthDateBounds,
   birthDateField,
   genderField,
   nameField,
+  passwordField,
   phoneField,
 } from '@/lib/validation';
 
-const participationSchema = z.object({
-  code: z
-    .string()
-    .length(10, 'Le code doit contenir exactement 10 caractères')
-    .regex(/^[A-Z0-9]+$/, 'Le code ne contient que des lettres majuscules et des chiffres'),
-  lastName: nameField('nom'),
-  firstName: nameField('prénom'),
-  email: z.string().email('Adresse email invalide'),
-  phone: phoneField,
-  birthDate: birthDateField,
-  gender: genderField,
-  consentData: z.literal(true, {
-    errorMap: () => ({ message: 'Vous devez accepter pour participer' }),
-  }),
-  consentEmail: z.boolean().default(false),
-  // Piège à robots : invisible à l'écran, donc toujours vide pour un humain.
-  website: z.string().max(0).optional(),
-});
+const participationSchema = z
+  .object({
+    code: z
+      .string()
+      .length(10, 'Le code doit contenir exactement 10 caractères')
+      .regex(/^[A-Z0-9]+$/, 'Le code ne contient que des lettres majuscules et des chiffres'),
+    lastName: nameField('nom'),
+    firstName: nameField('prénom'),
+    email: z.string().email('Adresse email invalide'),
+    password: passwordField,
+    confirmPassword: z.string(),
+    phone: phoneField,
+    birthDate: birthDateField,
+    gender: genderField,
+    consentData: z.literal(true, {
+      errorMap: () => ({ message: 'Vous devez accepter pour participer' }),
+    }),
+    consentEmail: z.boolean().default(false),
+    // Piège à robots : invisible à l'écran, donc toujours vide pour un humain.
+    website: z.string().max(0).optional(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Les mots de passe ne correspondent pas',
+    path: ['confirmPassword'],
+  });
 
 export type ParticipationFormData = z.infer<typeof participationSchema>;
 
@@ -117,6 +126,38 @@ export function ParticipationForm({ onSubmit, isSubmitting }: Props) {
           <p className="mt-1 text-xs text-stone-grey">
             Votre code de confirmation y sera envoyé
           </p>
+        )}
+      </div>
+
+      {/* Le compte est créé à la confirmation du code. Demander le mot de passe
+          ici plutôt qu'après le résultat évite les comptes sans mot de passe,
+          que leur titulaire ne pouvait plus retrouver faute de pouvoir s'y
+          reconnecter. */}
+      <div>
+        <Label htmlFor="password">Mot de passe *</Label>
+        <Input
+          id="password"
+          type="password"
+          autoComplete="new-password"
+          {...register('password')}
+        />
+        {errors.password ? (
+          <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>
+        ) : (
+          <p className="mt-1 text-xs text-stone-grey">{PASSWORD_HINT}</p>
+        )}
+      </div>
+
+      <div>
+        <Label htmlFor="confirmPassword">Confirmer le mot de passe *</Label>
+        <Input
+          id="confirmPassword"
+          type="password"
+          autoComplete="new-password"
+          {...register('confirmPassword')}
+        />
+        {errors.confirmPassword && (
+          <p className="mt-1 text-xs text-red-600">{errors.confirmPassword.message}</p>
         )}
       </div>
 

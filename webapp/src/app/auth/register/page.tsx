@@ -11,7 +11,9 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { api } from '@/lib/api';
 import { useAuthStore } from '@/lib/stores/auth-store';
+import { VerificationStep } from '@/components/participate/verification-step';
 import { useIsHydrated } from '@/lib/hooks/use-is-hydrated';
 import { trackRegisterSuccess, trackRegisterFailure, trackCTAClick } from '@/lib/analytics';
 import {
@@ -44,10 +46,23 @@ const registerSchema = z.object({
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
+/** Réponse de POST /auth/register : aucun jeton avant confirmation. */
+interface PendingRegistration {
+  leadId: string;
+  maskedEmail: string;
+  expiresAt: string;
+}
+
 export default function RegisterPage() {
   const router = useRouter();
-  const { register: registerUser } = useAuthStore();
+  const { setTokens, setUser } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
+  // L'inscription se fait en deux temps : le formulaire, puis le code reçu par
+  // email. Tant qu'il n'est pas saisi, aucun compte n'existe.
+  const [pending, setPending] = useState<PendingRegistration | null>(null);
+  const [offerEmailCorrection, setOfferEmailCorrection] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   // Même risque qu'à la connexion, aggravé : ce formulaire porte le mot de
   // passe, sa confirmation, la date de naissance et le téléphone.
   const isHydrated = useIsHydrated();
@@ -66,30 +81,70 @@ export default function RegisterPage() {
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
     try {
-      const { confirmPassword, ...rest } = data;
+      const { confirmPassword: _confirmPassword, ...rest } = data;
       // On évite d'envoyer des champs optionnels vides (sinon échec IsDateString, etc.)
-      await registerUser({
+      const { data: response } = await api.post<PendingRegistration>('/auth/register', {
         ...rest,
         phone: rest.phone || undefined,
         birthDate: rest.birthDate || undefined,
       });
-      trackRegisterSuccess('email');
-      toast.success('Inscription réussie ! Bienvenue !');
-      router.push('/dashboard');
-    } catch (error: any) {
-      const status = error?.response?.status;
-      if (status === 409) {
-        trackRegisterFailure('email', 'email_already_exists');
-        toast.error('Un compte existe déjà avec cet email');
-      } else if (status === 400 || status === 422) {
+      setPending(response);
+    } catch (error: unknown) {
+      // Le 409 « email déjà utilisé » a disparu : y répondre renseignerait
+      // n'importe qui sur les adresses inscrites. Une adresse déjà connue suit
+      // désormais le parcours nominal, et son titulaire est prévenu par email.
+      const status = (error as { response?: { status?: number } })?.response?.status;
+      if (status === 400 || status === 422) {
         trackRegisterFailure('email', 'invalid_data');
         toast.error('Données invalides. Vérifiez le formulaire.');
       } else {
         trackRegisterFailure('email', 'server_error');
-        toast.error('Erreur lors de l\'inscription');
+        toast.error("Erreur lors de l'inscription");
       }
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  /** Le compte n'est créé qu'ici, et la session s'ouvre dans la foulée. */
+  const onVerify = async (code: string) => {
+    setIsVerifying(true);
+    try {
+      const { data } = await api.post('/auth/register/verify', {
+        leadId: pending!.leadId,
+        code,
+      });
+      // L'API renvoie déjà le profil avec les jetons : inutile de rappeler
+      // /auth/me, comme le fait le tunnel de participation.
+      setTokens(data.accessToken, data.refreshToken);
+      setUser(data.user);
+      trackRegisterSuccess('email');
+      toast.success('Bienvenue !');
+      router.push('/dashboard');
+    } catch {
+      toast.error('Code invalide ou expiré');
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const onResend = async (newEmail?: string) => {
+    setIsResending(true);
+    try {
+      const { data } = await api.post('/auth/register/resend', {
+        leadId: pending!.leadId,
+        ...(newEmail ? { email: newEmail } : {}),
+      });
+      // maskedEmail et expiresAt changent : le décompte de 60 s repart de zéro.
+      setPending((prev) =>
+        prev ? { ...prev, maskedEmail: data.maskedEmail, expiresAt: data.expiresAt } : prev,
+      );
+      setOfferEmailCorrection(data.shouldOfferEmailCorrection);
+      toast.success('Un nouveau code vous a été envoyé');
+    } catch {
+      toast.error("Le renvoi n'a pas abouti");
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -100,6 +155,28 @@ export default function RegisterPage() {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
     window.location.href = `${apiUrl}/auth/${provider}`;
   };
+
+  if (pending) {
+    return (
+      <div className="flex min-h-[calc(100vh-5rem)] items-center justify-center bg-cream px-4 py-12">
+        <div className="w-full max-w-xl sm:rounded-card sm:border sm:border-warm-beige sm:bg-white sm:p-8 sm:shadow-sm">
+          <VerificationStep
+            // Un nouvel envoi produit une nouvelle échéance : le composant est
+            // remonté, ce qui relance le décompte de 60 s sans effet de bord.
+            key={pending.expiresAt}
+            maskedEmail={pending.maskedEmail}
+            expiresAt={pending.expiresAt}
+            isVerifying={isVerifying}
+            isResending={isResending}
+            offerEmailCorrection={offerEmailCorrection}
+            submitLabel="Créer mon compte"
+            onVerify={onVerify}
+            onResend={onResend}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-[calc(100vh-5rem)] items-center justify-center bg-cream px-4 py-12">
