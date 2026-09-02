@@ -117,11 +117,11 @@ export default function ReglementPage() {
           <div className="rounded-card border border-warm-beige bg-white p-6">
             <p className="text-sm text-stone-grey">
               Pour toute question relative au règlement, consultez notre{' '}
-              <Link href="/faq" className="text-terracotta-600 hover:underline">
+              <Link href="/faq" className="text-terracotta-600 underline underline-offset-2">
                 FAQ
               </Link>{' '}
               ou notre{' '}
-              <Link href="/politique-confidentialite" className="text-terracotta-600 hover:underline">
+              <Link href="/politique-confidentialite" className="text-terracotta-600 underline underline-offset-2">
                 politique de confidentialité
               </Link>
               .

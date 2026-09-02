@@ -138,7 +138,7 @@ export function ParticipationResult({
           </form>
 
           <p className="mt-3 text-center text-xs text-stone-grey">
-            <Link href="/dashboard" className="hover:underline">
+            <Link href="/dashboard" className="underline underline-offset-2">
               Plus tard
             </Link>
           </p>

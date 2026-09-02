@@ -309,11 +309,11 @@ export default function RegisterPage() {
               />
               <label htmlFor="consentData" className="text-xs leading-relaxed text-stone-grey">
                 J&apos;accepte les{' '}
-                <Link href="/cgu" className="text-terracotta-600 hover:underline">
+                <Link href="/cgu" className="text-terracotta-600 underline underline-offset-2">
                   Conditions d&apos;utilisation
                 </Link>{' '}
                 et la{' '}
-                <Link href="/politique-confidentialite" className="text-terracotta-600 hover:underline">
+                <Link href="/politique-confidentialite" className="text-terracotta-600 underline underline-offset-2">
                   Politique de confidentialité
                 </Link>{' '}
                 *
@@ -378,7 +378,7 @@ export default function RegisterPage() {
 
         <p className="mt-8 text-center text-sm text-stone-grey">
           Déjà un compte ?{' '}
-          <Link href="/auth/login" className="font-semibold text-terracotta-600 hover:underline">
+          <Link href="/auth/login" className="font-semibold text-terracotta-600 underline underline-offset-2">
             Se connecter
           </Link>
         </p>

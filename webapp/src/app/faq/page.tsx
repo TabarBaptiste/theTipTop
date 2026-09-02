@@ -111,13 +111,13 @@ export default function FaqPage() {
           <div className="rounded-card bg-terracotta-50 p-6 text-center">
             <p className="text-sm text-noir">
               Vous ne trouvez pas votre réponse ? Consultez le{' '}
-              <Link href="/reglement" className="font-semibold text-terracotta-600 hover:underline">
+              <Link href="/reglement" className="font-semibold text-terracotta-600 underline underline-offset-2">
                 règlement complet
               </Link>{' '}
               ou écrivez-nous à{' '}
               <a
                 href="mailto:contact@thetiptop.fr"
-                className="font-semibold text-terracotta-600 hover:underline"
+                className="font-semibold text-terracotta-600 underline underline-offset-2"
               >
                 contact@thetiptop.fr
               </a>
