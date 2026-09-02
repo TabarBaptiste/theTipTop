@@ -31,6 +31,9 @@ const buttonVariants = cva(
         default: 'h-11 px-8 py-3 text-ui',
         sm: 'h-9 px-6 py-2 text-ui',
         lg: 'h-14 px-10 py-3 text-[13px]',
+        // En-tete : 28 px de haut, libelle a 10 px sur la maquette. Meme
+        // reserve tactile en dessous de md.
+        nav: 'h-9 md:h-7 px-5 text-[10px]',
         // Réservé à l'action principale d'un écran : une seule par vue.
         // Le libellé ne se coupe pas (whitespace-nowrap) : sur les écrans
         // étroits, c'est la marge intérieure qui cède.

@@ -42,7 +42,7 @@ export function Footer() {
   };
 
   return (
-    <footer className="bg-noir text-white">
+    <footer className="relative bg-noir text-white">
       {/* Main Footer */}
       <div className="container mx-auto px-6 py-12">
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">

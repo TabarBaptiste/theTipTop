@@ -52,7 +52,7 @@ export default function DashboardPage() {
 
   if (authLoading || !isAuthenticated) {
     return (
-      <div className="min-h-[calc(100vh-5rem)] bg-cream py-8">
+      <div className="min-h-[calc(100vh-3.75rem)] bg-cream py-8">
         <div className="container mx-auto px-4">
           {/* Squelette cale sur la forme reelle, barre laterale comprise : sans
               elle, la mise en page sauterait d'une colonne a deux au moment ou
@@ -136,7 +136,7 @@ export default function DashboardPage() {
   const deliveredPrizes = participations?.filter((p) => p.prizeDelivered).length || 0;
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-cream py-8">
+    <div className="min-h-[calc(100vh-3.75rem)] bg-cream py-8">
       <div className="container mx-auto px-4">
         {/* Meme gabarit que /dashboard/profile et /dashboard/settings : cette
             page etait la seule de l'espace personnel sans sa navigation, ce que

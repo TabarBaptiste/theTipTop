@@ -55,7 +55,7 @@ function Desinscription() {
   }, [token]);
 
   return (
-    <div className="flex min-h-[calc(100vh-5rem)] items-center justify-center bg-cream px-6 py-12">
+    <div className="flex min-h-[calc(100vh-3.75rem)] items-center justify-center bg-cream px-6 py-12">
       <div className="w-full max-w-md rounded-card bg-white p-8">
         <MailX className="mb-6 h-10 w-10 text-terracotta-600" strokeWidth={1.5} />
         <h1 className="font-display text-h2 text-noir">Désinscription</h1>

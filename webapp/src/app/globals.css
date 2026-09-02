@@ -7,12 +7,12 @@
     scroll-behavior: smooth;
 
     /* WCAG 2.2, critère 2.4.11 « Focus non masqué ». L'en-tête est collant et
-       occupe 5rem : sans cette réserve, tout défilement provoqué par une ancre
+       occupe 3.75rem : sans cette réserve, tout défilement provoqué par une ancre
        ou par la mise au point au clavier amène la cible pile derrière lui, et
        l'utilisateur au clavier perd de vue l'élément qu'il vient d'atteindre.
        Les 43 « scroll-mt-* » disséminés dans les pages traitaient le symptôme
        section par section ; cette règle traite la cause. */
-    scroll-padding-top: 5.5rem;
+    scroll-padding-top: 4.25rem;
   }
 
   :root {
@@ -141,6 +141,90 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* Le lot affiche sur la scene des lots remplace le precedent : une breve
+   montee en opacite et en echelle marque le changement sans faire attendre. */
+.animate-lot-entree {
+  animation: lot-entree 0.55s ease-out both;
+}
+
+@keyframes lot-entree {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* La chute est decoupee en deux animations portees par deux elements
+   imbriques : la descente, reguliere, et le balancement lateral, qui a son
+   propre rythme. Reunies sur un seul element, elles se remplaceraient l'une
+   l'autre - une seule propriete transform - et la feuille tomberait droit. */
+.animate-chute {
+  animation-name: chute;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes chute {
+  from {
+    transform: translate3d(0, -14vh, 0);
+  }
+  to {
+    transform: translate3d(0, 104vh, 0);
+  }
+}
+
+.animate-balancement {
+  animation-name: balancement;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+@keyframes balancement {
+  from {
+    transform: translateX(-18px) rotate(-30deg);
+  }
+  to {
+    transform: translateX(18px) rotate(32deg);
+  }
+}
+
+/* Les feuilles du tas se posent une a une. On anime « translate » et non
+   « transform » : chaque feuille porte deja son inclinaison sur la propriete
+   « rotate », que transform ecraserait. */
+.animate-atterrissage {
+  animation: atterrissage 0.9s ease-out both;
+}
+
+@keyframes atterrissage {
+  from {
+    opacity: 0;
+    translate: 0 -30px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+/* Toute animation decorative de ce fichier tourne en boucle. Sans cette regle,
+   elle ne s'arreterait jamais pour qui a demande moins de mouvement - un
+   reglage souvent pose pour cause de vertiges ou de migraines. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 

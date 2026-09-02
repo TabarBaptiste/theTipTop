@@ -100,33 +100,55 @@ function PrizeCard({ image, imageAlt = '', category, title, value, odds, classNa
   const imgSrc = typeof image === 'string' ? image : image?.src;
 
   return (
-    // Pas de bordure ni de fond - la card est posée directement sur le fond de page
-    <article className={cn('group flex flex-col', className)}>
-      {/* Image : radius sur les 4 coins */}
-      <div className="aspect-[4/3] w-full overflow-hidden rounded-card">
+    // Le lot etait pose a nu sur le fond de page : rien ne le designait comme
+    // un objet a part, et l'image partageait la vedette avec le texte. Sur une
+    // surface qui se detache, l'image occupe la plus grande part de la carte
+    // et le texte passe en legende.
+    <article
+      className={cn(
+        'group flex flex-col overflow-hidden rounded-card bg-cream',
+        'shadow-[0_18px_40px_-26px_rgba(26,26,26,0.5)]',
+        'transition-[transform,box-shadow] duration-300 ease-out',
+        'hover:-translate-y-1 hover:shadow-[0_26px_52px_-24px_rgba(26,26,26,0.55)]',
+        'motion-reduce:transition-none motion-reduce:hover:translate-y-0',
+        className
+      )}
+    >
+      {/* Portrait plutot que paysage : a largeur de colonne egale, le format
+          vertical donne au visuel la moitie de la hauteur de la carte. */}
+      <div className="aspect-[4/5] w-full overflow-hidden">
         {imgSrc ? (
           <img
             src={imgSrc}
             alt={imageAlt}
-            className="block h-full w-full object-cover transition-transform duration-[400ms] ease-out group-hover:scale-[1.04]"
+            className="block h-full w-full object-cover transition-transform duration-[400ms] ease-out group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
           />
         ) : (
           <div className="h-full w-full bg-gradient-to-br from-terracotta-50 to-warm-beige/50" />
         )}
       </div>
 
-      {/* Catégorie : label terracotta UPPERCASE, sans background */}
-      <p className="mt-md font-functional text-ui uppercase text-terracotta-600">
-        {CATEGORY_LABELS[category]}
-      </p>
+      <div className="flex flex-1 flex-col p-md">
+        {/* Catégorie : label terracotta UPPERCASE, sans background */}
+        <p className="font-functional text-ui uppercase text-terracotta-600">
+          {CATEGORY_LABELS[category]}
+        </p>
 
-      {/* Titre éditorial italique */}
-      <h3 className="mt-2xs font-editorial text-h3 italic text-noir">{title}</h3>
+        {/* Titre éditorial italique */}
+        <h3 className="mt-2xs font-editorial text-h3 italic text-noir">{title}</h3>
 
-      {/* Footer : valeur (gauche) + pourcentage (droite), séparés par un filet */}
-      <div className={cn('mt-md flex items-center border-t border-warm-beige pt-sm', value ? 'justify-between' : 'justify-end')}>
-        {value && <span className="font-functional text-caption text-stone">Valeur {value}</span>}
-        <span className="font-functional text-caption font-semibold text-terracotta-600">{odds}</span>
+        {/* Footer : valeur (gauche) + pourcentage (droite), séparés par un filet.
+            « mt-auto » le colle en bas quelle que soit la longueur du titre, pour
+            que les filets s'alignent d'une carte à l'autre. */}
+        <div
+          className={cn(
+            'mt-auto flex items-center border-t border-warm-beige pt-sm',
+            value ? 'justify-between' : 'justify-end'
+          )}
+        >
+          {value && <span className="font-functional text-caption text-stone">Valeur {value}</span>}
+          <span className="font-functional text-caption font-semibold text-terracotta-600">{odds}</span>
+        </div>
       </div>
     </article>
   );

@@ -48,9 +48,15 @@ async function upload(publicId: string): Promise<string> {
   const bytes = await readFile(join(IMAGES_DIR, fileName));
 
   // `overwrite` est signé, `file` et `api_key` ne le sont jamais.
+  //
+  // `invalidate` purge le visuel précédent des caches du CDN. Sans lui, l'URL
+  // de livraison n'ayant pas de numéro de version, les serveurs de bordure
+  // continuent de servir l'ancienne image - et un format par dérivé, donc
+  // aussi longtemps pour l'AVIF que pour le WebP.
   const signed = {
     public_id: publicId,
     overwrite: 'true',
+    invalidate: 'true',
     timestamp: Math.floor(Date.now() / 1000).toString(),
   };
 

@@ -75,6 +75,10 @@ module.exports = {
           500: '#5C6B3A',
         },
         'warm-beige': '#E8D5B0',
+        // Filet gris des separations de section sur la maquette : sous les
+        // titres « Comment participer ? » et « Pourquoi nous ? », et entre les
+        // sections. Le beige chaud y etait trop present.
+        'section-line': '#D9D9D9',
         gold: {
           50: '#FBF6ED',
           100: '#F5E9D0',
@@ -139,6 +143,10 @@ module.exports = {
       fontSize: {
         h1: ['clamp(28px, 4vw, 36px)', { lineHeight: '1.2', letterSpacing: '-0.5px', fontWeight: '700' }],
         h2: ['clamp(22px, 3vw, 26px)', { lineHeight: '1.3', fontWeight: '600' }],
+        // Titres portes a 36px par la maquette : hero, grand prix, « Les lots
+        // a gagner », « Tout savoir ». Distinct de h2, qu'elle reserve a
+        // « Comment participer ? » et « Pourquoi nous ? », a 26px.
+        display: ['clamp(28px, 4vw, 36px)', { lineHeight: '1.2', letterSpacing: '-0.5px', fontWeight: '700' }],
         h3: ['20px', { lineHeight: '1.4', fontWeight: '500' }],
         body: ['14px', { lineHeight: '1.75', letterSpacing: '0.3px' }],
         ui: ['11px', { lineHeight: '1', letterSpacing: '2px', fontWeight: '700' }],

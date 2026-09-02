@@ -1,9 +1,11 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
-import { Gift, Scale, Sparkles, Users } from 'lucide-react';
+import coffretsImg from '@/img/coffret_boites_lavande.webp';
 import { Button } from '@/components/ui/button';
+import { SemisDeDoodles, type DoodlePose } from '@/components/decor/botanical-doodles';
 import { Skeleton } from '@/components/ui/skeleton';
 import { api } from '@/lib/api';
 
@@ -15,9 +17,27 @@ const SOCIAL_PROOF_THRESHOLD = 50;
 // Les trois objections que soulève un tirage au sort : faut-il s'inscrire,
 // faut-il multiplier les codes, et qui garantit le résultat.
 const ATOUTS = [
-  { Icone: Sparkles, texte: 'Inscription automatique dès votre première participation' },
-  { Icone: Users, texte: 'Une chance par personne, quel que soit le nombre de codes saisis' },
-  { Icone: Scale, texte: 'Tirage sous le contrôle de Maître Arnaud Rick, huissier de justice' },
+  'Inscription automatique dès votre première participation',
+  'Une chance par personne, quel que soit le nombre de codes saisis',
+  'Tirage sous le contrôle de Maître Arnaud Rick, huissier de justice',
+];
+
+// Le panneau vert n'avait que du texte. Ces botaniques le meublent sans y
+// mettre de photo, dans le prolongement des lisieres du hero.
+//
+// Deux regimes d'opacite, dictes par le contraste. Le texte du panneau est
+// blanc sur le vert mousse, a 5,80:1. Un trait blanc pose derriere lui eclaire
+// le fond localement : a 0,10 le rapport tient encore a 4,66:1, a 0,20 il
+// tombe a 3,79:1. Les doodles qui debordent hors de la colonne de texte -
+// ceux qui sortent par la droite, et ceux du bas sous le bouton - peuvent donc
+// monter a 0,16 ; ceux qui la traversent restent a 0,10.
+const DOODLES_GRAND_PRIX: DoodlePose[] = [
+  { doodle: 'feuille', haut: 10, gauche: 99, taille: 130, rotation: 24, opacite: 0.16 },
+  { doodle: 'brindille', haut: 58, gauche: 101, taille: 120, rotation: -14, opacite: 0.16 },
+  { doodle: 'camomille', haut: 96, gauche: 92, taille: 84, rotation: 20, opacite: 0.16 },
+  { doodle: 'anis', haut: 97, gauche: 8, taille: 76, rotation: 10, opacite: 0.16 },
+  { doodle: 'baies', haut: 33, gauche: 84, taille: 54, rotation: -26, opacite: 0.08 },
+  { doodle: 'feuille', haut: 4, gauche: 62, taille: 46, rotation: -30, opacite: 0.1 },
 ];
 
 interface GrandPrizeInfo {
@@ -42,102 +62,95 @@ export function GrandPrizeSection() {
   const showParticipants = participants >= SOCIAL_PROOF_THRESHOLD;
 
   return (
-    <section
-      id="grand-prize"
-      className="relative overflow-hidden bg-noir py-20 text-white md:py-28"
-    >
-      {/* Le noir était posé à plat : la section la plus importante de la page
-          n'avait aucune profondeur. Ce halo doré la centre sur le titre sans
-          rien ajouter à lire. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 top-0 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gold-500/20 blur-[130px]"
-      />
-
-      <div className="relative container mx-auto px-6">
-        <div className="mx-auto max-w-3xl text-center">
+    <section id="grand-prize" className="bg-noir text-white">
+      {isLoading ? (
+        <div className="container mx-auto flex max-w-3xl flex-col items-center gap-4 px-6 py-16 md:py-20">
+          <Skeleton className="h-12 w-64 bg-white/10" />
+          <Skeleton className="h-4 w-80 bg-white/10" />
+        </div>
+      ) : data?.drawn ? (
+        <div className="container mx-auto max-w-3xl px-6 py-16 text-center md:py-20">
           <p className="font-functional text-ui uppercase tracking-[2px] text-gold-500">
             Tirage au sort final
           </p>
+          {/* Après le tirage, annoncer « à gagner » serait faux. La section
+              bascule sur le résultat, ce qui referme l'opération et prouve
+              qu'elle a bien eu lieu. */}
+          <h2 className="mt-4 font-display text-display text-white">
+            Le grand prix a trouvé son gagnant
+          </h2>
+          {data.winner && (
+            <p className="mt-4 text-lg text-white/80">
+              Félicitations à{' '}
+              <strong className="text-gold-500">
+                {data.winner.firstName} {data.winner.lastName}
+              </strong>
+              , qui remporte un an de thé.
+            </p>
+          )}
+          <p className="mt-4 text-sm text-white/60">
+            Tirage effectué sous le contrôle de Maître Arnaud Rick, huissier de justice
+            {data.totalParticipants
+              ? `, parmi ${data.totalParticipants.toLocaleString('fr-FR')} participants.`
+              : '.'}
+          </p>
+        </div>
+      ) : (
+        // Deux colonnes pleine largeur, photo à gauche / panneau à droite :
+        // le lot était jusque-là annoncé par du texte seul sur fond noir, sans
+        // rien qui le montre.
+        <div className="grid lg:min-h-[467px] lg:grid-cols-2">
+          <div className="relative h-64 md:h-96 lg:h-auto">
+            <Image
+              src={coffretsImg}
+              alt="Coffrets de thés Thé Tip Top"
+              fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover"
+            />
+          </div>
 
-          {isLoading ? (
-            <div className="mt-6 flex flex-col items-center gap-4">
-              <Skeleton className="h-12 w-64 bg-white/10" />
-              <Skeleton className="h-4 w-80 bg-white/10" />
-            </div>
-          ) : data?.drawn ? (
-            // Après le tirage, annoncer « à gagner » serait faux. La section
-            // bascule sur le résultat, ce qui referme l'opération et prouve
-            // qu'elle a bien eu lieu.
-            <>
-              <h2 className="mt-4 font-display text-[clamp(2rem,5vw,3.5rem)] font-bold leading-[1.1] text-white">
-                Le grand prix a trouvé son gagnant
-              </h2>
-              {data.winner && (
-                <p className="mt-4 text-lg text-white/80">
-                  Félicitations à{' '}
-                  <strong className="text-gold-500">
-                    {data.winner.firstName} {data.winner.lastName}
-                  </strong>
-                  , qui remporte un an de thé.
+          <div className="relative flex flex-col overflow-hidden bg-moss px-6 pb-14 pt-9 text-white md:px-11">
+            <SemisDeDoodles poses={DOODLES_GRAND_PRIX} />
+
+            {/* Le même surtitre qu'en tête de page sur la maquette : c'est le
+                fil qui relie le hero au grand prix, et non deux annonces
+                distinctes. */}
+            <p className="relative font-functional text-[10px] font-bold uppercase leading-[15px] tracking-[2px] text-white">
+              Jeu concours exclusif
+            </p>
+
+            {/* La valeur du lot appartient au titre sur la maquette. Sortie en
+                pastille, elle se lisait comme un prix de vente accolé à
+                l'annonce plutôt que comme son estimation. */}
+            <h2 className="relative mt-5 font-display text-display text-white">
+              Un an de thé à gagner d&apos;une valeur de 360&nbsp;€
+            </h2>
+
+            <p className="relative mt-5 text-body leading-[24.5px] text-white">
+              Au-delà du lot garanti par votre ticket, chaque participation vous inscrit
+              automatiquement au tirage au sort final. Rien de plus à faire.
+            </p>
+
+            <ul className="relative mt-5 list-disc space-y-0 pl-[21px] text-body leading-[24.5px] text-white">
+              {ATOUTS.map((texte) => (
+                <li key={texte}>{texte}</li>
+              ))}
+            </ul>
+
+            <div className="relative mt-12 flex flex-col items-center gap-3">
+              <Button asChild size="xl" className="w-full md:w-auto">
+                <Link href="/participate">Participer au tirage</Link>
+              </Button>
+              {showParticipants && (
+                <p className="text-[11px] text-white/70">
+                  Déjà {participants.toLocaleString('fr-FR')} participants au tirage
                 </p>
               )}
-              <p className="mt-4 text-sm text-white/60">
-                Tirage effectué sous le contrôle de Maître Arnaud Rick, huissier de justice
-                {data.totalParticipants
-                  ? `, parmi ${data.totalParticipants.toLocaleString('fr-FR')} participants.`
-                  : '.'}
-              </p>
-            </>
-          ) : (
-            <>
-              <h2 className="mt-4 font-display text-[clamp(2rem,5vw,3.5rem)] font-bold leading-[1.1] text-white">
-                Un an de thé à gagner
-              </h2>
-              {/* « 360 € » en gros chiffres nus sous le titre se lisait comme
-                  un prix de vente. En pastille, la somme redevient ce qu'elle
-                  est : l'estimation du lot. */}
-              <p className="mt-6 inline-flex items-center gap-2 rounded-full border border-gold-500/40 bg-gold-500/10 px-5 py-2 font-functional text-sm font-bold uppercase tracking-[2px] text-gold-400">
-                <Gift className="h-4 w-4" strokeWidth={1.5} />
-                Une valeur de 360 €
-              </p>
-
-              <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-white/80">
-                Au-delà du lot garanti par votre ticket, chaque participation vous inscrit
-                <strong className="text-white"> automatiquement </strong>
-                au tirage au sort final. Rien de plus à faire.
-              </p>
-
-              {/* Icône et texte flottaient sur le fond noir, sans rien qui les
-                  rattache. Chaque argument tient maintenant dans sa surface. */}
-              <div className="mt-12 grid gap-4 text-left sm:grid-cols-3">
-                {ATOUTS.map(({ Icone, texte }) => (
-                  <div
-                    key={texte}
-                    className="rounded-card border border-white/10 bg-white/[0.04] p-5"
-                  >
-                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-gold-500/15">
-                      <Icone className="h-5 w-5 text-gold-400" strokeWidth={1.5} />
-                    </span>
-                    <p className="mt-3 text-sm leading-relaxed text-white/70">{texte}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-12 flex flex-col items-center gap-4">
-                <Button asChild size="xl">
-                  <Link href="/participate">Participer au tirage</Link>
-                </Button>
-                {showParticipants && (
-                  <p className="text-xs text-white/50">
-                    Déjà {participants.toLocaleString('fr-FR')} participants au tirage
-                  </p>
-                )}
-              </div>
-            </>
-          )}
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </section>
   );
 }

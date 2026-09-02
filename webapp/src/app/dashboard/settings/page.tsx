@@ -151,7 +151,7 @@ export default function SettingsPage() {
 
   if (authLoading || !isAuthenticated) {
     return (
-      <div className="min-h-[calc(100vh-5rem)] bg-white py-8">
+      <div className="min-h-[calc(100vh-3.75rem)] bg-white py-8">
         <div className="container mx-auto px-6">
           <div className="grid gap-8 lg:grid-cols-[240px_1fr]">
             {/* Squelette calé sur la forme réelle : un panneau, pas des lignes
@@ -171,7 +171,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-white py-8">
+    <div className="min-h-[calc(100vh-3.75rem)] bg-white py-8">
       <div className="container mx-auto px-6">
         <div className="grid gap-8 lg:grid-cols-[240px_1fr]">
           <AccountSidebar />

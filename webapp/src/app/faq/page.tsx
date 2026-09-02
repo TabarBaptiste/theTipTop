@@ -59,7 +59,7 @@ const FAQ_ITEMS = [
 
 export default function FaqPage() {
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-cream">
+    <div className="min-h-[calc(100vh-3.75rem)] bg-cream">
       {/* Décrit ces questions comme telles aux moteurs, ce que le HTML seul ne
           permet pas. Google peut alors les afficher dépliées dans ses résultats.
           Les réponses sont écrites en littéraux multilignes : leurs retours et
