@@ -9,52 +9,41 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useIsHydrated } from '@/lib/hooks/use-is-hydrated';
-import { toDateInputValue } from '@/lib/utils';
+import {
+  PASSWORD_HINT,
+  birthDateBounds,
+  birthDateField,
+  genderField,
+  nameField,
+  passwordField,
+  phoneField,
+} from '@/lib/validation';
 
-const MIN_AGE = 18;
-const MAX_AGE = 120;
-
-function getAge(birthDate: Date): number {
-  const today = new Date();
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const beforeBirthdayThisYear =
-    today.getMonth() < birthDate.getMonth() ||
-    (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate());
-  if (beforeBirthdayThisYear) age--;
-  return age;
-}
-
-// Miroir du DTO côté API : toute règle assouplie ici serait de toute façon
-// refusée par le serveur, autant le dire tout de suite à l'utilisateur.
-const participationSchema = z.object({
-  code: z
-    .string()
-    .length(10, 'Le code doit contenir exactement 10 caractères')
-    .regex(/^[A-Z0-9]+$/, 'Le code ne contient que des lettres majuscules et des chiffres'),
-  lastName: z.string().min(2, 'Le nom doit faire au moins 2 caractères'),
-  firstName: z.string().min(2, 'Le prénom doit faire au moins 2 caractères'),
-  email: z.string().email('Adresse email invalide'),
-  phone: z
-    .string()
-    .optional()
-    .refine((v) => !v || /^(\+33|0)[1-9](\d{2}){4}$/.test(v), 'Numéro de téléphone invalide'),
-  birthDate: z
-    .string()
-    .optional()
-    .refine((v) => !v || /^\d{4}-\d{2}-\d{2}$/.test(v), 'Date invalide (AAAA-MM-JJ)')
-    .refine((v) => !v || getAge(new Date(v)) >= MIN_AGE, 'Vous devez être majeur pour participer')
-    .refine((v) => !v || getAge(new Date(v)) <= MAX_AGE, 'Date de naissance invalide'),
-  gender: z.preprocess(
-    (v) => (v === '' ? undefined : v),
-    z.enum(['MALE', 'FEMALE', 'OTHER', 'PREFER_NOT_TO_SAY']).optional(),
-  ),
-  consentData: z.literal(true, {
-    errorMap: () => ({ message: 'Vous devez accepter pour participer' }),
-  }),
-  consentEmail: z.boolean().default(false),
-  // Piège à robots : invisible à l'écran, donc toujours vide pour un humain.
-  website: z.string().max(0).optional(),
-});
+const participationSchema = z
+  .object({
+    code: z
+      .string()
+      .length(10, 'Le code doit contenir exactement 10 caractères')
+      .regex(/^[A-Z0-9]+$/, 'Le code ne contient que des lettres majuscules et des chiffres'),
+    lastName: nameField('nom'),
+    firstName: nameField('prénom'),
+    email: z.string().email('Adresse email invalide'),
+    password: passwordField,
+    confirmPassword: z.string(),
+    phone: phoneField,
+    birthDate: birthDateField,
+    gender: genderField,
+    consentData: z.literal(true, {
+      errorMap: () => ({ message: 'Vous devez accepter pour participer' }),
+    }),
+    consentEmail: z.boolean().default(false),
+    // Piège à robots : invisible à l'écran, donc toujours vide pour un humain.
+    website: z.string().max(0).optional(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Les mots de passe ne correspondent pas',
+    path: ['confirmPassword'],
+  });
 
 export type ParticipationFormData = z.infer<typeof participationSchema>;
 
@@ -79,16 +68,7 @@ export function ParticipationForm({ onSubmit, isSubmitting }: Props) {
     defaultValues: { consentEmail: false, website: '' },
   });
 
-  const today = new Date();
-  // toDateInputValue lit les composants en heure locale. toISOString() convertit
-  // en UTC, ou minuit heure de Paris devient la veille : la borne tombait un jour
-  // trop tot et bloquait la personne ayant 18 ans le jour meme.
-  const maxBirthDate = toDateInputValue(
-    new Date(today.getFullYear() - MIN_AGE, today.getMonth(), today.getDate()),
-  );
-  const minBirthDate = toDateInputValue(
-    new Date(today.getFullYear() - MAX_AGE, today.getMonth(), today.getDate()),
-  );
+  const birthDateRange = birthDateBounds();
 
   return (
     <form noValidate onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
@@ -149,6 +129,38 @@ export function ParticipationForm({ onSubmit, isSubmitting }: Props) {
         )}
       </div>
 
+      {/* Le compte est créé à la confirmation du code. Demander le mot de passe
+          ici plutôt qu'après le résultat évite les comptes sans mot de passe,
+          que leur titulaire ne pouvait plus retrouver faute de pouvoir s'y
+          reconnecter. */}
+      <div>
+        <Label htmlFor="password">Mot de passe *</Label>
+        <Input
+          id="password"
+          type="password"
+          autoComplete="new-password"
+          {...register('password')}
+        />
+        {errors.password ? (
+          <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>
+        ) : (
+          <p className="mt-1 text-xs text-stone-grey">{PASSWORD_HINT}</p>
+        )}
+      </div>
+
+      <div>
+        <Label htmlFor="confirmPassword">Confirmer le mot de passe *</Label>
+        <Input
+          id="confirmPassword"
+          type="password"
+          autoComplete="new-password"
+          {...register('confirmPassword')}
+        />
+        {errors.confirmPassword && (
+          <p className="mt-1 text-xs text-red-600">{errors.confirmPassword.message}</p>
+        )}
+      </div>
+
       <div className="border-t border-warm-beige pt-4" />
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -157,8 +169,8 @@ export function ParticipationForm({ onSubmit, isSubmitting }: Props) {
           <Input
             id="birthDate"
             type="date"
-            min={minBirthDate}
-            max={maxBirthDate}
+            min={birthDateRange.min}
+            max={birthDateRange.max}
             {...register('birthDate')}
           />
           {errors.birthDate && (

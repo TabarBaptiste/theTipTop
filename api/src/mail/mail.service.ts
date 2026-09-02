@@ -114,6 +114,33 @@ export class MailService {
   }
 
   /**
+   * Inscription tentée sur une adresse déjà rattachée à un compte.
+   *
+   * L'API répond à cette tentative exactement comme à une inscription nominale,
+   * sans quoi la réponse dirait à un tiers que l'adresse est connue (RG-01).
+   * Le titulaire, lui, doit comprendre pourquoi aucun code ne lui parvient :
+   * c'est le rôle de ce message, adressé à la seule personne qui peut
+   * légitimement le lire, celle qui relève la boîte.
+   */
+  async sendAccountAlreadyExists(to: string): Promise<boolean> {
+    const loginUrl = `${this.config.get<string>('FRONTEND_URL', 'http://localhost:3000')}/auth/login`;
+
+    return this.send({
+      to,
+      subject: 'Votre compte Thé Tip Top existe déjà',
+      html: this.layout(
+        'Vous avez déjà un compte',
+        `<p>Une inscription vient d'être tentée avec cette adresse. Un compte y étant
+         déjà rattaché, aucun nouveau compte n'a été créé et rien n'a été modifié.</p>
+         <p><a href="${loginUrl}">Connectez-vous avec votre mot de passe habituel</a>,
+         ou utilisez le lien de récupération si vous l'avez oublié.</p>
+         <p>Si cette tentative ne vient pas de vous, il n'y a rien à faire :
+         sans votre mot de passe, personne n'accède à votre compte.</p>`,
+      ),
+    });
+  }
+
+  /**
    * Annonce du lot gagné, envoyée dès que la participation est enregistrée.
    *
    * Le code y figure volontairement : contrairement au code de confirmation à

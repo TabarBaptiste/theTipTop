@@ -69,8 +69,11 @@ export class ParticipationJobsService {
         data: {
           status: LeadStatus.EXPIRE,
           purgeAfter: this.daysFromNow(PURGE_DELAY_DAYS),
-          // Le code ne doit pas survivre à l'expiration.
+          // Ni le code ni le mot de passe en attente ne doivent survivre à
+          // l'expiration : le compte n'a pas été créé, ce hachage ne servira
+          // plus et n'a pas à traverser le délai de conservation.
           verificationCode: null,
+          password: null,
         },
       });
 

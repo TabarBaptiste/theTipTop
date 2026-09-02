@@ -15,6 +15,6 @@ import { MailModule } from '../../mail/mail.module';
   imports: [TicketsModule, AuthModule, MailModule],
   controllers: [ParticipationsController],
   providers: [ParticipationsService, LeadsService, ParticipationJobsService],
-  exports: [ParticipationsService],
+  exports: [ParticipationsService, LeadsService],
 })
 export class ParticipationsModule {}

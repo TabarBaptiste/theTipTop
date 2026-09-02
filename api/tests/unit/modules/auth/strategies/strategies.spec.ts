@@ -1,0 +1,253 @@
+// ===========================================
+// Tests unitaires - Stratégies Passport
+// ===========================================
+
+import { UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { LocalStrategy } from '@/modules/auth/strategies/local.strategy';
+import { JwtStrategy } from '@/modules/auth/strategies/jwt.strategy';
+import { JwtRefreshStrategy } from '@/modules/auth/strategies/jwt-refresh.strategy';
+import { GoogleStrategy } from '@/modules/auth/strategies/google.strategy';
+import { FacebookStrategy } from '@/modules/auth/strategies/facebook.strategy';
+import { AuthService } from '@/modules/auth/auth.service';
+
+const config: Record<string, string> = {
+  JWT_SECRET: 'test-secret',
+  JWT_REFRESH_SECRET: 'test-refresh-secret',
+  GOOGLE_CLIENT_ID: 'google-id',
+  GOOGLE_CLIENT_SECRET: 'google-secret',
+  GOOGLE_CALLBACK_URL: 'http://localhost:3001/api/v1/auth/google/callback',
+  FACEBOOK_APP_ID: 'fb-id',
+  FACEBOOK_APP_SECRET: 'fb-secret',
+  FACEBOOK_CALLBACK_URL: 'http://localhost:3001/api/v1/auth/facebook/callback',
+};
+
+const mockConfigService = {
+  getOrThrow: jest.fn((key: string) => config[key]),
+  // Les URL de retour sont désormais lues par `get`, avec repli sur un chemin
+  // relatif quand la variable est absente.
+  get: jest.fn((key: string) => config[key]),
+} as unknown as ConfigService;
+
+const mockAuthService = {
+  validateUser: jest.fn(),
+  validateJwtPayload: jest.fn(),
+  validateOAuthUser: jest.fn(),
+} as unknown as AuthService & {
+  validateUser: jest.Mock;
+  validateJwtPayload: jest.Mock;
+  validateOAuthUser: jest.Mock;
+};
+
+const payload = { sub: 'u1', email: 'jean@email.fr', role: 'CLIENT' as const };
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
+
+describe('LocalStrategy', () => {
+  const strategy = new LocalStrategy(mockAuthService);
+
+  it('should return the user for valid credentials', async () => {
+    mockAuthService.validateUser.mockResolvedValue({ id: 'u1', deletedAt: null });
+
+    const user = await strategy.validate('jean@email.fr', 'password');
+
+    expect(user.id).toBe('u1');
+  });
+
+  it('should throw UnauthorizedException for invalid credentials', async () => {
+    mockAuthService.validateUser.mockResolvedValue(null);
+
+    await expect(strategy.validate('jean@email.fr', 'wrong')).rejects.toThrow(
+      UnauthorizedException,
+    );
+  });
+
+  it('should throw UnauthorizedException for a soft-deleted account', async () => {
+    mockAuthService.validateUser.mockResolvedValue({ id: 'u1', deletedAt: new Date() });
+
+    await expect(strategy.validate('jean@email.fr', 'password')).rejects.toThrow(
+      UnauthorizedException,
+    );
+  });
+});
+
+describe('JwtStrategy', () => {
+  const strategy = new JwtStrategy(mockConfigService, mockAuthService);
+
+  it('should resolve the user from the payload', async () => {
+    mockAuthService.validateJwtPayload.mockResolvedValue({ id: 'u1', deletedAt: null });
+
+    const user = await strategy.validate(payload);
+
+    expect(user.id).toBe('u1');
+  });
+
+  it('should reject an unknown user', async () => {
+    mockAuthService.validateJwtPayload.mockResolvedValue(null);
+
+    await expect(strategy.validate(payload)).rejects.toThrow(UnauthorizedException);
+  });
+
+  it('should reject a soft-deleted account', async () => {
+    mockAuthService.validateJwtPayload.mockResolvedValue({ id: 'u1', deletedAt: new Date() });
+
+    await expect(strategy.validate(payload)).rejects.toThrow(UnauthorizedException);
+  });
+});
+
+describe('JwtRefreshStrategy', () => {
+  const strategy = new JwtRefreshStrategy(mockConfigService, mockAuthService);
+
+  it('should resolve the user from the payload', async () => {
+    mockAuthService.validateJwtPayload.mockResolvedValue({ id: 'u1' });
+
+    const user = await strategy.validate(payload);
+
+    expect(user.id).toBe('u1');
+  });
+
+  it('should reject an unknown user', async () => {
+    mockAuthService.validateJwtPayload.mockResolvedValue(null);
+
+    await expect(strategy.validate(payload)).rejects.toThrow(UnauthorizedException);
+  });
+});
+
+describe('GoogleStrategy', () => {
+  const strategy = new GoogleStrategy(mockConfigService, mockAuthService);
+
+  it('should create/find the user and call done with it', async () => {
+    mockAuthService.validateOAuthUser.mockResolvedValue({ id: 'u1' });
+    const done = jest.fn();
+
+    await strategy.validate(
+      'access',
+      'refresh',
+      {
+        id: 'g1',
+        name: { givenName: 'Jean', familyName: 'Dupont' },
+        emails: [{ value: 'jean@gmail.com' }],
+        photos: [],
+      } as never,
+      done,
+    );
+
+    expect(mockAuthService.validateOAuthUser).toHaveBeenCalledWith(
+      expect.objectContaining({ provider: 'google', providerId: 'g1', email: 'jean@gmail.com' }),
+    );
+    expect(done).toHaveBeenCalledWith(null, { id: 'u1' });
+  });
+
+  it('should fail when Google does not provide an email', async () => {
+    const done = jest.fn();
+
+    await strategy.validate('access', 'refresh', { id: 'g1', emails: [] } as never, done);
+
+    expect(done).toHaveBeenCalledWith(expect.any(Error), false);
+  });
+
+  it('should propagate service errors through done', async () => {
+    mockAuthService.validateOAuthUser.mockRejectedValue(new Error('db down'));
+    const done = jest.fn();
+
+    await strategy.validate(
+      'access',
+      'refresh',
+      { id: 'g1', emails: [{ value: 'jean@gmail.com' }] } as never,
+      done,
+    );
+
+    expect(done).toHaveBeenCalledWith(expect.any(Error), false);
+  });
+});
+
+describe('FacebookStrategy', () => {
+  const strategy = new FacebookStrategy(mockConfigService, mockAuthService);
+
+  beforeEach(() => {
+    mockAuthService.validateOAuthUser.mockReset();
+  });
+
+  it('should create/find the user with the profile email', async () => {
+    mockAuthService.validateOAuthUser.mockResolvedValue({ id: 'u1' });
+    const done = jest.fn();
+
+    await strategy.validate(
+      'access',
+      'refresh',
+      {
+        id: 'f1',
+        name: { givenName: 'Jean', familyName: 'Dupont' },
+        emails: [{ value: 'jean@fb.com' }],
+        photos: [],
+      } as never,
+      done,
+    );
+
+    expect(mockAuthService.validateOAuthUser).toHaveBeenCalledWith(
+      expect.objectContaining({ provider: 'facebook', providerId: 'f1', email: 'jean@fb.com' }),
+    );
+    expect(done).toHaveBeenCalledWith(null, { id: 'u1' });
+  });
+
+  // Refuser bloquerait toute inscription depuis ces comptes. On les laisse
+  // entrer avec une adresse de substitution ; une vraie adresse sera reclamee
+  // avant la premiere participation.
+  it('should fall back to a placeholder email when Facebook provides none', async () => {
+    mockAuthService.validateOAuthUser.mockResolvedValue({ id: 'u1' });
+    const done = jest.fn();
+
+    await strategy.validate('access', 'refresh', { id: 'f1', _json: {} } as never, done);
+
+    expect(mockAuthService.validateOAuthUser).toHaveBeenCalledWith(
+      expect.objectContaining({ email: 'fb_f1@facebook-noreply.invalid' }),
+    );
+    expect(done).toHaveBeenCalledWith(null, { id: 'u1' });
+  });
+
+  // .invalid est reserve par la RFC 2606 aux noms jamais resolvables. .local,
+  // utilise auparavant, est reserve au mDNS : un serveur de messagerie mal
+  // configure pourrait tenter de le router.
+  it('should use a domain that can never be routed', async () => {
+    mockAuthService.validateOAuthUser.mockResolvedValue({ id: 'u1' });
+    const done = jest.fn();
+
+    await strategy.validate('access', 'refresh', { id: 'f1', _json: {} } as never, done);
+
+    const { email } = mockAuthService.validateOAuthUser.mock.calls[0][0];
+    expect(email).toMatch(/\.invalid$/);
+    expect(email).not.toMatch(/\.local$/);
+  });
+
+  it('should read the email from _json when the profile has no emails array', async () => {
+    mockAuthService.validateOAuthUser.mockResolvedValue({ id: 'u1' });
+    const done = jest.fn();
+
+    await strategy.validate(
+      'access',
+      'refresh',
+      { id: 'f1', _json: { email: 'jean@fb.com' } } as never,
+      done,
+    );
+
+    expect(mockAuthService.validateOAuthUser).toHaveBeenCalledWith(
+      expect.objectContaining({ email: 'jean@fb.com' }),
+    );
+  });
+
+  it('should propagate service errors through done', async () => {
+    mockAuthService.validateOAuthUser.mockRejectedValue(new Error('db down'));
+    const done = jest.fn();
+
+    await strategy.validate(
+      'access',
+      'refresh',
+      { id: 'f1', emails: [{ value: 'jean@fb.com' }] } as never,
+      done,
+    );
+
+    expect(done).toHaveBeenCalledWith(expect.any(Error), null);
+  });
+});

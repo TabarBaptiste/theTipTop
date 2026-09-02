@@ -97,7 +97,7 @@ export function HeroSection() {
         <div className="relative mt-[52px] aspect-[4/3] w-full overflow-hidden md:aspect-[1129/468]">
           <Image
             src={tassesHeroImg}
-            alt=""
+            alt="Tasses de thé Tip Top"
             fill
             sizes="(max-width: 1200px) 100vw, 1152px"
             className="object-cover"

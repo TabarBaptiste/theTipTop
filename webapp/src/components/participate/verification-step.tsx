@@ -10,6 +10,17 @@ import { Label } from '@/components/ui/label';
 // anticipé, autant que le bouton reste grisé jusque-là.
 const RESEND_LOCK_SECONDS = 60;
 
+// Doit rester aligné sur CODE_TTL_HOURS côté API (leads.service.ts) : expiresAt
+// vaut toujours lastCodeSentAt + 48h, ce qui permet de retrouver l'instant
+// d'envoi réel sans porter lastCodeSentAt en prop.
+const CODE_TTL_HOURS = 48;
+
+function computeSecondsLeft(expiresAt: string): number {
+  const sentAt = new Date(expiresAt).getTime() - CODE_TTL_HOURS * 60 * 60 * 1000;
+  const elapsedMs = Date.now() - sentAt;
+  return Math.max(0, Math.ceil((RESEND_LOCK_SECONDS * 1000 - elapsedMs) / 1000));
+}
+
 interface Props {
   maskedEmail: string;
   expiresAt: string;
@@ -17,6 +28,11 @@ interface Props {
   isResending: boolean;
   /** RG-08 : passé deux renvois, on propose de corriger l'adresse. */
   offerEmailCorrection: boolean;
+  /**
+   * L'écran sert les deux parcours : confirmer une participation, ou créer un
+   * compte. Seul le bouton en dit la différence.
+   */
+  submitLabel?: string;
   onVerify: (code: string) => void;
   onResend: (newEmail?: string) => void;
 }
@@ -27,20 +43,21 @@ export function VerificationStep({
   isVerifying,
   isResending,
   offerEmailCorrection,
+  submitLabel = 'Confirmer ma participation',
   onVerify,
   onResend,
 }: Props) {
   const [code, setCode] = useState('');
   const [correctedEmail, setCorrectedEmail] = useState('');
   // Le décompte repart de lui-même à chaque nouvel envoi : la page remonte ce
-  // composant via une `key` calée sur expiresAt. Remettre l'état à zéro depuis
-  // un effet fonctionnerait aussi, mais provoque un rendu inutile et masque
-  // le fait qu'il s'agit d'un nouvel envoi, pas d'une mise à jour.
-  const [secondsLeft, setSecondsLeft] = useState(RESEND_LOCK_SECONDS);
+  // composant via une `key` calée sur expiresAt. Recalculé à partir d'expiresAt
+  // plutôt que d'un useState(60) fixe, pour refléter le temps réellement écoulé
+  // depuis le dernier envoi même si le composant est remonté (F5, retour arrière).
+  const [secondsLeft, setSecondsLeft] = useState(() => computeSecondsLeft(expiresAt));
 
   useEffect(() => {
     if (secondsLeft <= 0) return;
-    const timer = setInterval(() => setSecondsLeft((s) => s - 1), 1000);
+    const timer = setInterval(() => setSecondsLeft((s) => Math.max(0, s - 1)), 1000);
     return () => clearInterval(timer);
   }, [secondsLeft]);
 
@@ -67,8 +84,7 @@ export function VerificationStep({
         <div className="flex gap-3">
           <AlertCircle className="h-5 w-5 shrink-0 text-terracotta-600" strokeWidth={1.5} />
           <p className="text-xs leading-relaxed text-noir">
-            Votre code est réservé jusqu&apos;au <strong>{deadline}</strong>. Passé ce délai, il
-            redeviendra disponible et vous devrez recommencer.
+            Ce code est valable jusqu&apos;au <strong>{deadline}</strong>.
           </p>
         </div>
       </div>
@@ -106,7 +122,7 @@ export function VerificationStep({
               Vérification...
             </>
           ) : (
-            'Confirmer ma participation'
+            submitLabel
           )}
         </Button>
       </form>

@@ -7,14 +7,14 @@
     "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "eslint src",
-    "lint:fix": "eslint src --fix",
+    "lint": "eslint src tests/unit",
+    "lint:fix": "eslint src tests/unit --fix",
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "test:ci": "jest --ci --coverage --passWithNoTests",
     "test:e2e": "cypress run",
     "test:e2e:open": "cypress open",
-    "test:e2e:staging": "cypress run --config baseUrl=https://staging.thetiptop.dsp5-archi-o24a-4-5-g1.fr"
+    "test:e2e:staging": "cypress run --config baseUrl=https://thetiptop-preprod.wk-archi-o24a-4-5-g1.fr"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

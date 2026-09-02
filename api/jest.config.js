@@ -4,7 +4,8 @@
 
 module.exports = {
   moduleFileExtensions: ['js', 'json', 'ts'],
-  rootDir: 'src',
+  rootDir: '.',
+  roots: ['<rootDir>/tests/unit'],
   testRegex: '.*\\.spec\\.ts$',
   transform: {
     '^.+\\.(t|j)s$': 'ts-jest',
@@ -12,13 +13,12 @@ module.exports = {
   // Couverture : on exclut le bootstrap (main.ts), le câblage DI (*.module.ts)
   // et les barrels (index.ts) qui ne contiennent aucune logique testable.
   collectCoverageFrom: [
-    '**/*.(t|j)s',
-    '!**/*.spec.ts',
-    '!main.ts',
-    '!**/*.module.ts',
-    '!**/index.ts',
+    'src/**/*.(t|j)s',
+    '!src/main.ts',
+    '!src/**/*.module.ts',
+    '!src/**/index.ts',
   ],
-  coverageDirectory: '../coverage',
+  coverageDirectory: 'coverage',
   // Seuils d'echec. Le cahier des charges fait de 70 % une porte dure du
   // pipeline, mais aucun seuil n'etait declare : la couverture pouvait donc
   // chuter sans que rien ne le signale.
@@ -36,6 +36,6 @@ module.exports = {
   },
   testEnvironment: 'node',
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/$1',
+    '^@/(.*)$': '<rootDir>/src/$1',
   },
 };
