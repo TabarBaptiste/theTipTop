@@ -14,63 +14,25 @@ import { Label } from '@/components/ui/label';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { useIsHydrated } from '@/lib/hooks/use-is-hydrated';
 import { trackRegisterSuccess, trackRegisterFailure, trackCTAClick } from '@/lib/analytics';
-import { toDateInputValue } from '@/lib/utils';
-
-const MIN_AGE = 18;
-const MAX_AGE = 120;
-
-function getAge(birthDate: Date): number {
-  const today = new Date();
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const beforeBirthdayThisYear =
-    today.getMonth() < birthDate.getMonth() ||
-    (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate());
-  if (beforeBirthdayThisYear) age--;
-  return age;
-}
+import {
+  PASSWORD_HINT,
+  birthDateBounds,
+  birthDateField,
+  genderField,
+  nameField,
+  passwordField,
+  phoneField,
+} from '@/lib/validation';
 
 const registerSchema = z.object({
   email: z.string().email('Email invalide'),
-  password: z
-    .string()
-    .min(8, 'Le mot de passe doit faire au moins 8 caractères')
-    .regex(/[A-Z]/, 'Le mot de passe doit contenir au moins une majuscule')
-    .regex(/[a-z]/, 'Le mot de passe doit contenir au moins une minuscule')
-    .regex(/[0-9]/, 'Le mot de passe doit contenir au moins un chiffre')
-    .regex(
-      /[@$!%*?&#]/,
-      'Le mot de passe doit contenir au moins un caractère spécial (@$!%*?&#)'
-    ),
+  password: passwordField,
   confirmPassword: z.string(),
-  firstName: z.string().min(2, 'Le prénom doit faire au moins 2 caractères'),
-  lastName: z.string().min(2, 'Le nom doit faire au moins 2 caractères'),
-  phone: z.string().optional(),
-  birthDate: z
-    .string()
-    .optional()
-    .refine((val) => !val || /^\d{4}-\d{2}-\d{2}$/.test(val), {
-      message: 'Date invalide (format AAAA-MM-JJ, année sur 4 chiffres)',
-    })
-    .refine(
-      (val) => {
-        if (!val) return true;
-        const age = getAge(new Date(val));
-        return age >= MIN_AGE;
-      },
-      { message: 'Vous devez être majeur (18 ans minimum) pour vous inscrire' },
-    )
-    .refine(
-      (val) => {
-        if (!val) return true;
-        const age = getAge(new Date(val));
-        return age <= MAX_AGE;
-      },
-      { message: 'Date de naissance invalide' },
-    ),
-  gender: z.preprocess(
-    (val) => (val === '' ? undefined : val),
-    z.enum(['MALE', 'FEMALE', 'OTHER', 'PREFER_NOT_TO_SAY']).optional(),
-  ),
+  firstName: nameField('prénom'),
+  lastName: nameField('nom'),
+  phone: phoneField,
+  birthDate: birthDateField,
+  gender: genderField,
   consentEmail: z.boolean().default(false),
   consentData: z.literal(true, {
     errorMap: () => ({ message: 'Vous devez accepter les conditions' }),
@@ -131,16 +93,7 @@ export default function RegisterPage() {
     }
   };
 
-  const today = new Date();
-  // toDateInputValue lit les composants en heure locale. toISOString() convertit
-  // en UTC, ou minuit heure de Paris devient la veille : la borne tombait un jour
-  // trop tot et bloquait la personne ayant 18 ans le jour meme.
-  const maxBirthDate = toDateInputValue(
-    new Date(today.getFullYear() - MIN_AGE, today.getMonth(), today.getDate()),
-  );
-  const minBirthDate = toDateInputValue(
-    new Date(today.getFullYear() - MAX_AGE, today.getMonth(), today.getDate()),
-  );
+  const birthDateRange = birthDateBounds();
 
   const handleOAuthLogin = (provider: 'google' | 'facebook') => {
     trackCTAClick(`S'inscrire avec ${provider}`, 'register_page');
@@ -209,9 +162,7 @@ export default function RegisterPage() {
             {errors.password ? (
               <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>
             ) : (
-              <p className="mt-1 text-xs text-stone-grey">
-                Min. 8 caractères, 1 majuscule, 1 chiffre, 1 caractère spécial
-              </p>
+              <p className="mt-1 text-xs text-stone-grey">{PASSWORD_HINT}</p>
             )}
           </div>
 
@@ -239,8 +190,8 @@ export default function RegisterPage() {
               <Input
                 id="birthDate"
                 type="date"
-                min={minBirthDate}
-                max={maxBirthDate}
+                min={birthDateRange.min}
+                max={birthDateRange.max}
                 {...register('birthDate')}
               />
               {errors.birthDate && (
