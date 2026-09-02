@@ -15,6 +15,11 @@
  * Ces identifiants sont stables et repris tels quels à chaque envoi : réenvoyer
  * une image écrase la précédente au lieu d'en créer une copie. Ils reprennent
  * le nom des fichiers de webapp/src/img, qui restent le repli hors ligne.
+ *
+ * Les images livrées sont détourées, fond transparent. Les photos d'origine
+ * sont archivées sous les mêmes identifiants préfixés de `sources/` - par
+ * exemple `thetiptop/lots/sources/infuseur_premium`. Ne pas les supprimer :
+ * c'est d'elles que repart un détourage, et elles ne sont pas dans le dépôt.
  */
 export const PRIZE_IMAGE_PUBLIC_IDS: Record<string, string> = {
   INFUSER: 'thetiptop/lots/infuseur_premium',
