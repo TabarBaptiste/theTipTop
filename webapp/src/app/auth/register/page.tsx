@@ -11,66 +11,30 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { api } from '@/lib/api';
 import { useAuthStore } from '@/lib/stores/auth-store';
+import { VerificationStep } from '@/components/participate/verification-step';
 import { useIsHydrated } from '@/lib/hooks/use-is-hydrated';
 import { trackRegisterSuccess, trackRegisterFailure, trackCTAClick } from '@/lib/analytics';
-import { toDateInputValue } from '@/lib/utils';
-
-const MIN_AGE = 18;
-const MAX_AGE = 120;
-
-function getAge(birthDate: Date): number {
-  const today = new Date();
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const beforeBirthdayThisYear =
-    today.getMonth() < birthDate.getMonth() ||
-    (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate());
-  if (beforeBirthdayThisYear) age--;
-  return age;
-}
+import {
+  PASSWORD_HINT,
+  birthDateBounds,
+  birthDateField,
+  genderField,
+  nameField,
+  passwordField,
+  phoneField,
+} from '@/lib/validation';
 
 const registerSchema = z.object({
   email: z.string().email('Email invalide'),
-  password: z
-    .string()
-    .min(8, 'Le mot de passe doit faire au moins 8 caractères')
-    .regex(/[A-Z]/, 'Le mot de passe doit contenir au moins une majuscule')
-    .regex(/[a-z]/, 'Le mot de passe doit contenir au moins une minuscule')
-    .regex(/[0-9]/, 'Le mot de passe doit contenir au moins un chiffre')
-    .regex(
-      /[@$!%*?&#]/,
-      'Le mot de passe doit contenir au moins un caractère spécial (@$!%*?&#)'
-    ),
+  password: passwordField,
   confirmPassword: z.string(),
-  firstName: z.string().min(2, 'Le prénom doit faire au moins 2 caractères'),
-  lastName: z.string().min(2, 'Le nom doit faire au moins 2 caractères'),
-  phone: z.string().optional(),
-  birthDate: z
-    .string()
-    .optional()
-    .refine((val) => !val || /^\d{4}-\d{2}-\d{2}$/.test(val), {
-      message: 'Date invalide (format AAAA-MM-JJ, année sur 4 chiffres)',
-    })
-    .refine(
-      (val) => {
-        if (!val) return true;
-        const age = getAge(new Date(val));
-        return age >= MIN_AGE;
-      },
-      { message: 'Vous devez être majeur (18 ans minimum) pour vous inscrire' },
-    )
-    .refine(
-      (val) => {
-        if (!val) return true;
-        const age = getAge(new Date(val));
-        return age <= MAX_AGE;
-      },
-      { message: 'Date de naissance invalide' },
-    ),
-  gender: z.preprocess(
-    (val) => (val === '' ? undefined : val),
-    z.enum(['MALE', 'FEMALE', 'OTHER', 'PREFER_NOT_TO_SAY']).optional(),
-  ),
+  firstName: nameField('prénom'),
+  lastName: nameField('nom'),
+  phone: phoneField,
+  birthDate: birthDateField,
+  gender: genderField,
   consentEmail: z.boolean().default(false),
   consentData: z.literal(true, {
     errorMap: () => ({ message: 'Vous devez accepter les conditions' }),
@@ -82,10 +46,23 @@ const registerSchema = z.object({
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
+/** Réponse de POST /auth/register : aucun jeton avant confirmation. */
+interface PendingRegistration {
+  leadId: string;
+  maskedEmail: string;
+  expiresAt: string;
+}
+
 export default function RegisterPage() {
   const router = useRouter();
-  const { register: registerUser } = useAuthStore();
+  const { setTokens, setUser } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
+  // L'inscription se fait en deux temps : le formulaire, puis le code reçu par
+  // email. Tant qu'il n'est pas saisi, aucun compte n'existe.
+  const [pending, setPending] = useState<PendingRegistration | null>(null);
+  const [offerEmailCorrection, setOfferEmailCorrection] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   // Même risque qu'à la connexion, aggravé : ce formulaire porte le mot de
   // passe, sa confirmation, la date de naissance et le téléphone.
   const isHydrated = useIsHydrated();
@@ -104,49 +81,102 @@ export default function RegisterPage() {
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
     try {
-      const { confirmPassword, ...rest } = data;
+      const { confirmPassword: _confirmPassword, ...rest } = data;
       // On évite d'envoyer des champs optionnels vides (sinon échec IsDateString, etc.)
-      await registerUser({
+      const { data: response } = await api.post<PendingRegistration>('/auth/register', {
         ...rest,
         phone: rest.phone || undefined,
         birthDate: rest.birthDate || undefined,
       });
-      trackRegisterSuccess('email');
-      toast.success('Inscription réussie ! Bienvenue !');
-      router.push('/dashboard');
-    } catch (error: any) {
-      const status = error?.response?.status;
-      if (status === 409) {
-        trackRegisterFailure('email', 'email_already_exists');
-        toast.error('Un compte existe déjà avec cet email');
-      } else if (status === 400 || status === 422) {
+      setPending(response);
+    } catch (error: unknown) {
+      // Le 409 « email déjà utilisé » a disparu : y répondre renseignerait
+      // n'importe qui sur les adresses inscrites. Une adresse déjà connue suit
+      // désormais le parcours nominal, et son titulaire est prévenu par email.
+      const status = (error as { response?: { status?: number } })?.response?.status;
+      if (status === 400 || status === 422) {
         trackRegisterFailure('email', 'invalid_data');
         toast.error('Données invalides. Vérifiez le formulaire.');
       } else {
         trackRegisterFailure('email', 'server_error');
-        toast.error('Erreur lors de l\'inscription');
+        toast.error("Erreur lors de l'inscription");
       }
     } finally {
       setIsLoading(false);
     }
   };
 
-  const today = new Date();
-  // toDateInputValue lit les composants en heure locale. toISOString() convertit
-  // en UTC, ou minuit heure de Paris devient la veille : la borne tombait un jour
-  // trop tot et bloquait la personne ayant 18 ans le jour meme.
-  const maxBirthDate = toDateInputValue(
-    new Date(today.getFullYear() - MIN_AGE, today.getMonth(), today.getDate()),
-  );
-  const minBirthDate = toDateInputValue(
-    new Date(today.getFullYear() - MAX_AGE, today.getMonth(), today.getDate()),
-  );
+  /** Le compte n'est créé qu'ici, et la session s'ouvre dans la foulée. */
+  const onVerify = async (code: string) => {
+    setIsVerifying(true);
+    try {
+      const { data } = await api.post('/auth/register/verify', {
+        leadId: pending!.leadId,
+        code,
+      });
+      // L'API renvoie déjà le profil avec les jetons : inutile de rappeler
+      // /auth/me, comme le fait le tunnel de participation.
+      setTokens(data.accessToken, data.refreshToken);
+      setUser(data.user);
+      trackRegisterSuccess('email');
+      toast.success('Bienvenue !');
+      router.push('/dashboard');
+    } catch {
+      toast.error('Code invalide ou expiré');
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const onResend = async (newEmail?: string) => {
+    setIsResending(true);
+    try {
+      const { data } = await api.post('/auth/register/resend', {
+        leadId: pending!.leadId,
+        ...(newEmail ? { email: newEmail } : {}),
+      });
+      // maskedEmail et expiresAt changent : le décompte de 60 s repart de zéro.
+      setPending((prev) =>
+        prev ? { ...prev, maskedEmail: data.maskedEmail, expiresAt: data.expiresAt } : prev,
+      );
+      setOfferEmailCorrection(data.shouldOfferEmailCorrection);
+      toast.success('Un nouveau code vous a été envoyé');
+    } catch {
+      toast.error("Le renvoi n'a pas abouti");
+    } finally {
+      setIsResending(false);
+    }
+  };
+
+  const birthDateRange = birthDateBounds();
 
   const handleOAuthLogin = (provider: 'google' | 'facebook') => {
     trackCTAClick(`S'inscrire avec ${provider}`, 'register_page');
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
     window.location.href = `${apiUrl}/auth/${provider}`;
   };
+
+  if (pending) {
+    return (
+      <div className="flex min-h-[calc(100vh-5rem)] items-center justify-center bg-cream px-4 py-12">
+        <div className="w-full max-w-xl sm:rounded-card sm:border sm:border-warm-beige sm:bg-white sm:p-8 sm:shadow-sm">
+          <VerificationStep
+            // Un nouvel envoi produit une nouvelle échéance : le composant est
+            // remonté, ce qui relance le décompte de 60 s sans effet de bord.
+            key={pending.expiresAt}
+            maskedEmail={pending.maskedEmail}
+            expiresAt={pending.expiresAt}
+            isVerifying={isVerifying}
+            isResending={isResending}
+            offerEmailCorrection={offerEmailCorrection}
+            submitLabel="Créer mon compte"
+            onVerify={onVerify}
+            onResend={onResend}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-[calc(100vh-5rem)] items-center justify-center bg-cream px-4 py-12">
@@ -209,9 +239,7 @@ export default function RegisterPage() {
             {errors.password ? (
               <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>
             ) : (
-              <p className="mt-1 text-xs text-stone-grey">
-                Min. 8 caractères, 1 majuscule, 1 chiffre, 1 caractère spécial
-              </p>
+              <p className="mt-1 text-xs text-stone-grey">{PASSWORD_HINT}</p>
             )}
           </div>
 
@@ -239,8 +267,8 @@ export default function RegisterPage() {
               <Input
                 id="birthDate"
                 type="date"
-                min={minBirthDate}
-                max={maxBirthDate}
+                min={birthDateRange.min}
+                max={birthDateRange.max}
                 {...register('birthDate')}
               />
               {errors.birthDate && (

@@ -18,7 +18,6 @@ import { type Request, type Response } from 'express';
 
 import { AuthService, type TokenResponse } from './auth.service';
 import { EmailChangeService } from './email-change.service';
-import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { OAuthExchangeDto } from './dto/oauth-exchange.dto';
@@ -46,28 +45,9 @@ export class AuthController {
     private readonly emailChangeService: EmailChangeService,
   ) {}
 
-  // ===========================================
-  // INSCRIPTION
-  // ===========================================
-  @Public()
-  @Post('register')
-  @ApiOperation({ summary: "Inscription d'un nouvel utilisateur" })
-  @ApiResponse({
-    status: 201,
-    description: 'Utilisateur créé avec succès',
-    schema: {
-      properties: {
-        accessToken: { type: 'string' },
-        refreshToken: { type: 'string' },
-        expiresIn: { type: 'number' },
-      },
-    },
-  })
-  @ApiResponse({ status: 400, description: 'Données invalides' })
-  @ApiResponse({ status: 409, description: 'Email déjà utilisé' })
-  async register(@Body() dto: RegisterDto) {
-    return this.authService.register(dto);
-  }
+  // POST /auth/register vit desormais dans RegistrationController : l'inscription
+  // passe par le meme tunnel de verification que la participation, et n'ouvre
+  // plus de session sans preuve de possession de l'adresse.
 
   // ===========================================
   // CONNEXION

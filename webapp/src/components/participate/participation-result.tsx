@@ -12,18 +12,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { api } from '@/lib/api';
+import { PASSWORD_HINT, passwordField } from '@/lib/validation';
 
-// Mêmes exigences que l'inscription classique : le compte créé ici n'est pas
-// un compte de seconde zone.
 const passwordSchema = z
   .object({
-    password: z
-      .string()
-      .min(8, 'Le mot de passe doit faire au moins 8 caractères')
-      .regex(/[A-Z]/, 'Il doit contenir au moins une majuscule')
-      .regex(/[a-z]/, 'Il doit contenir au moins une minuscule')
-      .regex(/[0-9]/, 'Il doit contenir au moins un chiffre')
-      .regex(/[@$!%*?&#]/, 'Il doit contenir au moins un caractère spécial (@$!%*?&#)'),
+    password: passwordField,
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -120,9 +113,7 @@ export function ParticipationResult({
               {errors.password ? (
                 <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>
               ) : (
-                <p className="mt-1 text-xs text-stone-grey">
-                  Min. 8 caractères, 1 majuscule, 1 chiffre, 1 caractère spécial
-                </p>
+                <p className="mt-1 text-xs text-stone-grey">{PASSWORD_HINT}</p>
               )}
             </div>
 

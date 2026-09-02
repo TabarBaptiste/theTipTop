@@ -184,7 +184,11 @@ api/
 │  │   Client ──► POST /auth/register ──► Validation ──► Hash Password   │    │
 │  │      │                                                     │         │    │
 │  │      │                                                     ▼         │    │
-│  │      │                                              Create User      │    │
+│  │      │                                        Create Lead (attente)  │    │
+│  │      │                                                     │         │    │
+│  │      │                                        Envoi code 6 chiffres  │    │
+│  │      │                                                     │         │    │
+│  │      │              POST /auth/register/verify ──► Create User      │    │
 │  │      │                                                     │         │    │
 │  │      ◄───────────────── JWT Access + Refresh ◄─────────────┘         │    │
 │  └─────────────────────────────────────────────────────────────────────┘    │

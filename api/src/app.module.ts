@@ -15,6 +15,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { TicketsModule } from './modules/tickets/tickets.module';
 import { ParticipationsModule } from './modules/participations/participations.module';
+import { RegistrationModule } from './modules/registration/registration.module';
 import { GainsModule } from './modules/gains/gains.module';
 import { StatsModule } from './modules/stats/stats.module';
 import { GrandPrizeModule } from './modules/grand-prize/grand-prize.module';
@@ -75,6 +76,7 @@ import { HealthModule } from './modules/health/health.module';
     UsersModule,
     TicketsModule,
     ParticipationsModule,
+    RegistrationModule,
     GainsModule,
     StatsModule,
     GrandPrizeModule,
