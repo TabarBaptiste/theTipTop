@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
 import coffretsImg from '@/img/coffret_boites_lavande.webp';
 import { Button } from '@/components/ui/button';
+import { SemisDeDoodles, type DoodlePose } from '@/components/decor/botanical-doodles';
 import { Skeleton } from '@/components/ui/skeleton';
 import { api } from '@/lib/api';
 
@@ -19,6 +20,24 @@ const ATOUTS = [
   'Inscription automatique dès votre première participation',
   'Une chance par personne, quel que soit le nombre de codes saisis',
   'Tirage sous le contrôle de Maître Arnaud Rick, huissier de justice',
+];
+
+// Le panneau vert n'avait que du texte. Ces botaniques le meublent sans y
+// mettre de photo, dans le prolongement des lisieres du hero.
+//
+// Deux regimes d'opacite, dictes par le contraste. Le texte du panneau est
+// blanc sur le vert mousse, a 5,80:1. Un trait blanc pose derriere lui eclaire
+// le fond localement : a 0,10 le rapport tient encore a 4,66:1, a 0,20 il
+// tombe a 3,79:1. Les doodles qui debordent hors de la colonne de texte -
+// ceux qui sortent par la droite, et ceux du bas sous le bouton - peuvent donc
+// monter a 0,16 ; ceux qui la traversent restent a 0,10.
+const DOODLES_GRAND_PRIX: DoodlePose[] = [
+  { doodle: 'feuille', haut: 10, gauche: 99, taille: 130, rotation: 24, opacite: 0.16 },
+  { doodle: 'brindille', haut: 58, gauche: 101, taille: 120, rotation: -14, opacite: 0.16 },
+  { doodle: 'camomille', haut: 96, gauche: 92, taille: 84, rotation: 20, opacite: 0.16 },
+  { doodle: 'anis', haut: 97, gauche: 8, taille: 76, rotation: 10, opacite: 0.16 },
+  { doodle: 'baies', haut: 33, gauche: 84, taille: 54, rotation: -26, opacite: 0.08 },
+  { doodle: 'feuille', haut: 4, gauche: 62, taille: 46, rotation: -30, opacite: 0.1 },
 ];
 
 interface GrandPrizeInfo {
@@ -91,33 +110,35 @@ export function GrandPrizeSection() {
             />
           </div>
 
-          <div className="flex flex-col bg-moss px-6 pb-14 pt-9 md:px-11">
+          <div className="relative flex flex-col overflow-hidden bg-moss px-6 pb-14 pt-9 text-white md:px-11">
+            <SemisDeDoodles poses={DOODLES_GRAND_PRIX} />
+
             {/* Le même surtitre qu'en tête de page sur la maquette : c'est le
                 fil qui relie le hero au grand prix, et non deux annonces
                 distinctes. */}
-            <p className="font-functional text-[10px] font-bold uppercase leading-[15px] tracking-[2px] text-white">
+            <p className="relative font-functional text-[10px] font-bold uppercase leading-[15px] tracking-[2px] text-white">
               Jeu concours exclusif
             </p>
 
             {/* La valeur du lot appartient au titre sur la maquette. Sortie en
                 pastille, elle se lisait comme un prix de vente accolé à
                 l'annonce plutôt que comme son estimation. */}
-            <h2 className="mt-5 font-display text-display text-white">
+            <h2 className="relative mt-5 font-display text-display text-white">
               Un an de thé à gagner d&apos;une valeur de 360&nbsp;€
             </h2>
 
-            <p className="mt-5 text-body leading-[24.5px] text-white">
+            <p className="relative mt-5 text-body leading-[24.5px] text-white">
               Au-delà du lot garanti par votre ticket, chaque participation vous inscrit
               automatiquement au tirage au sort final. Rien de plus à faire.
             </p>
 
-            <ul className="mt-5 list-disc space-y-0 pl-[21px] text-body leading-[24.5px] text-white">
+            <ul className="relative mt-5 list-disc space-y-0 pl-[21px] text-body leading-[24.5px] text-white">
               {ATOUTS.map((texte) => (
                 <li key={texte}>{texte}</li>
               ))}
             </ul>
 
-            <div className="mt-12 flex flex-col items-center gap-3">
+            <div className="relative mt-12 flex flex-col items-center gap-3">
               <Button asChild size="cta" className="w-full md:w-[246px]">
                 <Link href="/participate">Participer au tirage</Link>
               </Button>
