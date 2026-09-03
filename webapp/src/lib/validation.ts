@@ -73,7 +73,7 @@ export const passwordField = z
   .min(8, 'Le mot de passe doit faire au moins 8 caractères')
   .regex(/[A-Z]/, 'Il doit contenir au moins une majuscule')
   .regex(/[a-z]/, 'Il doit contenir au moins une minuscule')
-  .regex(/[0-9]/, 'Il doit contenir au moins un chiffre')
+  .regex(/\d/, 'Il doit contenir au moins un chiffre')
   .regex(/[@$!%*?&#]/, 'Il doit contenir au moins un caractère spécial (@$!%*?&#)');
 
 /** Repris tel quel sous chaque champ mot de passe, en l'absence d'erreur. */

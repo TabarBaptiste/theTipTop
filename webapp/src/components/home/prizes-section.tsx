@@ -89,6 +89,208 @@ const DOODLES_LOTS: DoodlePose[] = [
 /** Duree d'affichage d'un lot avant de passer au suivant, en millisecondes. */
 const DUREE_PAR_LOT = 6000;
 
+/**
+ * Squelette affiche pendant le chargement des lots.
+ *
+ * Reprend la silhouette exacte du lot charge : memes trois colonnes, memes
+ * marges, et la rangee de commandes en dessous. Il en decrivait deux,
+ * heritees d'une version precedente : la colonne du pourcentage et les
+ * commandes surgissaient d'un coup, et la section changeait de hauteur au
+ * chargement - ce qu'un squelette existe precisement pour eviter.
+ */
+function PrizesSkeleton() {
+  return (
+    <>
+      <div className="container relative mx-auto grid items-center gap-10 px-6 pb-8 pt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)_auto] lg:gap-12 lg:pt-16">
+        <div>
+          <Skeleton className="h-[15px] w-32 bg-noir/10" />
+          <Skeleton className="mt-4 h-9 w-4/5 bg-noir/10" />
+          <Skeleton className="mt-2 h-9 w-3/5 bg-noir/10" />
+          {/* Huit lignes : c'est la longueur reelle des descriptions de
+              lots, et c'est cette colonne qui donne sa hauteur a la rangee.
+              En annoncer trois faisait porter la hauteur par l'image, et le
+              squelette depassait le contenu de cent pixels. */}
+          <div className="mt-5 flex flex-col gap-2">
+            {['w-full', 'w-full', 'w-full', 'w-full', 'w-full', 'w-full', 'w-5/6', 'w-2/3'].map(
+              (largeur, i) => (
+                <Skeleton key={i} className={cn('h-4 bg-noir/10', largeur)} />
+              )
+            )}
+          </div>
+        </div>
+
+        {/* Les visuels detoures font de 236 a 331 px de haut selon le lot :
+            le placeholder se tient dans cette fourchette au lieu de prendre
+            le maximum autorise. */}
+        <div className="order-first flex justify-center lg:order-none">
+          <Skeleton className="h-[220px] w-full max-w-[420px] rounded-card bg-noir/5 md:h-[280px] lg:h-[300px]" />
+        </div>
+
+        <div className="flex flex-col gap-2 lg:items-end">
+          <Skeleton className="h-11 w-24 bg-noir/10" />
+          <Skeleton className="h-[15px] w-20 bg-noir/10" />
+        </div>
+      </div>
+
+      <div className="container relative mx-auto flex items-center justify-between gap-6 px-6 pb-12">
+        <div className="flex gap-3">
+          {[0, 1, 2].map((i) => (
+            <Skeleton key={i} className="h-11 w-11 rounded-full bg-noir/10" />
+          ))}
+        </div>
+        {/* Cinq pastilles : c'est la taille du catalogue, et le squelette
+            n'a pas encore les lots pour la deduire. */}
+        <div className="flex items-center gap-4">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-[10px] w-[10px] rounded-full bg-noir/10" />
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+interface PrizesCarouselProps {
+  activePrize: PrizeApi;
+  prizes: PrizeApi[];
+  activeIndex: number;
+  total: number;
+  imageSrc: StaticImageData | string;
+  imageAlt: string;
+  defilementActif: boolean;
+  setDefilementActif: (updater: (actif: boolean) => boolean) => void;
+  allerA: (index: number) => void;
+}
+
+/** Lot actif, avec son visuel, ses commandes de navigation et ses pastilles. */
+function PrizesCarousel({
+  activePrize,
+  prizes,
+  activeIndex,
+  total,
+  imageSrc,
+  imageAlt,
+  defilementActif,
+  setDefilementActif,
+  allerA,
+}: Readonly<PrizesCarouselProps>) {
+  return (
+    <>
+      <div className="container relative mx-auto grid items-center gap-10 px-6 pb-8 pt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)_auto] lg:gap-12 lg:pt-16">
+        <div>
+          {/* terracotta-800 et non 600 : a 10 px le seuil est de 4,5:1,
+              et le 600 tombe entre 3,08 et 4,12 selon la teinte du lot -
+              le pire etant l'or de l'infuseur. Le 800 tient de 5,58 a
+              7,48 sur les cinq fonds. */}
+          <p className="font-functional text-[10px] font-bold uppercase leading-[15px] tracking-[2px] text-terracotta-800">
+            Lot {String(activeIndex + 1).padStart(2, '0')} sur {String(total).padStart(2, '0')}
+          </p>
+          {/* not-italic : la règle de base met les h3 en italique, ce qui
+              ne vaut que pour les titres d'étapes. */}
+          <h3 className="mt-4 font-display text-display not-italic text-noir">{activePrize.name}</h3>
+          <p className="mt-5 max-w-[52ch] text-body leading-[24.5px] text-stone-grey">
+            {activePrize.description}
+          </p>
+        </div>
+
+        {/* order-first : sur mobile le visuel passe devant le texte, c'est
+            lui qui annonce le lot. L'ordre du DOM garde le titre en
+            premier - c'est celui que suit un lecteur d'écran. */}
+        <div className="order-first flex justify-center lg:order-none">
+          {imageSrc && (
+            <img
+              key={activePrize.code}
+              src={typeof imageSrc === 'string' ? imageSrc : imageSrc.src}
+              alt={imageAlt}
+              className="animate-lot-entree max-h-[260px] w-auto object-contain drop-shadow-[0_20px_28px_rgba(74,70,62,0.28)] md:max-h-[340px] lg:max-h-[420px]"
+            />
+          )}
+        </div>
+
+        <div className="lg:text-right">
+          <p className="whitespace-nowrap font-display text-[44px] font-bold leading-none text-noir">
+            {activePrize.percentage}&nbsp;%
+          </p>
+          <p className="mt-2 font-functional text-[10px] font-bold uppercase leading-[15px] tracking-[2px] text-stone-grey">
+            des tickets
+          </p>
+          {activePrize.value && (
+            <p className="mt-6 font-functional text-[10px] font-bold uppercase leading-[15px] tracking-[2px] text-stone-grey">
+              Valeur {activePrize.value}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {total > 1 && (
+        <div className="container relative mx-auto flex items-center justify-between gap-6 px-6 pb-12">
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => allerA(activeIndex - 1)}
+              aria-label="Lot précédent"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-noir/25 text-noir transition-colors hover:bg-noir/5"
+            >
+              <ChevronLeft className="h-5 w-5" strokeWidth={1.5} />
+            </button>
+            <button
+              type="button"
+              onClick={() => allerA(activeIndex + 1)}
+              aria-label="Lot suivant"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-noir/25 text-noir transition-colors hover:bg-noir/5"
+            >
+              <ChevronRight className="h-5 w-5" strokeWidth={1.5} />
+            </button>
+            {/* Le critere 2.2.2 demande un moyen d'arreter tout contenu qui
+                se met a jour seul au-dela de cinq secondes. Le survol ne
+                suffit pas : il n'existe pas pour qui navigue au clavier. */}
+            <button
+              type="button"
+              onClick={() => setDefilementActif((actif) => !actif)}
+              aria-label={
+                defilementActif ? 'Mettre le défilement des lots en pause' : 'Reprendre le défilement des lots'
+              }
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-noir/25 text-noir transition-colors hover:bg-noir/5"
+            >
+              {defilementActif ? (
+                <Pause className="h-4 w-4" strokeWidth={1.5} />
+              ) : (
+                <Play className="h-4 w-4" strokeWidth={1.5} />
+              )}
+            </button>
+          </div>
+
+          <div className="flex items-center">
+            {prizes.map((prize, i) => (
+              <button
+                key={prize.code}
+                type="button"
+                onClick={() => allerA(i)}
+                aria-label={`Voir le lot ${i + 1} : ${prize.name}`}
+                aria-current={i === activeIndex}
+                // La pastille ne fait que 10 x 10 px. La marge transparente
+                // porte la cible a 26 x 34, au-dela du minimum de 24 px du
+                // critere 2.5.8, et c'est elle qui espace les pastilles
+                // plutot qu'un gap : deux cibles de 24 px separees de 8 px
+                // se recouvriraient, et l'exception d'espacement tomberait
+                // avec.
+                className="group -my-3 px-2 py-3"
+              >
+                <span
+                  className={cn(
+                    'block h-[10px] rounded-full transition-all duration-300',
+                    i === activeIndex ? 'w-8 bg-noir' : 'w-[10px] bg-noir/25 group-hover:bg-noir/50'
+                  )}
+                />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 export function PrizesSection() {
   const { data: prizes, isLoading } = useQuery<PrizeApi[]>({
     queryKey: ['prizes'],
@@ -102,7 +304,7 @@ export function PrizesSection() {
   // L'onglet actif peut dépasser le nombre de lots si la liste se réduit
   // après un premier affichage : on le ramène dans les bornes plutôt que de
   // planter sur un lot inexistant.
-  const [activeIndexRaw, setActiveIndex] = useState(0);
+  const [activeIndexRaw, setActiveIndexRaw] = useState(0);
   const total = prizes?.length ?? 0;
   const activeIndex = total ? Math.min(activeIndexRaw, total - 1) : 0;
   const activePrize = prizes?.[activeIndex];
@@ -128,7 +330,7 @@ export function PrizesSection() {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     const minuteur = setInterval(() => {
-      setActiveIndex((precedent) => (Math.min(precedent, total - 1) + 1) % total);
+      setActiveIndexRaw((precedent) => (Math.min(precedent, total - 1) + 1) % total);
     }, DUREE_PAR_LOT);
 
     return () => clearInterval(minuteur);
@@ -145,7 +347,7 @@ export function PrizesSection() {
   // suivante ramène au premier plutôt que de se désactiver.
   const allerA = (index: number) => {
     setDefilementActif(false);
-    setActiveIndex(((index % total) + total) % total);
+    setActiveIndexRaw(((index % total) + total) % total);
   };
 
   return (
@@ -175,187 +377,25 @@ export function PrizesSection() {
             Et au-dessus de ces lots,{' '}
             <a href="#grand-prize" className="underline underline-offset-2">
               le tirage au sort d&apos;un an de thé
-            </a>
-            , auquel chaque participation vous inscrit.
+            </a>, auquel chaque participation vous inscrit.
           </p>
         </div>
       </div>
 
-      {isLoading ? (
-        /* Le squelette reprend la silhouette exacte du lot charge : memes trois
-           colonnes, memes marges, et la rangee de commandes en dessous. Il en
-           decrivait deux, heritees d'une version precedente : la colonne du
-           pourcentage et les commandes surgissaient d'un coup, et la section
-           changeait de hauteur au chargement - ce qu'un squelette existe
-           precisement pour eviter. */
-        <>
-          <div className="container relative mx-auto grid items-center gap-10 px-6 pb-8 pt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)_auto] lg:gap-12 lg:pt-16">
-            <div>
-              <Skeleton className="h-[15px] w-32 bg-noir/10" />
-              <Skeleton className="mt-4 h-9 w-4/5 bg-noir/10" />
-              <Skeleton className="mt-2 h-9 w-3/5 bg-noir/10" />
-              {/* Huit lignes : c'est la longueur reelle des descriptions de
-                  lots, et c'est cette colonne qui donne sa hauteur a la rangee.
-                  En annoncer trois faisait porter la hauteur par l'image, et le
-                  squelette depassait le contenu de cent pixels. */}
-              <div className="mt-5 flex flex-col gap-2">
-                {['w-full', 'w-full', 'w-full', 'w-full', 'w-full', 'w-full', 'w-5/6', 'w-2/3'].map(
-                  (largeur, i) => (
-                    <Skeleton key={i} className={cn('h-4 bg-noir/10', largeur)} />
-                  )
-                )}
-              </div>
-            </div>
-
-            {/* Les visuels detoures font de 236 a 331 px de haut selon le lot :
-                le placeholder se tient dans cette fourchette au lieu de prendre
-                le maximum autorise. */}
-            <div className="order-first flex justify-center lg:order-none">
-              <Skeleton className="h-[220px] w-full max-w-[420px] rounded-card bg-noir/5 md:h-[280px] lg:h-[300px]" />
-            </div>
-
-            <div className="flex flex-col gap-2 lg:items-end">
-              <Skeleton className="h-11 w-24 bg-noir/10" />
-              <Skeleton className="h-[15px] w-20 bg-noir/10" />
-            </div>
-          </div>
-
-          <div className="container relative mx-auto flex items-center justify-between gap-6 px-6 pb-12">
-            <div className="flex gap-3">
-              {[0, 1, 2].map((i) => (
-                <Skeleton key={i} className="h-11 w-11 rounded-full bg-noir/10" />
-              ))}
-            </div>
-            {/* Cinq pastilles : c'est la taille du catalogue, et le squelette
-                n'a pas encore les lots pour la deduire. */}
-            <div className="flex items-center gap-4">
-              {[0, 1, 2, 3, 4].map((i) => (
-                <Skeleton key={i} className="h-[10px] w-[10px] rounded-full bg-noir/10" />
-              ))}
-            </div>
-          </div>
-        </>
-      ) : activePrize && prizes ? (
-        <>
-          <div className="container relative mx-auto grid items-center gap-10 px-6 pb-8 pt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)_auto] lg:gap-12 lg:pt-16">
-            <div>
-              {/* terracotta-800 et non 600 : a 10 px le seuil est de 4,5:1,
-                  et le 600 tombe entre 3,08 et 4,12 selon la teinte du lot -
-                  le pire etant l'or de l'infuseur. Le 800 tient de 5,58 a
-                  7,48 sur les cinq fonds. */}
-              <p className="font-functional text-[10px] font-bold uppercase leading-[15px] tracking-[2px] text-terracotta-800">
-                Lot {String(activeIndex + 1).padStart(2, '0')} sur {String(total).padStart(2, '0')}
-              </p>
-              {/* not-italic : la règle de base met les h3 en italique, ce qui
-                  ne vaut que pour les titres d'étapes. */}
-              <h3 className="mt-4 font-display text-display not-italic text-noir">
-                {activePrize.name}
-              </h3>
-              <p className="mt-5 max-w-[52ch] text-body leading-[24.5px] text-stone-grey">
-                {activePrize.description}
-              </p>
-            </div>
-
-            {/* order-first : sur mobile le visuel passe devant le texte, c'est
-                lui qui annonce le lot. L'ordre du DOM garde le titre en
-                premier - c'est celui que suit un lecteur d'écran. */}
-            <div className="order-first flex justify-center lg:order-none">
-              {imageSrc && (
-                <img
-                  key={activePrize.code}
-                  src={typeof imageSrc === 'string' ? imageSrc : imageSrc.src}
-                  alt={imageAlt}
-                  className="animate-lot-entree max-h-[260px] w-auto object-contain drop-shadow-[0_20px_28px_rgba(74,70,62,0.28)] md:max-h-[340px] lg:max-h-[420px]"
-                />
-              )}
-            </div>
-
-            <div className="lg:text-right">
-              <p className="whitespace-nowrap font-display text-[44px] font-bold leading-none text-noir">
-                {activePrize.percentage}&nbsp;%
-              </p>
-              <p className="mt-2 font-functional text-[10px] font-bold uppercase leading-[15px] tracking-[2px] text-stone-grey">
-                des tickets
-              </p>
-              {activePrize.value && (
-                <p className="mt-6 font-functional text-[10px] font-bold uppercase leading-[15px] tracking-[2px] text-stone-grey">
-                  Valeur {activePrize.value}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {total > 1 && (
-            <div className="container relative mx-auto flex items-center justify-between gap-6 px-6 pb-12">
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => allerA(activeIndex - 1)}
-                  aria-label="Lot précédent"
-                  className="flex h-11 w-11 items-center justify-center rounded-full border border-noir/25 text-noir transition-colors hover:bg-noir/5"
-                >
-                  <ChevronLeft className="h-5 w-5" strokeWidth={1.5} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => allerA(activeIndex + 1)}
-                  aria-label="Lot suivant"
-                  className="flex h-11 w-11 items-center justify-center rounded-full border border-noir/25 text-noir transition-colors hover:bg-noir/5"
-                >
-                  <ChevronRight className="h-5 w-5" strokeWidth={1.5} />
-                </button>
-                {/* Le critere 2.2.2 demande un moyen d'arreter tout contenu qui
-                    se met a jour seul au-dela de cinq secondes. Le survol ne
-                    suffit pas : il n'existe pas pour qui navigue au clavier. */}
-                <button
-                  type="button"
-                  onClick={() => setDefilementActif((actif) => !actif)}
-                  aria-label={
-                    defilementActif
-                      ? 'Mettre le défilement des lots en pause'
-                      : 'Reprendre le défilement des lots'
-                  }
-                  className="flex h-11 w-11 items-center justify-center rounded-full border border-noir/25 text-noir transition-colors hover:bg-noir/5"
-                >
-                  {defilementActif ? (
-                    <Pause className="h-4 w-4" strokeWidth={1.5} />
-                  ) : (
-                    <Play className="h-4 w-4" strokeWidth={1.5} />
-                  )}
-                </button>
-              </div>
-
-              <div className="flex items-center">
-                {prizes.map((prize, i) => (
-                  <button
-                    key={prize.code}
-                    type="button"
-                    onClick={() => allerA(i)}
-                    aria-label={`Voir le lot ${i + 1} : ${prize.name}`}
-                    aria-current={i === activeIndex}
-                    // La pastille ne fait que 10 x 10 px. La marge transparente
-                    // porte la cible a 26 x 34, au-dela du minimum de 24 px du
-                    // critere 2.5.8, et c'est elle qui espace les pastilles
-                    // plutot qu'un gap : deux cibles de 24 px separees de 8 px
-                    // se recouvriraient, et l'exception d'espacement tomberait
-                    // avec.
-                    className="group -my-3 px-2 py-3"
-                  >
-                    <span
-                      className={cn(
-                        'block h-[10px] rounded-full transition-all duration-300',
-                        i === activeIndex
-                          ? 'w-8 bg-noir'
-                          : 'w-[10px] bg-noir/25 group-hover:bg-noir/50'
-                      )}
-                    />
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </>
-      ) : null}
+      {isLoading && <PrizesSkeleton />}
+      {!isLoading && activePrize && prizes && (
+        <PrizesCarousel
+          activePrize={activePrize}
+          prizes={prizes}
+          activeIndex={activeIndex}
+          total={total}
+          imageSrc={imageSrc}
+          imageAlt={imageAlt}
+          defilementActif={defilementActif}
+          setDefilementActif={setDefilementActif}
+          allerA={allerA}
+        />
+      )}
     </section>
   );
 }

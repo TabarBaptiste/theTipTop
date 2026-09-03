@@ -16,7 +16,7 @@ interface RevealProps {
  * L'etat masque n'est pose que sous `motion-safe` : qui a demande moins de
  * mouvement voit le contenu tout de suite, sans transition ni saut.
  */
-export function Reveal({ children, delay = 0, className }: RevealProps) {
+export function Reveal({ children, delay = 0, className }: Readonly<RevealProps>) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 

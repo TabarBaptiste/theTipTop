@@ -97,17 +97,18 @@ export interface DoodlePose {
  * Masquee sous md : les doodles y chevaucheraient le texte, qui occupe alors
  * toute la largeur, et rien ne serait gagne a les entasser.
  */
-export function SemisDeDoodles({ poses, className }: { poses: DoodlePose[]; className?: string }) {
+export function SemisDeDoodles({ poses, className }: Readonly<{ poses: DoodlePose[]; className?: string }>) {
   return (
     <div
       aria-hidden="true"
       className={cn('pointer-events-none absolute inset-0 hidden md:block', className)}
     >
-      {poses.map((pose, i) => (
+      {poses.map((pose) => (
         <svg
-          // Deux doodles du meme type peuvent cohabiter : l'index est ici la
-          // seule identite stable, la liste etant fixe et jamais reordonnee.
-          key={i}
+          // Deux doodles du meme type peuvent cohabiter : la cle combine tous
+          // les attributs de la pose, seule identite stable dans une liste
+          // fixe et jamais reordonnee.
+          key={`${pose.doodle}-${pose.haut}-${pose.gauche}-${pose.taille}-${pose.rotation}-${pose.opacite}`}
           viewBox="0 0 100 100"
           fill="none"
           stroke="currentColor"
