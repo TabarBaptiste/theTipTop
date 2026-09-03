@@ -288,13 +288,11 @@ export function Header() {
           l'arbre d'accessibilite, sans toucher a la mise en page - l'animation
           de repli continue de jouer.
 
-          React 18.3 ne connait pas `inert` comme propriete booleenne : la
-          chaine vide y passe pour fausse et l'attribut n'atteint pas le DOM,
-          un booleen le pose mais declenche un avertissement a chaque rendu.
-          Une chaine non vide fait les deux correctement. */}
+          `inert` n'est pas encore dans les types de @types/react@18 : la
+          coercion reste necessaire pour que TypeScript accepte la prop. */}
       <div
         id="menu-mobile"
-        {...(mobileMenuOpen ? {} : ({ inert: 'true' } as unknown as { inert?: boolean }))}
+        {...(mobileMenuOpen ? {} : ({ inert: true } as { inert?: boolean }))}
         className={cn(
           'overflow-hidden border-t border-warm-beige bg-surface transition-all duration-300 ease-in-out md:hidden',
           // Hauteur calée sur le cas le plus haut : nav + bouton backoffice + profil + Jouer
