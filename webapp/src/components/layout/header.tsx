@@ -67,11 +67,11 @@ export function Header() {
   const navLinks = navigation;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-section-line bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+    <header className="sticky top-0 z-50 w-full border-b border-section-line bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/60">
       {/* 60 px, hauteur de la maquette. Si tu changes cette valeur,
           repercute-la sur les min-h-[calc(100vh-3.75rem)] des pages et sur le
           scroll-padding-top de globals.css. */}
-      <nav className="container mx-auto flex h-[60px] items-center justify-between px-6">
+      <nav className="container mx-auto flex h-[3.75rem] items-center justify-between px-6">
         {/* Logo */}
         <Link href="/" className="flex items-center">
           {/* unoptimized : l'optimiseur de Next refuse les SVG sans dangerouslyAllowSVG,
@@ -94,8 +94,8 @@ export function Header() {
               key={item.name}
               href={item.href}
               className={cn(
-                'whitespace-nowrap font-functional text-ui uppercase transition-colors hover:text-terracotta-600',
-                pathname === item.href ? 'text-terracotta-600' : 'text-noir'
+                'whitespace-nowrap font-functional text-ui uppercase transition-colors hover:text-accent',
+                pathname === item.href ? 'text-accent' : 'text-ink'
               )}
             >
               {item.name}
@@ -120,7 +120,7 @@ export function Header() {
                     <Button
                       variant="outline"
                       size="nav"
-                      className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-white active:bg-terracotta-600 active:text-white"
+                      className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-ink hover:text-white active:bg-terracotta-600 active:text-white"
                     >
                       <AccountIcon className="h-4 w-4" strokeWidth={1.5} />
                       {user?.firstName || 'Mon compte'}
@@ -180,9 +180,9 @@ export function Header() {
           aria-controls="menu-mobile"
         >
           {mobileMenuOpen ? (
-            <X className="h-6 w-6 text-noir" strokeWidth={1.5} />
+            <X className="h-6 w-6 text-ink" strokeWidth={1.5} />
           ) : (
-            <Menu className="h-6 w-6 text-noir" strokeWidth={1.5} />
+            <Menu className="h-6 w-6 text-ink" strokeWidth={1.5} />
           )}
         </button>
       </nav>
@@ -195,15 +195,15 @@ export function Header() {
           l'arbre d'accessibilite, sans toucher a la mise en page - l'animation
           de repli continue de jouer.
 
-          React 18.3 traite `inert` comme un attribut booleen : lui passer la
-          chaine vide revient a le rendre faux, et l'attribut n'atteignait pas
-          le DOM. On lui passe donc un booleen, que ses types ne declarent pas
-          encore. */}
+          React 18.3 ne connait pas `inert` comme propriete booleenne : la
+          chaine vide y passe pour fausse et l'attribut n'atteint pas le DOM,
+          un booleen le pose mais declenche un avertissement a chaque rendu.
+          Une chaine non vide fait les deux correctement. */}
       <div
         id="menu-mobile"
-        {...({ inert: !mobileMenuOpen } as unknown as { inert?: boolean })}
+        {...(mobileMenuOpen ? {} : ({ inert: 'true' } as unknown as { inert?: boolean }))}
         className={cn(
-          'overflow-hidden border-t border-warm-beige bg-white transition-all duration-300 ease-in-out md:hidden',
+          'overflow-hidden border-t border-warm-beige bg-surface transition-all duration-300 ease-in-out md:hidden',
           // Hauteur calée sur le cas le plus haut : nav + bouton backoffice + profil + Jouer
           mobileMenuOpen ? 'max-h-[32rem]' : 'max-h-0'
         )}
@@ -216,8 +216,8 @@ export function Header() {
               className={cn(
                 'block rounded-soft px-3 py-2 font-functional text-sm font-semibold',
                 pathname === item.href
-                  ? 'bg-terracotta-50 text-terracotta-600'
-                  : 'text-noir hover:bg-cream'
+                  ? 'bg-terracotta-50 text-accent'
+                  : 'text-ink hover:bg-cream'
               )}
               onClick={() => setMobileMenuOpen(false)}
             >
@@ -240,7 +240,7 @@ export function Header() {
                     <Button asChild variant="outline" className="w-full">
                       <Link
                         href={isStaff ? backofficeHref : '/dashboard'}
-                        className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-white active:bg-terracotta-600 active:text-white"
+                        className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-ink hover:text-white active:bg-terracotta-600 active:text-white"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         {isStaff ? (
@@ -254,7 +254,7 @@ export function Header() {
                     <Button asChild variant="outline" className="w-full">
                       <Link
                         href="/dashboard/profile"
-                        className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-white active:bg-terracotta-600 active:text-white"
+                        className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-ink hover:text-white active:bg-terracotta-600 active:text-white"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         <User className="h-4 w-4" strokeWidth={1.5} />

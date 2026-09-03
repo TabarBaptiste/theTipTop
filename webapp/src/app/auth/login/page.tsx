@@ -96,8 +96,8 @@ export default function LoginPage() {
         <OAuthErrorHandler />
       </Suspense>
 
-      <div className="w-full max-w-lg sm:rounded-card sm:border sm:border-warm-beige sm:bg-white sm:p-8 sm:shadow-sm">
-        <h1 className="font-display text-h2 text-noir">Se connecter</h1>
+      <div className="w-full max-w-lg sm:rounded-card sm:border sm:border-warm-beige sm:bg-surface sm:p-8 sm:shadow-sm">
+        <h1 className="font-display text-h2 text-ink">Se connecter</h1>
         <p className="mt-2 text-sm text-stone-grey">
           Ravis de vous revoir !
         </p>
@@ -122,7 +122,7 @@ export default function LoginPage() {
               {/* Pas de flux "mot de passe oublié" côté API : on oriente vers le support */}
               <a
                 href="mailto:contact@thetiptop.fr?subject=Mot%20de%20passe%20oubli%C3%A9"
-                className="text-xs text-terracotta-600 underline underline-offset-2"
+                className="text-xs text-accent underline underline-offset-2"
               >
                 Mot de passe oublié ?
               </a>
@@ -162,7 +162,7 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={() => handleOAuthLogin('google')}
-            className="flex w-full items-center justify-center gap-3 rounded-soft border border-gold-700 bg-white px-4 py-3 text-sm font-medium text-noir transition-colors hover:bg-cream"
+            className="flex w-full items-center justify-center gap-3 rounded-soft border border-gold-700 bg-surface px-4 py-3 text-sm font-medium text-ink transition-colors hover:bg-cream"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -176,7 +176,7 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={() => handleOAuthLogin('facebook')}
-            className="flex w-full items-center justify-center gap-3 rounded-soft border border-gold-700 bg-white px-4 py-3 text-sm font-medium text-noir transition-colors hover:bg-cream"
+            className="flex w-full items-center justify-center gap-3 rounded-soft border border-gold-700 bg-surface px-4 py-3 text-sm font-medium text-ink transition-colors hover:bg-cream"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="#1877F2">
               <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.886v2.267h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z" />
@@ -187,7 +187,7 @@ export default function LoginPage() {
 
         <p className="mt-8 text-center text-sm text-stone-grey">
           Pas encore de compte ?{' '}
-          <Link href="/auth/register" className="font-semibold text-terracotta-600 underline underline-offset-2">
+          <Link href="/auth/register" className="font-semibold text-accent underline underline-offset-2">
             Créer un compte
           </Link>
         </p>

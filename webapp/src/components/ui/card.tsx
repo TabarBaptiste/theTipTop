@@ -130,12 +130,12 @@ function PrizeCard({ image, imageAlt = '', category, title, value, odds, classNa
 
       <div className="flex flex-1 flex-col p-md">
         {/* Catégorie : label terracotta UPPERCASE, sans background */}
-        <p className="font-functional text-ui uppercase text-terracotta-600">
+        <p className="font-functional text-ui uppercase text-accent">
           {CATEGORY_LABELS[category]}
         </p>
 
         {/* Titre éditorial italique */}
-        <h3 className="mt-2xs font-editorial text-h3 italic text-noir">{title}</h3>
+        <h3 className="mt-2xs font-editorial text-h3 italic text-ink">{title}</h3>
 
         {/* Footer : valeur (gauche) + pourcentage (droite), séparés par un filet.
             « mt-auto » le colle en bas quelle que soit la longueur du titre, pour
@@ -147,7 +147,7 @@ function PrizeCard({ image, imageAlt = '', category, title, value, odds, classNa
           )}
         >
           {value && <span className="font-functional text-caption text-stone">Valeur {value}</span>}
-          <span className="font-functional text-caption font-semibold text-terracotta-600">{odds}</span>
+          <span className="font-functional text-caption font-semibold text-accent">{odds}</span>
         </div>
       </div>
     </article>

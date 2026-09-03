@@ -114,20 +114,20 @@ export default function ParticipatePage() {
     return (
       <div className="min-h-[calc(100vh-3.75rem)] bg-cream py-12">
         <div className="container mx-auto max-w-xl px-6">
-          <div className="rounded-card border-2 border-terracotta-600 bg-white p-8 text-center">
+          <div className="rounded-card border-2 border-accent bg-surface p-8 text-center">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-terracotta-50">
-              <PartyPopper className="h-8 w-8 text-terracotta-600" strokeWidth={1.5} />
+              <PartyPopper className="h-8 w-8 text-accent" strokeWidth={1.5} />
             </div>
 
-            <h1 className="mt-6 font-display text-h2 text-noir">Félicitations !</h1>
+            <h1 className="mt-6 font-display text-h2 text-ink">Félicitations !</h1>
             <p className="mt-2 text-sm text-stone-grey">Vous avez gagné :</p>
 
             <div className="mt-6 rounded-card bg-terracotta-50 p-6">
-              <Gift className="mx-auto h-10 w-10 text-terracotta-600" strokeWidth={1.5} />
-              <h2 className="mt-3 font-display text-xl font-bold text-noir">
+              <Gift className="mx-auto h-10 w-10 text-accent" strokeWidth={1.5} />
+              <h2 className="mt-3 font-display text-xl font-bold text-ink">
                 {result.prize.name}
               </h2>
-              <p className="mt-1 font-functional text-lg font-bold text-terracotta-600">
+              <p className="mt-1 font-functional text-lg font-bold text-accent">
                 Valeur : {result.prize.value}
               </p>
             </div>
@@ -159,12 +159,12 @@ export default function ParticipatePage() {
   return (
     <div className="min-h-[calc(100vh-3.75rem)] bg-cream">
       {/* Hero */}
-      <section className="bg-white py-12 text-center">
+      <section className="bg-surface py-12 text-center">
         <div className="container mx-auto px-6">
-          <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-600">
+          <p className="font-functional text-ui uppercase tracking-[2px] text-accent">
             Jeu-concours Thé Tip Top
           </p>
-          <h1 className="mt-3 font-display text-h1 text-noir">
+          <h1 className="mt-3 font-display text-h1 text-ink">
             Participez et gagnez !
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-sm text-stone-grey">
@@ -177,7 +177,7 @@ export default function ParticipatePage() {
       <div className="container mx-auto px-6 py-12">
         {/* Soumettre votre code */}
         <section className="mx-auto max-w-xl">
-          <h2 className="font-display text-h2 text-noir">Soumettre votre code</h2>
+          <h2 className="font-display text-h2 text-ink">Soumettre votre code</h2>
 
           <form noValidate onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
             <div>
@@ -217,7 +217,7 @@ export default function ParticipatePage() {
 
         {/* Reinitialiser votre code */}
         <section className="mx-auto mt-12 max-w-xl rounded-card bg-moss/10 p-6">
-          <h2 className="font-display text-h2 text-noir">Reinitialiser votre code</h2>
+          <h2 className="font-display text-h2 text-ink">Reinitialiser votre code</h2>
           <p className="mt-2 text-xs text-stone-grey">
             Code perdu ou illisible ? Contactez notre service client.
           </p>
@@ -231,7 +231,7 @@ export default function ParticipatePage() {
 
         {/* Repartition des lots */}
         <section className="mt-16">
-          <h2 className="font-display text-h2 text-noir">Repartition des lots</h2>
+          <h2 className="font-display text-h2 text-ink">Repartition des lots</h2>
           <p className="mt-1 text-xs text-stone-grey">
             500 000 tickets · 100% gagnants
           </p>
@@ -241,7 +241,7 @@ export default function ParticipatePage() {
               Array.from({ length: 4 }).map((_, i) => (
                 <div
                   key={i}
-                  className="rounded-card border border-warm-beige bg-white p-5 animate-pulse"
+                  className="rounded-card border border-warm-beige bg-surface p-5 animate-pulse"
                 >
                   <div className="h-3 w-2/3 rounded bg-warm-beige" />
                   <div className="mt-3 h-4 w-full rounded bg-warm-beige" />
@@ -271,18 +271,18 @@ export default function ParticipatePage() {
               prizes?.map((prize) => (
                 <div
                   key={prize.code}
-                  className="rounded-card border border-warm-beige bg-white p-5"
+                  className="rounded-card border border-warm-beige bg-surface p-5"
                 >
-                  <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-600">
+                  <p className="font-functional text-ui uppercase tracking-[2px] text-accent">
                     {prize.name}
                   </p>
-                  <p className="mt-2 font-functional text-sm font-semibold text-noir">
+                  <p className="mt-2 font-functional text-sm font-semibold text-ink">
                     {prize.description}
                   </p>
                   <div className="mt-2 flex items-center justify-between">
                     <span className="text-xs text-stone-grey">Chance : {prize.percentage}%</span>
                     {prize.value && (
-                      <span className="font-functional text-sm font-bold text-terracotta-600">
+                      <span className="font-functional text-sm font-bold text-accent">
                         {prize.value}
                       </span>
                     )}
@@ -294,12 +294,12 @@ export default function ParticipatePage() {
 
         {/* Règlement du concours */}
         <section className="mt-16">
-          <h2 className="font-display text-h2 text-noir">Règlement du concours</h2>
+          <h2 className="font-display text-h2 text-ink">Règlement du concours</h2>
           <div className="mt-6 space-y-3 rounded-card bg-terracotta-50 p-6">
             {rules.map((rule, idx) => (
               <div key={idx} className="flex items-start gap-3">
                 <div className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${rule.color}`} />
-                <p className="text-xs leading-relaxed text-noir">{rule.text}</p>
+                <p className="text-xs leading-relaxed text-ink">{rule.text}</p>
               </div>
             ))}
           </div>
@@ -307,7 +307,7 @@ export default function ParticipatePage() {
 
         {/* Votre engagement */}
         <section className="mt-16 text-center">
-          <h2 className="font-display text-h2 text-noir">Votre engagement</h2>
+          <h2 className="font-display text-h2 text-ink">Votre engagement</h2>
           <p className="mt-2 text-xs text-stone-grey">
             Thé Tip Top s&apos;engage dans une démarche responsable
           </p>
@@ -317,15 +317,15 @@ export default function ParticipatePage() {
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-moss/10">
                 <Leaf className="h-7 w-7 text-moss" strokeWidth={1.5} />
               </div>
-              <span className="mt-2 font-functional text-[10px] font-semibold uppercase tracking-[1px] text-noir">
+              <span className="mt-2 font-functional text-[0.625rem] font-semibold uppercase tracking-[1px] text-ink">
                 Eco-responsable
               </span>
             </div>
             <div className="flex flex-col items-center">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-terracotta-50">
-                <ShieldCheck className="h-7 w-7 text-terracotta-600" strokeWidth={1.5} />
+                <ShieldCheck className="h-7 w-7 text-accent" strokeWidth={1.5} />
               </div>
-              <span className="mt-2 font-functional text-[10px] font-semibold uppercase tracking-[1px] text-noir">
+              <span className="mt-2 font-functional text-[0.625rem] font-semibold uppercase tracking-[1px] text-ink">
                 Certifié bio
               </span>
             </div>
@@ -333,7 +333,7 @@ export default function ParticipatePage() {
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gold-100">
                 <Heart className="h-7 w-7 text-gold-600" strokeWidth={1.5} />
               </div>
-              <span className="mt-2 font-functional text-[10px] font-semibold uppercase tracking-[1px] text-noir">
+              <span className="mt-2 font-functional text-[0.625rem] font-semibold uppercase tracking-[1px] text-ink">
                 Solidaire
               </span>
             </div>

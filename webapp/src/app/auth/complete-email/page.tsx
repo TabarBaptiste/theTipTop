@@ -95,9 +95,9 @@ export default function CompleteEmailPage() {
 
   return (
     <div className="flex min-h-[calc(100vh-3.75rem)] items-center justify-center bg-cream px-6 py-12">
-      <div className="w-full max-w-md rounded-card bg-white p-8">
-        <MailCheck className="mb-6 h-10 w-10 text-terracotta-600" strokeWidth={1.5} />
-        <h1 className="font-display text-h2 text-noir">Confirmez votre adresse</h1>
+      <div className="w-full max-w-md rounded-card bg-surface p-8">
+        <MailCheck className="mb-6 h-10 w-10 text-accent" strokeWidth={1.5} />
+        <h1 className="font-display text-h2 text-ink">Confirmez votre adresse</h1>
 
         {pendingEmail === null ? (
           <>
@@ -144,7 +144,7 @@ export default function CompleteEmailPage() {
           <>
             <p className="mt-3 text-body text-stone-grey">
               Nous avons envoyé un code à six chiffres à{' '}
-              <strong className="text-noir">{pendingEmail}</strong>. Saisissez-le ci-dessous pour
+              <strong className="text-ink">{pendingEmail}</strong>. Saisissez-le ci-dessous pour
               rattacher cette adresse à votre compte.
             </p>
 
@@ -181,7 +181,7 @@ export default function CompleteEmailPage() {
               <button
                 type="button"
                 onClick={() => setPendingEmail(null)}
-                className="w-full text-center text-xs text-stone-grey underline underline-offset-4 hover:text-noir"
+                className="w-full text-center text-xs text-stone-grey underline underline-offset-4 hover:text-ink"
               >
                 Ce n&apos;est pas la bonne adresse ? En saisir une autre
               </button>

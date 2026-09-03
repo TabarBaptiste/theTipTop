@@ -56,9 +56,9 @@ function Desinscription() {
 
   return (
     <div className="flex min-h-[calc(100vh-3.75rem)] items-center justify-center bg-cream px-6 py-12">
-      <div className="w-full max-w-md rounded-card bg-white p-8">
-        <MailX className="mb-6 h-10 w-10 text-terracotta-600" strokeWidth={1.5} />
-        <h1 className="font-display text-h2 text-noir">Désinscription</h1>
+      <div className="w-full max-w-md rounded-card bg-surface p-8">
+        <MailX className="mb-6 h-10 w-10 text-accent" strokeWidth={1.5} />
+        <h1 className="font-display text-h2 text-ink">Désinscription</h1>
 
         {etat === 'en-cours' && (
           <p className="mt-3 flex items-center gap-2 text-body text-stone-grey">
@@ -71,7 +71,7 @@ function Desinscription() {
           <p className="mt-3 text-body text-stone-grey">
             {email ? (
               <>
-                L&apos;adresse <strong className="text-noir">{email}</strong> ne recevra plus notre
+                L&apos;adresse <strong className="text-ink">{email}</strong> ne recevra plus notre
                 newsletter.
               </>
             ) : (
@@ -96,7 +96,7 @@ function Desinscription() {
 
         <Link
           href="/"
-          className="mt-8 inline-block text-sm text-terracotta-600 underline underline-offset-4"
+          className="mt-8 inline-block text-sm text-accent underline underline-offset-4"
         >
           Retour à l&apos;accueil
         </Link>

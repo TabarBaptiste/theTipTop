@@ -19,7 +19,9 @@ describe('PrizeCard', () => {
     render(<PrizeCard {...baseProps} />);
 
     const category = screen.getByText('Accessoire');
-    expect(category.className).toContain('text-terracotta-600');
+    // `accent` depuis la separation des roles : le terracotta du texte
+    // s'eclaircit en theme sombre, celui des boutons non.
+    expect(category.className).toContain('text-accent');
     expect(category.className).not.toContain('rounded');
   });
 

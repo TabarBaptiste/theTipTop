@@ -165,16 +165,16 @@ export default function ParticipatePage() {
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-cream px-4 py-12">
-      <div className="w-full max-w-xl sm:rounded-card sm:border sm:border-warm-beige sm:bg-white sm:p-8 sm:shadow-sm">
+      <div className="w-full max-w-xl sm:rounded-card sm:border sm:border-warm-beige sm:bg-surface sm:p-8 sm:shadow-sm">
         {/* L'API refuse la participation d'un compte injoignable. Mieux vaut le
             dire ici que laisser saisir un code pour un refus, d'autant que le
             formulaire afficherait l'adresse de substitution comme contact. */}
         {step === 'form' && needsRealEmail && (
           <div className="text-center">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-terracotta-50">
-              <MailWarning className="h-8 w-8 text-terracotta-600" strokeWidth={1.5} />
+              <MailWarning className="h-8 w-8 text-accent" strokeWidth={1.5} />
             </div>
-            <h1 className="mt-6 font-display text-h2 text-noir">Une adresse est nécessaire</h1>
+            <h1 className="mt-6 font-display text-h2 text-ink">Une adresse est nécessaire</h1>
             <p className="mt-3 text-body text-stone-grey">
               Votre compte a été créé sans adresse e-mail. Avant de participer, renseignez-en une :
               c&apos;est par là que nous vous annoncerions votre lot et le délai pour le retirer.
@@ -201,7 +201,7 @@ export default function ParticipatePage() {
 
         {step === 'form' && !isConnected && (
           <>
-            <h1 className="font-display text-h2 text-noir">Participer au jeu-concours</h1>
+            <h1 className="font-display text-h2 text-ink">Participer au jeu-concours</h1>
             <p className="mt-2 text-sm text-stone-grey">
               Saisissez le code de votre ticket de caisse : votre compte est créé dans la
               foulée, une fois votre adresse confirmée.
@@ -233,7 +233,7 @@ export default function ParticipatePage() {
 
             <p className="mt-6 text-center text-xs text-stone-grey">
               Vous avez déjà un compte ?{' '}
-              <Link href="/auth/login" className="font-semibold text-terracotta-600 underline underline-offset-2">
+              <Link href="/auth/login" className="font-semibold text-accent underline underline-offset-2">
                 Se connecter
               </Link>
             </p>
@@ -271,13 +271,13 @@ export default function ParticipatePage() {
             reviennent le plus - où est le code, et que se passe-t-il ensuite. */}
         {step === 'form' && (
           <div className="mt-8 border-t border-warm-beige pt-6 text-sm leading-relaxed text-stone-grey">
-            <h2 className="font-display text-lg text-noir">Où trouver votre code ?</h2>
+            <h2 className="font-display text-lg text-ink">Où trouver votre code ?</h2>
             <p className="mt-2">
               Votre code figure en bas de votre ticket de caisse, sous le montant payé. Il compte
               dix caractères mêlant chiffres et lettres majuscules, sans espace ni tiret. Seuls les
               achats de plus de 49 € donnent droit à un code.
             </p>
-            <h2 className="mt-5 font-display text-lg text-noir">Et ensuite ?</h2>
+            <h2 className="mt-5 font-display text-lg text-ink">Et ensuite ?</h2>
             <p className="mt-2">
               Votre lot s&apos;affiche immédiatement : il est attribué au code dès sa génération,
               il n&apos;y a donc rien à attendre. Vous recevez ensuite un e-mail récapitulatif

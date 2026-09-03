@@ -72,7 +72,7 @@ export default function DashboardPage() {
           {/* Stats Cards */}
           <div className="mb-8 grid gap-4 md:grid-cols-3">
             {Array.from({ length: 3 }).map((_, i) => (
-              <Card key={i} className="bg-white">
+              <Card key={i} className="bg-surface">
                 <CardContent className="flex items-center gap-4 p-6">
                   <Skeleton className="h-12 w-12 rounded-card" />
                   <div>
@@ -96,7 +96,7 @@ export default function DashboardPage() {
           </Card>
 
           {/* Participations List */}
-          <Card className="bg-white">
+          <Card className="bg-surface">
             <CardHeader>
               <Skeleton className="h-5 w-40" />
               <Skeleton className="mt-2 h-4 w-72" />
@@ -147,7 +147,7 @@ export default function DashboardPage() {
           <main>
             {/* Header */}
             <div className="mb-8">
-              <h1 className="font-display text-h1 text-noir">
+              <h1 className="font-display text-h1 text-ink">
                 Bonjour, {user?.firstName} !
               </h1>
               <p className="mt-2 text-stone-grey">
@@ -157,19 +157,19 @@ export default function DashboardPage() {
 
         {/* Stats Cards */}
         <div className="mb-8 grid gap-4 md:grid-cols-3">
-          <Card className="bg-white">
+          <Card className="bg-surface">
             <CardContent className="flex items-center gap-4 p-6">
               <div className="rounded-card bg-terracotta-50 p-3">
-                <Ticket className="h-6 w-6 text-terracotta-600" strokeWidth={1.5} />
+                <Ticket className="h-6 w-6 text-accent" strokeWidth={1.5} />
               </div>
               <div>
                 <p className="text-sm text-stone-grey">Participations</p>
-                <p className="text-2xl font-bold text-noir">{totalParticipations}</p>
+                <p className="text-2xl font-bold text-ink">{totalParticipations}</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white">
+          <Card className="bg-surface">
             <CardContent className="flex items-center gap-4 p-6">
               {/* gold-800 et non gold-600 : ce dernier ne donne que 2.35:1 sur
                   la pastille, sous le minimum de 3:1 exige pour un pictogramme. */}
@@ -178,19 +178,19 @@ export default function DashboardPage() {
               </div>
               <div>
                 <p className="text-sm text-stone-grey">Lots à récupérer</p>
-                <p className="text-2xl font-bold text-noir">{pendingPrizes}</p>
+                <p className="text-2xl font-bold text-ink">{pendingPrizes}</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white">
+          <Card className="bg-surface">
             <CardContent className="flex items-center gap-4 p-6">
               <div className="rounded-card bg-moss-50 p-3">
                 <Trophy className="h-6 w-6 text-moss" strokeWidth={1.5} />
               </div>
               <div>
                 <p className="text-sm text-stone-grey">Lots récupérés</p>
-                <p className="text-2xl font-bold text-noir">{deliveredPrizes}</p>
+                <p className="text-2xl font-bold text-ink">{deliveredPrizes}</p>
               </div>
             </CardContent>
           </Card>
@@ -202,7 +202,7 @@ export default function DashboardPage() {
         <Card className="mb-8">
           <CardContent className="flex flex-col items-center justify-between gap-4 p-6 sm:flex-row">
             <div>
-              <h2 className="font-display text-h3 text-noir">
+              <h2 className="font-display text-h3 text-ink">
                 Vous avez un code de participation ?
               </h2>
               <p className="text-stone-grey">
@@ -219,7 +219,7 @@ export default function DashboardPage() {
         </Card>
 
         {/* Participations List */}
-        <Card className="bg-white">
+        <Card className="bg-surface">
           <CardHeader>
             <CardTitle>Mes participations</CardTitle>
             <CardDescription>
@@ -273,7 +273,7 @@ export default function DashboardPage() {
                         />
                       </div>
                       <div>
-                        <p className="font-medium text-noir">
+                        <p className="font-medium text-ink">
                           {participation.prize.name}
                         </p>
                         <p className="text-sm text-stone-grey">
@@ -284,7 +284,7 @@ export default function DashboardPage() {
                     <div className="text-right">
                       {/* terracotta-600 et non deep : #BA6905 plafonne a 4.11:1
                           sur blanc, sous le seuil AA pour ce corps de texte. */}
-                      <p className="font-medium text-terracotta-600">
+                      <p className="font-medium text-accent">
                         {participation.prize.value}
                       </p>
                       <p className="text-sm">

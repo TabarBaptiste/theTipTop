@@ -51,7 +51,7 @@ export function AccountSidebar() {
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
         aria-controls="account-nav"
-        className="mb-3 flex w-full items-center justify-center gap-2 rounded-card bg-cream px-4 py-3 text-sm text-noir transition-colors hover:bg-warm-beige/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-terracotta-deep focus-visible:ring-offset-2 lg:hidden"
+        className="mb-3 flex w-full items-center justify-center gap-2 rounded-card bg-cream px-4 py-3 text-sm text-ink transition-colors hover:bg-warm-beige/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-terracotta-deep focus-visible:ring-offset-2 lg:hidden"
       >
         {isOpen ? (
           <ChevronDown className="h-4 w-4" strokeWidth={1.5} />
@@ -87,8 +87,8 @@ export function AccountSidebar() {
                   // terracotta-600 et non deep : #BA6905 tombe à 3.89:1 ici,
                   // sous le seuil AA.
                   isActive
-                    ? 'font-semibold text-terracotta-600'
-                    : 'text-noir hover:text-terracotta-600',
+                    ? 'font-semibold text-accent'
+                    : 'text-ink hover:text-accent',
                 )}
               >
                 <link.icon className="h-4 w-4 shrink-0" strokeWidth={1.5} />

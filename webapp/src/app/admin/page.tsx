@@ -213,12 +213,12 @@ export default function AdminPage() {
   const grandPrizeDrawn = globalStats?.game.grandPrizeDrawn ?? false;
 
   return (
-    <div className="min-h-[calc(100vh-3.75rem)] bg-white py-8">
+    <div className="min-h-[calc(100vh-3.75rem)] bg-surface py-8">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
-            <h1 className="font-display text-h1 text-noir">Tableau de bord Admin</h1>
+            <h1 className="font-display text-h1 text-ink">Tableau de bord Admin</h1>
             <p className="mt-2 text-stone-grey">
               Vue d&apos;ensemble du jeu-concours Thé Tip Top
             </p>
@@ -234,11 +234,11 @@ export default function AdminPage() {
           <Card>
             <CardContent className="flex items-center gap-4 p-6">
               <div className="rounded-xl bg-terracotta-50 p-3">
-                <Users className="h-6 w-6 text-terracotta-600" strokeWidth={1.5} />
+                <Users className="h-6 w-6 text-accent" strokeWidth={1.5} />
               </div>
               <div>
                 <p className="text-sm text-stone-grey">Utilisateurs</p>
-                <p className="text-2xl font-bold text-noir">
+                <p className="text-2xl font-bold text-ink">
                   {globalStats?.users.total.toLocaleString('fr-FR')}
                 </p>
               </div>
@@ -252,7 +252,7 @@ export default function AdminPage() {
               </div>
               <div>
                 <p className="text-sm text-stone-grey">Participations</p>
-                <p className="text-2xl font-bold text-noir">
+                <p className="text-2xl font-bold text-ink">
                   {globalStats?.participations.total.toLocaleString('fr-FR')}
                 </p>
               </div>
@@ -266,7 +266,7 @@ export default function AdminPage() {
               </div>
               <div>
                 <p className="text-sm text-stone-grey">Lots remis</p>
-                <p className="text-2xl font-bold text-noir">
+                <p className="text-2xl font-bold text-ink">
                   {globalStats?.prizes.delivered.toLocaleString('fr-FR')}
                 </p>
               </div>
@@ -280,7 +280,7 @@ export default function AdminPage() {
               </div>
               <div>
                 <p className="text-sm text-stone-grey">Taux d&apos;utilisation</p>
-                <p className="text-2xl font-bold text-noir">{usageRate}%</p>
+                <p className="text-2xl font-bold text-ink">{usageRate}%</p>
               </div>
             </CardContent>
           </Card>
@@ -292,7 +292,7 @@ export default function AdminPage() {
             <Card>
               <CardContent className="p-6">
                 <p className="text-sm text-stone-grey">Tickets distribués</p>
-                <p className="text-xl font-bold text-noir">
+                <p className="text-xl font-bold text-ink">
                   {tickets.distributed.toLocaleString('fr-FR')}
                 </p>
               </CardContent>
@@ -300,7 +300,7 @@ export default function AdminPage() {
             <Card>
               <CardContent className="p-6">
                 <p className="text-sm text-stone-grey">Tickets utilisés</p>
-                <p className="text-xl font-bold text-noir">
+                <p className="text-xl font-bold text-ink">
                   {tickets.used.toLocaleString('fr-FR')}
                 </p>
               </CardContent>
@@ -308,7 +308,7 @@ export default function AdminPage() {
             <Card>
               <CardContent className="p-6">
                 <p className="text-sm text-stone-grey">Tickets restants</p>
-                <p className="text-xl font-bold text-noir">
+                <p className="text-xl font-bold text-ink">
                   {(tickets.total - tickets.used).toLocaleString('fr-FR')}
                 </p>
               </CardContent>
@@ -407,7 +407,7 @@ export default function AdminPage() {
                     return (
                       <div key={prize.type} className="space-y-2">
                         <div className="flex justify-between text-sm">
-                          <span className="font-medium text-noir">{prize.label}</span>
+                          <span className="font-medium text-ink">{prize.label}</span>
                           <span className="text-stone-grey">
                             {prize.count.toLocaleString('fr-FR')}
                             {prize.value ? ` · ${prize.value}` : ''}
@@ -444,11 +444,11 @@ export default function AdminPage() {
               <div className="space-y-6">
                 {/* Genre */}
                 <div>
-                  <h4 className="mb-3 font-medium text-noir">Par genre</h4>
+                  <h4 className="mb-3 font-medium text-ink">Par genre</h4>
                   <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                     {(demographics?.byGender ?? []).map((g) => (
                       <div key={g.gender} className="rounded-soft bg-terracotta-50 p-3 text-center">
-                        <p className="text-lg font-bold text-terracotta-600">{g.count}</p>
+                        <p className="text-lg font-bold text-accent">{g.count}</p>
                         <p className="text-xs text-stone-grey">
                           {GENDER_LABELS[g.gender] ?? g.gender}
                         </p>
@@ -462,12 +462,12 @@ export default function AdminPage() {
 
                 {/* Tranches d'âge */}
                 <div>
-                  <h4 className="mb-3 font-medium text-noir">Par tranche d&apos;âge</h4>
+                  <h4 className="mb-3 font-medium text-ink">Par tranche d&apos;âge</h4>
                   <div className="space-y-2">
                     {(demographics?.byAge ?? []).map((group) => (
                       <div key={group.range} className="flex items-center justify-between">
                         <span className="text-sm text-stone-grey">{group.range} ans</span>
-                        <span className="font-medium text-noir">{group.count}</span>
+                        <span className="font-medium text-ink">{group.count}</span>
                       </div>
                     ))}
                   </div>
@@ -507,8 +507,8 @@ export default function AdminPage() {
                       onClick={() => setSegment(s.key)}
                       className={`rounded-pill border px-4 py-2 text-sm transition-colors ${
                         segment === s.key
-                          ? 'border-terracotta-600 bg-terracotta-600 text-white'
-                          : 'border-warm-beige bg-white text-stone-grey hover:border-terracotta-600'
+                          ? 'border-accent bg-terracotta-600 text-white'
+                          : 'border-warm-beige bg-surface text-stone-grey hover:border-accent'
                       }`}
                     >
                       {s.label}
@@ -522,7 +522,7 @@ export default function AdminPage() {
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       <>
-                        <strong className="text-noir">
+                        <strong className="text-ink">
                           {emailingData?.count.toLocaleString('fr-FR') ?? 0}
                         </strong>{' '}
                         contacts consentants

@@ -238,7 +238,7 @@ describe('Header', () => {
     render(<Header />);
 
     const liens = screen.getAllByRole('link', { name: 'FAQ' });
-    expect(liens[0].className).toContain('text-terracotta-600');
+    expect(liens[0].className).toContain('text-accent');
   });
 
   describe('menu mobile', () => {
@@ -270,7 +270,7 @@ describe('Header', () => {
       fireEvent.click(boutonHamburger());
       const menu = within(document.getElementById('menu-mobile')!);
       const lienFaq = menu.getAllByRole('link', { name: 'FAQ' })[0];
-      expect(lienFaq.className).toContain('text-terracotta-600');
+      expect(lienFaq.className).toContain('text-accent');
 
       fireEvent.click(lienFaq);
       expect(boutonHamburger()).toHaveAttribute('aria-expanded', 'false');
