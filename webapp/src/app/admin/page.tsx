@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Users, Ticket, Gift, TrendingUp, Trophy,
@@ -114,9 +114,62 @@ function downloadCsv(filename: string, rows: string[][]) {
   window.URL.revokeObjectURL(url);
 }
 
+/**
+ * Couleurs du graphique, lues sur le document.
+ *
+ * Recharts pose ses couleurs en attributs SVG, ou ni `var()` ni une classe
+ * Tailwind ne sont resolues - d'ou les valeurs litterales qui figuraient ici.
+ * Elles ne suivaient donc pas le theme : en sombre, les graduations tombaient
+ * a 1,15:1 sur la carte, et la grille, restee claire, dominait la courbe.
+ *
+ * On lit donc les variables de theme sur `<html>`, et on relit quand
+ * `data-theme` change : le panneau d'accessibilite flotte sur toutes les
+ * pages, le theme peut donc basculer alors que le graphique est affiche.
+ *
+ * Les graduations remontent ainsi a 3,72:1. Le seuil de 4,5:1 reste hors
+ * d'atteinte tant que `--c-terracotta-pale`, dont la carte tire son fond,
+ * n'est pas lui-meme redefini par le theme sombre.
+ */
+const COULEURS_CLAIRES = {
+  graduation: 'rgb(74 70 62)',
+  grille: 'rgb(232 213 176)',
+  courbe: 'rgb(186 105 5)',
+  surface: 'rgb(255 255 255)',
+  texte: 'rgb(26 26 26)',
+};
+
+function useCouleursGraphique() {
+  const [couleurs, setCouleurs] = useState(COULEURS_CLAIRES);
+
+  useEffect(() => {
+    const lire = () => {
+      const style = getComputedStyle(document.documentElement);
+      const canal = (nom: string, secours: string) => {
+        const valeur = style.getPropertyValue(nom).trim();
+        return valeur ? `rgb(${valeur})` : secours;
+      };
+      setCouleurs({
+        graduation: canal('--c-stone-grey', COULEURS_CLAIRES.graduation),
+        grille: canal('--c-warm-beige', COULEURS_CLAIRES.grille),
+        courbe: canal('--c-terracotta-500', COULEURS_CLAIRES.courbe),
+        surface: canal('--c-surface', COULEURS_CLAIRES.surface),
+        texte: canal('--c-ink', COULEURS_CLAIRES.texte),
+      });
+    };
+
+    lire();
+    const observateur = new MutationObserver(lire);
+    observateur.observe(document.documentElement, { attributeFilter: ['data-theme'] });
+    return () => observateur.disconnect();
+  }, []);
+
+  return couleurs;
+}
+
 export default function AdminPage() {
   const queryClient = useQueryClient();
   const [segment, setSegment] = useState<SegmentKey>('all');
+  const couleurs = useCouleursGraphique();
 
   // Stats globales
   const { data: globalStats, isLoading: loadingGlobal } = useQuery<GlobalStats>({
@@ -338,24 +391,21 @@ export default function AdminPage() {
                   >
                     <defs>
                       <linearGradient id="fillParticipations" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#BA6905" stopOpacity={0.35} />
-                        <stop offset="95%" stopColor="#BA6905" stopOpacity={0} />
+                        <stop offset="5%" stopColor={couleurs.courbe} stopOpacity={0.35} />
+                        <stop offset="95%" stopColor={couleurs.courbe} stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    {/* Recharts pose ces couleurs en attributs SVG : une variable
-                        CSS n'y serait pas resolue, d'ou les valeurs litterales.
-                        Elles doivent suivre les tokens de tailwind.config.js. */}
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E8D5B0" />
+                    <CartesianGrid strokeDasharray="3 3" stroke={couleurs.grille} />
                     <XAxis
                       dataKey="date"
                       tickFormatter={(d: string) => format(parseISO(d), 'dd/MM', { locale: fr })}
-                      tick={{ fontSize: 11, fill: '#4A463E' }}
+                      tick={{ fontSize: 11, fill: couleurs.graduation }}
                       interval="preserveStartEnd"
                       minTickGap={24}
                     />
                     <YAxis
                       allowDecimals={false}
-                      tick={{ fontSize: 11, fill: '#4A463E' }}
+                      tick={{ fontSize: 11, fill: couleurs.graduation }}
                       width={40}
                     />
                     <Tooltip
@@ -365,14 +415,16 @@ export default function AdminPage() {
                       formatter={(value: number) => [value, 'Participations']}
                       contentStyle={{
                         borderRadius: 8,
-                        border: '1px solid #E8D5B0',
+                        border: `1px solid ${couleurs.grille}`,
+                        backgroundColor: couleurs.surface,
+                        color: couleurs.texte,
                         fontSize: 12,
                       }}
                     />
                     <Area
                       type="monotone"
                       dataKey="count"
-                      stroke="#BA6905"
+                      stroke={couleurs.courbe}
                       strokeWidth={2}
                       fill="url(#fillParticipations)"
                     />

@@ -282,7 +282,12 @@ function PrizesCarousel({
                 <span
                   className={cn(
                     'block h-[0.625rem] rounded-full transition-all duration-300',
-                    i === activeIndex ? 'w-8 bg-noir' : 'w-[10px] bg-ink/25 group-hover:bg-ink/50'
+                    // `bg-ink` et non `bg-noir` : en theme sombre, `noir` devient la
+                    // surface la plus profonde et la pastille active tombait a 1,28:1
+                    // sur la teinte du lot, sous le seuil de 3:1 du critere 1.4.11 -
+                    // soit l'indicateur du lot courant devenu invisible. `ink` suit le
+                    // texte, donc s'eclaircit, et vaut la meme valeur en theme clair.
+                    i === activeIndex ? 'w-8 bg-ink' : 'w-[10px] bg-ink/25 group-hover:bg-ink/50'
                   )}
                 />
               </button>
