@@ -182,14 +182,59 @@ export function PrizesSection() {
       </div>
 
       {isLoading ? (
-        <div className="container relative mx-auto grid items-center gap-10 px-6 py-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:py-20">
-          <div className="flex flex-col gap-4">
-            <Skeleton className="h-10 w-2/3 bg-noir/10" />
-            <Skeleton className="h-4 w-full bg-noir/10" />
-            <Skeleton className="h-4 w-5/6 bg-noir/10" />
+        /* Le squelette reprend la silhouette exacte du lot charge : memes trois
+           colonnes, memes marges, et la rangee de commandes en dessous. Il en
+           decrivait deux, heritees d'une version precedente : la colonne du
+           pourcentage et les commandes surgissaient d'un coup, et la section
+           changeait de hauteur au chargement - ce qu'un squelette existe
+           precisement pour eviter. */
+        <>
+          <div className="container relative mx-auto grid items-center gap-10 px-6 pb-8 pt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)_auto] lg:gap-12 lg:pt-16">
+            <div>
+              <Skeleton className="h-[15px] w-32 bg-noir/10" />
+              <Skeleton className="mt-4 h-9 w-4/5 bg-noir/10" />
+              <Skeleton className="mt-2 h-9 w-3/5 bg-noir/10" />
+              {/* Huit lignes : c'est la longueur reelle des descriptions de
+                  lots, et c'est cette colonne qui donne sa hauteur a la rangee.
+                  En annoncer trois faisait porter la hauteur par l'image, et le
+                  squelette depassait le contenu de cent pixels. */}
+              <div className="mt-5 flex flex-col gap-2">
+                {['w-full', 'w-full', 'w-full', 'w-full', 'w-full', 'w-full', 'w-5/6', 'w-2/3'].map(
+                  (largeur, i) => (
+                    <Skeleton key={i} className={cn('h-4 bg-noir/10', largeur)} />
+                  )
+                )}
+              </div>
+            </div>
+
+            {/* Les visuels detoures font de 236 a 331 px de haut selon le lot :
+                le placeholder se tient dans cette fourchette au lieu de prendre
+                le maximum autorise. */}
+            <div className="order-first flex justify-center lg:order-none">
+              <Skeleton className="h-[220px] w-full max-w-[420px] rounded-card bg-noir/5 md:h-[280px] lg:h-[300px]" />
+            </div>
+
+            <div className="flex flex-col gap-2 lg:items-end">
+              <Skeleton className="h-11 w-24 bg-noir/10" />
+              <Skeleton className="h-[15px] w-20 bg-noir/10" />
+            </div>
           </div>
-          <Skeleton className="h-64 w-full bg-noir/5 lg:h-96" />
-        </div>
+
+          <div className="container relative mx-auto flex items-center justify-between gap-6 px-6 pb-12">
+            <div className="flex gap-3">
+              {[0, 1, 2].map((i) => (
+                <Skeleton key={i} className="h-11 w-11 rounded-full bg-noir/10" />
+              ))}
+            </div>
+            {/* Cinq pastilles : c'est la taille du catalogue, et le squelette
+                n'a pas encore les lots pour la deduire. */}
+            <div className="flex items-center gap-4">
+              {[0, 1, 2, 3, 4].map((i) => (
+                <Skeleton key={i} className="h-[10px] w-[10px] rounded-full bg-noir/10" />
+              ))}
+            </div>
+          </div>
+        </>
       ) : activePrize && prizes ? (
         <>
           <div className="container relative mx-auto grid items-center gap-10 px-6 pb-8 pt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)_auto] lg:gap-12 lg:pt-16">
