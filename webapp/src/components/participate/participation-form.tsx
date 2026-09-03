@@ -182,7 +182,7 @@ export function ParticipationForm({ onSubmit, isSubmitting }: Props) {
           <select
             id="gender"
             defaultValue=""
-            className="flex h-10 w-full rounded-soft border border-warm-beige bg-white px-3 text-sm text-noir focus:outline-none focus:ring-2 focus:ring-terracotta-deep"
+            className="flex h-10 w-full rounded-soft border border-gold-700 bg-white px-3 text-sm text-noir focus:outline-none focus:ring-2 focus:ring-terracotta-deep"
             {...register('gender')}
           >
             <option value="">Sélectionner</option>

@@ -260,6 +260,20 @@ export default function RegisterPage() {
           {/* Divider optionnel */}
           <div className="border-t border-warm-beige pt-4"></div>
 
+          {/* Téléphone - Optionnel */}
+          <div>
+            <Label htmlFor="phone">Téléphone</Label>
+            <Input
+              id="phone"
+              type="tel"
+              placeholder="0612345678"
+              {...register('phone')}
+            />
+            {errors.phone && (
+              <p className="mt-1 text-xs text-red-600">{errors.phone.message}</p>
+            )}
+          </div>
+
           {/* Date de naissance / Genre - Optionnel */}
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
