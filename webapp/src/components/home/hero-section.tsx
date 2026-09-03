@@ -61,7 +61,7 @@ export function HeroSection() {
             vedette entre texte et visuel, alors que le titre porte seul
             l'argument du jeu. */}
         <div className="text-center">
-          <p className="font-functional text-[10px] font-bold uppercase tracking-[2px] text-accent">
+          <p className="font-functional text-[0.625rem] font-bold uppercase tracking-[2px] text-accent">
             Jeu-concours exclusif
           </p>
 
@@ -81,7 +81,7 @@ export function HeroSection() {
           {/* Le paragraphe court sur toute la largeur du contenu sur la
               maquette, et non sur celle du titre : deux lignes pleines plutôt
               que quatre lignes étroites. */}
-          <p className="mt-[30px] text-body leading-[24.5px] text-ink/70">
+          <p className="mt-[30px] text-body leading-[1.53125rem] text-ink/70">
             À l&apos;occasion de l&apos;ouverture de notre 10<sup>e</sup> boutique à Nice, chaque
             participation vous inscrit au tirage au sort d&apos;<strong className="font-bold text-ink">un an de thé</strong>, d&apos;une valeur de 360
             €. Et vous ne repartez jamais les mains vides :{' '}

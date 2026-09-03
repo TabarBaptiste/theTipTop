@@ -317,7 +317,7 @@ export default function ParticipatePage() {
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-moss/10">
                 <Leaf className="h-7 w-7 text-moss" strokeWidth={1.5} />
               </div>
-              <span className="mt-2 font-functional text-[10px] font-semibold uppercase tracking-[1px] text-ink">
+              <span className="mt-2 font-functional text-[0.625rem] font-semibold uppercase tracking-[1px] text-ink">
                 Eco-responsable
               </span>
             </div>
@@ -325,7 +325,7 @@ export default function ParticipatePage() {
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-terracotta-50">
                 <ShieldCheck className="h-7 w-7 text-accent" strokeWidth={1.5} />
               </div>
-              <span className="mt-2 font-functional text-[10px] font-semibold uppercase tracking-[1px] text-ink">
+              <span className="mt-2 font-functional text-[0.625rem] font-semibold uppercase tracking-[1px] text-ink">
                 Certifié bio
               </span>
             </div>
@@ -333,7 +333,7 @@ export default function ParticipatePage() {
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gold-100">
                 <Heart className="h-7 w-7 text-gold-600" strokeWidth={1.5} />
               </div>
-              <span className="mt-2 font-functional text-[10px] font-semibold uppercase tracking-[1px] text-ink">
+              <span className="mt-2 font-functional text-[0.625rem] font-semibold uppercase tracking-[1px] text-ink">
                 Solidaire
               </span>
             </div>

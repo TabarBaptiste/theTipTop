@@ -106,7 +106,7 @@ function PrizesSkeleton() {
     <>
       <div className="container relative mx-auto grid items-center gap-10 px-6 pb-8 pt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)_auto] lg:gap-12 lg:pt-16">
         <div>
-          <Skeleton className="h-[15px] w-32 bg-ink/10" />
+          <Skeleton className="h-[0.9375rem] w-32 bg-ink/10" />
           <Skeleton className="mt-4 h-9 w-4/5 bg-ink/10" />
           <Skeleton className="mt-2 h-9 w-3/5 bg-ink/10" />
           {/* Huit lignes : c'est la longueur reelle des descriptions de
@@ -126,16 +126,16 @@ function PrizesSkeleton() {
             le placeholder se tient dans cette fourchette au lieu de prendre
             le maximum autorise. */}
         <div className="order-first flex justify-center lg:order-none">
-          <Skeleton className="h-[220px] w-full max-w-[420px] rounded-card bg-ink/5 md:h-[280px] lg:h-[300px]" />
+          <Skeleton className="h-[13.75rem] w-full max-w-[420px] rounded-card bg-ink/5 md:h-[17.5rem] lg:h-[18.75rem]" />
         </div>
 
         <div className="flex flex-col gap-2 lg:items-end">
           <Skeleton className="h-11 w-24 bg-ink/10" />
-          <Skeleton className="h-[15px] w-20 bg-ink/10" />
+          <Skeleton className="h-[0.9375rem] w-20 bg-ink/10" />
         </div>
       </div>
 
-      <div className="container relative mx-auto flex items-center justify-between gap-6 px-6 pb-12">
+      <div className="container relative mx-auto flex flex-wrap items-center justify-between gap-4 px-6 pb-12">
         <div className="flex gap-3">
           {[0, 1, 2].map((i) => (
             <Skeleton key={i} className="h-11 w-11 rounded-full bg-ink/10" />
@@ -145,7 +145,7 @@ function PrizesSkeleton() {
             n'a pas encore les lots pour la deduire. */}
         <div className="flex items-center gap-4">
           {[0, 1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-[10px] w-[10px] rounded-full bg-ink/10" />
+            <Skeleton key={i} className="h-[0.625rem] w-[10px] rounded-full bg-ink/10" />
           ))}
         </div>
       </div>
@@ -185,13 +185,13 @@ function PrizesCarousel({
               et aucune nuance de la gamme ne le tient sur les deux themes. Le
               terracotta-600 tombait entre 3,08 et 4,12 sur les teintes
               claires, le 800 a 1,71 sur les sombres. */}
-          <p className="font-functional text-[10px] font-bold uppercase leading-[15px] tracking-[2px] text-lot-accent">
+          <p className="font-functional text-[0.625rem] font-bold uppercase leading-[0.9375rem] tracking-[2px] text-lot-accent">
             Lot {String(activeIndex + 1).padStart(2, '0')} sur {String(total).padStart(2, '0')}
           </p>
           {/* not-italic : la règle de base met les h3 en italique, ce qui
               ne vaut que pour les titres d'étapes. */}
           <h3 className="mt-4 font-display text-display not-italic text-ink">{activePrize.name}</h3>
-          <p className="mt-5 max-w-[52ch] text-body leading-[24.5px] text-stone-grey">
+          <p className="mt-5 max-w-[52ch] text-body leading-[1.53125rem] text-stone-grey">
             {activePrize.description}
           </p>
         </div>
@@ -205,20 +205,20 @@ function PrizesCarousel({
               key={activePrize.code}
               src={typeof imageSrc === 'string' ? imageSrc : imageSrc.src}
               alt={imageAlt}
-              className="animate-lot-entree max-h-[260px] w-auto object-contain drop-shadow-[0_20px_28px_rgba(74,70,62,0.28)] md:max-h-[340px] lg:max-h-[420px]"
+              className="animate-lot-entree max-h-[16.25rem] w-auto object-contain drop-shadow-[0_20px_28px_rgba(74,70,62,0.28)] md:max-h-[21.25rem] lg:max-h-[26.25rem]"
             />
           )}
         </div>
 
         <div className="lg:text-right">
-          <p className="whitespace-nowrap font-display text-[44px] font-bold leading-none text-ink">
+          <p className="whitespace-nowrap font-display text-[2.75rem] font-bold leading-none text-ink">
             {activePrize.percentage}&nbsp;%
           </p>
-          <p className="mt-2 font-functional text-[10px] font-bold uppercase leading-[15px] tracking-[2px] text-stone-grey">
+          <p className="mt-2 font-functional text-[0.625rem] font-bold uppercase leading-[0.9375rem] tracking-[2px] text-stone-grey">
             des tickets
           </p>
           {activePrize.value && (
-            <p className="mt-6 font-functional text-[10px] font-bold uppercase leading-[15px] tracking-[2px] text-stone-grey">
+            <p className="mt-6 font-functional text-[0.625rem] font-bold uppercase leading-[0.9375rem] tracking-[2px] text-stone-grey">
               Valeur {activePrize.value}
             </p>
           )}
@@ -226,7 +226,7 @@ function PrizesCarousel({
       </div>
 
       {total > 1 && (
-        <div className="container relative mx-auto flex items-center justify-between gap-6 px-6 pb-12">
+        <div className="container relative mx-auto flex flex-wrap items-center justify-between gap-4 px-6 pb-12">
           <div className="flex gap-3">
             <button
               type="button"
@@ -281,7 +281,7 @@ function PrizesCarousel({
               >
                 <span
                   className={cn(
-                    'block h-[10px] rounded-full transition-all duration-300',
+                    'block h-[0.625rem] rounded-full transition-all duration-300',
                     i === activeIndex ? 'w-8 bg-noir' : 'w-[10px] bg-ink/25 group-hover:bg-ink/50'
                   )}
                 />
@@ -371,7 +371,7 @@ export function PrizesSection() {
 
       <div className="container relative mx-auto px-6 text-center">
         <h2 className="font-display text-display text-ink">Les lots à gagner</h2>
-        <div className="mx-auto max-w-[633px] text-body leading-[24.5px] text-ink">
+        <div className="mx-auto max-w-[633px] text-body leading-[1.53125rem] text-ink">
           <p>100% des tickets sont gagnants</p>
           {/* Sans ce rappel, ces cinq lots passent pour tout ce qu'il y a à
               gagner : la section ne mentionnait pas le tirage, alors que la page

@@ -69,11 +69,11 @@ export function GrandPrizeSection() {
            squelette rendait une colonne etroite centree sur le fond noir,
            heritee d'une version anterieure - la page sautait d'un bloc au
            chargement. */
-        <div className="grid lg:min-h-[467px] lg:grid-cols-2">
+        <div className="grid lg:min-h-[29.1875rem] lg:grid-cols-2">
           <Skeleton className="h-64 w-full rounded-none bg-surface/5 md:h-96 lg:h-auto" />
 
           <div className="flex flex-col bg-moss-panel px-6 pb-14 pt-9 md:px-11">
-            <Skeleton className="h-[15px] w-40 bg-surface/20" />
+            <Skeleton className="h-[0.9375rem] w-40 bg-surface/20" />
             <Skeleton className="mt-5 h-9 w-4/5 bg-surface/20" />
             <Skeleton className="mt-2 h-9 w-2/5 bg-surface/20" />
 
@@ -124,7 +124,7 @@ export function GrandPrizeSection() {
         // Deux colonnes pleine largeur, photo à gauche / panneau à droite :
         // le lot était jusque-là annoncé par du texte seul sur fond noir, sans
         // rien qui le montre.
-        <div className="grid lg:min-h-[467px] lg:grid-cols-2">
+        <div className="grid lg:min-h-[29.1875rem] lg:grid-cols-2">
           <div className="relative h-64 md:h-96 lg:h-auto">
             <Image
               src={coffretsImg}
@@ -141,7 +141,7 @@ export function GrandPrizeSection() {
             {/* Le même surtitre qu'en tête de page sur la maquette : c'est le
                 fil qui relie le hero au grand prix, et non deux annonces
                 distinctes. */}
-            <p className="relative font-functional text-[10px] font-bold uppercase leading-[15px] tracking-[2px] text-white">
+            <p className="relative font-functional text-[0.625rem] font-bold uppercase leading-[0.9375rem] tracking-[2px] text-white">
               Jeu concours exclusif
             </p>
 
@@ -152,12 +152,12 @@ export function GrandPrizeSection() {
               Un an de thé à gagner d&apos;une valeur de 360&nbsp;€
             </h2>
 
-            <p className="relative mt-5 text-body leading-[24.5px] text-white">
+            <p className="relative mt-5 text-body leading-[1.53125rem] text-white">
               Au-delà du lot garanti par votre ticket, chaque participation vous inscrit
               automatiquement au tirage au sort final. Rien de plus à faire.
             </p>
 
-            <ul className="relative mt-5 list-disc space-y-0 pl-[21px] text-body leading-[24.5px] text-white">
+            <ul className="relative mt-5 list-disc space-y-0 pl-[21px] text-body leading-[1.53125rem] text-white">
               {ATOUTS.map((texte) => (
                 <li key={texte}>{texte}</li>
               ))}
@@ -168,7 +168,7 @@ export function GrandPrizeSection() {
                 <Link href="/participate">Participer au tirage</Link>
               </Button>
               {showParticipants && (
-                <p className="text-[11px] text-white/70">
+                <p className="text-[0.6875rem] text-white/70">
                   Déjà {participants.toLocaleString('fr-FR')} participants au tirage
                 </p>
               )}

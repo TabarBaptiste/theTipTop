@@ -226,8 +226,8 @@ export default function PolitiqueConfidentialitePage() {
                   <table className="w-full text-sm">
                     <thead className="bg-noir text-white">
                       <tr>
-                        <th className="px-4 py-3 text-left font-functional text-[10px] uppercase tracking-[2px]">Finalité</th>
-                        <th className="px-4 py-3 text-left font-functional text-[10px] uppercase tracking-[2px]">Base légale</th>
+                        <th className="px-4 py-3 text-left font-functional text-[0.625rem] uppercase tracking-[2px]">Finalité</th>
+                        <th className="px-4 py-3 text-left font-functional text-[0.625rem] uppercase tracking-[2px]">Base légale</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-warm-beige bg-surface">
@@ -296,8 +296,8 @@ export default function PolitiqueConfidentialitePage() {
                   <table className="w-full text-sm">
                     <thead className="bg-noir text-white">
                       <tr>
-                        <th className="px-4 py-3 text-left font-functional text-[10px] uppercase tracking-[2px]">Catégorie</th>
-                        <th className="px-4 py-3 text-left font-functional text-[10px] uppercase tracking-[2px]">Durée</th>
+                        <th className="px-4 py-3 text-left font-functional text-[0.625rem] uppercase tracking-[2px]">Catégorie</th>
+                        <th className="px-4 py-3 text-left font-functional text-[0.625rem] uppercase tracking-[2px]">Durée</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-warm-beige bg-surface">

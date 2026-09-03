@@ -31,7 +31,7 @@ export function AboutContestSection() {
     // visuel n'y est ni arrondi ni rentré dans la colonne de contenu.
     <section className="border-b border-section-line bg-surface">
       <div className="grid items-center lg:grid-cols-2">
-        <div className="relative h-72 w-full md:h-96 lg:h-[629px]">
+        <div className="relative h-72 w-full md:h-96 lg:h-[39.3125rem]">
           <Image
             src={mainsBolImg}
             alt=""
@@ -44,7 +44,7 @@ export function AboutContestSection() {
         <div className="px-6 py-9 lg:pl-[99px] lg:pr-[121px]">
           <h2 className="font-display text-display text-ink">Tout savoir sur le jeu-concours</h2>
 
-          <div className="mt-3 max-w-[501px] space-y-6 text-body leading-[24.5px] text-ink">
+          <div className="mt-3 max-w-[501px] space-y-6 text-body leading-[1.53125rem] text-ink">
             <p>
               Le jeu-concours Thé Tip Top se déroule{' '}
               {formatFrenchDateRange(GAME_START_DATE, GAME_END_DATE).toLowerCase()}, à

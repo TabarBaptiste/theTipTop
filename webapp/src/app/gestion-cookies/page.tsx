@@ -271,7 +271,7 @@ export default function GestionCookiesPage() {
                         {cat.category}
                       </h3>
                       <span
-                        className={`rounded-pill px-3 py-0.5 font-functional text-[10px] font-semibold uppercase tracking-[1.5px] ${cat.badgeClass}`}
+                        className={`rounded-pill px-3 py-0.5 font-functional text-[0.625rem] font-semibold uppercase tracking-[1.5px] ${cat.badgeClass}`}
                       >
                         {cat.badge}
                       </span>
@@ -298,7 +298,7 @@ export default function GestionCookiesPage() {
                             ].map((h) => (
                               <th
                                 key={h}
-                                className="px-4 py-2 text-left font-functional text-[10px] uppercase tracking-[1.5px] text-stone-grey"
+                                className="px-4 py-2 text-left font-functional text-[0.625rem] uppercase tracking-[1.5px] text-stone-grey"
                               >
                                 {h}
                               </th>
@@ -404,13 +404,13 @@ export default function GestionCookiesPage() {
                   <table className="w-full text-sm">
                     <thead className="bg-noir text-white">
                       <tr>
-                        <th className="px-4 py-3 text-left font-functional text-[10px] uppercase tracking-[1.5px]">
+                        <th className="px-4 py-3 text-left font-functional text-[0.625rem] uppercase tracking-[1.5px]">
                           Catégorie
                         </th>
-                        <th className="px-4 py-3 text-left font-functional text-[10px] uppercase tracking-[1.5px]">
+                        <th className="px-4 py-3 text-left font-functional text-[0.625rem] uppercase tracking-[1.5px]">
                           Durée maximale
                         </th>
-                        <th className="px-4 py-3 text-left font-functional text-[10px] uppercase tracking-[1.5px]">
+                        <th className="px-4 py-3 text-left font-functional text-[0.625rem] uppercase tracking-[1.5px]">
                           Remarque
                         </th>
                       </tr>

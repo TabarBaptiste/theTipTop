@@ -111,10 +111,10 @@ export function CountdownSection() {
           {/* Ce libellé titrait déjà la section de fait, sans en avoir le
               balisage : la page passait du h1 du hero au h2 du grand prix en
               sautant ce bandeau. */}
-          <h2 className="font-functional text-[12px] font-bold uppercase leading-[18px] tracking-[2px] text-stone-grey">
+          <h2 className="font-functional text-[0.75rem] font-bold uppercase leading-[1.125rem] tracking-[2px] text-stone-grey">
             Temps restant pour participer
           </h2>
-          {periode && <p className="text-[12px] leading-[21px] text-ink">{periode}</p>}
+          {periode && <p className="text-[0.75rem] leading-[1.3125rem] text-ink">{periode}</p>}
         </div>
 
         {/* Les deux-points qui séparaient les blocs ne figurent pas sur la
@@ -140,10 +140,10 @@ export function CountdownSection() {
 function TimeBlock({ value, label }: { value: number; label: string }) {
   return (
     <div className="flex w-16 flex-col items-center gap-2">
-      <span className="flex h-16 w-16 items-center justify-center rounded-soft bg-surface font-display text-[36px] font-bold leading-[54px] text-ink">
+      <span className="flex h-16 w-16 items-center justify-center rounded-soft bg-surface font-display text-[2.25rem] font-bold leading-[3.375rem] text-ink">
         {String(value).padStart(2, '0')}
       </span>
-      <span className="font-functional text-[10px] uppercase leading-[15px] text-stone-grey">
+      <span className="font-functional text-[0.625rem] uppercase leading-[0.9375rem] text-stone-grey">
         {label}
       </span>
     </div>

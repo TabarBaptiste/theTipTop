@@ -308,13 +308,13 @@ export default function CGUPage() {
                   <table className="w-full text-sm">
                     <thead className="bg-noir text-white">
                       <tr>
-                        <th className="px-4 py-3 text-left font-functional text-[10px] uppercase tracking-[2px]">
+                        <th className="px-4 py-3 text-left font-functional text-[0.625rem] uppercase tracking-[2px]">
                           Lot
                         </th>
-                        <th className="px-4 py-3 text-left font-functional text-[10px] uppercase tracking-[2px]">
+                        <th className="px-4 py-3 text-left font-functional text-[0.625rem] uppercase tracking-[2px]">
                           Valeur indicative
                         </th>
-                        <th className="px-4 py-3 text-left font-functional text-[10px] uppercase tracking-[2px]">
+                        <th className="px-4 py-3 text-left font-functional text-[0.625rem] uppercase tracking-[2px]">
                           Probabilité
                         </th>
                       </tr>

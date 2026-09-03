@@ -22,7 +22,7 @@ export function HowItWorksSection() {
   return (
     <section id="how-it-works" className="border-b border-section-line bg-cream py-12">
       <div className="container mx-auto px-6">
-        <h2 className="border-b border-section-line pb-[18px] font-display text-h2 leading-[39px] text-ink">
+        <h2 className="border-b border-section-line pb-[18px] font-display text-h2 leading-[2.4375rem] text-ink">
           Comment participer ?
         </h2>
 
@@ -31,15 +31,15 @@ export function HowItWorksSection() {
             <div key={step.number} className="flex flex-col">
               {/* Les numéros sont en Playfair sur la maquette, à la taille d'un
                   sous-titre : ils ouvrent l'étape au lieu de la surtitrer. */}
-              <span className="font-display text-[28px] font-bold leading-[42px] text-accent">
+              <span className="font-display text-[1.75rem] font-bold leading-[2.625rem] text-accent">
                 {step.number}
               </span>
               {/* italic est volontaire : les titres d'etapes sont en italique
                   sur la maquette Figma, contrairement au reste du site. */}
-              <h3 className="mt-[18px] font-display text-[20px] font-medium italic leading-[30px] text-ink">
+              <h3 className="mt-[18px] font-display text-[1.25rem] font-medium italic leading-[1.875rem] text-ink">
                 {step.title}
               </h3>
-              <p className="mt-3 text-[11px] leading-[16.5px] tracking-[0.3px] text-stone-grey">
+              <p className="mt-3 text-[0.6875rem] leading-[1.03125rem] tracking-[0.3px] text-stone-grey">
                 {step.description}
               </p>
             </div>

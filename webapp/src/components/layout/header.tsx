@@ -71,7 +71,7 @@ export function Header() {
       {/* 60 px, hauteur de la maquette. Si tu changes cette valeur,
           repercute-la sur les min-h-[calc(100vh-3.75rem)] des pages et sur le
           scroll-padding-top de globals.css. */}
-      <nav className="container mx-auto flex h-[60px] items-center justify-between px-6">
+      <nav className="container mx-auto flex h-[3.75rem] items-center justify-between px-6">
         {/* Logo */}
         <Link href="/" className="flex items-center">
           {/* unoptimized : l'optimiseur de Next refuse les SVG sans dangerouslyAllowSVG,

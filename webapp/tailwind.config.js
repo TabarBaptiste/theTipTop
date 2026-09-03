@@ -149,27 +149,31 @@ module.exports = {
         editorial: ['var(--font-playfair)', 'Playfair Display', 'Georgia', 'serif'],
         functional: ['var(--font-montserrat)', 'Montserrat', 'system-ui', 'sans-serif'],
       },
+      // En rem et non en pixels : le reglage d'agrandissement du module
+      // d'accessibilite agit sur la taille de base du document, et un
+      // espacement fige en pixels laisserait le texte grandir dans des
+      // conteneurs qui ne bougent pas.
       spacing: {
-        '2xs': '4px',
-        xs: '8px',
-        sm: '12px',
-        md: '16px',
-        lg: '24px',
-        xl: '32px',
-        '2xl': '48px',
-        '3xl': '64px',
+        '2xs': '0.25rem',
+        xs: '0.5rem',
+        sm: '0.75rem',
+        md: '1rem',
+        lg: '1.5rem',
+        xl: '2rem',
+        '2xl': '3rem',
+        '3xl': '4rem',
       },
       fontSize: {
-        h1: ['clamp(28px, 4vw, 36px)', { lineHeight: '1.2', letterSpacing: '-0.5px', fontWeight: '700' }],
-        h2: ['clamp(22px, 3vw, 26px)', { lineHeight: '1.3', fontWeight: '600' }],
-        // Titres portes a 36px par la maquette : hero, grand prix, « Les lots
+        h1: ['clamp(1.75rem, 4vw, 2.25rem)', { lineHeight: '1.2', letterSpacing: '-0.03125rem', fontWeight: '700' }],
+        h2: ['clamp(1.375rem, 3vw, 1.625rem)', { lineHeight: '1.3', fontWeight: '600' }],
+        // Titres portes a 2.25rem par la maquette : hero, grand prix, « Les lots
         // a gagner », « Tout savoir ». Distinct de h2, qu'elle reserve a
-        // « Comment participer ? » et « Pourquoi nous ? », a 26px.
-        display: ['clamp(28px, 4vw, 36px)', { lineHeight: '1.2', letterSpacing: '-0.5px', fontWeight: '700' }],
-        h3: ['20px', { lineHeight: '1.4', fontWeight: '500' }],
-        body: ['14px', { lineHeight: '1.75', letterSpacing: '0.3px' }],
-        ui: ['11px', { lineHeight: '1', letterSpacing: '2px', fontWeight: '700' }],
-        caption: ['11px', { lineHeight: '1.5', letterSpacing: '0.3px' }],
+        // « Comment participer ? » et « Pourquoi nous ? », a 1.625rem.
+        display: ['clamp(1.75rem, 4vw, 2.25rem)', { lineHeight: '1.2', letterSpacing: '-0.03125rem', fontWeight: '700' }],
+        h3: ['1.25rem', { lineHeight: '1.4', fontWeight: '500' }],
+        body: ['0.875rem', { lineHeight: '1.75', letterSpacing: '0.01875rem' }],
+        ui: ['0.6875rem', { lineHeight: '1', letterSpacing: '0.125rem', fontWeight: '700' }],
+        caption: ['0.6875rem', { lineHeight: '1.5', letterSpacing: '0.01875rem' }],
       },
       keyframes: {
         'accordion-down': {

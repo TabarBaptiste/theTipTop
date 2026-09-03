@@ -28,17 +28,17 @@ export function WhyUsSection() {
   return (
     <section id="why-us" className="bg-cream py-12">
       <div className="container mx-auto px-6">
-        <h2 className="border-b border-section-line pb-[18px] font-display text-h2 leading-[39px] text-ink">
+        <h2 className="border-b border-section-line pb-[18px] font-display text-h2 leading-[2.4375rem] text-ink">
           Pourquoi nous ?
         </h2>
 
         <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {reasons.map((reason) => (
             <div key={reason.number} className="flex flex-col gap-3">
-              <span className="font-display text-[22px] font-bold leading-[33px] text-accent">
+              <span className="font-display text-[1.375rem] font-bold leading-[2.0625rem] text-accent">
                 {reason.number}
               </span>
-              <p className="text-[11px] leading-[16.5px] tracking-[0.3px] text-stone-grey">
+              <p className="text-[0.6875rem] leading-[1.03125rem] tracking-[0.3px] text-stone-grey">
                 {reason.description}
               </p>
             </div>
@@ -47,7 +47,7 @@ export function WhyUsSection() {
 
         <Link
           href="/reglement"
-          className="mt-12 inline-block text-[11px] leading-[16.5px] text-moss underline underline-offset-2"
+          className="mt-12 inline-block text-[0.6875rem] leading-[1.03125rem] text-moss underline underline-offset-2"
         >
           Lire la charte de transparence
         </Link>
