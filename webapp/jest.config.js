@@ -33,10 +33,10 @@ const customJestConfig = {
   // couverture atteinte, pour garder une marge sans laisser filer.
   coverageThreshold: {
     global: {
-      statements: 70,
-      branches: 65,
-      functions: 68,
-      lines: 70,
+      statements: 88,
+      branches: 87,
+      functions: 84,
+      lines: 89,
     },
   },
 }
