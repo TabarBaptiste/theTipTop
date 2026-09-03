@@ -1,2 +1,4 @@
 fcc5837634dac121272ed08877a3c628e99bb892:docs/03-GUIDE-DEPLOIEMENT.md:generic-api-key:135
 fcc5837634dac121272ed08877a3c628e99bb892:docs/03-GUIDE-DEPLOIEMENT.md:generic-api-key:136
+tests/sonar-issues/sonar-issues.sh:curl-auth-user:49
+tests/sonar-issues/sonar-issues.sh:curl-auth-user:77
