@@ -1,0 +1,4 @@
+# Rapports produits par Lighthouse, regeneres a chaque campagne.
+# Meme regle que pour k6 : la mesure se refait, elle ne s'archive pas dans git.
+*.html
+*.json
