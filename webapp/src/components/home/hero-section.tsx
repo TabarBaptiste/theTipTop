@@ -74,8 +74,8 @@ export function HeroSection() {
               sans elles, la ligne se coupe entre « 100 » et « % », et le
               deux-points peut ouvrir une ligne. */}
           <h1 className="mx-auto mt-4 max-w-[782px] font-display text-display text-noir">
-            Jeu-concours <span className="whitespace-nowrap text-terracotta-600">Thé Tip Top</span>
-            &nbsp;: un an de thé à gagner, 100&nbsp;% des tickets gagnants
+            Jeu-concours <span className="whitespace-nowrap text-terracotta-600">Thé Tip Top</span>&nbsp;:
+            un an de thé à gagner, 100&nbsp;% des tickets gagnants
           </h1>
 
           {/* Le paragraphe court sur toute la largeur du contenu sur la
@@ -83,8 +83,7 @@ export function HeroSection() {
               que quatre lignes étroites. */}
           <p className="mt-[30px] text-body leading-[24.5px] text-noir/70">
             À l&apos;occasion de l&apos;ouverture de notre 10<sup>e</sup> boutique à Nice, chaque
-            participation vous inscrit au tirage au sort d&apos;
-            <strong className="font-bold text-noir">un an de thé</strong>, d&apos;une valeur de 360
+            participation vous inscrit au tirage au sort d&apos;<strong className="font-bold text-noir">un an de thé</strong>, d&apos;une valeur de 360
             €. Et vous ne repartez jamais les mains vides :{' '}
             <strong className="font-bold text-noir">100 % des tickets sont gagnants</strong>.
           </p>
