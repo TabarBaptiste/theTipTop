@@ -365,6 +365,41 @@
   }
 }
 
+/* Meme effet, demande depuis le module d'accessibilite. Le reglage systeme
+   ci-dessus suppose que le visiteur l'a trouve et pose ; sur un poste
+   partage, ou simplement pour qui ignore qu'il existe, l'interrupteur du
+   site reste le seul moyen. */
+[data-sans-animation] *,
+[data-sans-animation] *::before,
+[data-sans-animation] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Critere 1.4.12 « Espacement du texte ». Les valeurs sont celles du critere
+   lui-meme, qui demande que la mise en page tienne au-dela : interligne a
+   1,5 fois la taille, espacement des lettres a 0,12, des mots a 0,16, et
+   deux tailles entre deux paragraphes.
+
+   Cible les conteneurs de texte plutot que `*` : applique a tout, l'espacement
+   des lettres deforme les boutons et les libelles en capitales, qui portent
+   deja leur propre `letter-spacing`. */
+[data-espacement-texte] p,
+[data-espacement-texte] li,
+[data-espacement-texte] dd,
+[data-espacement-texte] dt,
+[data-espacement-texte] blockquote {
+  line-height: 1.5 !important;
+  letter-spacing: 0.12em !important;
+  word-spacing: 0.16em !important;
+}
+
+[data-espacement-texte] p {
+  margin-bottom: 2em;
+}
+
 /* Motifs decoratifs DESIGN.md */
 .pattern-overlay {
   opacity: 0.12;

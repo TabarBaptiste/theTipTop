@@ -7,6 +7,8 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { CookieConsentBanner } from '@/components/layout/cookie-consent-banner';
 import { ConditionalAnalytics } from '@/components/layout/conditional-analytics';
+import { AmorcagePreferences } from '@/components/accessibilite/amorcage-preferences';
+import { PanneauAccessibilite } from '@/components/accessibilite/panneau-accessibilite';
 import { StructuredData } from '@/components/seo/structured-data';
 import { ORGANIZATION_SCHEMA, WEBSITE_SCHEMA } from '@/lib/organization-schema';
 
@@ -110,6 +112,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr" suppressHydrationWarning data-scroll-behavior="smooth">
+      <head>
+        {/* Avant tout rendu : sans cela, un visiteur en theme sombre recoit la
+            page en clair puis la voit basculer a l'hydratation. */}
+        <AmorcagePreferences />
+      </head>
       <body className={`${montserrat.variable} ${playfair.variable} font-sans antialiased`}>
         {/* Identité de l'éditeur, présente sur toutes les pages : c'est ce qui
             permet aux moteurs de rattacher le site à l'entreprise plutôt que de
@@ -163,6 +170,7 @@ export default function RootLayout({
             }}
           />
           <CookieConsentBanner />
+          <PanneauAccessibilite />
         </Providers>
         {process.env.NEXT_PUBLIC_GA_ID && (
           <ConditionalAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
