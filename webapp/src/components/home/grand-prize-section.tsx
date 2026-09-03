@@ -70,26 +70,26 @@ export function GrandPrizeSection() {
            heritee d'une version anterieure - la page sautait d'un bloc au
            chargement. */
         <div className="grid lg:min-h-[467px] lg:grid-cols-2">
-          <Skeleton className="h-64 w-full rounded-none bg-white/5 md:h-96 lg:h-auto" />
+          <Skeleton className="h-64 w-full rounded-none bg-surface/5 md:h-96 lg:h-auto" />
 
-          <div className="flex flex-col bg-moss px-6 pb-14 pt-9 md:px-11">
-            <Skeleton className="h-[15px] w-40 bg-white/20" />
-            <Skeleton className="mt-5 h-9 w-4/5 bg-white/20" />
-            <Skeleton className="mt-2 h-9 w-2/5 bg-white/20" />
+          <div className="flex flex-col bg-moss-panel px-6 pb-14 pt-9 md:px-11">
+            <Skeleton className="h-[15px] w-40 bg-surface/20" />
+            <Skeleton className="mt-5 h-9 w-4/5 bg-surface/20" />
+            <Skeleton className="mt-2 h-9 w-2/5 bg-surface/20" />
 
             <div className="mt-5 flex flex-col gap-2">
-              <Skeleton className="h-4 w-full bg-white/20" />
-              <Skeleton className="h-4 w-11/12 bg-white/20" />
+              <Skeleton className="h-4 w-full bg-surface/20" />
+              <Skeleton className="h-4 w-11/12 bg-surface/20" />
             </div>
 
             <div className="mt-5 flex flex-col gap-2">
-              <Skeleton className="h-4 w-10/12 bg-white/20" />
-              <Skeleton className="h-4 w-11/12 bg-white/20" />
-              <Skeleton className="h-4 w-9/12 bg-white/20" />
+              <Skeleton className="h-4 w-10/12 bg-surface/20" />
+              <Skeleton className="h-4 w-11/12 bg-surface/20" />
+              <Skeleton className="h-4 w-9/12 bg-surface/20" />
             </div>
 
             <div className="mt-12 flex justify-center">
-              <Skeleton className="h-16 w-full rounded-full bg-white/20 md:w-[260px]" />
+              <Skeleton className="h-16 w-full rounded-full bg-surface/20 md:w-[260px]" />
             </div>
           </div>
         </div>
@@ -131,11 +131,11 @@ export function GrandPrizeSection() {
               alt="Coffrets de thés Thé Tip Top"
               fill
               sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-cover"
+              className="photo-attenuee object-cover"
             />
           </div>
 
-          <div className="relative flex flex-col overflow-hidden bg-moss px-6 pb-14 pt-9 text-white md:px-11">
+          <div className="relative flex flex-col overflow-hidden bg-moss-panel px-6 pb-14 pt-9 text-white md:px-11">
             <SemisDeDoodles poses={DOODLES_GRAND_PRIX} />
 
             {/* Le même surtitre qu'en tête de page sur la maquette : c'est le

@@ -167,7 +167,7 @@ export default function EmployeePage() {
     <div className="min-h-[calc(100vh-3.75rem)] bg-cream py-8">
       <div className="container mx-auto px-4">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-noir">
+          <h1 className="text-3xl font-bold text-ink">
             Espace Employé
           </h1>
           <p className="mt-2 text-stone-grey">
@@ -327,7 +327,7 @@ export default function EmployeePage() {
                         {clients.map((client) => (
                           <li
                             key={client.id}
-                            className="flex items-center justify-between rounded-lg border border-gold-400 bg-white p-3"
+                            className="flex items-center justify-between rounded-lg border border-gold-400 bg-surface p-3"
                           >
                             <div className="min-w-0 flex-1">
                               <p className="truncate font-medium">
@@ -379,7 +379,7 @@ export default function EmployeePage() {
                       // lui, la carte se confondait avec le fond de la liste et
                       // ne se distinguait qu'au passage de la souris - donc
                       // jamais sur un écran tactile.
-                      className="flex items-center justify-between rounded-lg border border-gold-400 bg-white p-3 hover:bg-cream"
+                      className="flex items-center justify-between rounded-lg border border-gold-400 bg-surface p-3 hover:bg-cream"
                     >
                       <div className="min-w-0 flex-1">
                         <p className="truncate font-medium">

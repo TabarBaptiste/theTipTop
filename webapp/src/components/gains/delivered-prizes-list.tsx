@@ -82,13 +82,13 @@ export function DeliveredPrizesList({ className }: { className?: string }) {
                 className="flex items-start justify-between gap-4 rounded-soft border border-warm-beige p-3"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium text-noir">
+                  <p className="truncate font-medium text-ink">
                     {delivery.user.firstName} {delivery.user.lastName}
                   </p>
                   <p className="mt-0.5 font-mono text-xs text-stone-grey">{delivery.code}</p>
                 </div>
                 <div className="shrink-0 text-right">
-                  <p className="text-sm font-medium text-terracotta-600">
+                  <p className="text-sm font-medium text-accent">
                     {delivery.prize?.name ?? delivery.prizeType}
                   </p>
                   {delivery.prizeDeliveredAt && (

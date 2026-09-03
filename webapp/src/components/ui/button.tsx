@@ -13,13 +13,13 @@ const buttonVariants = cva(
         destructive:
           'bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90',
         outline:
-          'border-[1.5px] border-terracotta-600 text-terracotta-600 bg-transparent rounded-full hover:bg-terracotta-600 hover:text-white',
+          'border-[1.5px] border-accent text-accent bg-transparent rounded-full hover:bg-terracotta-600 hover:text-white',
         secondary:
           'bg-moss text-white rounded-full hover:bg-moss-light',
         ghost:
-          'hover:bg-terracotta-50 hover:text-terracotta-600 rounded-soft normal-case tracking-normal font-semibold',
+          'hover:bg-terracotta-50 hover:text-accent rounded-soft normal-case tracking-normal font-semibold',
         link:
-          'text-terracotta-600 underline-offset-4 hover:underline normal-case tracking-normal font-semibold',
+          'text-accent underline-offset-4 hover:underline normal-case tracking-normal font-semibold',
       },
       // Les libellés restaient à 11 px quelle que soit la taille : un « lg » ne
       // se distinguait d'un « default » que par 8 px de hauteur, trop peu pour

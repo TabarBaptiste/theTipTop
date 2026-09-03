@@ -27,6 +27,25 @@
        ne changeait rien a l'ecran. Elles ne vivent plus qu'ici, ce qui permet
        de les redefinir par theme sans toucher a une seule classe.
        ========================================================== */
+    /* Roles semantiques, separes de la palette brute : le theme sombre les
+       fait varier dans des directions opposees. */
+    --c-ink: 26 26 26;
+    --c-surface: 255 255 255;
+    --c-accent: 168 93 4;
+    --c-moss-panel: 92 107 58;
+
+    /* Fonds du carrousel des lots, un par lot. Ils vivent ici plutot que dans
+       le composant pour suivre le theme comme le reste de la page. */
+    /* Surtitre pose sur ces teintes : il lui faut sa propre valeur, aucune
+       nuance de la gamme ne restant lisible sur les deux themes. */
+    --c-lot-accent: 110 61 2;
+
+    --c-lot-infuser: 220 203 149;
+    --c-lot-detox: 242 224 208;
+    --c-lot-signature: 232 213 176;
+    --c-lot-coffret-39: 224 232 208;
+    --c-lot-coffret-69: 245 233 208;
+
     --c-terracotta-50: 253 248 243;
     --c-terracotta-100: 249 237 217;
     --c-terracotta-200: 242 224 208;
@@ -80,7 +99,7 @@
        passent pas par une classe Tailwind. */
     --color-bg: rgb(var(--c-cream));
     --color-bg-card: rgb(var(--c-terracotta-pale));
-    --color-text-primary: rgb(var(--c-noir));
+    --color-text-primary: rgb(var(--c-ink));
     --color-text-secondary: rgb(var(--c-stone));
     --color-cta: rgb(var(--c-terracotta-deep));
     --color-cta-hover: rgb(var(--c-terracotta-hover));
@@ -138,6 +157,78 @@
     --radius: 0.5rem;
   }
 }
+
+  /* === Theme sombre ==========================================
+     Seules les variables qui changent sont redefinies : tout le reste est
+     herite de :root. Les valeurs ne sont pas une inversion mecanique - un
+     fond invente par soustraction vire au gris bleute et perd la chaleur de
+     la charte. Elles gardent la meme famille chromatique, brunie.
+
+     Contrastes verifies, tous au-dessus de 4,5:1 : texte principal 16,1:1
+     sur la page et 14,9:1 sur les surfaces, texte secondaire 8,6:1, accent
+     8,5:1, vert 8,0:1, blanc sur bouton terracotta 4,96:1.
+     =========================================================== */
+  [data-theme='sombre'] {
+    /* Surfaces, de la plus profonde a la plus haute */
+    --c-noir: 12 11 9;
+    --c-cream: 18 16 14;
+    --c-surface: 28 25 21;
+
+    /* Textes */
+    --c-ink: 240 236 228;
+    --c-stone: 181 174 163;
+    --c-stone-grey: 181 174 163;
+
+    /* Accents : l'accent de texte s'eclaircit, le remplissage des boutons
+       garde sa valeur claire - c'est elle qui porte le blanc a 4,96:1. */
+    --c-accent: 224 160 99;
+    --c-moss: 155 176 107;
+    --c-moss-panel: 47 58 30;
+
+    /* Filets et fonds teintes, qui etaient les valeurs les plus claires */
+    --c-warm-beige: 58 50 38;
+    --c-section-line: 51 48 43;
+    --c-terracotta-50: 30 24 18;
+    --c-terracotta-100: 38 30 22;
+    --c-terracotta-200: 48 38 28;
+    --c-moss-50: 24 29 18;
+    --c-moss-100: 32 39 24;
+    --c-gold-50: 32 28 20;
+    --c-gold-100: 42 36 26;
+
+    /* Bouts sombres des gammes. Ils servent de texte sur des pastilles
+       teintees - « Toujours actifs », « Soumis au consentement » - et une
+       gamme qui ne s'inverse qu'a une extremite les laisse illisibles :
+       mesures a 1,8:1 avant. Ils passent de l'autre cote. */
+    --c-moss-500: 155 176 107;
+    --c-moss-900: 185 202 145;
+    --c-gold-800: 198 172 128;
+    --c-gold-900: 214 190 145;
+
+    /* Fonds des lots : memes familles, brunies. Le visuel detoure de chaque
+       lot y garde son contraste, et le texte passe de 10:1 a plus de 12:1. */
+    --c-lot-accent: 224 160 99;
+    --c-lot-infuser: 42 36 23;
+    --c-lot-detox: 44 32 25;
+    --c-lot-signature: 42 36 25;
+    --c-lot-coffret-39: 31 38 24;
+    --c-lot-coffret-69: 43 37 25;
+  }
+
+  /* Les couleurs des SVG de decor sont figees dans les fichiers - un <img>
+     ne peut pas heriter de currentColor. Sur fond sombre, ce vert et ces
+     bruns moyens s'eteignent : on les eclaircit sans toucher aux fichiers. */
+  [data-theme='sombre'] .decor-botanique {
+    filter: brightness(1.45) saturate(0.9);
+  }
+
+  /* Les photographies pleine largeur gardent leur luminosite de studio et
+     eblouissent sur fond sombre. Les visuels de lots, eux, restent intacts :
+     ce sont des produits, les ternir dessert ce que la section montre. */
+  [data-theme='sombre'] .photo-attenuee {
+    filter: brightness(0.82);
+  }
+
 
 @layer base {
   * {

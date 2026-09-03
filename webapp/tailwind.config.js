@@ -36,8 +36,11 @@ module.exports = {
           DEFAULT: 'hsl(var(--muted))',
           foreground: 'hsl(var(--muted-foreground))',
         },
+        // Terracotta du texte et des liens, distinct du remplissage des
+        // boutons : en theme sombre l'un doit s'eclaircir pour rester lisible
+        // sur le fond, quand l'autre doit rester sombre pour porter du blanc.
         accent: {
-          DEFAULT: 'hsl(var(--accent))',
+          DEFAULT: 'rgb(var(--c-accent) / <alpha-value>)',
           foreground: 'hsl(var(--accent-foreground))',
         },
         popover: {
@@ -65,6 +68,14 @@ module.exports = {
           'hover': 'rgb(var(--c-terracotta-hover) / <alpha-value>)',
           'warm': 'rgb(var(--c-terracotta-warm) / <alpha-value>)',  // Méditerranéen - variante chaude entre deep et hover
         },
+        // Texte principal, et surface claire des cartes et sections. Ils
+        // valaient noir et blanc, deux roles que le theme sombre separe : le
+        // texte s'eclaircit, la surface s'assombrit.
+        'ink': 'rgb(var(--c-ink) / <alpha-value>)',
+        // Surtitre du carrousel des lots, pose sur des fonds teintes qui
+        // s'inversent avec le theme.
+        'lot-accent': 'rgb(var(--c-lot-accent) / <alpha-value>)',
+        'surface': 'rgb(var(--c-surface) / <alpha-value>)',
         'cream': 'rgb(var(--c-cream) / <alpha-value>)',
         'noir': 'rgb(var(--c-noir) / <alpha-value>)',
         moss: {
@@ -77,6 +88,10 @@ module.exports = {
           // claires ci-dessus. Le 500 n'y donne que 4,02:1, sous le minimum AA.
           // Celui-ci atteint 6,5:1. Pendant du gold-900, qui joue le meme role.
           '900': 'rgb(var(--c-moss-900) / <alpha-value>)',
+          // Le panneau du grand prix, seule grande surface verte du site. Le
+          // vert par defaut sert surtout de texte et d'icone : il s'eclaircit
+          // en theme sombre, ce panneau doit au contraire s'assombrir.
+          'panel': 'rgb(var(--c-moss-panel) / <alpha-value>)',
         },
         'warm-beige': 'rgb(var(--c-warm-beige) / <alpha-value>)',
         // Filet gris des separations de section sur la maquette : sous les

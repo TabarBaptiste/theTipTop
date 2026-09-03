@@ -50,14 +50,17 @@ const PRIZE_IMAGES: Record<string, PrizeImageConfig> = {
  * claire et chrome, prend la plus soutenue ; la boîte détox, vert sauge, part
  * sur le rose du terracotta pâle.
  *
- * Le noir du texte reste au-dessus de 10:1 sur les cinq.
+ * Les valeurs vivent dans globals.css et non ici : posees en dur, elles
+ * seraient restees claires en theme sombre, seule surface de la page a ne pas
+ * suivre. Le texte reste au-dessus de 10:1 sur les cinq, dans les deux
+ * themes.
  */
 const AMBIANCES: Record<string, string> = {
-  INFUSER: '#DCCB95',
-  TEA_DETOX: '#F2E0D0',
-  TEA_SIGNATURE: '#E8D5B0',
-  GIFT_BOX_39: '#E0E8D0',
-  GIFT_BOX_69: '#F5E9D0',
+  INFUSER: 'rgb(var(--c-lot-infuser))',
+  TEA_DETOX: 'rgb(var(--c-lot-detox))',
+  TEA_SIGNATURE: 'rgb(var(--c-lot-signature))',
+  GIFT_BOX_39: 'rgb(var(--c-lot-coffret-39))',
+  GIFT_BOX_69: 'rgb(var(--c-lot-coffret-69))',
 };
 
 // Un lot ajoute en base sans teinte declaree reste presentable : il reprend le
@@ -103,9 +106,9 @@ function PrizesSkeleton() {
     <>
       <div className="container relative mx-auto grid items-center gap-10 px-6 pb-8 pt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)_auto] lg:gap-12 lg:pt-16">
         <div>
-          <Skeleton className="h-[15px] w-32 bg-noir/10" />
-          <Skeleton className="mt-4 h-9 w-4/5 bg-noir/10" />
-          <Skeleton className="mt-2 h-9 w-3/5 bg-noir/10" />
+          <Skeleton className="h-[15px] w-32 bg-ink/10" />
+          <Skeleton className="mt-4 h-9 w-4/5 bg-ink/10" />
+          <Skeleton className="mt-2 h-9 w-3/5 bg-ink/10" />
           {/* Huit lignes : c'est la longueur reelle des descriptions de
               lots, et c'est cette colonne qui donne sa hauteur a la rangee.
               En annoncer trois faisait porter la hauteur par l'image, et le
@@ -113,7 +116,7 @@ function PrizesSkeleton() {
           <div className="mt-5 flex flex-col gap-2">
             {['w-full', 'w-full', 'w-full', 'w-full', 'w-full', 'w-full', 'w-5/6', 'w-2/3'].map(
               (largeur, i) => (
-                <Skeleton key={i} className={cn('h-4 bg-noir/10', largeur)} />
+                <Skeleton key={i} className={cn('h-4 bg-ink/10', largeur)} />
               )
             )}
           </div>
@@ -123,26 +126,26 @@ function PrizesSkeleton() {
             le placeholder se tient dans cette fourchette au lieu de prendre
             le maximum autorise. */}
         <div className="order-first flex justify-center lg:order-none">
-          <Skeleton className="h-[220px] w-full max-w-[420px] rounded-card bg-noir/5 md:h-[280px] lg:h-[300px]" />
+          <Skeleton className="h-[220px] w-full max-w-[420px] rounded-card bg-ink/5 md:h-[280px] lg:h-[300px]" />
         </div>
 
         <div className="flex flex-col gap-2 lg:items-end">
-          <Skeleton className="h-11 w-24 bg-noir/10" />
-          <Skeleton className="h-[15px] w-20 bg-noir/10" />
+          <Skeleton className="h-11 w-24 bg-ink/10" />
+          <Skeleton className="h-[15px] w-20 bg-ink/10" />
         </div>
       </div>
 
       <div className="container relative mx-auto flex items-center justify-between gap-6 px-6 pb-12">
         <div className="flex gap-3">
           {[0, 1, 2].map((i) => (
-            <Skeleton key={i} className="h-11 w-11 rounded-full bg-noir/10" />
+            <Skeleton key={i} className="h-11 w-11 rounded-full bg-ink/10" />
           ))}
         </div>
         {/* Cinq pastilles : c'est la taille du catalogue, et le squelette
             n'a pas encore les lots pour la deduire. */}
         <div className="flex items-center gap-4">
           {[0, 1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-[10px] w-[10px] rounded-full bg-noir/10" />
+            <Skeleton key={i} className="h-[10px] w-[10px] rounded-full bg-ink/10" />
           ))}
         </div>
       </div>
@@ -178,16 +181,16 @@ function PrizesCarousel({
     <>
       <div className="container relative mx-auto grid items-center gap-10 px-6 pb-8 pt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)_auto] lg:gap-12 lg:pt-16">
         <div>
-          {/* terracotta-800 et non 600 : a 10 px le seuil est de 4,5:1,
-              et le 600 tombe entre 3,08 et 4,12 selon la teinte du lot -
-              le pire etant l'or de l'infuseur. Le 800 tient de 5,58 a
-              7,48 sur les cinq fonds. */}
-          <p className="font-functional text-[10px] font-bold uppercase leading-[15px] tracking-[2px] text-terracotta-800">
+          {/* Ce surtitre a sa propre couleur : a 10 px le seuil est de 4,5:1
+              et aucune nuance de la gamme ne le tient sur les deux themes. Le
+              terracotta-600 tombait entre 3,08 et 4,12 sur les teintes
+              claires, le 800 a 1,71 sur les sombres. */}
+          <p className="font-functional text-[10px] font-bold uppercase leading-[15px] tracking-[2px] text-lot-accent">
             Lot {String(activeIndex + 1).padStart(2, '0')} sur {String(total).padStart(2, '0')}
           </p>
           {/* not-italic : la règle de base met les h3 en italique, ce qui
               ne vaut que pour les titres d'étapes. */}
-          <h3 className="mt-4 font-display text-display not-italic text-noir">{activePrize.name}</h3>
+          <h3 className="mt-4 font-display text-display not-italic text-ink">{activePrize.name}</h3>
           <p className="mt-5 max-w-[52ch] text-body leading-[24.5px] text-stone-grey">
             {activePrize.description}
           </p>
@@ -208,7 +211,7 @@ function PrizesCarousel({
         </div>
 
         <div className="lg:text-right">
-          <p className="whitespace-nowrap font-display text-[44px] font-bold leading-none text-noir">
+          <p className="whitespace-nowrap font-display text-[44px] font-bold leading-none text-ink">
             {activePrize.percentage}&nbsp;%
           </p>
           <p className="mt-2 font-functional text-[10px] font-bold uppercase leading-[15px] tracking-[2px] text-stone-grey">
@@ -229,7 +232,7 @@ function PrizesCarousel({
               type="button"
               onClick={() => allerA(activeIndex - 1)}
               aria-label="Lot précédent"
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-noir/25 text-noir transition-colors hover:bg-noir/5"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-ink/25 text-ink transition-colors hover:bg-ink/5"
             >
               <ChevronLeft className="h-5 w-5" strokeWidth={1.5} />
             </button>
@@ -237,7 +240,7 @@ function PrizesCarousel({
               type="button"
               onClick={() => allerA(activeIndex + 1)}
               aria-label="Lot suivant"
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-noir/25 text-noir transition-colors hover:bg-noir/5"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-ink/25 text-ink transition-colors hover:bg-ink/5"
             >
               <ChevronRight className="h-5 w-5" strokeWidth={1.5} />
             </button>
@@ -250,7 +253,7 @@ function PrizesCarousel({
               aria-label={
                 defilementActif ? 'Mettre le défilement des lots en pause' : 'Reprendre le défilement des lots'
               }
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-noir/25 text-noir transition-colors hover:bg-noir/5"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-ink/25 text-ink transition-colors hover:bg-ink/5"
             >
               {defilementActif ? (
                 <Pause className="h-4 w-4" strokeWidth={1.5} />
@@ -279,7 +282,7 @@ function PrizesCarousel({
                 <span
                   className={cn(
                     'block h-[10px] rounded-full transition-all duration-300',
-                    i === activeIndex ? 'w-8 bg-noir' : 'w-[10px] bg-noir/25 group-hover:bg-noir/50'
+                    i === activeIndex ? 'w-8 bg-noir' : 'w-[10px] bg-ink/25 group-hover:bg-ink/50'
                   )}
                 />
               </button>
@@ -367,8 +370,8 @@ export function PrizesSection() {
       <SemisDeDoodles poses={DOODLES_LOTS} className="text-moss" />
 
       <div className="container relative mx-auto px-6 text-center">
-        <h2 className="font-display text-display text-noir">Les lots à gagner</h2>
-        <div className="mx-auto max-w-[633px] text-body leading-[24.5px] text-noir">
+        <h2 className="font-display text-display text-ink">Les lots à gagner</h2>
+        <div className="mx-auto max-w-[633px] text-body leading-[24.5px] text-ink">
           <p>100% des tickets sont gagnants</p>
           {/* Sans ce rappel, ces cinq lots passent pour tout ce qu'il y a à
               gagner : la section ne mentionnait pas le tirage, alors que la page

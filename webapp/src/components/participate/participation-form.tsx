@@ -182,7 +182,7 @@ export function ParticipationForm({ onSubmit, isSubmitting }: Props) {
           <select
             id="gender"
             defaultValue=""
-            className="flex h-10 w-full rounded-soft border border-warm-beige bg-white px-3 text-sm text-noir focus:outline-none focus:ring-2 focus:ring-terracotta-deep"
+            className="flex h-10 w-full rounded-soft border border-warm-beige bg-surface px-3 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-terracotta-deep"
             {...register('gender')}
           >
             <option value="">Sélectionner</option>
@@ -216,7 +216,7 @@ export function ParticipationForm({ onSubmit, isSubmitting }: Props) {
           />
           <label htmlFor="consentData" className="text-xs leading-relaxed text-stone-grey">
             J&apos;accepte le traitement de mes données et le{' '}
-            <Link href="/reglement" className="text-terracotta-600 underline underline-offset-2">
+            <Link href="/reglement" className="text-accent underline underline-offset-2">
               règlement du jeu
             </Link>{' '}
             *

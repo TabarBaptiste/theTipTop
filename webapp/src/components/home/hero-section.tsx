@@ -24,25 +24,25 @@ export function HeroSection() {
         src={leftLeaves.src}
         alt=""
         aria-hidden="true"
-        className="pointer-events-none absolute left-0 top-0 hidden h-full w-auto opacity-90 xl:block"
+        className="decor-botanique pointer-events-none absolute left-0 top-0 hidden h-full w-auto opacity-90 xl:block"
       />
       <img
         src={rightLeaves.src}
         alt=""
         aria-hidden="true"
-        className="pointer-events-none absolute right-0 top-[8%] hidden h-[90%] w-auto opacity-90 xl:block"
+        className="decor-botanique pointer-events-none absolute right-0 top-[8%] hidden h-[90%] w-auto opacity-90 xl:block"
       />
       <img
         src={leftLavenderLeaves.src}
         alt=""
         aria-hidden="true"
-        className="pointer-events-none absolute left-0 top-[48%] hidden w-40 -translate-y-1/2 xl:block xl:w-56"
+        className="decor-botanique pointer-events-none absolute left-0 top-[48%] hidden w-40 -translate-y-1/2 xl:block xl:w-56"
       />
       <img
         src={rightLavenderLeaves.src}
         alt=""
         aria-hidden="true"
-        className="pointer-events-none absolute right-0 top-[28%] hidden w-40 xl:block xl:w-56"
+        className="decor-botanique pointer-events-none absolute right-0 top-[28%] hidden w-40 xl:block xl:w-56"
       />
 
       {/* Les vagues occupent toute la largeur de la page et affleurent le bas
@@ -52,7 +52,7 @@ export function HeroSection() {
         src={heroWaves.src}
         alt=""
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 bottom-0 hidden w-full opacity-70 md:block"
+        className="decor-botanique pointer-events-none absolute inset-x-0 bottom-0 hidden w-full opacity-70 md:block"
       />
 
       <div className="container relative mx-auto px-6">
@@ -61,7 +61,7 @@ export function HeroSection() {
             vedette entre texte et visuel, alors que le titre porte seul
             l'argument du jeu. */}
         <div className="text-center">
-          <p className="font-functional text-[10px] font-bold uppercase tracking-[2px] text-terracotta-600">
+          <p className="font-functional text-[10px] font-bold uppercase tracking-[2px] text-accent">
             Jeu-concours exclusif
           </p>
 
@@ -73,19 +73,19 @@ export function HeroSection() {
           {/* Espaces insécables devant le deux-points et le signe pourcent :
               sans elles, la ligne se coupe entre « 100 » et « % », et le
               deux-points peut ouvrir une ligne. */}
-          <h1 className="mx-auto mt-4 max-w-[782px] font-display text-display text-noir">
-            Jeu-concours <span className="whitespace-nowrap text-terracotta-600">Thé Tip Top</span>&nbsp;:
+          <h1 className="mx-auto mt-4 max-w-[782px] font-display text-display text-ink">
+            Jeu-concours <span className="whitespace-nowrap text-accent">Thé Tip Top</span>&nbsp;:
             un an de thé à gagner, 100&nbsp;% des tickets gagnants
           </h1>
 
           {/* Le paragraphe court sur toute la largeur du contenu sur la
               maquette, et non sur celle du titre : deux lignes pleines plutôt
               que quatre lignes étroites. */}
-          <p className="mt-[30px] text-body leading-[24.5px] text-noir/70">
+          <p className="mt-[30px] text-body leading-[24.5px] text-ink/70">
             À l&apos;occasion de l&apos;ouverture de notre 10<sup>e</sup> boutique à Nice, chaque
-            participation vous inscrit au tirage au sort d&apos;<strong className="font-bold text-noir">un an de thé</strong>, d&apos;une valeur de 360
+            participation vous inscrit au tirage au sort d&apos;<strong className="font-bold text-ink">un an de thé</strong>, d&apos;une valeur de 360
             €. Et vous ne repartez jamais les mains vides :{' '}
-            <strong className="font-bold text-noir">100 % des tickets sont gagnants</strong>.
+            <strong className="font-bold text-ink">100 % des tickets sont gagnants</strong>.
           </p>
 
           <div className="flex justify-center">
@@ -99,7 +99,7 @@ export function HeroSection() {
             alt="Tasses de thé Tip Top"
             fill
             sizes="(max-width: 1200px) 100vw, 1152px"
-            className="object-cover"
+            className="photo-attenuee object-cover"
             priority
             quality={85}
           />

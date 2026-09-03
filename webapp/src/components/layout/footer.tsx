@@ -193,7 +193,7 @@ export function Footer() {
                   placeholder="Votre email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="h-10 flex-1 rounded-soft border border-white/40 bg-white/5 px-3 text-sm text-white placeholder:text-white/50 focus:border-terracotta-300 focus:outline-none focus:ring-1 focus:ring-terracotta-300"
+                  className="h-10 flex-1 rounded-soft border border-white/40 bg-surface/5 px-3 text-sm text-white placeholder:text-white/50 focus:border-terracotta-300 focus:outline-none focus:ring-1 focus:ring-terracotta-300"
                   required
                 />
                 {/* Beige au repos, orange au clic (cf. charte). Texte sombre :
@@ -202,7 +202,7 @@ export function Footer() {
                   type="submit"
                   size="icon"
                   disabled={isSubmitting}
-                  className="shrink-0 bg-warm-beige text-noir hover:bg-warm-beige/90 active:bg-terracotta-600 active:text-white"
+                  className="shrink-0 bg-warm-beige text-ink hover:bg-warm-beige/90 active:bg-terracotta-600 active:text-white"
                   aria-label="S'abonner à la newsletter"
                 >
                   {isSubmitting ? '…' : '→'}

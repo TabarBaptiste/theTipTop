@@ -29,7 +29,7 @@ export function Pagination({ page, totalPages, total, onPageChange, label }: Pag
       className="mt-4 flex flex-col items-center justify-between gap-3 border-t border-warm-beige pt-4 sm:flex-row"
     >
       <p className="text-sm text-stone-grey">
-        <strong className="font-medium text-noir">{total.toLocaleString('fr-FR')}</strong> {label}
+        <strong className="font-medium text-ink">{total.toLocaleString('fr-FR')}</strong> {label}
       </p>
 
       {/* Une seule page : le compteur suffit, la navigation n'aurait rien à faire. */}

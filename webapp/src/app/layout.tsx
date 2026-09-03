@@ -144,7 +144,7 @@ export default function RootLayout({
               unstyled: true,
               classNames: {
                 toast:
-                  'flex items-center gap-sm w-full rounded-soft border border-warm-beige bg-cream px-md py-sm font-sans text-body text-noir shadow-lg',
+                  'flex items-center gap-sm w-full rounded-soft border border-warm-beige bg-cream px-md py-sm font-sans text-body text-ink shadow-lg',
                 title: 'font-semibold',
                 description: 'text-stone',
                 success: 'border-moss text-moss',
@@ -157,7 +157,7 @@ export default function RootLayout({
                 // boutons, ce bouton n'avait pas de raison d'en differer.
                 actionButton:
                   'rounded-full bg-terracotta-600 px-sm py-2xs text-ui font-bold uppercase tracking-widest text-white',
-                cancelButton: 'rounded-full bg-warm-beige px-sm py-2xs text-ui font-bold uppercase tracking-widest text-noir',
+                cancelButton: 'rounded-full bg-warm-beige px-sm py-2xs text-ui font-bold uppercase tracking-widest text-ink',
                 closeButton: 'border-warm-beige text-stone',
               },
             }}

@@ -29,7 +29,7 @@ export function AboutContestSection() {
   return (
     // Fond blanc et photo collée au bord gauche, comme sur la maquette : le
     // visuel n'y est ni arrondi ni rentré dans la colonne de contenu.
-    <section className="border-b border-section-line bg-white">
+    <section className="border-b border-section-line bg-surface">
       <div className="grid items-center lg:grid-cols-2">
         <div className="relative h-72 w-full md:h-96 lg:h-[629px]">
           <Image
@@ -37,14 +37,14 @@ export function AboutContestSection() {
             alt=""
             fill
             sizes="(max-width: 1024px) 100vw, 50vw"
-            className="object-cover"
+            className="photo-attenuee object-cover"
           />
         </div>
 
         <div className="px-6 py-9 lg:pl-[99px] lg:pr-[121px]">
-          <h2 className="font-display text-display text-noir">Tout savoir sur le jeu-concours</h2>
+          <h2 className="font-display text-display text-ink">Tout savoir sur le jeu-concours</h2>
 
-          <div className="mt-3 max-w-[501px] space-y-6 text-body leading-[24.5px] text-noir">
+          <div className="mt-3 max-w-[501px] space-y-6 text-body leading-[24.5px] text-ink">
             <p>
               Le jeu-concours Thé Tip Top se déroule{' '}
               {formatFrenchDateRange(GAME_START_DATE, GAME_END_DATE).toLowerCase()}, à
@@ -55,7 +55,7 @@ export function AboutContestSection() {
             </p>
 
             <p>
-              <strong className="text-noir">100 % des tickets sont gagnants</strong>, et ce
+              <strong className="text-ink">100 % des tickets sont gagnants</strong>, et ce
               n&apos;est pas une formule : le lot est attribué au code dès sa génération, avant même
               le début du jeu. 60 % des tickets donnent un infuseur à thé, 20 % une boîte de thé
               détox ou d&apos;infusion, 10 % une boîte de thé signature. Les 6 % et 4 % restants

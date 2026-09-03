@@ -30,12 +30,12 @@ export default function MentionsLegalesPage() {
   return (
     <div className="min-h-[calc(100vh-3.75rem)] bg-cream">
       {/* En-tête */}
-      <section className="border-b border-warm-beige bg-white">
+      <section className="border-b border-warm-beige bg-surface">
         <div className="container mx-auto px-6 py-12 md:py-16">
-          <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-600">
+          <p className="font-functional text-ui uppercase tracking-[2px] text-accent">
             Informations légales
           </p>
-          <h1 className="mt-3 font-display text-h1 text-noir">
+          <h1 className="mt-3 font-display text-h1 text-ink">
             Mentions Légales
           </h1>
           <p className="mt-4 max-w-2xl text-body text-stone-grey">
@@ -53,7 +53,7 @@ export default function MentionsLegalesPage() {
         <div className="mx-auto max-w-5xl lg:grid lg:grid-cols-[260px_1fr] lg:gap-12">
           {/* Sommaire */}
           <aside className="hidden lg:block">
-            <div className="sticky top-24 rounded-card border border-warm-beige bg-white p-6">
+            <div className="sticky top-24 rounded-card border border-warm-beige bg-surface p-6">
               <p className="font-functional text-ui uppercase tracking-[2px] text-stone-grey">
                 Sommaire
               </p>
@@ -62,7 +62,7 @@ export default function MentionsLegalesPage() {
                   <a
                     key={a.id}
                     href={`#${a.id}`}
-                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-600"
+                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-accent"
                   >
                     {a.label}
                   </a>
@@ -75,19 +75,19 @@ export default function MentionsLegalesPage() {
                 <nav className="mt-3 space-y-1">
                   <Link
                     href="/cgu"
-                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-600"
+                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-accent"
                   >
                     CGU
                   </Link>
                   <Link
                     href="/politique-confidentialite"
-                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-600"
+                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-accent"
                   >
                     Politique de confidentialité
                   </Link>
                   <Link
                     href="/gestion-cookies"
-                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-600"
+                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-accent"
                   >
                     Gestion des cookies
                   </Link>
@@ -101,7 +101,7 @@ export default function MentionsLegalesPage() {
 
             {/* Article 1 */}
             <section id="editeur" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">
+              <h2 className="font-display text-h2 text-ink">
                 Article 1 - Éditeur du site
               </h2>
               <div className="mt-4 space-y-4 text-body text-stone-grey">
@@ -115,7 +115,7 @@ export default function MentionsLegalesPage() {
                   // inatteignable. tabIndex rend la zone defilable au clavier,
                   // sans quoi son contenu resterait hors de portee sans souris.
                   tabIndex={0}
-                  className="overflow-x-auto rounded-card border border-warm-beige bg-white"
+                  className="overflow-x-auto rounded-card border border-warm-beige bg-surface"
                 >
                   <table className="w-full text-sm">
                     <tbody className="divide-y divide-warm-beige">
@@ -132,12 +132,12 @@ export default function MentionsLegalesPage() {
                         ['Email', 'contact@thetiptop.fr'],
                       ].map(([label, value]) => (
                         <tr key={label} className="even:bg-cream">
-                          <td className="px-4 py-3 font-medium text-noir">{label}</td>
+                          <td className="px-4 py-3 font-medium text-ink">{label}</td>
                           <td className="px-4 py-3 text-stone-grey">
                             {label === 'Email' ? (
                               <a
                                 href="mailto:contact@thetiptop.fr"
-                                className="text-terracotta-600 underline underline-offset-2"
+                                className="text-accent underline underline-offset-2"
                               >
                                 {value}
                               </a>
@@ -159,7 +159,7 @@ export default function MentionsLegalesPage() {
 
             {/* Article 2 */}
             <section id="hebergeur" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">Article 2 - Hébergeur</h2>
+              <h2 className="font-display text-h2 text-ink">Article 2 - Hébergeur</h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
                 <p>Le site est hébergé par :</p>
                 <div
@@ -168,7 +168,7 @@ export default function MentionsLegalesPage() {
                   // inatteignable. tabIndex rend la zone defilable au clavier,
                   // sans quoi son contenu resterait hors de portee sans souris.
                   tabIndex={0}
-                  className="overflow-x-auto rounded-card border border-warm-beige bg-white"
+                  className="overflow-x-auto rounded-card border border-warm-beige bg-surface"
                 >
                   <table className="w-full text-sm">
                     <tbody className="divide-y divide-warm-beige">
@@ -179,7 +179,7 @@ export default function MentionsLegalesPage() {
                         ['Site web', 'www.ovhcloud.com'],
                       ].map(([label, value]) => (
                         <tr key={label} className="even:bg-cream">
-                          <td className="px-4 py-3 font-medium text-noir">{label}</td>
+                          <td className="px-4 py-3 font-medium text-ink">{label}</td>
                           <td className="px-4 py-3 text-stone-grey">{value}</td>
                         </tr>
                       ))}
@@ -197,7 +197,7 @@ export default function MentionsLegalesPage() {
 
             {/* Article 3 */}
             <section id="directeur" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">
+              <h2 className="font-display text-h2 text-ink">
                 Article 3 - Directeur de la publication
               </h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
@@ -209,7 +209,7 @@ export default function MentionsLegalesPage() {
                   Pour tout contact relatif au contenu éditorial du site :{' '}
                   <a
                     href="mailto:contact@thetiptop.fr"
-                    className="text-terracotta-600 underline underline-offset-2"
+                    className="text-accent underline underline-offset-2"
                   >
                     contact@thetiptop.fr
                   </a>
@@ -219,7 +219,7 @@ export default function MentionsLegalesPage() {
 
             {/* Article 4 */}
             <section id="activite" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">
+              <h2 className="font-display text-h2 text-ink">
                 Article 4 - Activité réglementée
               </h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
@@ -235,7 +235,7 @@ export default function MentionsLegalesPage() {
                   commissaire de justice assermenté. Son règlement complet est consultable{' '}
                   <Link
                     href="/reglement"
-                    className="text-terracotta-600 underline underline-offset-2"
+                    className="text-accent underline underline-offset-2"
                   >
                     ici
                   </Link>
@@ -255,7 +255,7 @@ export default function MentionsLegalesPage() {
 
             {/* Article 5 */}
             <section id="propriete" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">
+              <h2 className="font-display text-h2 text-ink">
                 Article 5 - Propriété intellectuelle
               </h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
@@ -282,7 +282,7 @@ export default function MentionsLegalesPage() {
 
             {/* Article 6 */}
             <section id="responsabilite" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">Article 6 - Responsabilité</h2>
+              <h2 className="font-display text-h2 text-ink">Article 6 - Responsabilité</h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
                 <p>
                   Thé Tip Top met tout en œuvre pour offrir aux utilisateurs des informations
@@ -316,7 +316,7 @@ export default function MentionsLegalesPage() {
 
             {/* Article 7 */}
             <section id="liens" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">Article 7 - Liens hypertextes</h2>
+              <h2 className="font-display text-h2 text-ink">Article 7 - Liens hypertextes</h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
                 <p>
                   Le site peut contenir des liens hypertextes vers d&apos;autres sites internet.
@@ -331,7 +331,7 @@ export default function MentionsLegalesPage() {
                   doit être adressée à{' '}
                   <a
                     href="mailto:contact@thetiptop.fr"
-                    className="text-terracotta-600 underline underline-offset-2"
+                    className="text-accent underline underline-offset-2"
                   >
                     contact@thetiptop.fr
                   </a>
@@ -342,7 +342,7 @@ export default function MentionsLegalesPage() {
 
             {/* Article 8 */}
             <section id="donnees" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">
+              <h2 className="font-display text-h2 text-ink">
                 Article 8 - Données personnelles
               </h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
@@ -356,7 +356,7 @@ export default function MentionsLegalesPage() {
                   consultez notre{' '}
                   <Link
                     href="/politique-confidentialite"
-                    className="text-terracotta-600 underline underline-offset-2"
+                    className="text-accent underline underline-offset-2"
                   >
                     Politique de confidentialité
                   </Link>
@@ -367,7 +367,7 @@ export default function MentionsLegalesPage() {
                   portabilité) en contactant :{' '}
                   <a
                     href="mailto:rgpd@thetiptop.fr"
-                    className="text-terracotta-600 underline underline-offset-2"
+                    className="text-accent underline underline-offset-2"
                   >
                     rgpd@thetiptop.fr
                   </a>
@@ -380,7 +380,7 @@ export default function MentionsLegalesPage() {
                     href="https://www.cnil.fr"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-terracotta-600 underline underline-offset-2"
+                    className="text-accent underline underline-offset-2"
                   >
                     www.cnil.fr
                   </a>).
@@ -390,7 +390,7 @@ export default function MentionsLegalesPage() {
 
             {/* Article 9 */}
             <section id="cookies" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">Article 9 - Cookies</h2>
+              <h2 className="font-display text-h2 text-ink">Article 9 - Cookies</h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
                 <p>
                   Le site utilisé des cookies afin d&apos;assurer son bon fonctionnement et
@@ -403,7 +403,7 @@ export default function MentionsLegalesPage() {
                   page de{' '}
                   <Link
                     href="/gestion-cookies"
-                    className="text-terracotta-600 underline underline-offset-2"
+                    className="text-accent underline underline-offset-2"
                   >
                     gestion des cookies
                   </Link>
@@ -414,7 +414,7 @@ export default function MentionsLegalesPage() {
 
             {/* Article 10 */}
             <section id="droit" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">
+              <h2 className="font-display text-h2 text-ink">
                 Article 10 - Droit applicable et médiation
               </h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
@@ -432,7 +432,7 @@ export default function MentionsLegalesPage() {
                   sur simple demande à{' '}
                   <a
                     href="mailto:contact@thetiptop.fr"
-                    className="text-terracotta-600 underline underline-offset-2"
+                    className="text-accent underline underline-offset-2"
                   >
                     contact@thetiptop.fr
                   </a>
@@ -443,7 +443,7 @@ export default function MentionsLegalesPage() {
 
             {/* Mention projet pédagogique */}
             <section className="rounded-card border-2 border-gold-200 bg-gold-50 p-6">
-              <h3 className="font-display text-h3 text-noir">
+              <h3 className="font-display text-h3 text-ink">
                 Mention relative au projet pédagogique
               </h3>
               <p className="mt-3 text-sm text-stone-grey">
@@ -456,26 +456,26 @@ export default function MentionsLegalesPage() {
             </section>
 
             {/* Pied de page article */}
-            <div className="rounded-card border border-warm-beige bg-white p-6">
+            <div className="rounded-card border border-warm-beige bg-surface p-6">
               <p className="text-sm text-stone-grey">
                 Pour toute question relative aux présentes mentions légales, contactez-nous à{' '}
                 <a
                   href="mailto:contact@thetiptop.fr"
-                  className="font-medium text-terracotta-600 underline underline-offset-2"
+                  className="font-medium text-accent underline underline-offset-2"
                 >
                   contact@thetiptop.fr
                 </a>
                 . Consultez également nos{' '}
                 <Link
                   href="/cgu"
-                  className="font-medium text-terracotta-600 underline underline-offset-2"
+                  className="font-medium text-accent underline underline-offset-2"
                 >
                   CGU
                 </Link>{' '}
                 et notre{' '}
                 <Link
                   href="/politique-confidentialite"
-                  className="font-medium text-terracotta-600 underline underline-offset-2"
+                  className="font-medium text-accent underline underline-offset-2"
                 >
                   Politique de confidentialité
                 </Link>

@@ -32,7 +32,7 @@ export function CookieConsentBanner() {
           accepter ou refuser, et changer d&apos;avis à tout moment depuis la page{' '}
           <Link
             href="/gestion-cookies"
-            className="text-terracotta-600 underline underline-offset-2 hover:text-terracotta-700"
+            className="text-accent underline underline-offset-2 hover:text-terracotta-700"
           >
             Gestion des cookies
           </Link>

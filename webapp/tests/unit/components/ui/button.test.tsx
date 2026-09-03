@@ -24,7 +24,7 @@ describe('Button', () => {
   it('renders the outline variant with a terracotta border', () => {
     render(<Button variant="outline">Outline</Button>);
 
-    expect(screen.getByRole('button').className).toContain('border-terracotta-600');
+    expect(screen.getByRole('button').className).toContain('border-accent');
   });
 
   it('renders as the child element with asChild (Slot)', () => {
