@@ -6,9 +6,9 @@ import { rememberPostAuthDestination } from '@/lib/post-auth-redirect';
 
 interface Props {
   /** Chemin sur lequel revenir après l'aller-retour chez le fournisseur. */
-  returnTo: string;
+  readonly returnTo: string;
   /** Appelé avant la redirection, pour sauvegarder le brouillon du formulaire. */
-  onBeforeRedirect?: () => void;
+  readonly onBeforeRedirect?: () => void;
 }
 
 /**

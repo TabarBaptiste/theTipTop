@@ -30,7 +30,7 @@ function decodeRole(token: string): string | null {
   try {
     const payload = token.split('.')[1];
     if (!payload) return null;
-    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const base64 = payload.replaceAll('-', '+').replaceAll('_', '/');
     const json = JSON.parse(atob(base64));
     return typeof json.role === 'string' ? json.role : null;
   } catch {

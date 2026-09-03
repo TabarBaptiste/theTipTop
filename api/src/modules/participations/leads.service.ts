@@ -13,7 +13,7 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { randomInt, randomUUID } from 'crypto';
+import { randomInt, randomUUID } from 'node:crypto';
 import * as bcrypt from 'bcryptjs';
 import { Prisma, LeadStatus, Role } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -201,8 +201,7 @@ export class LeadsService {
     if (
       !lead ||
       lead.status !== LeadStatus.EN_ATTENTE_VERIFICATION ||
-      !lead.codeExpiresAt ||
-      lead.codeExpiresAt.getTime() < Date.now()
+      (lead.codeExpiresAt?.getTime() ?? 0) < Date.now()
     ) {
       throw new BadRequestException('Code invalide ou expiré');
     }
@@ -239,25 +238,23 @@ export class LeadsService {
       // Le compte peut déjà exister si la personne s'est inscrite par ailleurs
       // (OAuth, inscription classique) : on rattache plutôt que de dupliquer.
       let user = await tx.user.findUnique({ where: { email: lead.email } });
-      if (!user) {
-        user = await tx.user.create({
-          data: {
-            email: lead.email,
-            // Choisi au formulaire et haché depuis. Il reste nul pour les leads
-            // ouverts avant que le formulaire ne le demande, et pour le chemin
-            // Social Login : passwordRequired le signale alors au front.
-            password: lead.password,
-            firstName: lead.firstName,
-            lastName: lead.lastName,
-            phone: lead.phone,
-            birthDate: lead.birthDate,
-            gender: lead.gender,
-            role: Role.CLIENT,
-            consentEmail: lead.consentEmail,
-            consentData: true,
-          },
-        });
-      }
+      user ??= await tx.user.create({
+        data: {
+          email: lead.email,
+          // Choisi au formulaire et haché depuis. Il reste nul pour les leads
+          // ouverts avant que le formulaire ne le demande, et pour le chemin
+          // Social Login : passwordRequired le signale alors au front.
+          password: lead.password,
+          firstName: lead.firstName,
+          lastName: lead.lastName,
+          phone: lead.phone,
+          birthDate: lead.birthDate,
+          gender: lead.gender,
+          role: Role.CLIENT,
+          consentEmail: lead.consentEmail,
+          consentData: true,
+        },
+      });
       // Le compte préexistant garde son mot de passe. Celui du lead est
       // abandonné : prouver la possession d'une adresse autorise à ouvrir une
       // session, jamais à remplacer le secret d'un compte déjà constitué.

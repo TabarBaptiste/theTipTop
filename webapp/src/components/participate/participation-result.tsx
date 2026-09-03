@@ -27,12 +27,12 @@ const passwordSchema = z
 type PasswordFormData = z.infer<typeof passwordSchema>;
 
 interface Props {
-  prizeName: string;
-  prizeValue?: string;
-  code: string;
+  readonly prizeName: string;
+  readonly prizeValue?: string;
+  readonly code: string;
   /** Option A : le mot de passe est choisi après la validation du code. */
-  passwordRequired: boolean;
-  userId: string;
+  readonly passwordRequired: boolean;
+  readonly userId: string;
 }
 
 export function ParticipationResult({

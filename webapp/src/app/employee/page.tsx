@@ -163,6 +163,52 @@ export default function EmployeePage() {
     setClientQuery(valeur);
   };
 
+  const pendingDeliveriesListOrEmpty =
+    pendingDeliveries.length > 0 ? (
+      <div className="max-h-96 space-y-3 overflow-y-auto">
+        {pendingDeliveries.map((delivery) => (
+          <div
+            key={delivery.id}
+            // Fond blanc au repos, et non seulement au survol : sans
+            // lui, la carte se confondait avec le fond de la liste et
+            // ne se distinguait qu'au passage de la souris - donc
+            // jamais sur un écran tactile.
+            className="flex items-center justify-between rounded-lg border border-gold-400 bg-surface p-3 hover:bg-cream"
+          >
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-medium">
+                {delivery.user.firstName} {delivery.user.lastName}
+              </p>
+              <p className="text-sm text-stone-grey">
+                {delivery.code}
+              </p>
+            </div>
+            <div className="ml-4 text-right">
+              <p className="text-sm font-medium text-tea-600">
+                {delivery.prize.name}
+              </p>
+              <Button
+                size="sm"
+                variant="outline"
+                className="mt-1"
+                onClick={() => deliverMutation.mutate(delivery.id)}
+                disabled={deliverMutation.isPending}
+              >
+                Remettre
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <div className="py-8 text-center">
+        <CheckCircle className="mx-auto h-12 w-12 text-emerald-300" />
+        <p className="mt-4 text-stone-grey">
+          Aucun lot en attente de remise
+        </p>
+      </div>
+    );
+
   return (
     <div className="min-h-[calc(100vh-3.75rem)] bg-cream py-8">
       <div className="container mx-auto px-4">
@@ -370,50 +416,7 @@ export default function EmployeePage() {
             <CardContent>
               {isLoading ? (
                 <SkeletonList count={3} />
-              ) : pendingDeliveries.length > 0 ? (
-                <div className="max-h-96 space-y-3 overflow-y-auto">
-                  {pendingDeliveries.map((delivery) => (
-                    <div
-                      key={delivery.id}
-                      // Fond blanc au repos, et non seulement au survol : sans
-                      // lui, la carte se confondait avec le fond de la liste et
-                      // ne se distinguait qu'au passage de la souris - donc
-                      // jamais sur un écran tactile.
-                      className="flex items-center justify-between rounded-lg border border-gold-400 bg-surface p-3 hover:bg-cream"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate font-medium">
-                          {delivery.user.firstName} {delivery.user.lastName}
-                        </p>
-                        <p className="text-sm text-stone-grey">
-                          {delivery.code}
-                        </p>
-                      </div>
-                      <div className="ml-4 text-right">
-                        <p className="text-sm font-medium text-tea-600">
-                          {delivery.prize.name}
-                        </p>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="mt-1"
-                          onClick={() => deliverMutation.mutate(delivery.id)}
-                          disabled={deliverMutation.isPending}
-                        >
-                          Remettre
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="py-8 text-center">
-                  <CheckCircle className="mx-auto h-12 w-12 text-emerald-300" />
-                  <p className="mt-4 text-stone-grey">
-                    Aucun lot en attente de remise
-                  </p>
-                </div>
-              )}
+              ) : pendingDeliveriesListOrEmpty}
 
               {pending && pending.meta.total > 0 && (
                 <Pagination

@@ -115,6 +115,8 @@ export default function MentionsLegalesPage() {
                   // inatteignable. tabIndex rend la zone defilable au clavier,
                   // sans quoi son contenu resterait hors de portee sans souris.
                   tabIndex={0}
+                  role="region"
+                  aria-label="Tableau, défilement horizontal au clavier"
                   className="overflow-x-auto rounded-card border border-warm-beige bg-surface"
                 >
                   <table className="w-full text-sm">
@@ -168,6 +170,8 @@ export default function MentionsLegalesPage() {
                   // inatteignable. tabIndex rend la zone defilable au clavier,
                   // sans quoi son contenu resterait hors de portee sans souris.
                   tabIndex={0}
+                  role="region"
+                  aria-label="Tableau, défilement horizontal au clavier"
                   className="overflow-x-auto rounded-card border border-warm-beige bg-surface"
                 >
                   <table className="w-full text-sm">
@@ -334,8 +338,7 @@ export default function MentionsLegalesPage() {
                     className="text-accent underline underline-offset-2"
                   >
                     contact@thetiptop.fr
-                  </a>
-                  .
+                  </a>.
                 </p>
               </div>
             </section>
@@ -435,8 +438,7 @@ export default function MentionsLegalesPage() {
                     className="text-accent underline underline-offset-2"
                   >
                     contact@thetiptop.fr
-                  </a>
-                  .
+                  </a>.
                 </p>
               </div>
             </section>

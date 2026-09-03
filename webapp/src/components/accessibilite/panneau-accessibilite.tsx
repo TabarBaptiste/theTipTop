@@ -112,11 +112,14 @@ export function PanneauAccessibilite() {
   return (
     <div className="fixed bottom-6 left-6 z-[60] print:hidden">
       {ouvert && (
-        <div
+        <dialog
+          open
           ref={panneauRef}
-          role="dialog"
           aria-labelledby={titreId}
-          className="mb-3 w-[20rem] max-w-[calc(100vw-3rem)] rounded-card border border-section-line bg-surface p-5 shadow-2xl"
+          // static + m-0 : neutralise le position:absolute et le margin:auto
+          // par defaut de <dialog>, pour garder le meme flux que l'ancien div
+          // positionne par le conteneur fixed qui l'englobe.
+          className="static m-0 mb-3 w-[20rem] max-w-[calc(100vw-3rem)] rounded-card border border-section-line bg-surface p-5 shadow-2xl"
         >
           <div className="flex items-start justify-between gap-4">
             <h2 id={titreId} className="font-display text-h3 not-italic text-ink">
@@ -141,6 +144,7 @@ export function PanneauAccessibilite() {
               {THEMES.map((t) => (
                 <label
                   key={t.valeur}
+                  aria-label={t.libelle}
                   className={cn(
                     'flex cursor-pointer items-start gap-3 rounded-soft border p-3 transition-colors',
                     theme === t.valeur
@@ -219,7 +223,7 @@ export function PanneauAccessibilite() {
             <RotateCcw className="h-4 w-4" strokeWidth={1.5} />
             Tout réinitialiser
           </button>
-        </div>
+        </dialog>
       )}
 
       <button
@@ -249,12 +253,12 @@ function Interrupteur({
   aide,
   actif,
   onChange,
-}: {
+}: Readonly<{
   libelle: string;
   aide: string;
   actif: boolean;
   onChange: () => void;
-}) {
+}>) {
   return (
     <button
       type="button"

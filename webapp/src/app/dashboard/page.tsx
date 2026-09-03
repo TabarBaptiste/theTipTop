@@ -135,6 +135,73 @@ export default function DashboardPage() {
   const pendingPrizes = participations?.filter((p) => !p.prizeDelivered).length || 0;
   const deliveredPrizes = participations?.filter((p) => p.prizeDelivered).length || 0;
 
+  const participationsListOrEmpty =
+    participations && participations.length > 0 ? (
+      <div className="space-y-4">
+        {participations.map((participation) => (
+          <div
+            key={participation.id}
+            className="flex items-center justify-between rounded-soft border border-warm-beige p-4"
+          >
+            <div className="flex items-center gap-4">
+              <div
+                className={`rounded-soft p-2 ${
+                  participation.prizeDelivered
+                    ? 'bg-moss-50'
+                    : 'bg-gold-100'
+                }`}
+              >
+                <Gift
+                  strokeWidth={1.5}
+                  className={`h-5 w-5 ${
+                    participation.prizeDelivered
+                      ? 'text-moss'
+                      : 'text-gold-800'
+                  }`}
+                />
+              </div>
+              <div>
+                <p className="font-medium text-ink">
+                  {participation.prize.name}
+                </p>
+                <p className="text-sm text-stone-grey">
+                  Code : {participation.code}
+                </p>
+              </div>
+            </div>
+            <div className="text-right">
+              {/* terracotta-600 et non deep : #BA6905 plafonne a 4.11:1
+                  sur blanc, sous le seuil AA pour ce corps de texte. */}
+              <p className="font-medium text-accent">
+                {participation.prize.value}
+              </p>
+              <p className="text-sm">
+                {participation.prizeDelivered ? (
+                  <span className="text-moss">
+                    ✓ Récupéré le {formatDate(participation.prizeDeliveredAt!)}
+                  </span>
+                ) : (
+                  <span className="text-gold-800">
+                    À récupérer en boutique
+                  </span>
+                )}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <div className="py-8 text-center">
+        <Ticket className="mx-auto h-12 w-12 text-warm-beige" strokeWidth={1.5} />
+        <p className="mt-4 text-stone-grey">
+          Vous n&apos;avez pas encore participé au jeu-concours.
+        </p>
+        <Button asChild className="mt-4">
+          <Link href="/participate">Participer maintenant</Link>
+        </Button>
+      </div>
+    );
+
   return (
     <div className="min-h-[calc(100vh-3.75rem)] bg-cream py-8">
       <div className="container mx-auto px-4">
@@ -248,71 +315,7 @@ export default function DashboardPage() {
                   </div>
                 ))}
               </div>
-            ) : participations && participations.length > 0 ? (
-              <div className="space-y-4">
-                {participations.map((participation) => (
-                  <div
-                    key={participation.id}
-                    className="flex items-center justify-between rounded-soft border border-warm-beige p-4"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div
-                        className={`rounded-soft p-2 ${
-                          participation.prizeDelivered
-                            ? 'bg-moss-50'
-                            : 'bg-gold-100'
-                        }`}
-                      >
-                        <Gift
-                          strokeWidth={1.5}
-                          className={`h-5 w-5 ${
-                            participation.prizeDelivered
-                              ? 'text-moss'
-                              : 'text-gold-800'
-                          }`}
-                        />
-                      </div>
-                      <div>
-                        <p className="font-medium text-ink">
-                          {participation.prize.name}
-                        </p>
-                        <p className="text-sm text-stone-grey">
-                          Code : {participation.code}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      {/* terracotta-600 et non deep : #BA6905 plafonne a 4.11:1
-                          sur blanc, sous le seuil AA pour ce corps de texte. */}
-                      <p className="font-medium text-accent">
-                        {participation.prize.value}
-                      </p>
-                      <p className="text-sm">
-                        {participation.prizeDelivered ? (
-                          <span className="text-moss">
-                            ✓ Récupéré le {formatDate(participation.prizeDeliveredAt!)}
-                          </span>
-                        ) : (
-                          <span className="text-gold-800">
-                            À récupérer en boutique
-                          </span>
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="py-8 text-center">
-                <Ticket className="mx-auto h-12 w-12 text-warm-beige" strokeWidth={1.5} />
-                <p className="mt-4 text-stone-grey">
-                  Vous n&apos;avez pas encore participé au jeu-concours.
-                </p>
-                <Button asChild className="mt-4">
-                  <Link href="/participate">Participer maintenant</Link>
-                </Button>
-              </div>
-            )}
+            ) : participationsListOrEmpty}
           </CardContent>
         </Card>
           </main>

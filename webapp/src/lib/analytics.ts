@@ -5,15 +5,17 @@
 
 import { sendGAEvent } from '@next/third-parties/google';
 
+type AuthMethod = 'email' | 'google' | 'facebook';
+
 // -----------------------------------------------
 // Auth - Connexion
 // -----------------------------------------------
 
-export function trackLoginSuccess(method: 'email' | 'google' | 'facebook') {
+export function trackLoginSuccess(method: AuthMethod) {
   sendGAEvent('event', 'login', { method });
 }
 
-export function trackLoginFailure(method: 'email' | 'google' | 'facebook', reason: string) {
+export function trackLoginFailure(method: AuthMethod, reason: string) {
   sendGAEvent('event', 'login_failure', { method, reason });
 }
 
@@ -21,11 +23,11 @@ export function trackLoginFailure(method: 'email' | 'google' | 'facebook', reaso
 // Auth - Inscription
 // -----------------------------------------------
 
-export function trackRegisterSuccess(method: 'email' | 'google' | 'facebook') {
+export function trackRegisterSuccess(method: AuthMethod) {
   sendGAEvent('event', 'sign_up', { method });
 }
 
-export function trackRegisterFailure(method: 'email' | 'google' | 'facebook', reason: string) {
+export function trackRegisterFailure(method: AuthMethod, reason: string) {
   sendGAEvent('event', 'sign_up_failure', { method, reason });
 }
 

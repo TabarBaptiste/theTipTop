@@ -7,7 +7,7 @@
  */
 interface Props {
   /** Objet schema.org, sérialisé tel quel dans la page. */
-  data: Record<string, unknown>;
+  readonly data: Record<string, unknown>;
 }
 
 export function StructuredData({ data }: Props) {
@@ -19,7 +19,7 @@ export function StructuredData({ data }: Props) {
       // un « </script> » présent dans une valeur fermerait la balise par
       // anticipation et ferait passer la suite pour du script exécutable.
       // nosemgrep: typescript.react.security.audit.react-dangerouslysetinnerhtml.react-dangerouslysetinnerhtml -- data provient uniquement de constantes internes, jamais d'une entree utilisateur.
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data).replace(/</g, '\\u003c') }}
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data).replaceAll('<', String.raw`\u003c`) }}
     />
   );
 }

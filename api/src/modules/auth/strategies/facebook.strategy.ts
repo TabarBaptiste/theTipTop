@@ -63,7 +63,9 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
       // Noms des champs seulement, jamais leur contenu : « email » absent
       // signale une permission non accordee, « email » vide un compte sans
       // adresse confirmee. La distinction guide le message d'aide.
-      const champsRecus = Object.keys((profile as any)._json ?? {}).sort();
+      const champsRecus = Object.keys((profile as any)._json ?? {}).sort((a, b) =>
+        a.localeCompare(b),
+      );
       this.logger.warn(
         `Compte Facebook ${id} sans adresse email : adresse de substitution utilisee. ` +
           `Champs transmis par Meta : ${champsRecus.length ? champsRecus.join(', ') : 'aucun'}.`,

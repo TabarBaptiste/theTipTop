@@ -66,8 +66,8 @@ export function CookiePreferences() {
             État actuel :{' '}
             <strong className="text-ink">
               {analytics ? 'mesure d’audience autorisée' : 'mesure d’audience refusée'}
-            </strong>
-            . Les cookies strictement nécessaires au fonctionnement du site restent actifs dans
+            </strong>.
+            Les cookies strictement nécessaires au fonctionnement du site restent actifs dans
             les deux cas : ils ne relèvent pas du consentement.
           </p>
         </div>

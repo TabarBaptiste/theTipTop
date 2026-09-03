@@ -137,7 +137,7 @@ export function CountdownSection() {
   );
 }
 
-function TimeBlock({ value, label }: { value: number; label: string }) {
+function TimeBlock({ value, label }: Readonly<{ value: number; label: string }>) {
   return (
     <div className="flex w-16 flex-col items-center gap-2">
       <span className="flex h-16 w-16 items-center justify-center rounded-soft bg-surface font-display text-[2.25rem] font-bold leading-[3.375rem] text-ink">

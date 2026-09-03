@@ -92,9 +92,9 @@ export function appliquerPreferences(
       window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   if (sombre) {
-    racine.setAttribute('data-theme', 'sombre');
+    racine.dataset.theme = 'sombre';
   } else {
-    racine.removeAttribute('data-theme');
+    delete racine.dataset.theme;
   }
 
   // 100 % laisse la taille du navigateur intacte, y compris celle qu'un

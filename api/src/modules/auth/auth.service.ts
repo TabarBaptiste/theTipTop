@@ -5,7 +5,7 @@
 import { Injectable, ForbiddenException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { randomBytes, randomUUID } from 'crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 import * as bcrypt from 'bcryptjs';
 
 import { PrismaService } from '../../prisma/prisma.service';

@@ -27,11 +27,11 @@ const schema = z.object({
 export type AuthenticatedParticipationData = z.infer<typeof schema>;
 
 interface Props {
-  firstName: string;
-  email: string;
-  defaultCode?: string;
-  isSubmitting: boolean;
-  onSubmit: (data: AuthenticatedParticipationData) => void;
+  readonly firstName: string;
+  readonly email: string;
+  readonly defaultCode?: string;
+  readonly isSubmitting: boolean;
+  readonly onSubmit: (data: AuthenticatedParticipationData) => void;
 }
 
 export function AuthenticatedParticipationForm({
