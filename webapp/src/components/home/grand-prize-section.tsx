@@ -64,9 +64,34 @@ export function GrandPrizeSection() {
   return (
     <section id="grand-prize" className="bg-noir text-white">
       {isLoading ? (
-        <div className="container mx-auto flex max-w-3xl flex-col items-center gap-4 px-6 py-16 md:py-20">
-          <Skeleton className="h-12 w-64 bg-white/10" />
-          <Skeleton className="h-4 w-80 bg-white/10" />
+        /* Meme silhouette que la section chargee : deux moities, la photo a
+           gauche et le panneau vert a droite, avec sa hauteur minimale. Le
+           squelette rendait une colonne etroite centree sur le fond noir,
+           heritee d'une version anterieure - la page sautait d'un bloc au
+           chargement. */
+        <div className="grid lg:min-h-[467px] lg:grid-cols-2">
+          <Skeleton className="h-64 w-full rounded-none bg-white/5 md:h-96 lg:h-auto" />
+
+          <div className="flex flex-col bg-moss px-6 pb-14 pt-9 md:px-11">
+            <Skeleton className="h-[15px] w-40 bg-white/20" />
+            <Skeleton className="mt-5 h-9 w-4/5 bg-white/20" />
+            <Skeleton className="mt-2 h-9 w-2/5 bg-white/20" />
+
+            <div className="mt-5 flex flex-col gap-2">
+              <Skeleton className="h-4 w-full bg-white/20" />
+              <Skeleton className="h-4 w-11/12 bg-white/20" />
+            </div>
+
+            <div className="mt-5 flex flex-col gap-2">
+              <Skeleton className="h-4 w-10/12 bg-white/20" />
+              <Skeleton className="h-4 w-11/12 bg-white/20" />
+              <Skeleton className="h-4 w-9/12 bg-white/20" />
+            </div>
+
+            <div className="mt-12 flex justify-center">
+              <Skeleton className="h-16 w-full rounded-full bg-white/20 md:w-[260px]" />
+            </div>
+          </div>
         </div>
       ) : data?.drawn ? (
         <div className="container mx-auto max-w-3xl px-6 py-16 text-center md:py-20">

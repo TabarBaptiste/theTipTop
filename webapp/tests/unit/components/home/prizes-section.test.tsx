@@ -46,11 +46,22 @@ function sourceAffichee() {
 describe('PrizesSection', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('affiche des squelettes pendant le chargement', () => {
+  // « au moins un squelette » laissait la place a la derive : celui-ci a decrit
+  // pendant deux refontes une mise en page a deux colonnes qui n'existait plus,
+  // et rien ne l'a signale. La colonne du pourcentage et la rangee de commandes
+  // surgissaient alors d'un coup, la section changeant de hauteur au chargement.
+  // Ce test retient les quatre zones de la silhouette.
+  it('annonce la silhouette complete pendant le chargement', () => {
     reponse(undefined, true);
     const { container } = render(<PrizesSection />);
 
-    expect(container.querySelectorAll('.animate-pulse').length).toBeGreaterThan(0);
+    // Texte (surtitre, deux lignes de titre, trois de description), visuel,
+    // pourcentage et son libelle : douze au minimum avant les commandes.
+    expect(container.querySelectorAll('.animate-pulse').length).toBeGreaterThanOrEqual(12);
+
+    // Les commandes du carrousel sont les seules formes rondes du squelette :
+    // deux fleches, le bouton de pause, cinq pastilles.
+    expect(container.querySelectorAll('.animate-pulse.rounded-full')).toHaveLength(8);
   });
 
   it('sert le visuel distant quand l’API en fournit un', () => {
