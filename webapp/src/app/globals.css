@@ -16,30 +16,76 @@
   }
 
   :root {
-    /* === DESIGN.md - Palette primaire === */
-    --color-terracotta-deep: #BA6905;
-    --color-terracotta-hover: #C25F1F;
-    --color-black: #1A1A1A;
-    --color-white: #FFFFFF;
-    --color-cream: #FAF6EF;
+    /* === Palette de marque =====================================
+       Source de verite des couleurs, en canaux RVB separes par des espaces :
+       c'est la forme qu'attend `rgb(var(--x) / <alpha-value>)` dans
+       tailwind.config.js, et la seule qui laisse fonctionner les modificateurs
+       d'opacite du type `bg-noir/10`.
 
-    /* === DESIGN.md - Palette secondaire === */
-    --color-moss-green: #5C6B3A;
-    --color-warm-beige: #E8D5B0;
-    --color-gold: #C9A96E;
-    --color-terracotta-pale: #F2E0D0;
-    --color-terracotta-warm: #C76C3A;
-    --color-stone-grey: #4A463E;
+       Les valeurs etaient jusqu'ici ecrites deux fois - ici en hexadecimal et
+       la-bas en litteral - et seule la seconde comptait : changer une variable
+       ne changeait rien a l'ecran. Elles ne vivent plus qu'ici, ce qui permet
+       de les redefinir par theme sans toucher a une seule classe.
+       ========================================================== */
+    --c-terracotta-50: 253 248 243;
+    --c-terracotta-100: 249 237 217;
+    --c-terracotta-200: 242 224 208;
+    --c-terracotta-300: 212 167 106;
+    --c-terracotta-400: 200 146 58;
+    --c-terracotta-500: 186 105 5;
+    --c-terracotta-600: 168 93 4;
+    --c-terracotta-700: 139 77 3;
+    --c-terracotta-800: 110 61 2;
+    --c-terracotta-900: 81 45 2;
+    --c-terracotta-pale: 242 224 208;
+    --c-terracotta-deep: 186 105 5;
+    --c-terracotta-hover: 194 95 31;
+    --c-terracotta-warm: 199 108 58;
+    --c-cream: 250 246 239;
+    --c-noir: 26 26 26;
+    --c-moss: 92 107 58;
+    --c-moss-light: 122 140 86;
+    --c-moss-50: 242 245 236;
+    --c-moss-100: 224 232 208;
+    --c-moss-500: 92 107 58;
+    --c-moss-900: 63 74 40;
+    --c-warm-beige: 232 213 176;
+    --c-section-line: 217 217 217;
+    --c-gold-50: 251 246 237;
+    --c-gold-100: 245 233 208;
+    --c-gold-200: 235 219 181;
+    --c-gold-300: 220 203 149;
+    --c-gold-400: 209 185 126;
+    --c-gold-500: 201 169 110;
+    --c-gold-600: 181 149 90;
+    --c-gold-700: 154 125 72;
+    --c-gold-800: 127 102 56;
+    --c-gold-900: 100 79 42;
+    --c-stone: 74 70 62;
+    --c-stone-grey: 74 70 62;
+    --c-tea-50: 253 248 243;
+    --c-tea-100: 249 237 217;
+    --c-tea-200: 242 224 208;
+    --c-tea-300: 212 167 106;
+    --c-tea-400: 200 146 58;
+    --c-tea-500: 186 105 5;
+    --c-tea-600: 168 93 4;
+    --c-tea-700: 139 77 3;
+    --c-tea-800: 110 61 2;
+    --c-tea-900: 81 45 2;
+    --c-tea-950: 58 32 1;
 
-    /* === DESIGN.md - Semantiques === */
-    --color-bg: var(--color-cream);
-    --color-bg-card: var(--color-terracotta-pale);
-    --color-text-primary: var(--color-black);
-    --color-text-secondary: var(--color-stone-grey);
-    --color-cta: var(--color-terracotta-deep);
-    --color-cta-hover: var(--color-terracotta-hover);
-    --color-accent: var(--color-gold);
-    --color-success: var(--color-moss-green);
+    /* === DESIGN.md - Semantiques ===
+       Derivees de la palette ci-dessus, pour les quelques regles CSS qui ne
+       passent pas par une classe Tailwind. */
+    --color-bg: rgb(var(--c-cream));
+    --color-bg-card: rgb(var(--c-terracotta-pale));
+    --color-text-primary: rgb(var(--c-noir));
+    --color-text-secondary: rgb(var(--c-stone));
+    --color-cta: rgb(var(--c-terracotta-deep));
+    --color-cta-hover: rgb(var(--c-terracotta-hover));
+    --color-accent: rgb(var(--c-gold));
+    --color-success: rgb(var(--c-moss));
 
     /* === DESIGN.md - Typographie === */
     --font-editorial: 'Playfair Display', Georgia, serif;
