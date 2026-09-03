@@ -165,8 +165,9 @@
      la charte. Elles gardent la meme famille chromatique, brunie.
 
      Contrastes verifies, tous au-dessus de 4,5:1 : texte principal 16,1:1
-     sur la page et 14,9:1 sur les surfaces, texte secondaire 8,6:1, accent
-     8,5:1, vert 8,0:1, blanc sur bouton terracotta 4,96:1.
+     sur la page, 14,9:1 sur les surfaces et 14,7:1 sur les cartes, texte
+     secondaire 8,6:1, accent 8,5:1, vert 8,0:1, blanc sur bouton
+     terracotta 4,96:1.
      =========================================================== */
   [data-theme='sombre'] {
     /* Surfaces, de la plus profonde a la plus haute */
@@ -188,6 +189,11 @@
     /* Filets et fonds teintes, qui etaient les valeurs les plus claires */
     --c-warm-beige: 58 50 38;
     --c-section-line: 51 48 43;
+    /* Fond des cartes shadcn, servi a 30 % d'opacite. Non redefini, il
+       composait un brun moyen a rgb(85 78 72) sur la page presque noire, ou
+       les graduations du graphique admin tombaient a 1,15:1 et le texte
+       herite a 2,13:1. La carte se rend maintenant a rgb(30 26 22). */
+    --c-terracotta-pale: 58 50 42;
     --c-terracotta-50: 30 24 18;
     --c-terracotta-100: 38 30 22;
     --c-terracotta-200: 48 38 28;
@@ -213,6 +219,20 @@
     --c-lot-signature: 42 36 25;
     --c-lot-coffret-39: 31 38 24;
     --c-lot-coffret-69: 43 37 25;
+
+    /* === Jetons shadcn/ui ======================================
+       Ils sont en HSL et vivaient seulement sur `:root`, donc figes en
+       clair. Seuls les trois atteignables sont repris : `--foreground`
+       (le texte herite des cartes), `--border` (la couleur de bordure par
+       defaut, posee sur tout element par la regle `* { border-border }`)
+       et `--input`, qui la suit. Les autres - `--card`, `--popover`,
+       `--secondary`, `--muted`... - ne sont references par aucune classe
+       du projet : les redefinir serait deviner une valeur que personne ne
+       lit.
+       ========================================================== */
+    --foreground: 40 29% 92%;
+    --border: 37 9% 18%;
+    --input: 37 9% 18%;
   }
 
   /* Les couleurs des SVG de decor sont figees dans les fichiers - un <img>

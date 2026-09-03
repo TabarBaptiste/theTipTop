@@ -126,9 +126,8 @@ function downloadCsv(filename: string, rows: string[][]) {
  * `data-theme` change : le panneau d'accessibilite flotte sur toutes les
  * pages, le theme peut donc basculer alors que le graphique est affiche.
  *
- * Les graduations remontent ainsi a 3,72:1. Le seuil de 4,5:1 reste hors
- * d'atteinte tant que `--c-terracotta-pale`, dont la carte tire son fond,
- * n'est pas lui-meme redefini par le theme sombre.
+ * Les graduations remontent ainsi a 7,86:1, une fois `--c-terracotta-pale`
+ * - dont la carte tire son fond - redefini lui aussi par le theme sombre.
  */
 const COULEURS_CLAIRES = {
   graduation: 'rgb(74 70 62)',
