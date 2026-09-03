@@ -81,7 +81,7 @@ export function Header() {
             alt="Thé Tip Top"
             width={152}
             height={64}
-            className="h-10 w-auto"
+            className="logo-marque h-10 w-auto"
             unoptimized
             priority
           />
