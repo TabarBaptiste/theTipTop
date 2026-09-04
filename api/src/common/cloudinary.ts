@@ -30,6 +30,24 @@ export const PRIZE_IMAGE_PUBLIC_IDS: Record<string, string> = {
 };
 
 /**
+ * Photographies de la page d'accueil, hors visuels de lots.
+ *
+ * Même logique que ci-dessus, autre dossier : ce ne sont pas des lots, et les
+ * regrouper sous `lots/` rendrait le catalogue illisible au moment de
+ * remplacer une image depuis l'interface Cloudinary.
+ *
+ * Les décors vectoriels de l'accueil - vagues et feuillages - n'y figurent
+ * volontairement pas. Ils relèvent du système de design, évoluent avec le code
+ * plutôt qu'indépendamment de lui, et un SVG ne tire aucun bénéfice de la
+ * négociation de format : ils restent empaquetés et servis par l'application.
+ */
+export const SITE_IMAGE_PUBLIC_IDS: Record<string, string> = {
+  HERO: 'thetiptop/accueil/tasses_hero_panier',
+  A_PROPOS: 'thetiptop/accueil/mains_bol_infusion',
+  GRAND_PRIX: 'thetiptop/accueil/coffret_boites_lavande',
+};
+
+/**
  * URL de livraison d'une image.
  *
  * `f_auto` laisse Cloudinary servir l'AVIF ou le WebP selon ce que le

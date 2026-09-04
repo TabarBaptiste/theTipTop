@@ -14,7 +14,11 @@ import { readFile } from 'fs/promises';
 import { basename, join } from 'path';
 import { config as loadEnv } from 'dotenv';
 
-import { PRIZE_IMAGE_PUBLIC_IDS, buildImageUrl } from '../src/common/cloudinary';
+import {
+  PRIZE_IMAGE_PUBLIC_IDS,
+  SITE_IMAGE_PUBLIC_IDS,
+  buildImageUrl,
+} from '../src/common/cloudinary';
 
 loadEnv({ path: join(__dirname, '..', '.env') });
 
@@ -92,13 +96,26 @@ async function upload(publicId: string): Promise<string> {
 
   console.log(`\nEnvoi vers le compte « ${CLOUD_NAME} »\n`);
 
-  for (const [code, publicId] of Object.entries(PRIZE_IMAGE_PUBLIC_IDS)) {
-    const fileName = await upload(publicId);
-    console.log(`  ${code.padEnd(14)} ${fileName}`);
-    console.log(`  ${' '.repeat(14)} ${buildImageUrl(CLOUD_NAME, publicId)}\n`);
+  const lots = Object.entries(PRIZE_IMAGE_PUBLIC_IDS);
+  const accueil = Object.entries(SITE_IMAGE_PUBLIC_IDS);
+
+  for (const [titre, entrees] of [
+    ['Visuels des lots', lots],
+    ["Photographies de l'accueil", accueil],
+  ] as [string, [string, string][]][]) {
+    console.log(`${titre}\n`);
+
+    for (const [code, publicId] of entrees) {
+      const fileName = await upload(publicId);
+      console.log(`  ${code.padEnd(14)} ${fileName}`);
+      console.log(`  ${' '.repeat(14)} ${buildImageUrl(CLOUD_NAME, publicId)}\n`);
+    }
   }
 
-  console.log('Terminé. Lancez « npm run prisma:seed » pour enregistrer ces URL.\n');
+  // Seuls les visuels de lots transitent par la base : les photographies de
+  // l'accueil sont référencées directement par les composants, la seed n'a
+  // rien à en faire.
+  console.log('Terminé. Lancez « npm run prisma:seed » pour enregistrer les URL des lots.\n');
 })().catch((error) => {
   console.error(error instanceof Error ? error.message : error);
   process.exit(1);
