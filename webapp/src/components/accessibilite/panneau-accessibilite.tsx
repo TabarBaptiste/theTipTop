@@ -35,7 +35,7 @@ const LIBELLES_TAILLE: Record<TailleTexte, string> = {
 export function PanneauAccessibilite() {
   const [ouvert, setOuvert] = useState(false);
   const boutonRef = useRef<HTMLButtonElement>(null);
-  const panneauRef = useRef<HTMLDivElement>(null);
+  const panneauRef = useRef<HTMLDialogElement>(null);
   const titreId = useId();
 
   const preferences = useAccessibiliteStore();

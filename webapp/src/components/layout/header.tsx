@@ -13,7 +13,10 @@ import {
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
 import { useAuthStore } from '@/lib/stores/auth-store';
-import type { User } from '@/lib/stores/auth-store';
+// Alias : `User` est deja pris par l'icone lucide importee plus haut, et les
+// deux se retrouvaient dans la meme portee - le build echouait sur un
+// identifiant duplique.
+import type { User as Utilisateur } from '@/lib/stores/auth-store';
 import { useIsHydrated } from '@/lib/hooks/use-is-hydrated';
 import { cn } from '@/lib/utils';
 
@@ -29,7 +32,7 @@ const navigation = [
 
 // Le bouclier pour l'administration, la boutique pour un employé, la
 // silhouette pour un participant sans rôle particulier.
-function accountIconForRole(role: User['role'] | undefined) {
+function accountIconForRole(role: Utilisateur['role'] | undefined) {
   if (role === 'ADMIN') return ShieldCheck;
   if (role === 'EMPLOYEE') return Store;
   return User;
