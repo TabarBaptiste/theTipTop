@@ -1,5 +1,5 @@
-import Image from 'next/image';
-import tassesHeroImg from '@/img/tasses_hero_panier.webp';
+import { PHOTOS_ACCUEIL } from '@/lib/cloudinary';
+import { PhotoCloudinary } from '@/components/ui/photo-cloudinary';
 import heroWaves from '@/img/hero_waves.svg';
 import leftLeaves from '@/img/left_leaves.svg';
 import rightLeaves from '@/img/right_leaves.svg';
@@ -94,10 +94,9 @@ export function HeroSection() {
         </div>
 
         <div className="relative mt-[52px] aspect-[4/3] w-full overflow-hidden md:aspect-[1129/468]">
-          <Image
-            src={tassesHeroImg}
+          <PhotoCloudinary
+            src={PHOTOS_ACCUEIL.hero}
             alt="Tasses de thé Tip Top"
-            fill
             sizes="(max-width: 1200px) 100vw, 1152px"
             className="photo-attenuee object-cover"
             priority

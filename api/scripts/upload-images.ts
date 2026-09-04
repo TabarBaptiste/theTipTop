@@ -4,8 +4,13 @@
 // Rejouable sans risque : chaque image part sous un identifiant stable avec
 // overwrite, donc un second passage remplace au lieu de dupliquer.
 //
-// Les fichiers restent dans webapp/src/img - ils servent de repli quand
-// Cloudinary est injoignable ou non configuré. Ce script n'en est qu'une copie.
+// Les fichiers restent dans webapp/src/img : c'est d'eux que part chaque envoi,
+// et ce script n'en est qu'une copie. Pour les visuels de lots, ils servent en
+// plus de repli quand Cloudinary est injoignable ou non configuré - la seed
+// enregistre alors null et l'interface les affiche. Les photographies de
+// l'accueil, elles, sont référencées par leur URL Cloudinary : leur copie
+// locale n'est plus qu'une source d'envoi. Ne pas la supprimer, sans quoi ce
+// script n'aurait plus rien à téléverser pour elles.
 //
 //   npm run images:upload
 
