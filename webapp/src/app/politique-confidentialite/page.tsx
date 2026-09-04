@@ -114,30 +114,33 @@ export default function PolitiqueConfidentialitePage() {
                   // inatteignable. tabIndex rend la zone defilable au clavier,
                   // sans quoi son contenu resterait hors de portee sans souris.
                   tabIndex={0}
+                  role="region"
+                  aria-label="Tableau, défilement horizontal au clavier"
                   className="overflow-x-auto rounded-card border border-warm-beige bg-surface"
                 >
                   <table className="w-full text-sm">
                     <tbody className="divide-y divide-warm-beige">
                       {[
-                        ['Responsable', 'Thé Tip Top - Société Anonyme (SA)'],
-                        ['Adresse', '18 rue Léon Frot, 75011 Paris - France'],
-                        ['Email contact', 'contact@thetiptop.fr'],
-                        ['Email RGPD', 'rgpd@thetiptop.fr'],
-                        ['Téléphone', '+33 1 23 74 85 96'],
-                      ].map(([label, value]) => (
+                        { label: 'Responsable', value: 'Thé Tip Top - Société Anonyme (SA)' },
+                        { label: 'Adresse', value: '18 rue Léon Frot, 75011 Paris - France' },
+                        {
+                          label: 'Email contact',
+                          value: 'contact@thetiptop.fr',
+                          href: 'mailto:contact@thetiptop.fr',
+                        },
+                        {
+                          label: 'Email RGPD',
+                          value: 'rgpd@thetiptop.fr',
+                          href: 'mailto:rgpd@thetiptop.fr',
+                        },
+                        { label: 'Téléphone', value: '+33 1 23 74 85 96' },
+                      ].map(({ label, value, href }) => (
                         <tr key={label} className="even:bg-cream">
                           <td className="px-4 py-3 font-medium text-ink">{label}</td>
                           <td className="px-4 py-3 text-stone-grey">
-                            {label === 'Email contact' ? (
+                            {href ? (
                               <a
-                                href="mailto:contact@thetiptop.fr"
-                                className="text-accent underline underline-offset-2"
-                              >
-                                {value}
-                              </a>
-                            ) : label === 'Email RGPD' ? (
-                              <a
-                                href="mailto:rgpd@thetiptop.fr"
+                                href={href}
                                 className="text-accent underline underline-offset-2"
                               >
                                 {value}
@@ -221,6 +224,8 @@ export default function PolitiqueConfidentialitePage() {
                   // inatteignable. tabIndex rend la zone defilable au clavier,
                   // sans quoi son contenu resterait hors de portee sans souris.
                   tabIndex={0}
+                  role="region"
+                  aria-label="Tableau, défilement horizontal au clavier"
                   className="overflow-x-auto rounded-card border border-warm-beige"
                 >
                   <table className="w-full text-sm">
@@ -291,6 +296,8 @@ export default function PolitiqueConfidentialitePage() {
                   // inatteignable. tabIndex rend la zone defilable au clavier,
                   // sans quoi son contenu resterait hors de portee sans souris.
                   tabIndex={0}
+                  role="region"
+                  aria-label="Tableau, défilement horizontal au clavier"
                   className="overflow-x-auto rounded-card border border-warm-beige"
                 >
                   <table className="w-full text-sm">

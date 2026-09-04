@@ -31,7 +31,7 @@ CardHeader.displayName = 'CardHeader';
 const CardTitle = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLHeadingElement>
->(({ className, ...props }, ref) => (
+>(({ className, children, ...props }, ref) => (
   <h3
     ref={ref}
     className={cn(
@@ -39,7 +39,9 @@ const CardTitle = React.forwardRef<
       className
     )}
     {...props}
-  />
+  >
+    {children}
+  </h3>
 ));
 CardTitle.displayName = 'CardTitle';
 
@@ -87,13 +89,13 @@ const CATEGORY_LABELS: Record<PrizeCategory, string> = {
 
 interface PrizeCardProps {
   /** URL string ou StaticImageData Next.js ({ src: string }) */
-  image?: string | { src: string };
-  imageAlt?: string;
-  category: PrizeCategory;
-  title: string;
-  value: string | null;  // ex: "39€" ou null si pas de valeur associée
-  odds: string;   // ex: "1 chance sur 3" ou "33%"
-  className?: string;
+  readonly image?: string | { src: string };
+  readonly imageAlt?: string;
+  readonly category: PrizeCategory;
+  readonly title: string;
+  readonly value: string | null;  // ex: "39€" ou null si pas de valeur associée
+  readonly odds: string;   // ex: "1 chance sur 3" ou "33%"
+  readonly className?: string;
 }
 
 function PrizeCard({ image, imageAlt = '', category, title, value, odds, className }: PrizeCardProps) {

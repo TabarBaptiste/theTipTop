@@ -22,19 +22,19 @@ function computeSecondsLeft(expiresAt: string): number {
 }
 
 interface Props {
-  maskedEmail: string;
-  expiresAt: string;
-  isVerifying: boolean;
-  isResending: boolean;
+  readonly maskedEmail: string;
+  readonly expiresAt: string;
+  readonly isVerifying: boolean;
+  readonly isResending: boolean;
   /** RG-08 : passé deux renvois, on propose de corriger l'adresse. */
-  offerEmailCorrection: boolean;
+  readonly offerEmailCorrection: boolean;
   /**
    * L'écran sert les deux parcours : confirmer une participation, ou créer un
    * compte. Seul le bouton en dit la différence.
    */
-  submitLabel?: string;
-  onVerify: (code: string) => void;
-  onResend: (newEmail?: string) => void;
+  readonly submitLabel?: string;
+  readonly onVerify: (code: string) => void;
+  readonly onResend: (newEmail?: string) => void;
 }
 
 export function VerificationStep({
@@ -65,6 +65,8 @@ export function VerificationStep({
     dateStyle: 'long',
     timeStyle: 'short',
   });
+
+  const resendButtonLabel = secondsLeft > 0 ? `Renvoyer le code (${secondsLeft} s)` : 'Renvoyer le code';
 
   return (
     <div>
@@ -165,11 +167,7 @@ export function VerificationStep({
               onClick={() => onResend()}
               disabled={isResending || secondsLeft > 0}
             >
-              {isResending
-                ? 'Envoi...'
-                : secondsLeft > 0
-                  ? `Renvoyer le code (${secondsLeft} s)`
-                  : 'Renvoyer le code'}
+              {isResending ? 'Envoi...' : resendButtonLabel}
             </Button>
           </div>
         )}

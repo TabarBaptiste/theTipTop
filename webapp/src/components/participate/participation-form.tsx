@@ -48,8 +48,8 @@ const participationSchema = z
 export type ParticipationFormData = z.infer<typeof participationSchema>;
 
 interface Props {
-  onSubmit: (data: ParticipationFormData) => void;
-  isSubmitting: boolean;
+  readonly onSubmit: (data: ParticipationFormData) => void;
+  readonly isSubmitting: boolean;
 }
 
 export function ParticipationForm({ onSubmit, isSubmitting }: Props) {

@@ -103,7 +103,7 @@ const REFETCH_INTERVAL = 30_000;
 
 function downloadCsv(filename: string, rows: string[][]) {
   // BOM UTF-8 pour qu'Excel ouvre correctement les accents
-  const csv = '\uFEFF' + rows.map((r) => r.map((c) => `"${c.replace(/"/g, '""')}"`).join(';')).join('\r\n');
+  const csv = '\uFEFF' + rows.map((r) => r.map((c) => `"${c.replaceAll('"', '""')}"`).join(';')).join('\r\n');
   const url = window.URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
   const link = document.createElement('a');
   link.href = url;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -54,6 +54,13 @@ const rules = [
 export default function ParticipatePage() {
   const queryClient = useQueryClient();
   const [result, setResult] = useState<ParticipationResult | null>(null);
+  // Identifiants stables pour les 4 blocs du squelette de chargement, plutot
+  // que l'index du tableau (S6479). Math.random() plutot que crypto.randomUUID() :
+  // ce dernier n'existe pas dans l'environnement jsdom utilise par les tests Jest.
+  const prizeSkeletonIds = useMemo(
+    () => Array.from({ length: 4 }, () => Math.random().toString(36).slice(2)),
+    [],
+  );
 
   // Chargement des lots depuis l'API (source de vérité en DB)
   const {
@@ -238,9 +245,9 @@ export default function ParticipatePage() {
 
           <div className="mt-8 grid gap-4 sm:grid-cols-2">
             {prizesLoading &&
-              Array.from({ length: 4 }).map((_, i) => (
+              prizeSkeletonIds.map((id) => (
                 <div
-                  key={i}
+                  key={id}
                   className="rounded-card border border-warm-beige bg-surface p-5 animate-pulse"
                 >
                   <div className="h-3 w-2/3 rounded bg-warm-beige" />

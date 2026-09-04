@@ -120,8 +120,7 @@ export default function FaqPage() {
                 className="font-semibold text-accent underline underline-offset-2"
               >
                 contact@thetiptop.fr
-              </a>
-              .
+              </a>.
             </p>
           </div>
         </div>

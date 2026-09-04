@@ -255,7 +255,7 @@ export default function SettingsPage() {
                   onChange={(e) => handleConsentChange(e.target.checked)}
                 />
                 <span className="text-sm text-ink">
-                  Je souhaite recevoir les offres et actualités de Thé Tip Top par e-mail.
+                  Je souhaite recevoir les offres et actualités de Thé Tip Top par e-mail.{' '}
                   <span className="mt-1 block text-xs text-stone-grey">
                     Les e-mails liés à vos participations, eux, vous seront toujours envoyés :
                     ils sont nécessaires au jeu-concours.
@@ -328,6 +328,7 @@ export default function SettingsPage() {
                   </p>
 
                   <button
+                    type="button"
                     onClick={handleDeleteAccount}
                     disabled={isDeleting}
                     className="mt-4 flex items-center gap-2 rounded-full border-[1.5px] border-red-700 px-6 py-2 font-functional text-ui font-bold uppercase tracking-[2px] text-red-700 transition-colors hover:bg-red-700 hover:text-white disabled:opacity-50"

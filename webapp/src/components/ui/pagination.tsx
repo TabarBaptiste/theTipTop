@@ -4,12 +4,12 @@ import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-r
 import { Button } from '@/components/ui/button';
 
 interface PaginationProps {
-  page: number;
-  totalPages: number;
-  total: number;
-  onPageChange: (page: number) => void;
+  readonly page: number;
+  readonly totalPages: number;
+  readonly total: number;
+  readonly onPageChange: (page: number) => void;
   /** Ce qui est compté, au pluriel : « lots remis », « lots en attente ». */
-  label: string;
+  readonly label: string;
 }
 
 /**
