@@ -10,8 +10,17 @@ describe('Page d\'accueil', () => {
   it('affiche le titre principal', () => {
     // Le titre porte l'argument différenciant, pas une formule de bienvenue :
     // c'est ce qui remonte dans les résultats de recherche.
-    cy.get('h1').should('contain.text', 'Jeu-concours');
-    cy.get('h1').should('contain.text', '100 % des tickets gagnants');
+    //
+    // Le titre sépare « 100 » de « % » par une espace insécable, sans quoi la
+    // ligne se coupe entre les deux. Elle est normalisée avant comparaison :
+    // cette espace relève de la typographie et non du contenu, et l'écrire
+    // littéralement dans le spec y glisserait un caractère invisible que la
+    // relecture ne distingue pas d'une espace ordinaire.
+    cy.get('h1').should(($titre) => {
+      const texte = $titre.text().replace(/\u00a0/g, ' ');
+      expect(texte).to.contain('Jeu-concours');
+      expect(texte).to.contain('100 % des tickets gagnants');
+    });
   });
 
   it('affiche le bandeau de temps restant (ou de fin de jeu)', () => {
