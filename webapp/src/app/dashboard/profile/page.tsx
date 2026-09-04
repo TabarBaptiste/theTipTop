@@ -96,7 +96,7 @@ export default function ProfilePage() {
 
   if (authLoading || !isAuthenticated) {
     return (
-      <div className="min-h-[calc(100vh-5rem)] bg-white py-8">
+      <div className="min-h-[calc(100vh-3.75rem)] bg-surface py-8">
         <div className="container mx-auto px-6">
           <div className="grid gap-8 lg:grid-cols-[240px_1fr]">
             {/* Squelette calé sur la forme réelle : un panneau, pas des lignes
@@ -130,14 +130,14 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-white py-8">
+    <div className="min-h-[calc(100vh-3.75rem)] bg-surface py-8">
       <div className="container mx-auto px-6">
         <div className="grid gap-8 lg:grid-cols-[240px_1fr]">
           <AccountSidebar />
 
           {/* Main content */}
           <main>
-            <h1 className="font-display text-h2 text-noir">Mes informations</h1>
+            <h1 className="font-display text-h2 text-ink">Mes informations</h1>
 
             {/* Grille à deux colonnes de bout en bout, comme la maquette. Les
                 champs d'adresse qu'elle montre ne sont pas repris : ils
@@ -190,7 +190,7 @@ export default function ProfilePage() {
                   <Label htmlFor="gender">Genre</Label>
                   <select
                     id="gender"
-                    className="flex h-10 w-full rounded-soft border-[1.5px] border-warm-beige bg-white px-4 py-2 font-functional text-sm text-noir transition-colors focus:border-terracotta-600 focus:outline-none"
+                    className="flex h-10 w-full rounded-soft border-[1.5px] border-gold-700 bg-surface px-4 py-2 font-functional text-sm text-ink transition-colors focus:border-accent focus:outline-none"
                     {...register('gender')}
                   >
                     <option value="">Sélectionner</option>

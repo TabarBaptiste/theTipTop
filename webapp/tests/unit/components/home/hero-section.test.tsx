@@ -22,16 +22,6 @@ describe('HeroSection', () => {
     expect(titre).toHaveTextContent(/Thé Tip Top/i);
   });
 
-  // Les trois arguments de reassurance repondent chacun a une objection. En
-  // perdre un passe inapercu a la relecture.
-  it('affiche les trois arguments de réassurance', () => {
-    render(<HeroSection />);
-
-    expect(screen.getByText('Bio certifié')).toBeInTheDocument();
-    expect(screen.getByText('500 000 tickets')).toBeInTheDocument();
-    expect(screen.getByText('100% gagnant')).toBeInTheDocument();
-  });
-
   it('rend les appels à l’action', () => {
     render(<HeroSection />);
 

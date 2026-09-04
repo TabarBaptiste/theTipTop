@@ -12,18 +12,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { api } from '@/lib/api';
+import { PASSWORD_HINT, passwordField } from '@/lib/validation';
 
-// Mêmes exigences que l'inscription classique : le compte créé ici n'est pas
-// un compte de seconde zone.
 const passwordSchema = z
   .object({
-    password: z
-      .string()
-      .min(8, 'Le mot de passe doit faire au moins 8 caractères')
-      .regex(/[A-Z]/, 'Il doit contenir au moins une majuscule')
-      .regex(/[a-z]/, 'Il doit contenir au moins une minuscule')
-      .regex(/[0-9]/, 'Il doit contenir au moins un chiffre')
-      .regex(/[@$!%*?&#]/, 'Il doit contenir au moins un caractère spécial (@$!%*?&#)'),
+    password: passwordField,
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -34,12 +27,12 @@ const passwordSchema = z
 type PasswordFormData = z.infer<typeof passwordSchema>;
 
 interface Props {
-  prizeName: string;
-  prizeValue?: string;
-  code: string;
+  readonly prizeName: string;
+  readonly prizeValue?: string;
+  readonly code: string;
   /** Option A : le mot de passe est choisi après la validation du code. */
-  passwordRequired: boolean;
-  userId: string;
+  readonly passwordRequired: boolean;
+  readonly userId: string;
 }
 
 export function ParticipationResult({
@@ -80,17 +73,17 @@ export function ParticipationResult({
   return (
     <div className="text-center">
       <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-terracotta-50">
-        <PartyPopper className="h-8 w-8 text-terracotta-600" strokeWidth={1.5} />
+        <PartyPopper className="h-8 w-8 text-accent" strokeWidth={1.5} />
       </div>
 
-      <h1 className="mt-6 font-display text-h2 text-noir">Félicitations !</h1>
+      <h1 className="mt-6 font-display text-h2 text-ink">Félicitations !</h1>
       <p className="mt-2 text-sm text-stone-grey">Vous avez gagné :</p>
 
       <div className="mt-6 rounded-card bg-terracotta-50 p-6">
-        <Gift className="mx-auto h-10 w-10 text-terracotta-600" strokeWidth={1.5} />
-        <h2 className="mt-3 font-display text-xl font-bold text-noir">{prizeName}</h2>
+        <Gift className="mx-auto h-10 w-10 text-accent" strokeWidth={1.5} />
+        <h2 className="mt-3 font-display text-xl font-bold text-ink">{prizeName}</h2>
         {prizeValue && (
-          <p className="mt-1 font-functional text-lg font-bold text-terracotta-600">
+          <p className="mt-1 font-functional text-lg font-bold text-accent">
             Valeur : {prizeValue}
           </p>
         )}
@@ -108,7 +101,7 @@ export function ParticipationResult({
 
       {passwordRequired && !passwordSet ? (
         <div className="mt-8 border-t border-warm-beige pt-6 text-left">
-          <h3 className="font-display text-lg text-noir">Sécurisez votre compte</h3>
+          <h3 className="font-display text-lg text-ink">Sécurisez votre compte</h3>
           <p className="mt-1 text-sm text-stone-grey">
             Choisissez un mot de passe pour retrouver vos participations plus tard.
           </p>
@@ -120,9 +113,7 @@ export function ParticipationResult({
               {errors.password ? (
                 <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>
               ) : (
-                <p className="mt-1 text-xs text-stone-grey">
-                  Min. 8 caractères, 1 majuscule, 1 chiffre, 1 caractère spécial
-                </p>
+                <p className="mt-1 text-xs text-stone-grey">{PASSWORD_HINT}</p>
               )}
             </div>
 
@@ -147,7 +138,7 @@ export function ParticipationResult({
           </form>
 
           <p className="mt-3 text-center text-xs text-stone-grey">
-            <Link href="/dashboard" className="hover:underline">
+            <Link href="/dashboard" className="underline underline-offset-2">
               Plus tard
             </Link>
           </p>

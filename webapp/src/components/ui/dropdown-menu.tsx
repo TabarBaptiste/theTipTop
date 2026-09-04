@@ -22,7 +22,7 @@ const DropdownMenuContent = React.forwardRef<
       ref={ref}
       sideOffset={sideOffset}
       className={cn(
-        'z-50 min-w-[13rem] overflow-hidden rounded-card border border-warm-beige bg-white p-1 shadow-lg',
+        'z-50 min-w-[13rem] overflow-hidden rounded-card border border-warm-beige bg-surface p-1 shadow-lg',
         className
       )}
       {...props}
@@ -38,10 +38,10 @@ const DropdownMenuItem = React.forwardRef<
   <DropdownMenuPrimitive.Item
     ref={ref}
     className={cn(
-      'flex cursor-pointer select-none items-center gap-2 rounded-soft px-3 py-2 text-sm text-noir outline-none transition-colors',
+      'flex cursor-pointer select-none items-center gap-2 rounded-soft px-3 py-2 text-sm text-ink outline-none transition-colors',
       // Radix marque l'élément survolé ou atteint au clavier par data-highlighted :
       // un seul style couvre donc la souris et le clavier.
-      'data-[highlighted]:bg-cream data-[highlighted]:text-terracotta-600',
+      'data-[highlighted]:bg-cream data-[highlighted]:text-accent',
       className
     )}
     {...props}

@@ -13,15 +13,15 @@ export default function NotFound() {
       <Leaf
         size={64}
         strokeWidth={1.5}
-        className="mb-8 text-terracotta-600 opacity-20"
+        className="mb-8 text-accent opacity-20"
       />
       {/* terracotta-600 et non -deep : sur le crème, -deep plafonne a 3.81:1,
           sous le minimum AA de 4.5:1 exige pour du petit texte. La nuance 600
           atteint 4.61:1 pour un ecart de teinte imperceptible. */}
-      <p className="mb-4 font-functional text-ui uppercase text-terracotta-600">
+      <p className="mb-4 font-functional text-ui uppercase text-accent">
         Erreur 404
       </p>
-      <h1 className="mb-3 font-editorial text-h1 text-noir">
+      <h1 className="mb-3 font-editorial text-h1 text-ink">
         Cette page n&apos;existe pas
       </h1>
       <p className="mb-10 max-w-md font-editorial italic text-base text-stone-grey">

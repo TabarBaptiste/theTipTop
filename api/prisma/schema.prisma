@@ -174,6 +174,13 @@ model Lead {
 
   status        LeadStatus @default(EN_ATTENTE_VERIFICATION)
 
+  // Mot de passe choisi au formulaire, deja hache. Il n'est transfere sur le
+  // compte qu'a la confirmation du code : tant que l'adresse n'est pas prouvee,
+  // aucune ligne users n'existe pour le porter. Nullable pour les leads nes
+  // avant cette colonne et pour le chemin Social Login, ou le mot de passe
+  // n'a pas lieu d'etre.
+  password      String?
+
   // Code de verification email : 6 chiffres, 48h (RG-06).
   // Chaque renvoi invalide le precedent et repousse l'echeance (RG-07).
   verificationCode String?   @db.VarChar(6)
@@ -212,6 +219,13 @@ model Lead {
   purgeAfter    DateTime?                     // Expire + 30 j, puis suppression (RG-21)
 
   @@index([email])
+  // Un index unique partiel restreint aux leads en attente complete cet index :
+  // il interdit deux demandes concurrentes sur la meme adresse (RG-01), sans
+  // bloquer une nouvelle tentative apres expiration. Prisma ne sait pas
+  // exprimer la clause WHERE d'un index partiel : il est cree en SQL brut par
+  // la migration lead_password_and_unique_email et n'apparait donc pas ici.
+  // Consequence a connaitre : `prisma migrate dev` le voit comme une derive et
+  // proposera de le supprimer. Refuser, ou le recreer.
   @@index([status])
   @@index([codeExpiresAt])                    // Job d'expiration des leads (RG-21)
   @@index([purgeAfter])                       // Job de purge (RG-21)

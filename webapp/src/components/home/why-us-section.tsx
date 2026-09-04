@@ -1,59 +1,56 @@
-import { Leaf, Award, ShieldCheck, Heart } from 'lucide-react';
+import Link from 'next/link';
 
+// Ces quatre arguments sont ceux de la maquette : ils portent sur la loyauté
+// du jeu-concours, pas sur la marque. Les précédents - bio, mélanges à la
+// main, provenance, éco-responsabilité - répondaient à une autre question que
+// celle posée par le titre de la section.
 const reasons = [
   {
-    icon: Leaf,
     number: '01',
-    title: 'Thé 100% bio',
-    description: 'Tous nos thés sont certifiés bio depuis l\'origine de notre marque.',
+    description: 'Jeu 100% transparent et équitable pour tous les participants.',
   },
   {
-    icon: Award,
     number: '02',
-    title: 'Artisanat unique',
-    description: 'Chaque mélange est créé à la main par nos maîtres théiers.',
+    description: 'Lots de qualité premium sélectionnés avec soin.',
   },
   {
-    icon: ShieldCheck,
     number: '03',
-    title: 'Traçabilité totale',
-    description: 'De la plantation à votre tasse, nous garantissons la provenance.',
+    description: 'Tirage certifié par huissier de justice.',
   },
   {
-    icon: Heart,
     number: '04',
-    title: 'Engagement RSE',
-    description: 'Une démarche éco-responsable à chaque étape de production.',
+    description: 'Service client disponible 7j/7 pour vous accompagner.',
   },
 ];
 
 // L'id « why-us » est la cible du lien « À propos » du footer (/#why-us).
 export function WhyUsSection() {
   return (
-    <section id="why-us" className="bg-cream py-16 md:py-20">
+    <section id="why-us" className="bg-cream py-12">
       <div className="container mx-auto px-6">
-        <h2 className="font-display text-h2 text-noir">
+        <h2 className="border-b border-section-line pb-[18px] font-display text-h2 leading-[2.4375rem] text-ink">
           Pourquoi nous ?
         </h2>
 
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {reasons.map((reason) => (
-            <div key={reason.number} className="flex flex-col">
-              <span className="font-functional text-ui uppercase tracking-[2px] text-terracotta-600">
+            <div key={reason.number} className="flex flex-col gap-3">
+              <span className="font-display text-[1.375rem] font-bold leading-[2.0625rem] text-accent">
                 {reason.number}
               </span>
-              <div className="mt-3 flex h-10 w-10 items-center justify-center rounded-full bg-terracotta-50">
-                <reason.icon className="h-5 w-5 text-terracotta-600" strokeWidth={1.5} />
-              </div>
-              <h3 className="mt-3 font-functional text-sm font-bold text-noir">
-                {reason.title}
-              </h3>
-              <p className="mt-2 text-xs leading-relaxed text-stone-grey">
+              <p className="text-[0.6875rem] leading-[1.03125rem] tracking-[0.3px] text-stone-grey">
                 {reason.description}
               </p>
             </div>
           ))}
         </div>
+
+        <Link
+          href="/reglement"
+          className="mt-12 inline-block text-[0.6875rem] leading-[1.03125rem] text-moss underline underline-offset-2"
+        >
+          Lire la charte de transparence
+        </Link>
       </div>
     </section>
   );

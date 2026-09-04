@@ -29,6 +29,8 @@ function remplir(ecarts: Record<string, string> = {}) {
     'Nom *': 'Dupont',
     'Prénom *': 'Jean',
     'Adresse email *': 'jean.dupont@email.fr',
+    'Mot de passe *': 'Password1!',
+    'Confirmer le mot de passe *': 'Password1!',
     ...ecarts,
   };
 
@@ -124,7 +126,7 @@ describe('ParticipationForm', () => {
     accepterLeReglement();
     fireEvent.click(screen.getByRole('button', { name: /participer/i }));
 
-    expect(await screen.findByText(/majeur pour participer/i)).toBeInTheDocument();
+    expect(await screen.findByText(/majeur.*pour vous inscrire/i)).toBeInTheDocument();
     expect(onSubmit).not.toHaveBeenCalled();
   });
 

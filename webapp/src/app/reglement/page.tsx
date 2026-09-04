@@ -89,14 +89,14 @@ const ARTICLES = [
 
 export default function ReglementPage() {
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-cream">
+    <div className="min-h-[calc(100vh-3.75rem)] bg-cream">
       {/* En-tête */}
-      <section className="border-b border-warm-beige bg-white">
+      <section className="border-b border-warm-beige bg-surface">
         <div className="container mx-auto px-6 py-12 md:py-16">
-          <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-600">
+          <p className="font-functional text-ui uppercase tracking-[2px] text-accent">
             Jeu-concours
           </p>
-          <h1 className="mt-3 font-display text-h1 text-noir">Règlement du jeu-concours</h1>
+          <h1 className="mt-3 font-display text-h1 text-ink">Règlement du jeu-concours</h1>
           <p className="mt-4 max-w-2xl text-body text-stone-grey">
             Règlement officiel du jeu-concours Thé Tip Top organisé à l&apos;occasion de
             l&apos;ouverture de la 10ème boutique à Nice, déposé auprès de Maître Arnaud Rick,
@@ -109,19 +109,19 @@ export default function ReglementPage() {
         <div className="mx-auto max-w-3xl space-y-10">
           {ARTICLES.map((article) => (
             <section key={article.id} id={article.id}>
-              <h2 className="font-display text-h2 text-noir">{article.title}</h2>
+              <h2 className="font-display text-h2 text-ink">{article.title}</h2>
               <p className="mt-3 text-body leading-relaxed text-stone-grey">{article.content}</p>
             </section>
           ))}
 
-          <div className="rounded-card border border-warm-beige bg-white p-6">
+          <div className="rounded-card border border-warm-beige bg-surface p-6">
             <p className="text-sm text-stone-grey">
               Pour toute question relative au règlement, consultez notre{' '}
-              <Link href="/faq" className="text-terracotta-600 hover:underline">
+              <Link href="/faq" className="text-accent underline underline-offset-2">
                 FAQ
               </Link>{' '}
               ou notre{' '}
-              <Link href="/politique-confidentialite" className="text-terracotta-600 hover:underline">
+              <Link href="/politique-confidentialite" className="text-accent underline underline-offset-2">
                 politique de confidentialité
               </Link>
               .

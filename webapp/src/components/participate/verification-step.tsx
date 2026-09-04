@@ -22,14 +22,19 @@ function computeSecondsLeft(expiresAt: string): number {
 }
 
 interface Props {
-  maskedEmail: string;
-  expiresAt: string;
-  isVerifying: boolean;
-  isResending: boolean;
+  readonly maskedEmail: string;
+  readonly expiresAt: string;
+  readonly isVerifying: boolean;
+  readonly isResending: boolean;
   /** RG-08 : passé deux renvois, on propose de corriger l'adresse. */
-  offerEmailCorrection: boolean;
-  onVerify: (code: string) => void;
-  onResend: (newEmail?: string) => void;
+  readonly offerEmailCorrection: boolean;
+  /**
+   * L'écran sert les deux parcours : confirmer une participation, ou créer un
+   * compte. Seul le bouton en dit la différence.
+   */
+  readonly submitLabel?: string;
+  readonly onVerify: (code: string) => void;
+  readonly onResend: (newEmail?: string) => void;
 }
 
 export function VerificationStep({
@@ -38,6 +43,7 @@ export function VerificationStep({
   isVerifying,
   isResending,
   offerEmailCorrection,
+  submitLabel = 'Confirmer ma participation',
   onVerify,
   onResend,
 }: Props) {
@@ -60,24 +66,26 @@ export function VerificationStep({
     timeStyle: 'short',
   });
 
+  const resendButtonLabel = secondsLeft > 0 ? `Renvoyer le code (${secondsLeft} s)` : 'Renvoyer le code';
+
   return (
     <div>
       <div className="flex justify-center">
         <div className="rounded-full bg-terracotta-50 p-3">
-          <Mail className="h-6 w-6 text-terracotta-600" strokeWidth={1.5} />
+          <Mail className="h-6 w-6 text-accent" strokeWidth={1.5} />
         </div>
       </div>
 
-      <h1 className="mt-6 text-center font-display text-h2 text-noir">Vérifiez votre email</h1>
+      <h1 className="mt-6 text-center font-display text-h2 text-ink">Vérifiez votre email</h1>
 
       <p className="mt-4 text-center text-sm text-stone-grey">
-        Un code à 6 chiffres a été envoyé à <strong className="text-noir">{maskedEmail}</strong>
+        Un code à 6 chiffres a été envoyé à <strong className="text-ink">{maskedEmail}</strong>
       </p>
 
       <div className="mt-6 rounded-soft bg-terracotta-50 p-4">
         <div className="flex gap-3">
-          <AlertCircle className="h-5 w-5 shrink-0 text-terracotta-600" strokeWidth={1.5} />
-          <p className="text-xs leading-relaxed text-noir">
+          <AlertCircle className="h-5 w-5 shrink-0 text-accent" strokeWidth={1.5} />
+          <p className="text-xs leading-relaxed text-ink">
             Ce code est valable jusqu&apos;au <strong>{deadline}</strong>.
           </p>
         </div>
@@ -116,7 +124,7 @@ export function VerificationStep({
               Vérification...
             </>
           ) : (
-            'Confirmer ma participation'
+            submitLabel
           )}
         </Button>
       </form>
@@ -126,7 +134,7 @@ export function VerificationStep({
           // RG-08 : après deux échecs, la cause la plus probable est une faute
           // de frappe. On corrige plutôt que de renvoyer une fois de plus.
           <div className="space-y-3">
-            <p className="text-sm text-noir">Toujours rien reçu ?</p>
+            <p className="text-sm text-ink">Toujours rien reçu ?</p>
             <p className="text-xs text-stone-grey">
               Vérifiez votre adresse : une faute de frappe est l&apos;explication la plus
               fréquente.
@@ -159,11 +167,7 @@ export function VerificationStep({
               onClick={() => onResend()}
               disabled={isResending || secondsLeft > 0}
             >
-              {isResending
-                ? 'Envoi...'
-                : secondsLeft > 0
-                  ? `Renvoyer le code (${secondsLeft} s)`
-                  : 'Renvoyer le code'}
+              {isResending ? 'Envoi...' : resendButtonLabel}
             </Button>
           </div>
         )}

@@ -5,7 +5,7 @@
 // de Cloudinary via Prize.imageUrl, et retombent sur les images empaquetees si
 // l'URL manque. Sans ce repli, une panne du prestataire viderait la page.
 
-import { render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 
 import { PrizesSection } from '@/components/home/prizes-section';
 
@@ -26,6 +26,14 @@ const LOT_DISTANT = {
   displayOrder: 1,
 };
 
+const SECOND_LOT = {
+  ...LOT_DISTANT,
+  code: 'TEA_DETOX',
+  name: 'Thé détox',
+  percentage: 20,
+  displayOrder: 2,
+};
+
 function reponse(prizes: unknown[] | undefined, isLoading = false) {
   mockQuery.mockReturnValue({ data: prizes, isLoading });
 }
@@ -38,11 +46,22 @@ function sourceAffichee() {
 describe('PrizesSection', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('affiche des squelettes pendant le chargement', () => {
+  // « au moins un squelette » laissait la place a la derive : celui-ci a decrit
+  // pendant deux refontes une mise en page a deux colonnes qui n'existait plus,
+  // et rien ne l'a signale. La colonne du pourcentage et la rangee de commandes
+  // surgissaient alors d'un coup, la section changeant de hauteur au chargement.
+  // Ce test retient les quatre zones de la silhouette.
+  it('annonce la silhouette complete pendant le chargement', () => {
     reponse(undefined, true);
     const { container } = render(<PrizesSection />);
 
-    expect(container.querySelectorAll('.animate-pulse').length).toBeGreaterThan(0);
+    // Texte (surtitre, deux lignes de titre, trois de description), visuel,
+    // pourcentage et son libelle : douze au minimum avant les commandes.
+    expect(container.querySelectorAll('.animate-pulse').length).toBeGreaterThanOrEqual(12);
+
+    // Les commandes du carrousel sont les seules formes rondes du squelette :
+    // deux fleches, le bouton de pause, cinq pastilles.
+    expect(container.querySelectorAll('.animate-pulse.rounded-full')).toHaveLength(8);
   });
 
   it('sert le visuel distant quand l’API en fournit un', () => {
@@ -69,13 +88,58 @@ describe('PrizesSection', () => {
     reponse([{ ...LOT_DISTANT, code: 'LOT_INEDIT', name: 'Lot inédit' }]);
     render(<PrizesSection />);
 
-    expect(screen.getByText('Lot inédit')).toBeInTheDocument();
+    // Le numero du lot ouvre desormais le titre - « 01. Lot inedit » - et le
+    // nom n'est plus un noeud de texte a lui seul.
+    expect(screen.getByText(/Lot inédit/)).toBeInTheDocument();
   });
 
   it('affiche le pourcentage de chances de chaque lot', () => {
     reponse([LOT_DISTANT]);
     render(<PrizesSection />);
 
-    expect(screen.getByText('60%')).toBeInTheDocument();
+    // Espace insecable entre le nombre et le signe pourcent, comme le veut la
+    // typographie francaise : la chaine exacte n'est plus « 60% ».
+    expect(screen.getByText(/60\s*%/)).toBeInTheDocument();
+  });
+  // Le defilement automatique est du contenu qui se substitue tout seul : le
+  // critere 2.2.2 impose de pouvoir l'arreter, et le survol n'y suffit pas -
+  // il n'existe pas au clavier.
+  it('fait defiler les lots et laisse mettre le defilement en pause', () => {
+    jest.useFakeTimers();
+    reponse([LOT_DISTANT, SECOND_LOT]);
+    render(<PrizesSection />);
+
+    expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent('Infuseur à thé');
+
+    act(() => {
+      jest.advanceTimersByTime(6000);
+    });
+    expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent('Thé détox');
+
+    fireEvent.click(screen.getByLabelText(/mettre le défilement des lots en pause/i));
+    act(() => {
+      jest.advanceTimersByTime(12000);
+    });
+    expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent('Thé détox');
+
+    jest.useRealTimers();
+  });
+
+  // Naviguer soi-meme coupe le defilement : sinon le lot choisi disparait sous
+  // les yeux quelques secondes plus tard.
+  it('arrête le défilement dès que le visiteur navigue lui-même', () => {
+    jest.useFakeTimers();
+    reponse([LOT_DISTANT, SECOND_LOT]);
+    render(<PrizesSection />);
+
+    fireEvent.click(screen.getByLabelText('Lot suivant'));
+    expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent('Thé détox');
+
+    act(() => {
+      jest.advanceTimersByTime(12000);
+    });
+    expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent('Thé détox');
+
+    jest.useRealTimers();
   });
 });

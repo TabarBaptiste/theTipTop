@@ -90,11 +90,11 @@ api.interceptors.response.use(
           window.location.href = '/auth/login';
         }
         
-        return Promise.reject(error);
+        throw error;
       }
     }
 
-    return Promise.reject(error);
+    throw error;
   }
 );
 

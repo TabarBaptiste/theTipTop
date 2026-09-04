@@ -151,7 +151,7 @@ export default function SettingsPage() {
 
   if (authLoading || !isAuthenticated) {
     return (
-      <div className="min-h-[calc(100vh-5rem)] bg-white py-8">
+      <div className="min-h-[calc(100vh-3.75rem)] bg-surface py-8">
         <div className="container mx-auto px-6">
           <div className="grid gap-8 lg:grid-cols-[240px_1fr]">
             {/* Squelette calé sur la forme réelle : un panneau, pas des lignes
@@ -171,17 +171,17 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-white py-8">
+    <div className="min-h-[calc(100vh-3.75rem)] bg-surface py-8">
       <div className="container mx-auto px-6">
         <div className="grid gap-8 lg:grid-cols-[240px_1fr]">
           <AccountSidebar />
 
           <main className="max-w-2xl">
-            <h1 className="font-display text-h2 text-noir">Paramètres</h1>
+            <h1 className="font-display text-h2 text-ink">Paramètres</h1>
 
             {/* --- Mot de passe --- */}
             <section className="mt-8 border-t border-warm-beige pt-6">
-              <h2 className="font-display text-h3 text-noir">
+              <h2 className="font-display text-h3 text-ink">
                 {aUnMotDePasse ? 'Mot de passe' : 'Définir un mot de passe'}
               </h2>
               <p className="mt-1 text-sm text-stone-grey">
@@ -240,13 +240,13 @@ export default function SettingsPage() {
 
             {/* --- Communications --- */}
             <section className="mt-8 border-t border-warm-beige pt-6">
-              <h2 className="font-display text-h3 text-noir">Communications</h2>
+              <h2 className="font-display text-h3 text-ink">Communications</h2>
               <p className="mt-1 text-sm text-stone-grey">
                 Vous pouvez retirer votre consentement à tout moment, sans avoir à vous
                 justifier. Cela n&apos;affecte pas vos participations en cours.
               </p>
 
-              <label className="mt-4 flex cursor-pointer items-start gap-3 rounded-soft border border-warm-beige bg-white p-4">
+              <label className="mt-4 flex cursor-pointer items-start gap-3 rounded-soft border border-warm-beige bg-surface p-4">
                 <input
                   type="checkbox"
                   className="mt-0.5 h-4 w-4 shrink-0 accent-terracotta-deep"
@@ -254,8 +254,8 @@ export default function SettingsPage() {
                   disabled={isSavingConsent}
                   onChange={(e) => handleConsentChange(e.target.checked)}
                 />
-                <span className="text-sm text-noir">
-                  Je souhaite recevoir les offres et actualités de Thé Tip Top par e-mail.
+                <span className="text-sm text-ink">
+                  Je souhaite recevoir les offres et actualités de Thé Tip Top par e-mail.{' '}
                   <span className="mt-1 block text-xs text-stone-grey">
                     Les e-mails liés à vos participations, eux, vous seront toujours envoyés :
                     ils sont nécessaires au jeu-concours.
@@ -275,7 +275,7 @@ export default function SettingsPage() {
                 Le suivi de mesure d&apos;audience se règle séparément, depuis la{' '}
                 <Link
                   href="/gestion-cookies"
-                  className="text-terracotta-600 underline underline-offset-2"
+                  className="text-accent underline underline-offset-2"
                 >
                   gestion des cookies
                 </Link>
@@ -285,7 +285,7 @@ export default function SettingsPage() {
 
             {/* --- Donnees personnelles --- */}
             <section className="mt-8 border-t border-warm-beige pt-6">
-              <h2 className="font-display text-h3 text-noir">Mes données</h2>
+              <h2 className="font-display text-h3 text-ink">Mes données</h2>
               <p className="mt-1 text-sm text-stone-grey">
                 Téléchargez l&apos;intégralité des données que nous détenons sur vous : votre
                 profil, vos participations et les lots associés, au format JSON.
@@ -308,7 +308,7 @@ export default function SettingsPage() {
 
             {/* --- Suppression --- */}
             <section className="mt-8 border-t border-warm-beige pt-6">
-              <h2 className="font-display text-h3 text-noir">Supprimer mon compte</h2>
+              <h2 className="font-display text-h3 text-ink">Supprimer mon compte</h2>
 
               {estPersonnel ? (
                 // L'API refuse cette suppression : afficher le bouton
@@ -328,6 +328,7 @@ export default function SettingsPage() {
                   </p>
 
                   <button
+                    type="button"
                     onClick={handleDeleteAccount}
                     disabled={isDeleting}
                     className="mt-4 flex items-center gap-2 rounded-full border-[1.5px] border-red-700 px-6 py-2 font-functional text-ui font-bold uppercase tracking-[2px] text-red-700 transition-colors hover:bg-red-700 hover:text-white disabled:opacity-50"

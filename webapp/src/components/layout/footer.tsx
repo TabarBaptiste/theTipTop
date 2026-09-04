@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { Mail, Instagram, Facebook, Youtube, Linkedin, Music2 } from 'lucide-react';
+import { Mail, Music2 } from 'lucide-react';
+import { FacebookIcon, InstagramIcon, LinkedinIcon, YoutubeIcon } from '@/components/icons/brand-icons';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -42,7 +43,7 @@ export function Footer() {
   };
 
   return (
-    <footer className="bg-noir text-white">
+    <footer className="relative bg-noir text-white">
       {/* Main Footer */}
       <div className="container mx-auto px-6 py-12">
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
@@ -193,7 +194,7 @@ export function Footer() {
                   placeholder="Votre email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="h-10 flex-1 rounded-soft border border-white/40 bg-white/5 px-3 text-sm text-white placeholder:text-white/50 focus:border-terracotta-300 focus:outline-none focus:ring-1 focus:ring-terracotta-300"
+                  className="h-10 flex-1 rounded-soft border border-white/40 bg-surface/5 px-3 text-sm text-white placeholder:text-white/50 focus:border-terracotta-300 focus:outline-none focus:ring-1 focus:ring-terracotta-300"
                   required
                 />
                 {/* Beige au repos, orange au clic (cf. charte). Texte sombre :
@@ -202,7 +203,7 @@ export function Footer() {
                   type="submit"
                   size="icon"
                   disabled={isSubmitting}
-                  className="shrink-0 bg-warm-beige text-noir hover:bg-warm-beige/90 active:bg-terracotta-600 active:text-white"
+                  className="shrink-0 bg-warm-beige text-ink hover:bg-warm-beige/90 active:bg-terracotta-600 active:text-white"
                   aria-label="S'abonner à la newsletter"
                 >
                   {isSubmitting ? '…' : '→'}
@@ -212,7 +213,7 @@ export function Footer() {
                 Nous respectons votre vie privée. Consultez notre{' '}
                 <Link
                   href="/politique-confidentialite"
-                  className="text-terracotta-300 hover:underline"
+                  className="text-terracotta-300 underline underline-offset-2"
                 >
                   politique de confidentialité
                 </Link>
@@ -241,7 +242,7 @@ export function Footer() {
               className="text-white/70 transition-colors hover:text-terracotta-300"
               aria-label="Instagram"
             >
-              <Instagram className="h-4 w-4" strokeWidth={1.5} />
+              <InstagramIcon className="h-4 w-4" />
             </a>
             <a
               href={lienSocial('TikTok')}
@@ -270,7 +271,7 @@ export function Footer() {
               className="text-white/70 transition-colors hover:text-terracotta-300"
               aria-label="Facebook"
             >
-              <Facebook className="h-4 w-4" strokeWidth={1.5} />
+              <FacebookIcon className="h-4 w-4" />
             </a>
             <a
               href={lienSocial('LinkedIn')}
@@ -279,7 +280,7 @@ export function Footer() {
               className="text-white/70 transition-colors hover:text-terracotta-300"
               aria-label="LinkedIn"
             >
-              <Linkedin className="h-4 w-4" strokeWidth={1.5} />
+              <LinkedinIcon className="h-4 w-4" />
             </a>
             <a
               href={lienSocial('YouTube')}
@@ -288,7 +289,7 @@ export function Footer() {
               className="text-white/70 transition-colors hover:text-terracotta-300"
               aria-label="YouTube"
             >
-              <Youtube className="h-4 w-4" strokeWidth={1.5} />
+              <YoutubeIcon className="h-4 w-4" />
             </a>
           </div>
         </div>

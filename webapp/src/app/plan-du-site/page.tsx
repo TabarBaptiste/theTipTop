@@ -90,8 +90,8 @@ export default function PlanDuSitePage() {
   return (
     <div className="bg-cream py-16 md:py-20">
       <div className="container mx-auto max-w-3xl px-6">
-        <Map className="mb-6 h-10 w-10 text-terracotta-600" strokeWidth={1.5} />
-        <h1 className="font-display text-h1 text-noir">Plan du site</h1>
+        <Map className="mb-6 h-10 w-10 text-accent" strokeWidth={1.5} />
+        <h1 className="font-display text-h1 text-ink">Plan du site</h1>
         <p className="mt-3 text-body text-stone-grey">
           Toutes les pages du site, regroupées par thème. Les pages de votre espace personnel
           demandent d&apos;être connecté.
@@ -100,14 +100,14 @@ export default function PlanDuSitePage() {
         <div className="mt-12 space-y-12">
           {RUBRIQUES.map((rubrique) => (
             <section key={rubrique.titre}>
-              <h2 className="font-display text-h2 text-noir">{rubrique.titre}</h2>
+              <h2 className="font-display text-h2 text-ink">{rubrique.titre}</h2>
 
               <ul className="mt-4 space-y-4">
                 {rubrique.entrees.map((entree) => (
                   <li key={entree.href} className="border-t border-warm-beige pt-4">
                     <Link
                       href={entree.href}
-                      className="font-functional text-body font-semibold text-terracotta-600 underline underline-offset-4"
+                      className="font-functional text-body font-semibold text-accent underline underline-offset-4"
                     >
                       {entree.libelle}
                     </Link>

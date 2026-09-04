@@ -4,12 +4,12 @@ import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-r
 import { Button } from '@/components/ui/button';
 
 interface PaginationProps {
-  page: number;
-  totalPages: number;
-  total: number;
-  onPageChange: (page: number) => void;
+  readonly page: number;
+  readonly totalPages: number;
+  readonly total: number;
+  readonly onPageChange: (page: number) => void;
   /** Ce qui est compté, au pluriel : « lots remis », « lots en attente ». */
-  label: string;
+  readonly label: string;
 }
 
 /**
@@ -29,7 +29,7 @@ export function Pagination({ page, totalPages, total, onPageChange, label }: Pag
       className="mt-4 flex flex-col items-center justify-between gap-3 border-t border-warm-beige pt-4 sm:flex-row"
     >
       <p className="text-sm text-stone-grey">
-        <strong className="font-medium text-noir">{total.toLocaleString('fr-FR')}</strong> {label}
+        <strong className="font-medium text-ink">{total.toLocaleString('fr-FR')}</strong> {label}
       </p>
 
       {/* Une seule page : le compteur suffit, la navigation n'aurait rien à faire. */}

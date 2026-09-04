@@ -46,10 +46,13 @@ describe('UC-05 - Participation sans compte', () => {
     ctx.envois.length = 0;
   });
 
+  const MOT_DE_PASSE = 'Motdepasse1!';
+
   /** Corps d'ouverture valide, majeur, consentant, pour le code donne. */
   const ouverture = (code: string, email: string) => ({
     code,
     email,
+    password: MOT_DE_PASSE,
     firstName: 'Camille',
     lastName: 'Martin',
     birthDate: '1990-05-15',
@@ -99,11 +102,12 @@ describe('UC-05 - Participation sans compte', () => {
         expect.objectContaining({ name: expect.any(String) }),
       );
 
-      // La personne repart connectee : c'est ce qui lui evite de ressaisir un
-      // mot de passe qu'elle n'a pas encore choisi.
+      // La personne repart connectee, sans avoir a se reconnecter avec le mot
+      // de passe qu'elle vient de choisir. Celui-ci ayant ete saisi des
+      // l'ouverture, il ne reste rien a definir.
       expect(validation.body.accessToken).toEqual(expect.any(String));
       expect(validation.body.refreshToken).toEqual(expect.any(String));
-      expect(validation.body.passwordRequired).toBe(true);
+      expect(validation.body.passwordRequired).toBe(false);
 
       // --- Etape 4 : l'etat en base correspond a ce qui a ete annonce ---
       const enBase = await ctx.prisma.ticket.findUnique({
@@ -115,7 +119,10 @@ describe('UC-05 - Participation sans compte', () => {
       expect(enBase!.usedAt).not.toBeNull();
       expect(enBase!.participation).not.toBeNull();
       expect(enBase!.participation!.user.email).toBe(email);
-      expect(enBase!.participation!.user.password).toBeNull();
+      // Le mot de passe saisi a l'ouverture a ete transfere sur le compte, et
+      // n'a jamais transite en clair : seul son hache bcrypt est en base.
+      expect(enBase!.participation!.user.password).not.toBe(MOT_DE_PASSE);
+      expect(enBase!.participation!.user.password).toMatch(/^\$2[aby]\$/);
 
       const lead = await ctx.prisma.lead.findUnique({
         where: { id: initiation.body.leadId },

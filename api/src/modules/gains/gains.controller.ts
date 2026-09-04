@@ -25,10 +25,17 @@ export class GainsController {
   // ===========================================
   @Post(':id/deliver')
   @Roles('EMPLOYEE', 'ADMIN')
-  @ApiOperation({ summary: 'Marquer un lot comme remis (Employé/Admin)' })
+  @ApiOperation({
+    summary: 'Marquer un lot comme remis (Employé/Admin)',
+    description:
+      "La remise est atomique : la condition « non encore remis » fait partie de l'ordre " +
+      "d'écriture, de sorte que deux caisses validant le même lot au même instant ne peuvent " +
+      'pas aboutir toutes les deux (RG-22).',
+  })
   @ApiResponse({ status: 200, description: 'Lot remis avec succès' })
-  @ApiResponse({ status: 400, description: 'Lot déjà remis' })
+  @ApiResponse({ status: 403, description: 'Période de réclamation expirée (RG-24)' })
   @ApiResponse({ status: 404, description: 'Participation non trouvée' })
+  @ApiResponse({ status: 409, description: 'Lot déjà remis' })
   async deliverPrize(
     @Param('id') id: string,
     @Body() dto: DeliverPrizeDto,
@@ -44,8 +51,10 @@ export class GainsController {
   @Roles('EMPLOYEE', 'ADMIN')
   @ApiOperation({ summary: 'Marquer un lot comme remis par code (Employé/Admin)' })
   @ApiResponse({ status: 200, description: 'Lot remis avec succès' })
-  @ApiResponse({ status: 400, description: 'Lot déjà remis ou code non utilisé' })
+  @ApiResponse({ status: 400, description: 'Code non encore utilisé par un client' })
+  @ApiResponse({ status: 403, description: 'Période de réclamation expirée (RG-24)' })
   @ApiResponse({ status: 404, description: 'Ticket non trouvé' })
+  @ApiResponse({ status: 409, description: 'Lot déjà remis' })
   async deliverPrizeByCode(
     @Param('code') code: string,
     @Body() dto: DeliverPrizeDto,

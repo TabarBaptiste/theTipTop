@@ -59,7 +59,7 @@ const FAQ_ITEMS = [
 
 export default function FaqPage() {
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-cream">
+    <div className="min-h-[calc(100vh-3.75rem)] bg-cream">
       {/* Décrit ces questions comme telles aux moteurs, ce que le HTML seul ne
           permet pas. Google peut alors les afficher dépliées dans ses résultats.
           Les réponses sont écrites en littéraux multilignes : leurs retours et
@@ -81,12 +81,12 @@ export default function FaqPage() {
       />
 
       {/* En-tête */}
-      <section className="border-b border-warm-beige bg-white">
+      <section className="border-b border-warm-beige bg-surface">
         <div className="container mx-auto px-6 py-12 md:py-16">
-          <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-600">
+          <p className="font-functional text-ui uppercase tracking-[2px] text-accent">
             Aide
           </p>
-          <h1 className="mt-3 font-display text-h1 text-noir">Questions fréquentes</h1>
+          <h1 className="mt-3 font-display text-h1 text-ink">Questions fréquentes</h1>
           <p className="mt-4 max-w-2xl text-body text-stone-grey">
             Tout ce qu&apos;il faut savoir sur le jeu-concours Thé Tip Top : participation, codes,
             lots et grand prix.
@@ -99,9 +99,9 @@ export default function FaqPage() {
           {FAQ_ITEMS.map((item) => (
             <details
               key={item.question}
-              className="group rounded-card border border-warm-beige bg-white p-6"
+              className="group rounded-card border border-warm-beige bg-surface p-6"
             >
-              <summary className="cursor-pointer list-none font-display text-lg font-semibold text-noir transition-colors group-open:text-terracotta-600">
+              <summary className="cursor-pointer list-none font-display text-lg font-semibold text-ink transition-colors group-open:text-accent">
                 {item.question}
               </summary>
               <p className="mt-3 text-body leading-relaxed text-stone-grey">{item.answer}</p>
@@ -109,19 +109,18 @@ export default function FaqPage() {
           ))}
 
           <div className="rounded-card bg-terracotta-50 p-6 text-center">
-            <p className="text-sm text-noir">
+            <p className="text-sm text-ink">
               Vous ne trouvez pas votre réponse ? Consultez le{' '}
-              <Link href="/reglement" className="font-semibold text-terracotta-600 hover:underline">
+              <Link href="/reglement" className="font-semibold text-accent underline underline-offset-2">
                 règlement complet
               </Link>{' '}
               ou écrivez-nous à{' '}
               <a
                 href="mailto:contact@thetiptop.fr"
-                className="font-semibold text-terracotta-600 hover:underline"
+                className="font-semibold text-accent underline underline-offset-2"
               >
                 contact@thetiptop.fr
-              </a>
-              .
+              </a>.
             </p>
           </div>
         </div>

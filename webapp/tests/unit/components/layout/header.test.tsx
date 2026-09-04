@@ -2,13 +2,14 @@
 // Tests unitaires - Header
 // ===========================================
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { Header } from '@/components/layout/header';
 import type { User } from '@/lib/stores/auth-store';
 
 const mockReplace = jest.fn();
+const mockPathname = jest.fn(() => '/');
 jest.mock('next/navigation', () => ({
-  usePathname: () => '/',
+  usePathname: () => mockPathname(),
   useRouter: () => ({ replace: mockReplace }),
 }));
 
@@ -45,6 +46,7 @@ describe('Header', () => {
     mockAuthState.mockReset();
     mockLogout.mockReset();
     mockReplace.mockReset();
+    mockPathname.mockReset().mockReturnValue('/');
   });
 
   it('affiche le logo et le ramene a l accueil', () => {
@@ -217,5 +219,130 @@ describe('Header', () => {
 
     expect(mockLogout).toHaveBeenCalled();
     expect(mockReplace).toHaveBeenCalledWith('/auth/login');
+  });
+
+  it('affiche « Mon compte » quand le profil ne porte pas de prénom', () => {
+    mockAuthState.mockReturnValue({
+      user: { ...baseUser, firstName: undefined },
+      isAuthenticated: true,
+      logout: mockLogout,
+    });
+    render(<Header />);
+
+    expect(screen.getByRole('button', { name: /Mon compte/ })).toBeInTheDocument();
+  });
+
+  it('surligne le lien actif dans la navigation desktop', () => {
+    mockPathname.mockReturnValue('/faq');
+    signedOut();
+    render(<Header />);
+
+    const liens = screen.getAllByRole('link', { name: 'FAQ' });
+    expect(liens[0].className).toContain('text-accent');
+  });
+
+  describe('menu mobile', () => {
+    function boutonHamburger() {
+      return screen.getByRole('button', { name: /(Ouvrir|Fermer) le menu/ });
+    }
+
+    it("s'ouvre et se referme au clic sur le bouton hamburger", () => {
+      signedOut();
+      render(<Header />);
+
+      const bouton = boutonHamburger();
+      expect(bouton).toHaveAttribute('aria-expanded', 'false');
+      expect(bouton).toHaveAttribute('aria-label', 'Ouvrir le menu');
+
+      fireEvent.click(bouton);
+      expect(bouton).toHaveAttribute('aria-expanded', 'true');
+      expect(bouton).toHaveAttribute('aria-label', 'Fermer le menu');
+
+      fireEvent.click(bouton);
+      expect(bouton).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('se referme apres un clic sur un lien de navigation, qui reste surligne s’il est actif', () => {
+      mockPathname.mockReturnValue('/faq');
+      signedOut();
+      render(<Header />);
+
+      fireEvent.click(boutonHamburger());
+      const menu = within(document.getElementById('menu-mobile')!);
+      const lienFaq = menu.getAllByRole('link', { name: 'FAQ' })[0];
+      expect(lienFaq.className).toContain('text-accent');
+
+      fireEvent.click(lienFaq);
+      expect(boutonHamburger()).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('se referme apres un clic sur « Participer »', () => {
+      signedOut();
+      render(<Header />);
+
+      fireEvent.click(boutonHamburger());
+      const menu = within(document.getElementById('menu-mobile')!);
+      fireEvent.click(menu.getByRole('link', { name: 'Participer' }));
+
+      expect(boutonHamburger()).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('se referme apres un clic sur « Connexion » pour un visiteur anonyme', () => {
+      signedOut();
+      render(<Header />);
+
+      fireEvent.click(boutonHamburger());
+      const menu = within(document.getElementById('menu-mobile')!);
+      fireEvent.click(menu.getByRole('link', { name: 'Connexion' }));
+
+      expect(boutonHamburger()).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('se referme apres un clic sur « Mes participations » pour un compte CLIENT', () => {
+      signedInAs('CLIENT');
+      render(<Header />);
+
+      fireEvent.click(boutonHamburger());
+      const menu = within(document.getElementById('menu-mobile')!);
+      fireEvent.click(menu.getAllByRole('link', { name: 'Mes participations' })[0]);
+
+      expect(boutonHamburger()).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('se referme apres un clic sur le lien de profil', () => {
+      signedInAs('CLIENT');
+      render(<Header />);
+
+      fireEvent.click(boutonHamburger());
+      const menu = within(document.getElementById('menu-mobile')!);
+      fireEvent.click(menu.getAllByRole('link', { name: 'Mon profil' })[0]);
+
+      expect(boutonHamburger()).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('se referme et deconnecte apres un clic sur « Se déconnecter »', () => {
+      signedInAs('ADMIN');
+      render(<Header />);
+
+      fireEvent.click(boutonHamburger());
+      const menu = within(document.getElementById('menu-mobile')!);
+      fireEvent.click(menu.getByRole('button', { name: /Se déconnecter/ }));
+
+      expect(mockLogout).toHaveBeenCalled();
+      expect(mockReplace).toHaveBeenCalledWith('/auth/login');
+      expect(boutonHamburger()).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('propose le raccourci vers le backoffice pour un compte ADMIN', () => {
+      signedInAs('ADMIN');
+      render(<Header />);
+
+      fireEvent.click(boutonHamburger());
+      const menu = within(document.getElementById('menu-mobile')!);
+      const lien = menu.getAllByRole('link', { name: 'Administration' })[0];
+
+      fireEvent.click(lien);
+      expect(boutonHamburger()).toHaveAttribute('aria-expanded', 'false');
+    });
   });
 });

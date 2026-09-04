@@ -12,7 +12,6 @@ describe('AuthController', () => {
   let controller: AuthController;
 
   const mockAuthService = {
-    register: jest.fn(),
     login: jest.fn(),
     refreshToken: jest.fn(),
     logout: jest.fn(),
@@ -45,16 +44,6 @@ describe('AuthController', () => {
     );
     jest.clearAllMocks();
     process.env.FRONTEND_URL = 'http://localhost:3000';
-  });
-
-  it('register should delegate to the service', async () => {
-    mockAuthService.register.mockResolvedValue(tokens);
-    const dto = { email: 'jean@email.fr', password: 'Password123!' };
-
-    const result = await controller.register(dto as never);
-
-    expect(result).toBe(tokens);
-    expect(mockAuthService.register).toHaveBeenCalledWith(dto);
   });
 
   it('login should generate tokens for the validated user', async () => {

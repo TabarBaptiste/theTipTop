@@ -7,50 +7,115 @@
     scroll-behavior: smooth;
 
     /* WCAG 2.2, critère 2.4.11 « Focus non masqué ». L'en-tête est collant et
-       occupe 5rem : sans cette réserve, tout défilement provoqué par une ancre
+       occupe 3.75rem : sans cette réserve, tout défilement provoqué par une ancre
        ou par la mise au point au clavier amène la cible pile derrière lui, et
        l'utilisateur au clavier perd de vue l'élément qu'il vient d'atteindre.
        Les 43 « scroll-mt-* » disséminés dans les pages traitaient le symptôme
        section par section ; cette règle traite la cause. */
-    scroll-padding-top: 5.5rem;
+    scroll-padding-top: 4.25rem;
   }
 
   :root {
-    /* === DESIGN.md - Palette primaire === */
-    --color-terracotta-deep: #BA6905;
-    --color-terracotta-hover: #C25F1F;
-    --color-black: #1A1A1A;
-    --color-white: #FFFFFF;
-    --color-cream: #FAF6EF;
+    /* === Palette de marque =====================================
+       Source de verite des couleurs, en canaux RVB separes par des espaces :
+       c'est la forme qu'attend `rgb(var(--x) / <alpha-value>)` dans
+       tailwind.config.js, et la seule qui laisse fonctionner les modificateurs
+       d'opacite du type `bg-noir/10`.
 
-    /* === DESIGN.md - Palette secondaire === */
-    --color-moss-green: #5C6B3A;
-    --color-warm-beige: #E8D5B0;
-    --color-gold: #C9A96E;
-    --color-terracotta-pale: #F2E0D0;
-    --color-terracotta-warm: #C76C3A;
-    --color-stone-grey: #4A463E;
+       Les valeurs etaient jusqu'ici ecrites deux fois - ici en hexadecimal et
+       la-bas en litteral - et seule la seconde comptait : changer une variable
+       ne changeait rien a l'ecran. Elles ne vivent plus qu'ici, ce qui permet
+       de les redefinir par theme sans toucher a une seule classe.
+       ========================================================== */
+    /* Roles semantiques, separes de la palette brute : le theme sombre les
+       fait varier dans des directions opposees. */
+    --c-ink: 26 26 26;
+    --c-surface: 255 255 255;
+    --c-accent: 168 93 4;
+    --c-moss-panel: 92 107 58;
 
-    /* === DESIGN.md - Semantiques === */
-    --color-bg: var(--color-cream);
-    --color-bg-card: var(--color-terracotta-pale);
-    --color-text-primary: var(--color-black);
-    --color-text-secondary: var(--color-stone-grey);
-    --color-cta: var(--color-terracotta-deep);
-    --color-cta-hover: var(--color-terracotta-hover);
-    --color-accent: var(--color-gold);
-    --color-success: var(--color-moss-green);
+    /* Fonds du carrousel des lots, un par lot. Ils vivent ici plutot que dans
+       le composant pour suivre le theme comme le reste de la page. */
+    /* Surtitre pose sur ces teintes : il lui faut sa propre valeur, aucune
+       nuance de la gamme ne restant lisible sur les deux themes. */
+    --c-lot-accent: 110 61 2;
+
+    --c-lot-infuser: 220 203 149;
+    --c-lot-detox: 242 224 208;
+    --c-lot-signature: 232 213 176;
+    --c-lot-coffret-39: 224 232 208;
+    --c-lot-coffret-69: 245 233 208;
+
+    --c-terracotta-50: 253 248 243;
+    --c-terracotta-100: 249 237 217;
+    --c-terracotta-200: 242 224 208;
+    --c-terracotta-300: 212 167 106;
+    --c-terracotta-400: 200 146 58;
+    --c-terracotta-500: 186 105 5;
+    --c-terracotta-600: 168 93 4;
+    --c-terracotta-700: 139 77 3;
+    --c-terracotta-800: 110 61 2;
+    --c-terracotta-900: 81 45 2;
+    --c-terracotta-pale: 242 224 208;
+    --c-terracotta-deep: 186 105 5;
+    --c-terracotta-hover: 194 95 31;
+    --c-terracotta-warm: 199 108 58;
+    --c-cream: 250 246 239;
+    --c-noir: 26 26 26;
+    --c-moss: 92 107 58;
+    --c-moss-light: 122 140 86;
+    --c-moss-50: 242 245 236;
+    --c-moss-100: 224 232 208;
+    --c-moss-500: 92 107 58;
+    --c-moss-900: 63 74 40;
+    --c-warm-beige: 232 213 176;
+    --c-section-line: 217 217 217;
+    --c-gold-50: 251 246 237;
+    --c-gold-100: 245 233 208;
+    --c-gold-200: 235 219 181;
+    --c-gold-300: 220 203 149;
+    --c-gold-400: 209 185 126;
+    --c-gold-500: 201 169 110;
+    --c-gold-600: 181 149 90;
+    --c-gold-700: 154 125 72;
+    --c-gold-800: 127 102 56;
+    --c-gold-900: 100 79 42;
+    --c-stone: 74 70 62;
+    --c-stone-grey: 74 70 62;
+    --c-tea-50: 253 248 243;
+    --c-tea-100: 249 237 217;
+    --c-tea-200: 242 224 208;
+    --c-tea-300: 212 167 106;
+    --c-tea-400: 200 146 58;
+    --c-tea-500: 186 105 5;
+    --c-tea-600: 168 93 4;
+    --c-tea-700: 139 77 3;
+    --c-tea-800: 110 61 2;
+    --c-tea-900: 81 45 2;
+    --c-tea-950: 58 32 1;
+
+    /* === DESIGN.md - Semantiques ===
+       Derivees de la palette ci-dessus, pour les quelques regles CSS qui ne
+       passent pas par une classe Tailwind. */
+    --color-bg: rgb(var(--c-cream));
+    --color-bg-card: rgb(var(--c-terracotta-pale));
+    --color-text-primary: rgb(var(--c-ink));
+    --color-text-secondary: rgb(var(--c-stone));
+    --color-cta: rgb(var(--c-terracotta-deep));
+    --color-cta-hover: rgb(var(--c-terracotta-hover));
+    --color-accent: rgb(var(--c-gold));
+    --color-success: rgb(var(--c-moss));
 
     /* === DESIGN.md - Typographie === */
     --font-editorial: 'Playfair Display', Georgia, serif;
     --font-functional: 'Montserrat', system-ui, sans-serif;
 
-    --text-h1: clamp(28px, 4vw, 36px);
-    --text-h2: clamp(22px, 3vw, 26px);
-    --text-h3: 20px;
-    --text-body: 14px;
-    --text-small: 11px;
-    --text-ui: 11px;
+    --text-h1: clamp(1.75rem, 4vw, 2.25rem);
+    --text-h2: clamp(1.375rem, 3vw, 1.625rem);
+    --text-h3: 1.25rem;
+    --text-body: 0.875rem;
+    --text-small: 0.6875rem;
+    --text-ui: 0.6875rem;
 
     /* === DESIGN.md - Espacement === */
     --space-2xs: 4px;
@@ -92,6 +157,107 @@
     --radius: 0.5rem;
   }
 }
+
+  /* === Theme sombre ==========================================
+     Seules les variables qui changent sont redefinies : tout le reste est
+     herite de :root. Les valeurs ne sont pas une inversion mecanique - un
+     fond invente par soustraction vire au gris bleute et perd la chaleur de
+     la charte. Elles gardent la meme famille chromatique, brunie.
+
+     Contrastes verifies, tous au-dessus de 4,5:1 : texte principal 16,1:1
+     sur la page, 14,9:1 sur les surfaces et 14,7:1 sur les cartes, texte
+     secondaire 8,6:1, accent 8,5:1, vert 8,0:1, blanc sur bouton
+     terracotta 4,96:1.
+     =========================================================== */
+  [data-theme='sombre'] {
+    /* Surfaces, de la plus profonde a la plus haute */
+    --c-noir: 12 11 9;
+    --c-cream: 18 16 14;
+    --c-surface: 28 25 21;
+
+    /* Textes */
+    --c-ink: 240 236 228;
+    --c-stone: 181 174 163;
+    --c-stone-grey: 181 174 163;
+
+    /* Accents : l'accent de texte s'eclaircit, le remplissage des boutons
+       garde sa valeur claire - c'est elle qui porte le blanc a 4,96:1. */
+    --c-accent: 224 160 99;
+    --c-moss: 155 176 107;
+    --c-moss-panel: 47 58 30;
+
+    /* Filets et fonds teintes, qui etaient les valeurs les plus claires */
+    --c-warm-beige: 58 50 38;
+    --c-section-line: 51 48 43;
+    /* Fond des cartes shadcn, servi a 30 % d'opacite. Non redefini, il
+       composait un brun moyen a rgb(85 78 72) sur la page presque noire, ou
+       les graduations du graphique admin tombaient a 1,15:1 et le texte
+       herite a 2,13:1. La carte se rend maintenant a rgb(30 26 22). */
+    --c-terracotta-pale: 58 50 42;
+    --c-terracotta-50: 30 24 18;
+    --c-terracotta-100: 38 30 22;
+    --c-terracotta-200: 48 38 28;
+    --c-moss-50: 24 29 18;
+    --c-moss-100: 32 39 24;
+    --c-gold-50: 32 28 20;
+    --c-gold-100: 42 36 26;
+
+    /* Bouts sombres des gammes. Ils servent de texte sur des pastilles
+       teintees - « Toujours actifs », « Soumis au consentement » - et une
+       gamme qui ne s'inverse qu'a une extremite les laisse illisibles :
+       mesures a 1,8:1 avant. Ils passent de l'autre cote. */
+    --c-moss-500: 155 176 107;
+    --c-moss-900: 185 202 145;
+    --c-gold-800: 198 172 128;
+    --c-gold-900: 214 190 145;
+
+    /* Fonds des lots : memes familles, brunies. Le visuel detoure de chaque
+       lot y garde son contraste, et le texte passe de 10:1 a plus de 12:1. */
+    --c-lot-accent: 224 160 99;
+    --c-lot-infuser: 42 36 23;
+    --c-lot-detox: 44 32 25;
+    --c-lot-signature: 42 36 25;
+    --c-lot-coffret-39: 31 38 24;
+    --c-lot-coffret-69: 43 37 25;
+
+    /* === Jetons shadcn/ui ======================================
+       Ils sont en HSL et vivaient seulement sur `:root`, donc figes en
+       clair. Seuls les trois atteignables sont repris : `--foreground`
+       (le texte herite des cartes), `--border` (la couleur de bordure par
+       defaut, posee sur tout element par la regle `* { border-border }`)
+       et `--input`, qui la suit. Les autres - `--card`, `--popover`,
+       `--secondary`, `--muted`... - ne sont references par aucune classe
+       du projet : les redefinir serait deviner une valeur que personne ne
+       lit.
+       ========================================================== */
+    --foreground: 40 29% 92%;
+    --border: 37 9% 18%;
+    --input: 37 9% 18%;
+  }
+
+  /* Les couleurs des SVG de decor sont figees dans les fichiers - un <img>
+     ne peut pas heriter de currentColor. Sur fond sombre, ce vert et ces
+     bruns moyens s'eteignent : on les eclaircit sans toucher aux fichiers. */
+  /* Le logo est un SVG monochrome en #BA592E, servi par un <img> : ni
+     currentColor ni variable ne l'atteignent. Sur l'en-tete sombre il tombe a
+     3,80:1 - les logotypes sont exemptes du critere 1.4.11, mais il s'y lit
+     mal. Un eclaircissement de 30 % le porte a 6,07:1 sans deriver vers
+     l'orange, ce que ferait une valeur plus forte en saturant le canal rouge. */
+  [data-theme='sombre'] .logo-marque {
+    filter: brightness(1.3);
+  }
+
+  [data-theme='sombre'] .decor-botanique {
+    filter: brightness(1.45) saturate(0.9);
+  }
+
+  /* Les photographies pleine largeur gardent leur luminosite de studio et
+     eblouissent sur fond sombre. Les visuels de lots, eux, restent intacts :
+     ce sont des produits, les ternir dessert ce que la section montre. */
+  [data-theme='sombre'] .photo-attenuee {
+    filter: brightness(0.82);
+  }
+
 
 @layer base {
   * {
@@ -142,6 +308,125 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Le lot affiche sur la scene des lots remplace le precedent : une breve
+   montee en opacite et en echelle marque le changement sans faire attendre. */
+.animate-lot-entree {
+  animation: lot-entree 0.55s ease-out both;
+}
+
+@keyframes lot-entree {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* La chute est decoupee en deux animations portees par deux elements
+   imbriques : la descente, reguliere, et le balancement lateral, qui a son
+   propre rythme. Reunies sur un seul element, elles se remplaceraient l'une
+   l'autre - une seule propriete transform - et la feuille tomberait droit. */
+.animate-chute {
+  animation-name: chute;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes chute {
+  from {
+    transform: translate3d(0, -14vh, 0);
+  }
+  to {
+    transform: translate3d(0, 104vh, 0);
+  }
+}
+
+.animate-balancement {
+  animation-name: balancement;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+@keyframes balancement {
+  from {
+    transform: translateX(-18px) rotate(-30deg);
+  }
+  to {
+    transform: translateX(18px) rotate(32deg);
+  }
+}
+
+/* Les feuilles du tas se posent une a une. On anime « translate » et non
+   « transform » : chaque feuille porte deja son inclinaison sur la propriete
+   « rotate », que transform ecraserait. */
+.animate-atterrissage {
+  animation: atterrissage 0.9s ease-out both;
+}
+
+@keyframes atterrissage {
+  from {
+    opacity: 0;
+    translate: 0 -30px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+/* Toute animation decorative de ce fichier tourne en boucle. Sans cette regle,
+   elle ne s'arreterait jamais pour qui a demande moins de mouvement - un
+   reglage souvent pose pour cause de vertiges ou de migraines. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Meme effet, demande depuis le module d'accessibilite. Le reglage systeme
+   ci-dessus suppose que le visiteur l'a trouve et pose ; sur un poste
+   partage, ou simplement pour qui ignore qu'il existe, l'interrupteur du
+   site reste le seul moyen. */
+[data-sans-animation] *,
+[data-sans-animation] *::before,
+[data-sans-animation] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Critere 1.4.12 « Espacement du texte ». Les valeurs sont celles du critere
+   lui-meme, qui demande que la mise en page tienne au-dela : interligne a
+   1,5 fois la taille, espacement des lettres a 0,12, des mots a 0,16, et
+   deux tailles entre deux paragraphes.
+
+   Cible les conteneurs de texte plutot que `*` : applique a tout, l'espacement
+   des lettres deforme les boutons et les libelles en capitales, qui portent
+   deja leur propre `letter-spacing`. */
+[data-espacement-texte] p,
+[data-espacement-texte] li,
+[data-espacement-texte] dd,
+[data-espacement-texte] dt,
+[data-espacement-texte] blockquote {
+  line-height: 1.5 !important;
+  letter-spacing: 0.12em !important;
+  word-spacing: 0.16em !important;
+}
+
+[data-espacement-texte] p {
+  margin-bottom: 2em;
 }
 
 /* Motifs decoratifs DESIGN.md */

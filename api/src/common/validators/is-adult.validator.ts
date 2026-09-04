@@ -32,7 +32,7 @@ export function IsAdult(validationOptions?: ValidationOptions) {
         validate(value: string) {
           if (!value) return true;
           const birthDate = new Date(value);
-          if (isNaN(birthDate.getTime())) return false;
+          if (Number.isNaN(birthDate.getTime())) return false;
           const age = getAge(birthDate);
           return age >= MIN_AGE && age <= MAX_AGE;
         },

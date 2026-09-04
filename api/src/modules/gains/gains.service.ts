@@ -2,8 +2,14 @@
 // Service Gains
 // ===========================================
 
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { DeliveryMethod } from '@prisma/client';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+} from '@nestjs/common';
+import { DeliveryMethod, Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TicketsService } from '../tickets/tickets.service';
 import { RedisService } from '../../redis/redis.service';
@@ -19,34 +25,22 @@ export class GainsService {
 
   /**
    * Marquer un gain comme remis
+   *
+   * RG-24 : la remise n'est possible que jusqu'a claimEndDate.
+   * RG-22 : un lot ne peut etre remis qu'une fois, y compris depuis deux
+   * caisses simultanees.
    */
   async deliverPrize(participationId: string, employeeId: string, deliveryMethod: DeliveryMethod) {
-    const participation = await this.prisma.participation.findUnique({
-      where: { id: participationId },
-      include: {
-        ticket: true,
-        user: {
-          select: {
-            id: true,
-            email: true,
-            firstName: true,
-            lastName: true,
-          },
-        },
-      },
-    });
+    await this.assertClaimPeriodOpen();
 
-    if (!participation) {
-      throw new NotFoundException('Participation non trouvée');
-    }
-
-    if (participation.prizeDelivered) {
-      throw new BadRequestException('Ce lot a déjà été remis');
-    }
-
-    const [updated, prizesMap] = await Promise.all([
-      this.prisma.participation.update({
-        where: { id: participationId },
+    let updated;
+    try {
+      // La condition prizeDelivered: false fait partie du UPDATE, comme la
+      // condition isUsed a la consommation d'un ticket. La relire d'abord ne
+      // suffisait pas : deux employes servant le meme client au meme instant
+      // lisaient tous deux false, et le lot partait deux fois.
+      updated = await this.prisma.participation.update({
+        where: { id: participationId, prizeDelivered: false },
         data: {
           prizeDelivered: true,
           prizeDeliveredAt: new Date(),
@@ -64,9 +58,18 @@ export class GainsService {
             },
           },
         },
-      }),
-      this.ticketsService.getPrizesMap(),
-    ]);
+      });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025' // aucune ligne ne correspond au filtre
+      ) {
+        await this.rejectUnmatchedDelivery(participationId);
+      }
+      throw error;
+    }
+
+    const prizesMap = await this.ticketsService.getPrizesMap();
 
     await this.redis.delByPattern(STATS_CACHE_PATTERN);
 
@@ -80,6 +83,42 @@ export class GainsService {
       prizeDeliveredAt: updated.prizeDeliveredAt,
       deliveryMethod: updated.deliveryMethod,
     };
+  }
+
+  /**
+   * RG-24 : le delai de reclamation est inscrit au reglement depose chez
+   * l'huissier. Une edition sans configuration active ne bloque pas la remise :
+   * la contrainte est calendaire, et refuser un lot deja gagne faute de
+   * parametrage penaliserait le client plutot que l'exploitant.
+   */
+  private async assertClaimPeriodOpen(): Promise<void> {
+    const gameConfig = await this.prisma.gameConfig.findFirst({
+      where: { isActive: true },
+      select: { claimEndDate: true },
+    });
+
+    if (gameConfig && gameConfig.claimEndDate.getTime() < Date.now()) {
+      throw new ForbiddenException('La période de réclamation pour ce lot est expirée.');
+    }
+  }
+
+  /**
+   * L'UPDATE conditionnel n'a touche aucune ligne. Deux causes possibles, deux
+   * reponses distinctes au comptoir : la participation n'existe pas, ou le lot
+   * etait deja remis. On ne le sait qu'en relisant - cout accepte, ce chemin
+   * n'est emprunte qu'en erreur.
+   */
+  private async rejectUnmatchedDelivery(participationId: string): Promise<never> {
+    const existing = await this.prisma.participation.findUnique({
+      where: { id: participationId },
+      select: { id: true },
+    });
+
+    if (!existing) {
+      throw new NotFoundException('Participation non trouvée');
+    }
+
+    throw new ConflictException('Ce lot a déjà été remis');
   }
 
   /**

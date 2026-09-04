@@ -13,6 +13,8 @@ import { Pagination } from '@/components/ui/pagination';
 import { DeliveredPrizesList } from '@/components/gains/delivered-prizes-list';
 import { api } from '@/lib/api';
 import { formatDateTime } from '@/lib/utils';
+import { trackRewardClaimedStore } from '@/lib/analytics';
+import { useAuthStore } from '@/lib/stores/auth-store';
 
 const PAGE_SIZE = 20;
 
@@ -70,6 +72,7 @@ interface SearchResult {
 
 export default function EmployeePage() {
   const queryClient = useQueryClient();
+  const vendeurId = useAuthStore((state) => state.user?.id);
   const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
   const [pendingPage, setPendingPage] = useState(1);
 
@@ -122,15 +125,20 @@ export default function EmployeePage() {
     },
   });
 
-  // Remettre le lot
+  // Remettre le lot.
+  //
+  // Le type de lot accompagne l'identifiant jusqu'ici : la reponse de l'API ne
+  // le renvoie pas, et le plan de marquage en fait une dimension de
+  // reward_claimed_store.
   const deliverMutation = useMutation({
-    mutationFn: async (participationId: string) => {
+    mutationFn: async ({ participationId }: { participationId: string; prizeType: string }) => {
       const response = await api.post(`/gains/${participationId}/deliver`, {
         deliveryMethod: 'IN_STORE',
       });
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
+      trackRewardClaimedStore(variables.prizeType, vendeurId ?? '');
       toast.success('Lot remis avec succès !');
       queryClient.invalidateQueries({ queryKey: ['pending-deliveries'] });
       // Une remise fait passer le lot d'une liste à l'autre : sans cette
@@ -163,11 +171,62 @@ export default function EmployeePage() {
     setClientQuery(valeur);
   };
 
+  const pendingDeliveriesListOrEmpty =
+    pendingDeliveries.length > 0 ? (
+      <div className="max-h-96 space-y-3 overflow-y-auto">
+        {pendingDeliveries.map((delivery) => (
+          <div
+            key={delivery.id}
+            // Fond blanc au repos, et non seulement au survol : sans
+            // lui, la carte se confondait avec le fond de la liste et
+            // ne se distinguait qu'au passage de la souris - donc
+            // jamais sur un écran tactile.
+            className="flex items-center justify-between rounded-lg border border-gold-400 bg-surface p-3 hover:bg-cream"
+          >
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-medium">
+                {delivery.user.firstName} {delivery.user.lastName}
+              </p>
+              <p className="text-sm text-stone-grey">
+                {delivery.code}
+              </p>
+            </div>
+            <div className="ml-4 text-right">
+              <p className="text-sm font-medium text-tea-600">
+                {delivery.prize.name}
+              </p>
+              <Button
+                size="sm"
+                variant="outline"
+                className="mt-1"
+                onClick={() =>
+                  deliverMutation.mutate({
+                    participationId: delivery.id,
+                    prizeType: delivery.prizeType,
+                  })
+                }
+                disabled={deliverMutation.isPending}
+              >
+                Remettre
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <div className="py-8 text-center">
+        <CheckCircle className="mx-auto h-12 w-12 text-emerald-300" />
+        <p className="mt-4 text-stone-grey">
+          Aucun lot en attente de remise
+        </p>
+      </div>
+    );
+
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-cream py-8">
+    <div className="min-h-[calc(100vh-3.75rem)] bg-cream py-8">
       <div className="container mx-auto px-4">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-noir">
+          <h1 className="text-3xl font-bold text-ink">
             Espace Employé
           </h1>
           <p className="mt-2 text-stone-grey">
@@ -277,7 +336,10 @@ export default function EmployeePage() {
                         <Button
                           className="mt-4 w-full"
                           onClick={() =>
-                            deliverMutation.mutate(searchResult.participation!.id)
+                            deliverMutation.mutate({
+                              participationId: searchResult.participation!.id,
+                              prizeType: searchResult.ticket.prizeType,
+                            })
                           }
                           disabled={deliverMutation.isPending}
                         >
@@ -327,7 +389,7 @@ export default function EmployeePage() {
                         {clients.map((client) => (
                           <li
                             key={client.id}
-                            className="flex items-center justify-between rounded-lg border border-gold-400 bg-white p-3"
+                            className="flex items-center justify-between rounded-lg border border-gold-400 bg-surface p-3"
                           >
                             <div className="min-w-0 flex-1">
                               <p className="truncate font-medium">
@@ -370,50 +432,7 @@ export default function EmployeePage() {
             <CardContent>
               {isLoading ? (
                 <SkeletonList count={3} />
-              ) : pendingDeliveries.length > 0 ? (
-                <div className="max-h-96 space-y-3 overflow-y-auto">
-                  {pendingDeliveries.map((delivery) => (
-                    <div
-                      key={delivery.id}
-                      // Fond blanc au repos, et non seulement au survol : sans
-                      // lui, la carte se confondait avec le fond de la liste et
-                      // ne se distinguait qu'au passage de la souris - donc
-                      // jamais sur un écran tactile.
-                      className="flex items-center justify-between rounded-lg border border-gold-400 bg-white p-3 hover:bg-cream"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate font-medium">
-                          {delivery.user.firstName} {delivery.user.lastName}
-                        </p>
-                        <p className="text-sm text-stone-grey">
-                          {delivery.code}
-                        </p>
-                      </div>
-                      <div className="ml-4 text-right">
-                        <p className="text-sm font-medium text-tea-600">
-                          {delivery.prize.name}
-                        </p>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="mt-1"
-                          onClick={() => deliverMutation.mutate(delivery.id)}
-                          disabled={deliverMutation.isPending}
-                        >
-                          Remettre
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="py-8 text-center">
-                  <CheckCircle className="mx-auto h-12 w-12 text-emerald-300" />
-                  <p className="mt-4 text-stone-grey">
-                    Aucun lot en attente de remise
-                  </p>
-                </div>
-              )}
+              ) : pendingDeliveriesListOrEmpty}
 
               {pending && pending.meta.total > 0 && (
                 <Pagination

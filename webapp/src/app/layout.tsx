@@ -7,6 +7,8 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { CookieConsentBanner } from '@/components/layout/cookie-consent-banner';
 import { ConditionalAnalytics } from '@/components/layout/conditional-analytics';
+import { AmorcagePreferences } from '@/components/accessibilite/amorcage-preferences';
+import { PanneauAccessibilite } from '@/components/accessibilite/panneau-accessibilite';
 import { StructuredData } from '@/components/seo/structured-data';
 import { ORGANIZATION_SCHEMA, WEBSITE_SCHEMA } from '@/lib/organization-schema';
 
@@ -105,11 +107,16 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
     <html lang="fr" suppressHydrationWarning data-scroll-behavior="smooth">
+      <head>
+        {/* Avant tout rendu : sans cela, un visiteur en theme sombre recoit la
+            page en clair puis la voit basculer a l'hydratation. */}
+        <AmorcagePreferences />
+      </head>
       <body className={`${montserrat.variable} ${playfair.variable} font-sans antialiased`}>
         {/* Identité de l'éditeur, présente sur toutes les pages : c'est ce qui
             permet aux moteurs de rattacher le site à l'entreprise plutôt que de
@@ -118,8 +125,24 @@ export default function RootLayout({
         <StructuredData data={WEBSITE_SCHEMA} />
         <Providers>
           <div className="flex min-h-screen flex-col">
+            {/* Lien d'evitement, exige par le RGAA sur chaque page (12.7) : sans
+                lui, atteindre le contenu au clavier demande de traverser le
+                logo, les cinq liens de navigation et les deux boutons de
+                compte, sur chaque page. Invisible tant qu'il n'a pas le focus.
+
+                `tabIndex` sur le main : sans lui, le navigateur deplace bien la
+                vue mais pas toujours le focus, et la tabulation suivante
+                repartirait du lien. */}
+            <a
+              href="#contenu"
+              className="sr-only rounded-full focus:not-sr-only focus:absolute focus:left-6 focus:top-4 focus:z-[100] focus:bg-terracotta-600 focus:px-6 focus:py-3 focus:font-functional focus:text-ui focus:font-bold focus:uppercase focus:tracking-[2px] focus:text-white"
+            >
+              Aller au contenu
+            </a>
             <Header />
-            <main className="flex-1">{children}</main>
+            <main id="contenu" tabIndex={-1} className="flex-1 focus:outline-none">
+              {children}
+            </main>
             <Footer />
           </div>
           <Toaster
@@ -128,7 +151,7 @@ export default function RootLayout({
               unstyled: true,
               classNames: {
                 toast:
-                  'flex items-center gap-sm w-full rounded-soft border border-warm-beige bg-cream px-md py-sm font-sans text-body text-noir shadow-lg',
+                  'flex items-center gap-sm w-full rounded-soft border border-warm-beige bg-cream px-md py-sm font-sans text-body text-ink shadow-lg',
                 title: 'font-semibold',
                 description: 'text-stone',
                 success: 'border-moss text-moss',
@@ -141,12 +164,13 @@ export default function RootLayout({
                 // boutons, ce bouton n'avait pas de raison d'en differer.
                 actionButton:
                   'rounded-full bg-terracotta-600 px-sm py-2xs text-ui font-bold uppercase tracking-widest text-white',
-                cancelButton: 'rounded-full bg-warm-beige px-sm py-2xs text-ui font-bold uppercase tracking-widest text-noir',
+                cancelButton: 'rounded-full bg-warm-beige px-sm py-2xs text-ui font-bold uppercase tracking-widest text-ink',
                 closeButton: 'border-warm-beige text-stone',
               },
             }}
           />
           <CookieConsentBanner />
+          <PanneauAccessibilite />
         </Providers>
         {process.env.NEXT_PUBLIC_GA_ID && (
           <ConditionalAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />

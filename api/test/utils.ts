@@ -17,6 +17,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { ThrottlerStorage } from '@nestjs/throttler';
 import { PrizeType } from '@prisma/client';
+import request from 'supertest';
 
 import { AppModule } from '../src/app.module';
 import { MailService } from '../src/mail/mail.service';
@@ -58,10 +59,14 @@ function faireUnMailDeTest(envois: Envoi[]): Partial<MailService> {
       return true;
     };
 
+  // La liste doit couvrir toutes les methodes d'envoi : une methode oubliee
+  // n'est pas remplacee mais absente, et l'appel echoue en 500 au lieu d'etre
+  // journalise - ce qui masque le scenario au lieu de l'eprouver.
   return {
     sendVerificationCode: enregistrer('sendVerificationCode'),
     sendVerificationReminder: enregistrer('sendVerificationReminder'),
     sendEmailConfirmation: enregistrer('sendEmailConfirmation'),
+    sendAccountAlreadyExists: enregistrer('sendAccountAlreadyExists'),
     sendPrizeWon: enregistrer('sendPrizeWon'),
     sendExpirationNotice: enregistrer('sendExpirationNotice'),
   } as Partial<MailService>;
@@ -132,6 +137,69 @@ export async function demarrer(options: Options = {}): Promise<Contexte> {
  */
 export async function reinitialiserQuota({ redis }: Contexte): Promise<void> {
   await redis.delByPattern('ratelimit:*:initiate:*');
+}
+
+/** Session ouverte par une inscription menee a son terme. */
+export interface Session {
+  email: string;
+  leadId: string;
+  accessToken: string;
+  refreshToken: string;
+}
+
+/**
+ * Mene une inscription classique de bout en bout et retourne la session.
+ *
+ * POST /auth/register ne cree plus de compte : il ouvre un lead et envoie un
+ * code a six chiffres, le compte naissant a la confirmation. Les suites qui
+ * ont seulement besoin d'un compte utilisable passent par ici plutot que de
+ * reecrire les deux appels et la lecture du code a chaque fois.
+ *
+ * Le code est relu dans l'email intercepte, et non en base : c'est celui que
+ * la personne recevrait reellement.
+ */
+export async function inscrire(ctx: Contexte, email: string, motDePasse: string): Promise<Session> {
+  const http = () => request(ctx.app.getHttpServer());
+
+  const ouverture = await http()
+    .post('/api/v1/auth/register')
+    .send({
+      email,
+      password: motDePasse,
+      firstName: 'Camille',
+      lastName: 'Martin',
+      birthDate: '1990-05-15',
+      consentData: true,
+    })
+    .expect(201);
+
+  const code = dernierCodeEnvoye(ctx, email);
+  if (!code) throw new Error(`Aucun code de verification envoye a ${email}.`);
+
+  const confirmation = await http()
+    .post('/api/v1/auth/register/verify')
+    .send({ leadId: ouverture.body.leadId, code })
+    .expect(200);
+
+  return {
+    email,
+    leadId: ouverture.body.leadId,
+    accessToken: confirmation.body.accessToken,
+    refreshToken: confirmation.body.refreshToken,
+  };
+}
+
+/**
+ * Dernier code de verification adresse a cette adresse, ou undefined.
+ *
+ * Le dernier et non le premier : un renvoi invalide le code precedent (RG-07),
+ * et c'est celui qui vient de partir qui sera accepte.
+ */
+export function dernierCodeEnvoye({ envois }: Contexte, email: string): string | undefined {
+  const pertinents = envois.filter(
+    (e) => e.methode === 'sendVerificationCode' && e.destinataire === email,
+  );
+  return pertinents.at(-1)?.arguments[0] as string | undefined;
 }
 
 /** Supprime tout ce que la suite a cree, et rien d'autre. */

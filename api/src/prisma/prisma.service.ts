@@ -43,12 +43,13 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
         typeof key === 'string' && !key.startsWith('_') && !key.startsWith('$'),
     );
     return Promise.all(
-      models.map((modelKey) => {
-        const model = (this as Record<string, unknown>)[modelKey];
-        if (model && typeof model === 'object' && 'deleteMany' in model) {
-          return (model as { deleteMany: () => Promise<unknown> }).deleteMany();
-        }
-      }),
+      models
+        .map((modelKey) => (this as Record<string, unknown>)[modelKey])
+        .filter(
+          (model): model is { deleteMany: () => Promise<unknown> } =>
+            !!model && typeof model === 'object' && 'deleteMany' in model,
+        )
+        .map((model) => model.deleteMany()),
     );
   }
 }

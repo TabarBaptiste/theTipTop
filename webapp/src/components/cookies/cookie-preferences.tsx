@@ -40,11 +40,11 @@ export function CookiePreferences() {
   };
 
   if (!isHydrated) {
-    return <div className="h-24 rounded-card border border-warm-beige bg-white" />;
+    return <div className="h-24 rounded-card border border-warm-beige bg-surface" />;
   }
 
   return (
-    <div className="rounded-card border border-warm-beige bg-white p-6">
+    <div className="rounded-card border border-warm-beige bg-surface p-6">
       <div className="flex items-start gap-3">
         <input
           type="checkbox"
@@ -54,7 +54,7 @@ export function CookiePreferences() {
           className="mt-1 h-4 w-4 shrink-0 accent-terracotta-600"
         />
         <div>
-          <label htmlFor="consentement-analytics" className="font-semibold text-noir">
+          <label htmlFor="consentement-analytics" className="font-semibold text-ink">
             Autoriser la mesure d&apos;audience
           </label>
           <p className="mt-1 text-sm text-stone-grey">
@@ -64,10 +64,10 @@ export function CookiePreferences() {
           </p>
           <p className="mt-2 text-sm text-stone-grey">
             État actuel :{' '}
-            <strong className="text-noir">
+            <strong className="text-ink">
               {analytics ? 'mesure d’audience autorisée' : 'mesure d’audience refusée'}
-            </strong>
-            . Les cookies strictement nécessaires au fonctionnement du site restent actifs dans
+            </strong>.
+            Les cookies strictement nécessaires au fonctionnement du site restent actifs dans
             les deux cas : ils ne relèvent pas du consentement.
           </p>
         </div>

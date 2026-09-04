@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Users, Ticket, Gift, TrendingUp, Trophy,
@@ -103,7 +103,7 @@ const REFETCH_INTERVAL = 30_000;
 
 function downloadCsv(filename: string, rows: string[][]) {
   // BOM UTF-8 pour qu'Excel ouvre correctement les accents
-  const csv = '\uFEFF' + rows.map((r) => r.map((c) => `"${c.replace(/"/g, '""')}"`).join(';')).join('\r\n');
+  const csv = '\uFEFF' + rows.map((r) => r.map((c) => `"${c.replaceAll('"', '""')}"`).join(';')).join('\r\n');
   const url = window.URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
   const link = document.createElement('a');
   link.href = url;
@@ -114,9 +114,61 @@ function downloadCsv(filename: string, rows: string[][]) {
   window.URL.revokeObjectURL(url);
 }
 
+/**
+ * Couleurs du graphique, lues sur le document.
+ *
+ * Recharts pose ses couleurs en attributs SVG, ou ni `var()` ni une classe
+ * Tailwind ne sont resolues - d'ou les valeurs litterales qui figuraient ici.
+ * Elles ne suivaient donc pas le theme : en sombre, les graduations tombaient
+ * a 1,15:1 sur la carte, et la grille, restee claire, dominait la courbe.
+ *
+ * On lit donc les variables de theme sur `<html>`, et on relit quand
+ * `data-theme` change : le panneau d'accessibilite flotte sur toutes les
+ * pages, le theme peut donc basculer alors que le graphique est affiche.
+ *
+ * Les graduations remontent ainsi a 7,86:1, une fois `--c-terracotta-pale`
+ * - dont la carte tire son fond - redefini lui aussi par le theme sombre.
+ */
+const COULEURS_CLAIRES = {
+  graduation: 'rgb(74 70 62)',
+  grille: 'rgb(232 213 176)',
+  courbe: 'rgb(186 105 5)',
+  surface: 'rgb(255 255 255)',
+  texte: 'rgb(26 26 26)',
+};
+
+function useCouleursGraphique() {
+  const [couleurs, setCouleurs] = useState(COULEURS_CLAIRES);
+
+  useEffect(() => {
+    const lire = () => {
+      const style = getComputedStyle(document.documentElement);
+      const canal = (nom: string, secours: string) => {
+        const valeur = style.getPropertyValue(nom).trim();
+        return valeur ? `rgb(${valeur})` : secours;
+      };
+      setCouleurs({
+        graduation: canal('--c-stone-grey', COULEURS_CLAIRES.graduation),
+        grille: canal('--c-warm-beige', COULEURS_CLAIRES.grille),
+        courbe: canal('--c-terracotta-500', COULEURS_CLAIRES.courbe),
+        surface: canal('--c-surface', COULEURS_CLAIRES.surface),
+        texte: canal('--c-ink', COULEURS_CLAIRES.texte),
+      });
+    };
+
+    lire();
+    const observateur = new MutationObserver(lire);
+    observateur.observe(document.documentElement, { attributeFilter: ['data-theme'] });
+    return () => observateur.disconnect();
+  }, []);
+
+  return couleurs;
+}
+
 export default function AdminPage() {
   const queryClient = useQueryClient();
   const [segment, setSegment] = useState<SegmentKey>('all');
+  const couleurs = useCouleursGraphique();
 
   // Stats globales
   const { data: globalStats, isLoading: loadingGlobal } = useQuery<GlobalStats>({
@@ -194,7 +246,7 @@ export default function AdminPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[calc(100vh-5rem)] flex-col items-center justify-center gap-8 bg-cream px-6">
+      <div className="flex min-h-[calc(100vh-3.75rem)] flex-col items-center justify-center gap-8 bg-cream px-6">
         <div className="w-full max-w-4xl space-y-6">
           <Skeleton className="h-12 w-1/3" />
           <div className="grid gap-4 md:grid-cols-4">
@@ -213,12 +265,12 @@ export default function AdminPage() {
   const grandPrizeDrawn = globalStats?.game.grandPrizeDrawn ?? false;
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-white py-8">
+    <div className="min-h-[calc(100vh-3.75rem)] bg-surface py-8">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
-            <h1 className="font-display text-h1 text-noir">Tableau de bord Admin</h1>
+            <h1 className="font-display text-h1 text-ink">Tableau de bord Admin</h1>
             <p className="mt-2 text-stone-grey">
               Vue d&apos;ensemble du jeu-concours Thé Tip Top
             </p>
@@ -234,11 +286,11 @@ export default function AdminPage() {
           <Card>
             <CardContent className="flex items-center gap-4 p-6">
               <div className="rounded-xl bg-terracotta-50 p-3">
-                <Users className="h-6 w-6 text-terracotta-600" strokeWidth={1.5} />
+                <Users className="h-6 w-6 text-accent" strokeWidth={1.5} />
               </div>
               <div>
                 <p className="text-sm text-stone-grey">Utilisateurs</p>
-                <p className="text-2xl font-bold text-noir">
+                <p className="text-2xl font-bold text-ink">
                   {globalStats?.users.total.toLocaleString('fr-FR')}
                 </p>
               </div>
@@ -252,7 +304,7 @@ export default function AdminPage() {
               </div>
               <div>
                 <p className="text-sm text-stone-grey">Participations</p>
-                <p className="text-2xl font-bold text-noir">
+                <p className="text-2xl font-bold text-ink">
                   {globalStats?.participations.total.toLocaleString('fr-FR')}
                 </p>
               </div>
@@ -266,7 +318,7 @@ export default function AdminPage() {
               </div>
               <div>
                 <p className="text-sm text-stone-grey">Lots remis</p>
-                <p className="text-2xl font-bold text-noir">
+                <p className="text-2xl font-bold text-ink">
                   {globalStats?.prizes.delivered.toLocaleString('fr-FR')}
                 </p>
               </div>
@@ -280,7 +332,7 @@ export default function AdminPage() {
               </div>
               <div>
                 <p className="text-sm text-stone-grey">Taux d&apos;utilisation</p>
-                <p className="text-2xl font-bold text-noir">{usageRate}%</p>
+                <p className="text-2xl font-bold text-ink">{usageRate}%</p>
               </div>
             </CardContent>
           </Card>
@@ -292,7 +344,7 @@ export default function AdminPage() {
             <Card>
               <CardContent className="p-6">
                 <p className="text-sm text-stone-grey">Tickets distribués</p>
-                <p className="text-xl font-bold text-noir">
+                <p className="text-xl font-bold text-ink">
                   {tickets.distributed.toLocaleString('fr-FR')}
                 </p>
               </CardContent>
@@ -300,7 +352,7 @@ export default function AdminPage() {
             <Card>
               <CardContent className="p-6">
                 <p className="text-sm text-stone-grey">Tickets utilisés</p>
-                <p className="text-xl font-bold text-noir">
+                <p className="text-xl font-bold text-ink">
                   {tickets.used.toLocaleString('fr-FR')}
                 </p>
               </CardContent>
@@ -308,7 +360,7 @@ export default function AdminPage() {
             <Card>
               <CardContent className="p-6">
                 <p className="text-sm text-stone-grey">Tickets restants</p>
-                <p className="text-xl font-bold text-noir">
+                <p className="text-xl font-bold text-ink">
                   {(tickets.total - tickets.used).toLocaleString('fr-FR')}
                 </p>
               </CardContent>
@@ -338,24 +390,21 @@ export default function AdminPage() {
                   >
                     <defs>
                       <linearGradient id="fillParticipations" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#BA6905" stopOpacity={0.35} />
-                        <stop offset="95%" stopColor="#BA6905" stopOpacity={0} />
+                        <stop offset="5%" stopColor={couleurs.courbe} stopOpacity={0.35} />
+                        <stop offset="95%" stopColor={couleurs.courbe} stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    {/* Recharts pose ces couleurs en attributs SVG : une variable
-                        CSS n'y serait pas resolue, d'ou les valeurs litterales.
-                        Elles doivent suivre les tokens de tailwind.config.js. */}
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E8D5B0" />
+                    <CartesianGrid strokeDasharray="3 3" stroke={couleurs.grille} />
                     <XAxis
                       dataKey="date"
                       tickFormatter={(d: string) => format(parseISO(d), 'dd/MM', { locale: fr })}
-                      tick={{ fontSize: 11, fill: '#4A463E' }}
+                      tick={{ fontSize: 11, fill: couleurs.graduation }}
                       interval="preserveStartEnd"
                       minTickGap={24}
                     />
                     <YAxis
                       allowDecimals={false}
-                      tick={{ fontSize: 11, fill: '#4A463E' }}
+                      tick={{ fontSize: 11, fill: couleurs.graduation }}
                       width={40}
                     />
                     <Tooltip
@@ -365,14 +414,16 @@ export default function AdminPage() {
                       formatter={(value: number) => [value, 'Participations']}
                       contentStyle={{
                         borderRadius: 8,
-                        border: '1px solid #E8D5B0',
+                        border: `1px solid ${couleurs.grille}`,
+                        backgroundColor: couleurs.surface,
+                        color: couleurs.texte,
                         fontSize: 12,
                       }}
                     />
                     <Area
                       type="monotone"
                       dataKey="count"
-                      stroke="#BA6905"
+                      stroke={couleurs.courbe}
                       strokeWidth={2}
                       fill="url(#fillParticipations)"
                     />
@@ -407,7 +458,7 @@ export default function AdminPage() {
                     return (
                       <div key={prize.type} className="space-y-2">
                         <div className="flex justify-between text-sm">
-                          <span className="font-medium text-noir">{prize.label}</span>
+                          <span className="font-medium text-ink">{prize.label}</span>
                           <span className="text-stone-grey">
                             {prize.count.toLocaleString('fr-FR')}
                             {prize.value ? ` · ${prize.value}` : ''}
@@ -444,11 +495,11 @@ export default function AdminPage() {
               <div className="space-y-6">
                 {/* Genre */}
                 <div>
-                  <h4 className="mb-3 font-medium text-noir">Par genre</h4>
+                  <h4 className="mb-3 font-medium text-ink">Par genre</h4>
                   <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                     {(demographics?.byGender ?? []).map((g) => (
                       <div key={g.gender} className="rounded-soft bg-terracotta-50 p-3 text-center">
-                        <p className="text-lg font-bold text-terracotta-600">{g.count}</p>
+                        <p className="text-lg font-bold text-accent">{g.count}</p>
                         <p className="text-xs text-stone-grey">
                           {GENDER_LABELS[g.gender] ?? g.gender}
                         </p>
@@ -462,12 +513,12 @@ export default function AdminPage() {
 
                 {/* Tranches d'âge */}
                 <div>
-                  <h4 className="mb-3 font-medium text-noir">Par tranche d&apos;âge</h4>
+                  <h4 className="mb-3 font-medium text-ink">Par tranche d&apos;âge</h4>
                   <div className="space-y-2">
                     {(demographics?.byAge ?? []).map((group) => (
                       <div key={group.range} className="flex items-center justify-between">
                         <span className="text-sm text-stone-grey">{group.range} ans</span>
-                        <span className="font-medium text-noir">{group.count}</span>
+                        <span className="font-medium text-ink">{group.count}</span>
                       </div>
                     ))}
                   </div>
@@ -507,8 +558,8 @@ export default function AdminPage() {
                       onClick={() => setSegment(s.key)}
                       className={`rounded-pill border px-4 py-2 text-sm transition-colors ${
                         segment === s.key
-                          ? 'border-terracotta-600 bg-terracotta-600 text-white'
-                          : 'border-warm-beige bg-white text-stone-grey hover:border-terracotta-600'
+                          ? 'border-accent bg-terracotta-600 text-white'
+                          : 'border-warm-beige bg-surface text-stone-grey hover:border-accent'
                       }`}
                     >
                       {s.label}
@@ -522,7 +573,7 @@ export default function AdminPage() {
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       <>
-                        <strong className="text-noir">
+                        <strong className="text-ink">
                           {emailingData?.count.toLocaleString('fr-FR') ?? 0}
                         </strong>{' '}
                         contacts consentants

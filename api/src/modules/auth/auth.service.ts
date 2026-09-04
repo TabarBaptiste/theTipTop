@@ -2,16 +2,15 @@
 // Service d'Authentification
 // ===========================================
 
-import { Injectable, ForbiddenException, ConflictException, Logger } from '@nestjs/common';
+import { Injectable, ForbiddenException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { randomBytes, randomUUID } from 'crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 import * as bcrypt from 'bcryptjs';
 
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { UsersService } from '../users/users.service';
-import { RegisterDto } from './dto/register.dto';
 import { User, Role } from '@prisma/client';
 
 export interface JwtPayload {
@@ -119,40 +118,6 @@ export class AuthService {
 
     const { password: _pw, ...safeUser } = user as any;
     return safeUser as User;
-  }
-
-  /**
-   * Inscription d'un nouvel utilisateur
-   */
-  async register(dto: RegisterDto): Promise<TokenResponse> {
-    // Vérifier si l'email existe déjà
-    const existingUser = await this.usersService.findByEmail(dto.email);
-    if (existingUser) {
-      throw new ConflictException('Un compte existe déjà avec cet email');
-    }
-
-    // Hasher le mot de passe
-    const hashedPassword = await bcrypt.hash(dto.password, 12);
-
-    // Créer l'utilisateur
-    const user = await this.prisma.user.create({
-      data: {
-        email: dto.email.toLowerCase().trim(),
-        password: hashedPassword,
-        firstName: dto.firstName.trim(),
-        lastName: dto.lastName.trim(),
-        birthDate: dto.birthDate ? new Date(dto.birthDate) : undefined,
-        gender: dto.gender,
-        phone: dto.phone,
-        consentEmail: dto.consentEmail ?? false,
-        consentData: dto.consentData ?? false,
-        role: 'CLIENT',
-      },
-    });
-
-    this.logger.log(`Nouvel utilisateur inscrit: ${user.email}`);
-
-    return this.generateTokens(user);
   }
 
   /**

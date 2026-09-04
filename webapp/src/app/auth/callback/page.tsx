@@ -84,7 +84,7 @@ function AuthCallbackHandler() {
   }, [params, router, handleOAuthCallback]);
 
   return (
-    <div className="flex min-h-[calc(100vh-5rem)] flex-col items-center justify-center gap-4 bg-cream">
+    <div className="flex min-h-[calc(100vh-3.75rem)] flex-col items-center justify-center gap-4 bg-cream">
       <Skeleton className="h-8 w-48" />
       <Skeleton className="h-4 w-32" />
     </div>
@@ -95,7 +95,7 @@ export default function AuthCallbackPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-[calc(100vh-5rem)] flex-col items-center justify-center gap-4 bg-cream">
+        <div className="flex min-h-[calc(100vh-3.75rem)] flex-col items-center justify-center gap-4 bg-cream">
           <Skeleton className="h-8 w-48" />
           <Skeleton className="h-4 w-32" />
         </div>

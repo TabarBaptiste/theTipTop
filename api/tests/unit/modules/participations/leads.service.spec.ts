@@ -3,6 +3,7 @@
 // ===========================================
 
 import { BadRequestException, ConflictException, HttpException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { LeadsService } from '@/modules/participations/leads.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { RedisService } from '@/redis/redis.service';
@@ -14,7 +15,13 @@ describe('LeadsService', () => {
   let service: LeadsService;
 
   const mockPrisma = {
-    lead: { create: jest.fn(), findFirst: jest.fn(), findUnique: jest.fn(), update: jest.fn() },
+    lead: {
+      create: jest.fn(),
+      findFirst: jest.fn(),
+      findUnique: jest.fn(),
+      update: jest.fn(),
+      updateMany: jest.fn(),
+    },
     ticket: { updateMany: jest.fn(), findUnique: jest.fn() },
     user: { findUnique: jest.fn(), create: jest.fn() },
     participation: { create: jest.fn() },
@@ -22,14 +29,27 @@ describe('LeadsService', () => {
     $transaction: jest.fn(),
   };
 
-  const mockRedis = { incr: jest.fn(), expire: jest.fn() };
-  const mockMail = { sendVerificationCode: jest.fn(), sendPrizeWon: jest.fn() };
+  const mockRedis = { incr: jest.fn(), expire: jest.fn(), del: jest.fn() };
+  const mockMail = {
+    sendVerificationCode: jest.fn(),
+    sendPrizeWon: jest.fn(),
+    sendAccountAlreadyExists: jest.fn(),
+  };
   const mockTickets = { verifyCode: jest.fn(), getPrizesMap: jest.fn() };
   const mockAuth = { login: jest.fn() };
 
   const validDto = {
     code: 'ABCDEFGH23',
     email: 'Jean.Dupont@Email.FR',
+    password: 'MonMotDePasse123!',
+    firstName: 'Jean',
+    lastName: 'Dupont',
+    consentData: true,
+  } as never;
+
+  const registerDto = {
+    email: 'Jean.Dupont@Email.FR',
+    password: 'MonMotDePasse123!',
     firstName: 'Jean',
     lastName: 'Dupont',
     consentData: true,
@@ -73,6 +93,60 @@ describe('LeadsService', () => {
       // Le code reste disponible : aucune écriture sur la table tickets.
       expect(mockPrisma.ticket.updateMany).not.toHaveBeenCalled();
       expect(mockMail.sendVerificationCode).toHaveBeenCalled();
+    });
+
+    it('stocke le mot de passe haché, jamais en clair', async () => {
+      mockTickets.verifyCode.mockResolvedValue({ isValid: true, ticket: { id: 't1' } });
+      mockPrisma.lead.findFirst.mockResolvedValue(null);
+      mockPrisma.lead.create.mockResolvedValue({ id: 'l1' });
+
+      await service.initiate(validDto, '10.0.0.1');
+
+      const { password } = mockPrisma.lead.create.mock.calls[0][0].data;
+      expect(password).not.toBe('MonMotDePasse123!');
+      expect(password).toMatch(/^\$2[aby]\$/);
+    });
+
+    // Le lead perime n'est plus actif au sens de RG-01, mais il occupe encore
+    // l'index unique partiel : sans ce menage, la creation echouerait.
+    it('expire une demande périmée sur la même adresse avant d’en ouvrir une', async () => {
+      mockTickets.verifyCode.mockResolvedValue({ isValid: true, ticket: { id: 't1' } });
+      mockPrisma.lead.findFirst.mockResolvedValue(null);
+      mockPrisma.lead.create.mockResolvedValue({ id: 'l1' });
+
+      await service.initiate(validDto, '10.0.0.1');
+
+      expect(mockPrisma.lead.updateMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            email: 'jean.dupont@email.fr',
+            status: 'EN_ATTENTE_VERIFICATION',
+          }),
+          data: expect.objectContaining({ status: 'EXPIRE', password: null }),
+        }),
+      );
+    });
+
+    // Deux soumissions simultanees : l'index unique partiel tranche, et la
+    // perdante doit repondre comme un doublon ordinaire plutot que par une 500.
+    it('retombe sur le mode silencieux quand l’index unique tranche une course', async () => {
+      mockTickets.verifyCode.mockResolvedValue({ isValid: true, ticket: { id: 't1' } });
+      mockPrisma.lead.findFirst.mockResolvedValueOnce(null).mockResolvedValueOnce({
+        id: 'gagnant',
+        status: 'EN_ATTENTE_VERIFICATION',
+        codeExpiresAt: new Date(Date.now() + 3600_000),
+      });
+      mockPrisma.lead.create.mockRejectedValue(
+        new Prisma.PrismaClientKnownRequestError('doublon', {
+          code: 'P2002',
+          clientVersion: 'test',
+        }),
+      );
+
+      const result = await service.initiate(validDto, '10.0.0.1');
+
+      expect(result.leadId).toBe('gagnant');
+      expect(mockMail.sendVerificationCode).not.toHaveBeenCalled();
     });
 
     it('génère un code à 6 chiffres', async () => {
@@ -137,6 +211,7 @@ describe('LeadsService', () => {
       codeExpiresAt: new Date(Date.now() + 3600_000),
       consentEmail: true,
       ticketId: 't1',
+      password: 'hachage-du-lead',
     };
 
     it('rejette un code erroné', async () => {
@@ -174,7 +249,7 @@ describe('LeadsService', () => {
 
       const result = await service.verify({ leadId: 'l1', code: '123456' });
 
-      expect(result.participation.prize.name).toBe('Infuseur à thé');
+      expect(result.participation!.prize.name).toBe('Infuseur à thé');
       // Option A : le mot de passe reste à définir après la validation.
       expect(result.passwordRequired).toBe(true);
       expect(mockAuth.login).toHaveBeenCalled();
@@ -226,7 +301,7 @@ describe('LeadsService', () => {
 
       const result = await service.verify({ leadId: 'l1', code: '123456' });
 
-      expect(result.participation.prize.name).toBe('Infuseur');
+      expect(result.participation!.prize.name).toBe('Infuseur');
     });
 
     it('rattache un compte existant au lieu de le dupliquer', async () => {
@@ -269,6 +344,149 @@ describe('LeadsService', () => {
       await expect(service.verify({ leadId: 'l1', code: '123456' })).rejects.toThrow(
         ConflictException,
       );
+    });
+
+    // Le mot de passe choisi au formulaire rejoint le compte a sa creation :
+    // c'est ce qui supprime l'etape « definissez un mot de passe » d'apres-coup.
+    it('reprend le mot de passe du lead sur le compte créé', async () => {
+      mockPrisma.lead.findUnique.mockResolvedValue(pendingLead);
+      mockPrisma.ticket.findUnique.mockResolvedValue({ id: 't1', code: 'C', prizeType: 'INFUSER' });
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockPrisma.user.create.mockResolvedValue({ id: 'u1', password: 'hachage-du-lead' });
+      mockPrisma.ticket.updateMany.mockResolvedValue({ count: 1 });
+      mockPrisma.participation.create.mockResolvedValue({ id: 'p1', createdAt: new Date() });
+      mockTickets.getPrizesMap.mockResolvedValue({ INFUSER: { name: 'Infuseur' } });
+      mockAuth.login.mockResolvedValue({ accessToken: 'jwt' });
+
+      const result = await service.verify({ leadId: 'l1', code: '123456' });
+
+      expect(mockPrisma.user.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ password: 'hachage-du-lead' }),
+        }),
+      );
+      expect(result.passwordRequired).toBe(false);
+      // Le hachage ne doit pas survivre a son usage.
+      expect(mockPrisma.lead.update.mock.calls[0][0].data.password).toBeNull();
+    });
+
+    // Prouver qu'on releve une boite autorise a ouvrir une session, jamais a
+    // remplacer le secret d'un compte deja constitue.
+    it('n’écrase pas le mot de passe d’un compte préexistant', async () => {
+      mockPrisma.lead.findUnique.mockResolvedValue(pendingLead);
+      mockPrisma.ticket.findUnique.mockResolvedValue({ id: 't1', code: 'C', prizeType: 'INFUSER' });
+      mockPrisma.user.findUnique.mockResolvedValue({ id: 'existant', password: 'ancien-hachage' });
+      mockPrisma.ticket.updateMany.mockResolvedValue({ count: 1 });
+      mockPrisma.participation.create.mockResolvedValue({ id: 'p1', createdAt: new Date() });
+      mockTickets.getPrizesMap.mockResolvedValue({ INFUSER: { name: 'Infuseur' } });
+      mockAuth.login.mockResolvedValue({ accessToken: 'jwt' });
+
+      await service.verify({ leadId: 'l1', code: '123456' });
+
+      expect(mockPrisma.user.create).not.toHaveBeenCalled();
+    });
+
+    // Inscription classique : le lead ne vise aucun ticket.
+    it('ouvre le compte sans participation quand le lead ne vise aucun ticket', async () => {
+      mockPrisma.lead.findUnique.mockResolvedValue({ ...pendingLead, ticketId: null });
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockPrisma.user.create.mockResolvedValue({ id: 'u1', password: 'hachage-du-lead' });
+      mockAuth.login.mockResolvedValue({ accessToken: 'jwt' });
+
+      const result = await service.verify({ leadId: 'l1', code: '123456' });
+
+      expect(result.participation).toBeNull();
+      expect(mockPrisma.ticket.findUnique).not.toHaveBeenCalled();
+      expect(mockPrisma.ticket.updateMany).not.toHaveBeenCalled();
+      expect(mockPrisma.participation.create).not.toHaveBeenCalled();
+      // Aucun lot a annoncer.
+      expect(mockMail.sendPrizeWon).not.toHaveBeenCalled();
+      expect(result.accessToken).toBe('jwt');
+    });
+
+    // Sans plafond, les 48 h de validite suffiraient a parcourir une bonne part
+    // du million de combinaisons au rythme autorise par le throttler global.
+    it('détruit le code après cinq essais manqués, sans détruire la demande', async () => {
+      mockPrisma.lead.findUnique.mockResolvedValue(pendingLead);
+      mockRedis.incr.mockResolvedValue(5);
+
+      await expect(service.verify({ leadId: 'l1', code: '999999' })).rejects.toThrow(
+        BadRequestException,
+      );
+
+      expect(mockPrisma.lead.updateMany).toHaveBeenCalledWith({
+        where: { id: 'l1', status: 'EN_ATTENTE_VERIFICATION' },
+        data: { verificationCode: null },
+      });
+    });
+
+    it('laisse la demande intacte tant que le plafond n’est pas atteint', async () => {
+      mockPrisma.lead.findUnique.mockResolvedValue(pendingLead);
+      mockRedis.incr.mockResolvedValue(2);
+
+      await expect(service.verify({ leadId: 'l1', code: '999999' })).rejects.toThrow(
+        BadRequestException,
+      );
+
+      expect(mockPrisma.lead.updateMany).not.toHaveBeenCalled();
+    });
+
+    // Un identifiant tire au hasard ne doit alimenter aucun compteur, sans quoi
+    // il suffirait d'en produire en masse pour saturer Redis.
+    it('ne compte aucun essai pour un lead inconnu', async () => {
+      mockPrisma.lead.findUnique.mockResolvedValue(null);
+
+      await expect(service.verify({ leadId: 'inconnu', code: '123456' })).rejects.toThrow(
+        BadRequestException,
+      );
+
+      expect(mockRedis.incr).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('initiateRegistration', () => {
+    it('ouvre un lead sans ticket et envoie le code', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue(null);
+      mockPrisma.lead.findFirst.mockResolvedValue(null);
+      mockPrisma.lead.create.mockResolvedValue({ id: 'l1' });
+
+      const result = await service.initiateRegistration(registerDto, '10.0.0.1');
+
+      expect(result.leadId).toBe('l1');
+      expect(mockPrisma.lead.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ email: 'jean.dupont@email.fr', ticketId: null }),
+        }),
+      );
+      expect(mockMail.sendVerificationCode).toHaveBeenCalled();
+      // Aucun ticket n'est en jeu : le service de tickets n'est pas sollicite.
+      expect(mockTickets.verifyCode).not.toHaveBeenCalled();
+    });
+
+    // RG-01 : un 409 « email deja utilise » repondrait a n'importe qui la
+    // question qu'une enumeration cherche a poser.
+    it('répond comme au nominal sur une adresse déjà titulaire d’un compte', async () => {
+      mockPrisma.user.findUnique.mockResolvedValue({ id: 'u1' });
+
+      const result = await service.initiateRegistration(registerDto, '10.0.0.1');
+
+      expect(result.maskedEmail).toBe('je*********@email.fr');
+      expect(result.leadId).toEqual(expect.any(String));
+      expect(result.expiresAt!.getTime()).toBeGreaterThan(Date.now());
+      expect(mockPrisma.lead.create).not.toHaveBeenCalled();
+      expect(mockMail.sendVerificationCode).not.toHaveBeenCalled();
+      // L'information part vers le seul destinataire legitime.
+      expect(mockMail.sendAccountAlreadyExists).toHaveBeenCalledWith('jean.dupont@email.fr');
+    });
+
+    // RG-03 : meme plafond que le tunnel, la porte d'entree est la meme.
+    it('bloque au-delà du plafond horaire par IP', async () => {
+      mockRedis.incr.mockResolvedValue(11);
+
+      await expect(service.initiateRegistration(registerDto, '10.0.0.1')).rejects.toThrow(
+        HttpException,
+      );
+      expect(mockPrisma.lead.create).not.toHaveBeenCalled();
     });
   });
 

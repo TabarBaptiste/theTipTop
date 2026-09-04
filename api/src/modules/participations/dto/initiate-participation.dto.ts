@@ -36,6 +36,22 @@ export class InitiateParticipationDto {
   @IsEmail({}, { message: 'Adresse email invalide' })
   email: string;
 
+  // Meme regle que l'inscription classique : le compte cree ici n'est pas un
+  // compte de seconde zone, et assouplir la regle d'un cote la viderait des
+  // deux, les deux parcours menant a la meme table users.
+  @ApiProperty({
+    example: 'MonMotDePasse123!',
+    description: 'Mot de passe du compte (min 8 caractères, 1 majuscule, 1 chiffre, 1 spécial)',
+  })
+  @IsString()
+  @MinLength(8, { message: 'Le mot de passe doit contenir au moins 8 caractères' })
+  @MaxLength(50)
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]/, {
+    message:
+      'Le mot de passe doit contenir au moins une majuscule, une minuscule, un chiffre et un caractère spécial',
+  })
+  password: string;
+
   @ApiProperty({ example: 'Jean', description: 'Prénom' })
   @IsString()
   @MinLength(2)

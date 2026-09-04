@@ -13,6 +13,10 @@ import {
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
 import { useAuthStore } from '@/lib/stores/auth-store';
+// Alias : `User` est deja pris par l'icone lucide importee plus haut, et les
+// deux se retrouvaient dans la meme portee - le build echouait sur un
+// identifiant duplique.
+import type { User as Utilisateur } from '@/lib/stores/auth-store';
 import { useIsHydrated } from '@/lib/hooks/use-is-hydrated';
 import { cn } from '@/lib/utils';
 
@@ -26,6 +30,140 @@ const navigation = [
   { name: 'FAQ', href: '/faq' },
 ];
 
+// Le bouclier pour l'administration, la boutique pour un employé, la
+// silhouette pour un participant sans rôle particulier.
+function accountIconForRole(role: Utilisateur['role'] | undefined) {
+  if (role === 'ADMIN') return ShieldCheck;
+  if (role === 'EMPLOYEE') return Store;
+  return User;
+}
+
+interface AccountMenuProps {
+  readonly isStaff: boolean;
+  readonly firstName?: string;
+  readonly backofficeHref: string;
+  readonly backofficeLabel: string;
+  readonly AccountIcon: typeof User;
+  readonly onLogout: () => void;
+}
+
+// Un seul contrôle de compte, quel que soit le rôle : les destinations
+// personnelles s'y rangent au lieu d'encombrer la navigation publique, qui ne
+// porte que du contenu accessible à tous. Extrait de Header() pour que sa
+// propre ramification (rôle staff ou non) ne s'ajoute pas à celle du header.
+function AccountMenuDesktop({
+  isStaff,
+  firstName,
+  backofficeHref,
+  backofficeLabel,
+  AccountIcon,
+  onLogout,
+}: AccountMenuProps) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="outline"
+          size="nav"
+          className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-ink hover:text-white active:bg-terracotta-600 active:text-white"
+        >
+          <AccountIcon className="h-4 w-4" strokeWidth={1.5} />
+          {firstName || 'Mon compte'}
+          <ChevronDown className="h-3 w-3" strokeWidth={2} />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        {isStaff ? (
+          <DropdownMenuItem asChild>
+            <Link href={backofficeHref}>
+              <AccountIcon className="h-4 w-4" strokeWidth={1.5} />
+              {backofficeLabel}
+            </Link>
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem asChild>
+            <Link href="/dashboard">
+              <Gift className="h-4 w-4" strokeWidth={1.5} />
+              Mes participations
+            </Link>
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuItem asChild>
+          <Link href="/dashboard/profile">
+            <User className="h-4 w-4" strokeWidth={1.5} />
+            Mon profil
+          </Link>
+        </DropdownMenuItem>
+        {/* La déconnexion n'existait que dans la barre latérale du
+            compte : un visiteur connecté sur une page publique
+            devait d'abord naviguer ailleurs pour se déconnecter. */}
+        <DropdownMenuItem
+          onSelect={onLogout}
+          className="text-red-700 data-[highlighted]:text-red-700"
+        >
+          <LogOut className="h-4 w-4" strokeWidth={1.5} />
+          Se déconnecter
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+interface AccountMenuMobileProps extends AccountMenuProps {
+  readonly onNavigate: () => void;
+}
+
+// Le menu mobile est déjà une liste dépliée : les mêmes destinations que le
+// menu de compte s'y succèdent, sans qu'un second niveau déroulant soit
+// nécessaire.
+function AccountMenuMobile({
+  isStaff,
+  backofficeHref,
+  backofficeLabel,
+  AccountIcon,
+  onLogout,
+  onNavigate,
+}: AccountMenuMobileProps) {
+  return (
+    <>
+      <Button asChild variant="outline" className="w-full">
+        <Link
+          href={isStaff ? backofficeHref : '/dashboard'}
+          className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-ink hover:text-white active:bg-terracotta-600 active:text-white"
+          onClick={onNavigate}
+        >
+          {isStaff ? (
+            <AccountIcon className="h-4 w-4" strokeWidth={1.5} />
+          ) : (
+            <Gift className="h-4 w-4" strokeWidth={1.5} />
+          )}
+          {isStaff ? backofficeLabel : 'Mes participations'}
+        </Link>
+      </Button>
+      <Button asChild variant="outline" className="w-full">
+        <Link
+          href="/dashboard/profile"
+          className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-ink hover:text-white active:bg-terracotta-600 active:text-white"
+          onClick={onNavigate}
+        >
+          <User className="h-4 w-4" strokeWidth={1.5} />
+          Mon profil
+        </Link>
+      </Button>
+      <button
+        type="button"
+        onClick={() => {
+          onNavigate();
+          onLogout();
+        }}
+        className="flex w-full items-center justify-center gap-2 rounded-full border-[1.5px] border-red-700 px-6 py-2 font-functional text-ui font-bold uppercase tracking-[2px] text-red-700 transition-colors hover:bg-red-50"
+      >
+        <LogOut className="h-4 w-4" strokeWidth={1.5} />
+        Se déconnecter
+      </button>
+    </>
+  );
+}
 
 export function Header() {
   const pathname = usePathname();
@@ -58,7 +196,7 @@ export function Header() {
 
   // L'icône du compte reflète le rôle : le bouclier pour l'administration, la
   // boutique pour un employé, la silhouette pour un participant.
-  const AccountIcon = user?.role === 'ADMIN' ? ShieldCheck : user?.role === 'EMPLOYEE' ? Store : User;
+  const AccountIcon = accountIconForRole(user?.role);
 
   // La navigation ne porte plus que du contenu public. « Mes participations »
   // y figurait pour les participants, alors qu'il s'agit d'une destination
@@ -67,10 +205,11 @@ export function Header() {
   const navLinks = navigation;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-warm-beige bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-      {/* h-20 : la nav est calee sur le logo. Si tu changes cette hauteur,
-          repercute-la sur les min-h-[calc(100vh-5rem)] des pages. */}
-      <nav className="container mx-auto flex h-20 items-center justify-between px-6">
+    <header className="sticky top-0 z-50 w-full border-b border-section-line bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/60">
+      {/* 60 px, hauteur de la maquette. Si tu changes cette valeur,
+          repercute-la sur les min-h-[calc(100vh-3.75rem)] des pages et sur le
+          scroll-padding-top de globals.css. */}
+      <nav className="container mx-auto flex h-[3.75rem] items-center justify-between px-6">
         {/* Logo */}
         <Link href="/" className="flex items-center">
           {/* unoptimized : l'optimiseur de Next refuse les SVG sans dangerouslyAllowSVG,
@@ -80,23 +219,21 @@ export function Header() {
             alt="Thé Tip Top"
             width={152}
             height={64}
-            className="h-16 w-auto"
+            className="logo-marque h-10 w-auto"
             unoptimized
             priority
           />
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden items-center gap-4 md:flex lg:gap-6">
+        <div className="hidden items-center gap-6 md:flex lg:gap-20">
           {navLinks.map((item) => (
             <Link
               key={item.name}
               href={item.href}
               className={cn(
-                'whitespace-nowrap font-functional text-[10px] uppercase tracking-[1.5px] transition-colors hover:text-terracotta-600 lg:text-ui lg:tracking-[2px]',
-                pathname === item.href
-                  ? 'text-terracotta-600'
-                  : 'text-noir'
+                'whitespace-nowrap font-functional text-ui uppercase transition-colors hover:text-accent',
+                pathname === item.href ? 'text-accent' : 'text-ink'
               )}
             >
               {item.name}
@@ -105,65 +242,23 @@ export function Header() {
         </div>
 
         {/* Auth Buttons */}
-        <div className="hidden items-center gap-3 md:flex">
-          <Button asChild size="sm">
+        <div className="hidden items-center gap-4 md:flex">
+          <Button asChild size="nav">
             <Link href="/participate">Participer</Link>
           </Button>
           {isHydrated && (
             <>
               {isAuthenticated ? (
-                // Un seul contrôle de compte, quel que soit le rôle : les
-                // destinations personnelles s'y rangent au lieu d'encombrer la
-                // navigation publique, qui ne porte que du contenu accessible
-                // à tous.
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-white active:bg-terracotta-600 active:text-white"
-                    >
-                      <AccountIcon className="h-4 w-4" strokeWidth={1.5} />
-                      {user?.firstName || 'Mon compte'}
-                      <ChevronDown className="h-3 w-3" strokeWidth={2} />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    {isStaff ? (
-                      <DropdownMenuItem asChild>
-                        <Link href={backofficeHref}>
-                          <AccountIcon className="h-4 w-4" strokeWidth={1.5} />
-                          {backofficeLabel}
-                        </Link>
-                      </DropdownMenuItem>
-                    ) : (
-                      <DropdownMenuItem asChild>
-                        <Link href="/dashboard">
-                          <Gift className="h-4 w-4" strokeWidth={1.5} />
-                          Mes participations
-                        </Link>
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuItem asChild>
-                      <Link href="/dashboard/profile">
-                        <User className="h-4 w-4" strokeWidth={1.5} />
-                        Mon profil
-                      </Link>
-                    </DropdownMenuItem>
-                    {/* La déconnexion n'existait que dans la barre latérale du
-                        compte : un visiteur connecté sur une page publique
-                        devait d'abord naviguer ailleurs pour se déconnecter. */}
-                    <DropdownMenuItem
-                      onSelect={seDeconnecter}
-                      className="text-red-700 data-[highlighted]:text-red-700"
-                    >
-                      <LogOut className="h-4 w-4" strokeWidth={1.5} />
-                      Se déconnecter
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <AccountMenuDesktop
+                  isStaff={isStaff}
+                  firstName={user?.firstName}
+                  backofficeHref={backofficeHref}
+                  backofficeLabel={backofficeLabel}
+                  AccountIcon={AccountIcon}
+                  onLogout={seDeconnecter}
+                />
               ) : (
-                <Button asChild variant="outline" size="sm">
+                <Button asChild variant="outline" size="nav">
                   <Link href="/auth/login">Connexion</Link>
                 </Button>
               )}
@@ -177,19 +272,32 @@ export function Header() {
           className="md:hidden"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           aria-label={mobileMenuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+          aria-expanded={mobileMenuOpen}
+          aria-controls="menu-mobile"
         >
           {mobileMenuOpen ? (
-            <X className="h-6 w-6 text-noir" strokeWidth={1.5} />
+            <X className="h-6 w-6 text-ink" strokeWidth={1.5} />
           ) : (
-            <Menu className="h-6 w-6 text-noir" strokeWidth={1.5} />
+            <Menu className="h-6 w-6 text-ink" strokeWidth={1.5} />
           )}
         </button>
       </nav>
 
       {/* Mobile Menu */}
+      {/* `max-h-0` masque le menu a l'oeil mais le laisse dans l'ordre de
+          tabulation : au clavier, une tabulation depuis le bouton amenait sur
+          « Le jeu », dont l'anneau de focus se dessinait dans un conteneur haut
+          d'un pixel. `inert` retire tout le sous-arbre de la tabulation et de
+          l'arbre d'accessibilite, sans toucher a la mise en page - l'animation
+          de repli continue de jouer.
+
+          `inert` n'est pas encore dans les types de @types/react@18 : la
+          coercion reste necessaire pour que TypeScript accepte la prop. */}
       <div
+        id="menu-mobile"
+        {...(mobileMenuOpen ? {} : ({ inert: true } as { inert?: boolean }))}
         className={cn(
-          'overflow-hidden border-t border-warm-beige bg-white transition-all duration-300 ease-in-out md:hidden',
+          'overflow-hidden border-t border-warm-beige bg-surface transition-all duration-300 ease-in-out md:hidden',
           // Hauteur calée sur le cas le plus haut : nav + bouton backoffice + profil + Jouer
           mobileMenuOpen ? 'max-h-[32rem]' : 'max-h-0'
         )}
@@ -202,8 +310,8 @@ export function Header() {
               className={cn(
                 'block rounded-soft px-3 py-2 font-functional text-sm font-semibold',
                 pathname === item.href
-                  ? 'bg-terracotta-50 text-terracotta-600'
-                  : 'text-noir hover:bg-cream'
+                  ? 'bg-terracotta-50 text-accent'
+                  : 'text-ink hover:bg-cream'
               )}
               onClick={() => setMobileMenuOpen(false)}
             >
@@ -219,49 +327,19 @@ export function Header() {
             {isHydrated && (
               <>
                 {isAuthenticated ? (
-                  <>
-                    {/* Le menu mobile est déjà une liste dépliée : les mêmes
-                        destinations que le menu de compte s'y succèdent, sans
-                        qu'un second niveau déroulant soit nécessaire. */}
-                    <Button asChild variant="outline" className="w-full">
-                      <Link
-                        href={isStaff ? backofficeHref : '/dashboard'}
-                        className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-white active:bg-terracotta-600 active:text-white"
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        {isStaff ? (
-                          <AccountIcon className="h-4 w-4" strokeWidth={1.5} />
-                        ) : (
-                          <Gift className="h-4 w-4" strokeWidth={1.5} />
-                        )}
-                        {isStaff ? backofficeLabel : 'Mes participations'}
-                      </Link>
-                    </Button>
-                    <Button asChild variant="outline" className="w-full">
-                      <Link
-                        href="/dashboard/profile"
-                        className="flex items-center gap-2 font-functional text-ui uppercase tracking-[2px] text-noir hover:text-white active:bg-terracotta-600 active:text-white"
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        <User className="h-4 w-4" strokeWidth={1.5} />
-                        Mon profil
-                      </Link>
-                    </Button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setMobileMenuOpen(false);
-                        seDeconnecter();
-                      }}
-                      className="flex w-full items-center justify-center gap-2 rounded-full border-[1.5px] border-red-700 px-6 py-2 font-functional text-ui font-bold uppercase tracking-[2px] text-red-700 transition-colors hover:bg-red-50"
-                    >
-                      <LogOut className="h-4 w-4" strokeWidth={1.5} />
-                      Se déconnecter
-                    </button>
-                  </>
+                  <AccountMenuMobile
+                    isStaff={isStaff}
+                    backofficeHref={backofficeHref}
+                    backofficeLabel={backofficeLabel}
+                    AccountIcon={AccountIcon}
+                    onLogout={seDeconnecter}
+                    onNavigate={() => setMobileMenuOpen(false)}
+                  />
                 ) : (
                   <Button asChild variant="outline" className="w-full">
-                    <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)}>Connexion</Link>
+                    <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)}>
+                      Connexion
+                    </Link>
                   </Button>
                 )}
               </>

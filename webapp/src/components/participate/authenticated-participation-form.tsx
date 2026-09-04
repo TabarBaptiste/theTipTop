@@ -27,11 +27,11 @@ const schema = z.object({
 export type AuthenticatedParticipationData = z.infer<typeof schema>;
 
 interface Props {
-  firstName: string;
-  email: string;
-  defaultCode?: string;
-  isSubmitting: boolean;
-  onSubmit: (data: AuthenticatedParticipationData) => void;
+  readonly firstName: string;
+  readonly email: string;
+  readonly defaultCode?: string;
+  readonly isSubmitting: boolean;
+  readonly onSubmit: (data: AuthenticatedParticipationData) => void;
 }
 
 export function AuthenticatedParticipationForm({
@@ -57,9 +57,9 @@ export function AuthenticatedParticipationForm({
 
   return (
     <>
-      <h1 className="font-display text-h2 text-noir">Bonjour {firstName}</h1>
+      <h1 className="font-display text-h2 text-ink">Bonjour {firstName}</h1>
       <p className="mt-2 text-sm text-stone-grey">
-        Vous êtes identifié avec <strong className="text-noir">{email}</strong>. Saisissez
+        Vous êtes identifié avec <strong className="text-ink">{email}</strong>. Saisissez
         votre code : votre lot sera révélé immédiatement.
       </p>
 
@@ -99,7 +99,7 @@ export function AuthenticatedParticipationForm({
             />
             <label htmlFor="consentData" className="text-xs leading-relaxed text-stone-grey">
               J&apos;accepte le traitement de mes données et le{' '}
-              <Link href="/reglement" className="text-terracotta-600 hover:underline">
+              <Link href="/reglement" className="text-accent underline underline-offset-2">
                 règlement du jeu
               </Link>{' '}
               *

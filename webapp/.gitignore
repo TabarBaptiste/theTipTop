@@ -38,3 +38,8 @@ cypress/screenshots/
 # Misc
 *.tsbuildinfo
 next-env.d.ts
+
+# Photos sources des lots, avant detourage. Leur archive de reference est
+# Cloudinary, sous thetiptop/lots/sources/ ; la copie locale n'est la que pour
+# rejouer un detourage sans retelecharger.
+assets-sources/

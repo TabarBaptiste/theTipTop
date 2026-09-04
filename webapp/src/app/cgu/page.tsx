@@ -38,14 +38,14 @@ const ARTICLES = [
 
 export default function CGUPage() {
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-cream">
+    <div className="min-h-[calc(100vh-3.75rem)] bg-cream">
       {/* En-tête */}
-      <section className="border-b border-warm-beige bg-white">
+      <section className="border-b border-warm-beige bg-surface">
         <div className="container mx-auto px-6 py-12 md:py-16">
-          <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-600">
+          <p className="font-functional text-ui uppercase tracking-[2px] text-accent">
             Informations légales
           </p>
-          <h1 className="mt-3 font-display text-h1 text-noir">
+          <h1 className="mt-3 font-display text-h1 text-ink">
             Conditions Générales d&apos;Utilisation
           </h1>
           <p className="mt-4 max-w-2xl text-body text-stone-grey">
@@ -63,7 +63,7 @@ export default function CGUPage() {
         <div className="mx-auto max-w-5xl lg:grid lg:grid-cols-[260px_1fr] lg:gap-12">
           {/* Sommaire */}
           <aside className="hidden lg:block">
-            <div className="sticky top-24 rounded-card border border-warm-beige bg-white p-6">
+            <div className="sticky top-24 rounded-card border border-warm-beige bg-surface p-6">
               <p className="font-functional text-ui uppercase tracking-[2px] text-stone-grey">
                 Sommaire
               </p>
@@ -72,7 +72,7 @@ export default function CGUPage() {
                   <a
                     key={a.id}
                     href={`#${a.id}`}
-                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-600"
+                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-accent"
                   >
                     {a.label}
                   </a>
@@ -85,19 +85,19 @@ export default function CGUPage() {
                 <nav className="mt-3 space-y-1">
                   <Link
                     href="/mentions-legales"
-                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-600"
+                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-accent"
                   >
                     Mentions légales
                   </Link>
                   <Link
                     href="/politique-confidentialite"
-                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-600"
+                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-accent"
                   >
                     Politique de confidentialité
                   </Link>
                   <Link
                     href="/gestion-cookies"
-                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-600"
+                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-accent"
                   >
                     Gestion des cookies
                   </Link>
@@ -110,7 +110,7 @@ export default function CGUPage() {
           <article className="space-y-10">
             {/* Article 1 */}
             <section id="editeur" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">
+              <h2 className="font-display text-h2 text-ink">
                 Article 1 - Présentation de l&apos;éditeur
               </h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
@@ -140,7 +140,7 @@ export default function CGUPage() {
                     <strong>Email :</strong>{' '}
                     <a
                       href="mailto:contact@thetiptop.fr"
-                      className="text-terracotta-600 underline underline-offset-2"
+                      className="text-accent underline underline-offset-2"
                     >
                       contact@thetiptop.fr
                     </a>
@@ -157,7 +157,7 @@ export default function CGUPage() {
 
             {/* Article 2 */}
             <section id="objet" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">Article 2 - Objet des CGU</h2>
+              <h2 className="font-display text-h2 text-ink">Article 2 - Objet des CGU</h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
                 <p>
                   Les présentes CGU ont pour objet de définir les modalités et conditions
@@ -180,7 +180,7 @@ export default function CGUPage() {
 
             {/* Article 3 */}
             <section id="acceptation" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">Article 3 - Acceptation des CGU</h2>
+              <h2 className="font-display text-h2 text-ink">Article 3 - Acceptation des CGU</h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
                 <p>
                   L&apos;accès au Site et/ou la participation au jeu-concours implique
@@ -203,7 +203,7 @@ export default function CGUPage() {
 
             {/* Article 4 */}
             <section id="acces" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">Article 4 - Accès au site</h2>
+              <h2 className="font-display text-h2 text-ink">Article 4 - Accès au site</h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
                 <p>
                   Le Site est accessible gratuitement depuis tout appareil connecté à internet.
@@ -237,7 +237,7 @@ export default function CGUPage() {
 
             {/* Article 5 */}
             <section id="participation" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">
+              <h2 className="font-display text-h2 text-ink">
                 Article 5 - Conditions de participation au jeu-concours
               </h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
@@ -285,7 +285,7 @@ export default function CGUPage() {
 
             {/* Article 6 */}
             <section id="mecanisme" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">Article 6 - Mécanisme du jeu</h2>
+              <h2 className="font-display text-h2 text-ink">Article 6 - Mécanisme du jeu</h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
                 <p>
                   Le Grand Jeu-Concours Thé Tip Top est un jeu de type <strong>loterie sans achat
@@ -303,18 +303,20 @@ export default function CGUPage() {
                   // inatteignable. tabIndex rend la zone defilable au clavier,
                   // sans quoi son contenu resterait hors de portee sans souris.
                   tabIndex={0}
+                  role="region"
+                  aria-label="Tableau, défilement horizontal au clavier"
                   className="overflow-x-auto rounded-card border border-warm-beige"
                 >
                   <table className="w-full text-sm">
                     <thead className="bg-noir text-white">
                       <tr>
-                        <th className="px-4 py-3 text-left font-functional text-[10px] uppercase tracking-[2px]">
+                        <th className="px-4 py-3 text-left font-functional text-[0.625rem] uppercase tracking-[2px]">
                           Lot
                         </th>
-                        <th className="px-4 py-3 text-left font-functional text-[10px] uppercase tracking-[2px]">
+                        <th className="px-4 py-3 text-left font-functional text-[0.625rem] uppercase tracking-[2px]">
                           Valeur indicative
                         </th>
-                        <th className="px-4 py-3 text-left font-functional text-[10px] uppercase tracking-[2px]">
+                        <th className="px-4 py-3 text-left font-functional text-[0.625rem] uppercase tracking-[2px]">
                           Probabilité
                         </th>
                       </tr>
@@ -327,10 +329,10 @@ export default function CGUPage() {
                         ['Boîte thé signature (69,90€)', '69,90 €', '7 %'],
                         ['An de thé offert (360€)', '360,00 €', '1 %'],
                       ].map(([lot, valeur, proba]) => (
-                        <tr key={lot} className="bg-white even:bg-cream">
+                        <tr key={lot} className="bg-surface even:bg-cream">
                           <td className="px-4 py-3 text-stone-grey">{lot}</td>
                           <td className="px-4 py-3 text-stone-grey">{valeur}</td>
-                          <td className="px-4 py-3 font-medium text-terracotta-600">{proba}</td>
+                          <td className="px-4 py-3 font-medium text-accent">{proba}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -345,7 +347,7 @@ export default function CGUPage() {
 
             {/* Article 7 */}
             <section id="dotations" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">Article 7 - Dotations</h2>
+              <h2 className="font-display text-h2 text-ink">Article 7 - Dotations</h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
                 <p>
                   Les lots ne peuvent être ni cédés, ni échangés, ni remplacés par leur contre-valeur
@@ -367,7 +369,7 @@ export default function CGUPage() {
 
             {/* Article 8 */}
             <section id="gagnants" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">
+              <h2 className="font-display text-h2 text-ink">
                 Article 8 - Désignation des gagnants
               </h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
@@ -392,7 +394,7 @@ export default function CGUPage() {
 
             {/* Article 9 */}
             <section id="remise" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">Article 9 - Remise des lots</h2>
+              <h2 className="font-display text-h2 text-ink">Article 9 - Remise des lots</h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
                 <p>
                   Les lots sont à retirer directement en boutique sur présentation :
@@ -421,7 +423,7 @@ export default function CGUPage() {
 
             {/* Article 10 */}
             <section id="propriete" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">
+              <h2 className="font-display text-h2 text-ink">
                 Article 10 - Propriété intellectuelle
               </h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
@@ -446,7 +448,7 @@ export default function CGUPage() {
 
             {/* Article 11 */}
             <section id="responsabilite" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">Article 11 - Responsabilité</h2>
+              <h2 className="font-display text-h2 text-ink">Article 11 - Responsabilité</h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
                 <p>
                   L&apos;éditeur s&apos;engage à mettre en œuvre tous les moyens nécessaires pour
@@ -484,7 +486,7 @@ export default function CGUPage() {
 
             {/* Article 12 */}
             <section id="donnees" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">
+              <h2 className="font-display text-h2 text-ink">
                 Article 12 - Protection des données personnelles
               </h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
@@ -523,7 +525,7 @@ export default function CGUPage() {
                   Ces droits peuvent être exercés par email à{' '}
                   <a
                     href="mailto:rgpd@thetiptop.fr"
-                    className="text-terracotta-600 underline underline-offset-2"
+                    className="text-accent underline underline-offset-2"
                   >
                     rgpd@thetiptop.fr
                   </a>{' '}
@@ -531,7 +533,7 @@ export default function CGUPage() {
                   consultez notre{' '}
                   <Link
                     href="/politique-confidentialite"
-                    className="text-terracotta-600 underline underline-offset-2"
+                    className="text-accent underline underline-offset-2"
                   >
                     Politique de confidentialité
                   </Link>
@@ -542,7 +544,7 @@ export default function CGUPage() {
 
             {/* Article 13 */}
             <section id="cookies" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">Article 13 - Cookies</h2>
+              <h2 className="font-display text-h2 text-ink">Article 13 - Cookies</h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
                 <p>
                   Le Site utilisé des cookies afin d&apos;améliorer l&apos;expérience utilisateur
@@ -556,7 +558,7 @@ export default function CGUPage() {
                   notre page de{' '}
                   <Link
                     href="/gestion-cookies"
-                    className="text-terracotta-600 underline underline-offset-2"
+                    className="text-accent underline underline-offset-2"
                   >
                     gestion des cookies
                   </Link>
@@ -568,7 +570,7 @@ export default function CGUPage() {
 
             {/* Article 14 */}
             <section id="droit" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">
+              <h2 className="font-display text-h2 text-ink">
                 Article 14 - Droit applicable et juridiction compétente
               </h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
@@ -592,20 +594,20 @@ export default function CGUPage() {
             </section>
 
             {/* Bas de page */}
-            <div className="rounded-card border border-warm-beige bg-white p-6">
+            <div className="rounded-card border border-warm-beige bg-surface p-6">
               <p className="text-sm text-stone-grey">
                 Pour toute question relative aux présentes CGU ou au règlement du jeu-concours,
                 vous pouvez nous contacter à{' '}
                 <a
                   href="mailto:contact@thetiptop.fr"
-                  className="font-medium text-terracotta-600 underline underline-offset-2"
+                  className="font-medium text-accent underline underline-offset-2"
                 >
                   contact@thetiptop.fr
                 </a>{' '}
                 ou consulter notre page de{' '}
                 <Link
                   href="/mentions-legales"
-                  className="font-medium text-terracotta-600 underline underline-offset-2"
+                  className="font-medium text-accent underline underline-offset-2"
                 >
                   mentions légales
                 </Link>

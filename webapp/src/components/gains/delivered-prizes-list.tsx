@@ -43,7 +43,7 @@ interface PaginatedDeliveries {
  * L'endpoint `/gains/history` est ouvert aux deux rôles et renvoie exactement
  * les mêmes données : une seule implémentation suffit.
  */
-export function DeliveredPrizesList({ className }: { className?: string }) {
+export function DeliveredPrizesList({ className }: Readonly<{ className?: string }>) {
   const [page, setPage] = useState(1);
 
   const { data, isLoading } = useQuery<PaginatedDeliveries>({
@@ -58,6 +58,45 @@ export function DeliveredPrizesList({ className }: { className?: string }) {
   const deliveries = data?.data ?? [];
   const meta = data?.meta;
 
+  const deliveriesListOrEmpty =
+    deliveries.length === 0 ? (
+      <p className="py-8 text-center text-sm text-stone-grey">
+        Aucun lot n&apos;a encore été remis.
+      </p>
+    ) : (
+      <ul className="space-y-3">
+        {deliveries.map((delivery) => (
+          <li
+            key={delivery.id}
+            className="flex items-start justify-between gap-4 rounded-soft border border-warm-beige p-3"
+          >
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-medium text-ink">
+                {delivery.user.firstName} {delivery.user.lastName}
+              </p>
+              <p className="mt-0.5 font-mono text-xs text-stone-grey">{delivery.code}</p>
+            </div>
+            <div className="shrink-0 text-right">
+              <p className="text-sm font-medium text-accent">
+                {delivery.prize?.name ?? delivery.prizeType}
+              </p>
+              {delivery.prizeDeliveredAt && (
+                <p className="mt-0.5 text-xs text-stone-grey">
+                  {formatDateTime(delivery.prizeDeliveredAt)}
+                </p>
+              )}
+              <p className="text-xs text-stone-grey">
+                {delivery.deliveryMethod
+                  ? (DELIVERY_METHOD_LABELS[delivery.deliveryMethod] ?? delivery.deliveryMethod)
+                  : 'Méthode non précisée'}
+                {delivery.deliveredBy ? ` · ${delivery.deliveredBy}` : ''}
+              </p>
+            </div>
+          </li>
+        ))}
+      </ul>
+    );
+
   return (
     <Card className={className}>
       <CardHeader>
@@ -70,42 +109,8 @@ export function DeliveredPrizesList({ className }: { className?: string }) {
       <CardContent>
         {isLoading ? (
           <SkeletonList count={4} />
-        ) : deliveries.length === 0 ? (
-          <p className="py-8 text-center text-sm text-stone-grey">
-            Aucun lot n&apos;a encore été remis.
-          </p>
         ) : (
-          <ul className="space-y-3">
-            {deliveries.map((delivery) => (
-              <li
-                key={delivery.id}
-                className="flex items-start justify-between gap-4 rounded-soft border border-warm-beige p-3"
-              >
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium text-noir">
-                    {delivery.user.firstName} {delivery.user.lastName}
-                  </p>
-                  <p className="mt-0.5 font-mono text-xs text-stone-grey">{delivery.code}</p>
-                </div>
-                <div className="shrink-0 text-right">
-                  <p className="text-sm font-medium text-terracotta-600">
-                    {delivery.prize?.name ?? delivery.prizeType}
-                  </p>
-                  {delivery.prizeDeliveredAt && (
-                    <p className="mt-0.5 text-xs text-stone-grey">
-                      {formatDateTime(delivery.prizeDeliveredAt)}
-                    </p>
-                  )}
-                  <p className="text-xs text-stone-grey">
-                    {delivery.deliveryMethod
-                      ? (DELIVERY_METHOD_LABELS[delivery.deliveryMethod] ?? delivery.deliveryMethod)
-                      : 'Méthode non précisée'}
-                    {delivery.deliveredBy ? ` · ${delivery.deliveredBy}` : ''}
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ul>
+          deliveriesListOrEmpty
         )}
 
         {/* Liste vide : le message suffit, un « 0 lots remis » le répéterait. */}

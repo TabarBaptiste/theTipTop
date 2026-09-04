@@ -6,8 +6,8 @@ fait que les relier entre elles.
 
 | Type | Emplacement | Outil | Lancé par |
 |---|---|---|---|
-| Unitaires API | `api/src/**/*.spec.ts` (31 fichiers) | Jest | Stage `Unit Tests` du pipeline (`npx jest` dans `api/`), sur toute branche |
-| Unitaires Webapp | `webapp/src/**/*.test.ts(x)` (32 fichiers) | Jest | Idem, dans `webapp/` |
+| Unitaires API | [api/tests/unit/](../api/tests/unit/) (`*.spec.ts`, miroir de `api/src/`) | Jest | Stage `Unit Tests` du pipeline (`npx jest` dans `api/`), sur toute branche |
+| Unitaires Webapp | [webapp/tests/unit/](../webapp/tests/unit/) (`*.test.ts(x)`, miroir de `webapp/src/`) | Jest | Idem, dans `webapp/` |
 | Fonctionnels API (intégration) | [api/test/](../api/test/) (`*.e2e-spec.ts`) | Jest + Supertest | `npm run test:e2e:ci --workspace api`, en local ou manuellement - **pas encore branché au pipeline** (voir [api/test/README.md](../api/test/README.md)) |
 | End-to-end Webapp | `webapp/cypress/e2e/*.cy.ts` (5 specs) | Cypress | Stage `E2E Tests` du pipeline, contre PREPROD, uniquement sur `main` |
 | Performance | [tests/performance/](performance/) | k6 | `Jenkinsfile.k6`, planifié chaque semaine contre PREPROD |
@@ -17,21 +17,22 @@ fait que les relier entre elles.
 Le protocole détaillé des tests de charge, de sécurité et de régression est
 dans [docs/05-PROTOCOLES-DE-TESTS.md](../docs/05-PROTOCOLES-DE-TESTS.md).
 
-## Pourquoi les tests unitaires restent à côté du code source
+## Où vivent les tests unitaires, et pourquoi
 
-`api/src/**/*.spec.ts` et `webapp/src/**/*.test.ts(x)` ne sont pas sous
-`tests/` : ils sont colocalisés avec le fichier qu'ils testent, ce qui est la
-convention standard de l'écosystème (Jest, NestJS, Next.js) - un contributeur
-qui ouvre `users.service.ts` trouve `users.service.spec.ts` juste à côté, sans
-naviguer un arbre parallèle.
+`api/src/**/*.spec.ts` et `webapp/src/**/*.test.ts(x)` ont été déplacés vers
+`api/tests/unit/` et `webapp/tests/unit/` (miroir de l'arborescence `src/`),
+en réécrivant leurs imports relatifs vers l'alias `@/` pour qu'ils restent
+valides indépendamment de leur emplacement. `api/jest.config.js`
+(`roots: ['<rootDir>/tests/unit']`) et `webapp/jest.config.js`
+(`testMatch: ['<rootDir>/tests/unit/**/*.test.{ts,tsx}']`) pointent désormais
+vers ce nouvel emplacement.
 
-Les regrouper physiquement sous `tests/` demanderait de réécrire les imports
-relatifs d'une soixantaine de fichiers (`import { X } from './x.service'`) sans
-aucun bénéfice fonctionnel : le `rootDir`/`testRegex` de chaque
-`jest.config.js` (`api/jest.config.js`, `webapp/jest.config.js`) suffit déjà à
-ce qu'ils soient exécutés correctement, où qu'ils vivent.
+Le déplacement reste **interne à chaque workspace npm** (`api/`, `webapp/`) :
+remonter jusqu'à `tests/` à la racine du dépôt casserait la résolution de
+`node_modules`/`tsconfig` propre à chaque package pour un gain purement
+cosmétique.
 
-## Pourquoi `api/test/` et `webapp/cypress/` ne sont pas non plus sous `tests/`
+## Pourquoi `api/test/` et `webapp/cypress/` ne sont pas sous `tests/unit/` ou `tests/`
 
 Les deux sont déjà isolés du code source, mais restent dans leur workspace
 npm respectif car ils y sont fortement couplés :

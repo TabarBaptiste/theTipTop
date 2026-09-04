@@ -29,14 +29,14 @@ const ARTICLES = [
 
 export default function PolitiqueConfidentialitePage() {
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-cream">
+    <div className="min-h-[calc(100vh-3.75rem)] bg-cream">
       {/* En-tête */}
-      <section className="border-b border-warm-beige bg-white">
+      <section className="border-b border-warm-beige bg-surface">
         <div className="container mx-auto px-6 py-12 md:py-16">
-          <p className="font-functional text-ui uppercase tracking-[2px] text-terracotta-600">
+          <p className="font-functional text-ui uppercase tracking-[2px] text-accent">
             Informations légales
           </p>
-          <h1 className="mt-3 font-display text-h1 text-noir">
+          <h1 className="mt-3 font-display text-h1 text-ink">
             Politique de confidentialité
           </h1>
           <p className="mt-4 max-w-2xl text-body text-stone-grey">
@@ -55,7 +55,7 @@ export default function PolitiqueConfidentialitePage() {
         <div className="mx-auto max-w-5xl lg:grid lg:grid-cols-[260px_1fr] lg:gap-12">
           {/* Sommaire */}
           <aside className="hidden lg:block">
-            <div className="sticky top-24 rounded-card border border-warm-beige bg-white p-6">
+            <div className="sticky top-24 rounded-card border border-warm-beige bg-surface p-6">
               <p className="font-functional text-ui uppercase tracking-[2px] text-stone-grey">
                 Sommaire
               </p>
@@ -64,7 +64,7 @@ export default function PolitiqueConfidentialitePage() {
                   <a
                     key={a.id}
                     href={`#${a.id}`}
-                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-600"
+                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-accent"
                   >
                     {a.label}
                   </a>
@@ -77,19 +77,19 @@ export default function PolitiqueConfidentialitePage() {
                 <nav className="mt-3 space-y-1">
                   <Link
                     href="/cgu"
-                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-600"
+                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-accent"
                   >
                     CGU
                   </Link>
                   <Link
                     href="/mentions-legales"
-                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-600"
+                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-accent"
                   >
                     Mentions légales
                   </Link>
                   <Link
                     href="/gestion-cookies"
-                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-terracotta-600"
+                    className="block rounded-soft px-2 py-1.5 text-sm text-stone-grey transition-colors hover:bg-cream hover:text-accent"
                   >
                     Gestion des cookies
                   </Link>
@@ -103,7 +103,7 @@ export default function PolitiqueConfidentialitePage() {
 
             {/* Article 1 */}
             <section id="responsable" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">
+              <h2 className="font-display text-h2 text-ink">
                 Article 1 - Responsable du traitement
               </h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
@@ -114,31 +114,34 @@ export default function PolitiqueConfidentialitePage() {
                   // inatteignable. tabIndex rend la zone defilable au clavier,
                   // sans quoi son contenu resterait hors de portee sans souris.
                   tabIndex={0}
-                  className="overflow-x-auto rounded-card border border-warm-beige bg-white"
+                  role="region"
+                  aria-label="Tableau, défilement horizontal au clavier"
+                  className="overflow-x-auto rounded-card border border-warm-beige bg-surface"
                 >
                   <table className="w-full text-sm">
                     <tbody className="divide-y divide-warm-beige">
                       {[
-                        ['Responsable', 'Thé Tip Top - Société Anonyme (SA)'],
-                        ['Adresse', '18 rue Léon Frot, 75011 Paris - France'],
-                        ['Email contact', 'contact@thetiptop.fr'],
-                        ['Email RGPD', 'rgpd@thetiptop.fr'],
-                        ['Téléphone', '+33 1 23 74 85 96'],
-                      ].map(([label, value]) => (
+                        { label: 'Responsable', value: 'Thé Tip Top - Société Anonyme (SA)' },
+                        { label: 'Adresse', value: '18 rue Léon Frot, 75011 Paris - France' },
+                        {
+                          label: 'Email contact',
+                          value: 'contact@thetiptop.fr',
+                          href: 'mailto:contact@thetiptop.fr',
+                        },
+                        {
+                          label: 'Email RGPD',
+                          value: 'rgpd@thetiptop.fr',
+                          href: 'mailto:rgpd@thetiptop.fr',
+                        },
+                        { label: 'Téléphone', value: '+33 1 23 74 85 96' },
+                      ].map(({ label, value, href }) => (
                         <tr key={label} className="even:bg-cream">
-                          <td className="px-4 py-3 font-medium text-noir">{label}</td>
+                          <td className="px-4 py-3 font-medium text-ink">{label}</td>
                           <td className="px-4 py-3 text-stone-grey">
-                            {label === 'Email contact' ? (
+                            {href ? (
                               <a
-                                href="mailto:contact@thetiptop.fr"
-                                className="text-terracotta-600 underline underline-offset-2"
-                              >
-                                {value}
-                              </a>
-                            ) : label === 'Email RGPD' ? (
-                              <a
-                                href="mailto:rgpd@thetiptop.fr"
-                                className="text-terracotta-600 underline underline-offset-2"
+                                href={href}
+                                className="text-accent underline underline-offset-2"
                               >
                                 {value}
                               </a>
@@ -161,7 +164,7 @@ export default function PolitiqueConfidentialitePage() {
 
             {/* Article 2 */}
             <section id="donnees" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">
+              <h2 className="font-display text-h2 text-ink">
                 Article 2 - Données collectées
               </h2>
               <div className="mt-4 space-y-4 text-body text-stone-grey">
@@ -190,9 +193,9 @@ export default function PolitiqueConfidentialitePage() {
                   ].map((cat) => (
                     <div
                       key={cat.title}
-                      className="rounded-card border border-warm-beige bg-white p-4"
+                      className="rounded-card border border-warm-beige bg-surface p-4"
                     >
-                      <p className="font-medium text-noir">{cat.title}</p>
+                      <p className="font-medium text-ink">{cat.title}</p>
                       <ul className="mt-2 ml-4 list-disc space-y-0.5 pl-2 text-sm text-stone-grey">
                         {cat.items.map((item) => (
                           <li key={item}>{item}</li>
@@ -210,7 +213,7 @@ export default function PolitiqueConfidentialitePage() {
 
             {/* Article 3 */}
             <section id="finalites" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">
+              <h2 className="font-display text-h2 text-ink">
                 Article 3 - Finalités des traitements
               </h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
@@ -221,16 +224,18 @@ export default function PolitiqueConfidentialitePage() {
                   // inatteignable. tabIndex rend la zone defilable au clavier,
                   // sans quoi son contenu resterait hors de portee sans souris.
                   tabIndex={0}
+                  role="region"
+                  aria-label="Tableau, défilement horizontal au clavier"
                   className="overflow-x-auto rounded-card border border-warm-beige"
                 >
                   <table className="w-full text-sm">
                     <thead className="bg-noir text-white">
                       <tr>
-                        <th className="px-4 py-3 text-left font-functional text-[10px] uppercase tracking-[2px]">Finalité</th>
-                        <th className="px-4 py-3 text-left font-functional text-[10px] uppercase tracking-[2px]">Base légale</th>
+                        <th className="px-4 py-3 text-left font-functional text-[0.625rem] uppercase tracking-[2px]">Finalité</th>
+                        <th className="px-4 py-3 text-left font-functional text-[0.625rem] uppercase tracking-[2px]">Base légale</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-warm-beige bg-white">
+                    <tbody className="divide-y divide-warm-beige bg-surface">
                       {[
                         ['Création et gestion du compte participant', 'Exécution du contrat'],
                         ['Organisation et gestion du jeu-concours', 'Exécution du contrat'],
@@ -243,7 +248,7 @@ export default function PolitiqueConfidentialitePage() {
                       ].map(([finalite, base]) => (
                         <tr key={finalite} className="even:bg-cream">
                           <td className="px-4 py-3 text-stone-grey">{finalite}</td>
-                          <td className="px-4 py-3 font-medium text-terracotta-600">{base}</td>
+                          <td className="px-4 py-3 font-medium text-accent">{base}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -254,7 +259,7 @@ export default function PolitiqueConfidentialitePage() {
 
             {/* Article 4 */}
             <section id="base-legale" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">Article 4 - Base légale</h2>
+              <h2 className="font-display text-h2 text-ink">Article 4 - Base légale</h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
                 <p>Conformément à l&apos;article 6 du RGPD, les traitements reposent sur :</p>
                 <ul className="ml-4 space-y-2 pl-4">
@@ -281,7 +286,7 @@ export default function PolitiqueConfidentialitePage() {
 
             {/* Article 5 */}
             <section id="conservation" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">
+              <h2 className="font-display text-h2 text-ink">
                 Article 5 - Durée de conservation
               </h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
@@ -291,16 +296,18 @@ export default function PolitiqueConfidentialitePage() {
                   // inatteignable. tabIndex rend la zone defilable au clavier,
                   // sans quoi son contenu resterait hors de portee sans souris.
                   tabIndex={0}
+                  role="region"
+                  aria-label="Tableau, défilement horizontal au clavier"
                   className="overflow-x-auto rounded-card border border-warm-beige"
                 >
                   <table className="w-full text-sm">
                     <thead className="bg-noir text-white">
                       <tr>
-                        <th className="px-4 py-3 text-left font-functional text-[10px] uppercase tracking-[2px]">Catégorie</th>
-                        <th className="px-4 py-3 text-left font-functional text-[10px] uppercase tracking-[2px]">Durée</th>
+                        <th className="px-4 py-3 text-left font-functional text-[0.625rem] uppercase tracking-[2px]">Catégorie</th>
+                        <th className="px-4 py-3 text-left font-functional text-[0.625rem] uppercase tracking-[2px]">Durée</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-warm-beige bg-white">
+                    <tbody className="divide-y divide-warm-beige bg-surface">
                       {[
                         ['Compte participant (actif)', 'Durée de vie du compte + 3 ans après clôture'],
                         ['Données du jeu-concours', '3 ans à compter de la fin du jeu (fins probatoires)'],
@@ -326,7 +333,7 @@ export default function PolitiqueConfidentialitePage() {
 
             {/* Article 6 */}
             <section id="destinataires" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">Article 6 - Destinataires</h2>
+              <h2 className="font-display text-h2 text-ink">Article 6 - Destinataires</h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
                 <p>
                   Vos données personnelles sont strictement confidentielles. Elles ne sont
@@ -361,7 +368,7 @@ export default function PolitiqueConfidentialitePage() {
 
             {/* Article 7 */}
             <section id="transferts" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">
+              <h2 className="font-display text-h2 text-ink">
                 Article 7 - Transferts hors Union européenne
               </h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
@@ -382,7 +389,7 @@ export default function PolitiqueConfidentialitePage() {
 
             {/* Article 8 */}
             <section id="droits" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">Article 8 - Vos droits</h2>
+              <h2 className="font-display text-h2 text-ink">Article 8 - Vos droits</h2>
               <div className="mt-4 space-y-4 text-body text-stone-grey">
                 <p>
                   Conformément au RGPD, vous disposez des droits suivants sur vos données
@@ -417,9 +424,9 @@ export default function PolitiqueConfidentialitePage() {
                   ].map(({ droit, desc }) => (
                     <div
                       key={droit}
-                      className="rounded-card border border-warm-beige bg-white p-4"
+                      className="rounded-card border border-warm-beige bg-surface p-4"
                     >
-                      <p className="font-medium text-noir">{droit}</p>
+                      <p className="font-medium text-ink">{droit}</p>
                       <p className="mt-1 text-sm text-stone-grey">{desc}</p>
                     </div>
                   ))}
@@ -428,7 +435,7 @@ export default function PolitiqueConfidentialitePage() {
                   Pour exercer l&apos;un de ces droits, envoyez votre demande par email à{' '}
                   <a
                     href="mailto:rgpd@thetiptop.fr"
-                    className="text-terracotta-600 underline underline-offset-2"
+                    className="text-accent underline underline-offset-2"
                   >
                     rgpd@thetiptop.fr
                   </a>{' '}
@@ -445,7 +452,7 @@ export default function PolitiqueConfidentialitePage() {
 
             {/* Article 9 */}
             <section id="cookies" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">Article 9 - Cookies et traceurs</h2>
+              <h2 className="font-display text-h2 text-ink">Article 9 - Cookies et traceurs</h2>
               <div className="mt-4 space-y-4 text-body text-stone-grey">
                 <p>
                   Un cookie est un petit fichier texte déposé sur votre appareil lors de la
@@ -480,7 +487,7 @@ export default function PolitiqueConfidentialitePage() {
                   ].map(({ type, color, badge, badgeColor, desc, exemples }) => (
                     <div key={type} className={`rounded-card border p-4 ${color}`}>
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className="font-medium text-noir">{type}</p>
+                        <p className="font-medium text-ink">{type}</p>
                         <span className={`rounded-pill px-2 py-0.5 text-xs font-medium ${badgeColor}`}>
                           {badge}
                         </span>
@@ -496,7 +503,7 @@ export default function PolitiqueConfidentialitePage() {
                   Vous pouvez gérer vos préférences à tout moment via notre page de{' '}
                   <Link
                     href="/gestion-cookies"
-                    className="text-terracotta-600 underline underline-offset-2"
+                    className="text-accent underline underline-offset-2"
                   >
                     gestion des cookies
                   </Link>
@@ -512,7 +519,7 @@ export default function PolitiqueConfidentialitePage() {
 
             {/* Article 10 */}
             <section id="securite" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">Article 10 - Sécurité</h2>
+              <h2 className="font-display text-h2 text-ink">Article 10 - Sécurité</h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
                 <p>
                   Thé Tip Top met en œuvre les mesures techniques et organisationnelles
@@ -537,7 +544,7 @@ export default function PolitiqueConfidentialitePage() {
 
             {/* Article 11 */}
             <section id="cnil" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">
+              <h2 className="font-display text-h2 text-ink">
                 Article 11 - Réclamation auprès de la CNIL
               </h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
@@ -547,8 +554,8 @@ export default function PolitiqueConfidentialitePage() {
                   réclamation auprès de l&apos;autorité de contrôle compétente, la{' '}
                   <strong>Commission Nationale de l&apos;Informatique et des Libertés (CNIL)</strong> :
                 </p>
-                <div className="rounded-card border border-warm-beige bg-white p-4 text-sm">
-                  <p className="font-medium text-noir">CNIL</p>
+                <div className="rounded-card border border-warm-beige bg-surface p-4 text-sm">
+                  <p className="font-medium text-ink">CNIL</p>
                   <p className="mt-1 text-stone-grey">3 Place de Fontenoy, TSA 80715</p>
                   <p className="text-stone-grey">75334 Paris Cedex 07</p>
                   <p className="mt-2">
@@ -556,7 +563,7 @@ export default function PolitiqueConfidentialitePage() {
                       href="https://www.cnil.fr/fr/vous-souhaitez-contacter-la-cnil"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-terracotta-600 underline underline-offset-2"
+                      className="text-accent underline underline-offset-2"
                     >
                       www.cnil.fr
                     </a>
@@ -566,7 +573,7 @@ export default function PolitiqueConfidentialitePage() {
                   Nous vous encourageons à nous contacter en premier lieu à{' '}
                   <a
                     href="mailto:rgpd@thetiptop.fr"
-                    className="text-terracotta-600 underline underline-offset-2"
+                    className="text-accent underline underline-offset-2"
                   >
                     rgpd@thetiptop.fr
                   </a>{' '}
@@ -577,7 +584,7 @@ export default function PolitiqueConfidentialitePage() {
 
             {/* Article 12 */}
             <section id="modification" className="scroll-mt-24">
-              <h2 className="font-display text-h2 text-noir">
+              <h2 className="font-display text-h2 text-ink">
                 Article 12 - Modification de la politique
               </h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
@@ -596,26 +603,26 @@ export default function PolitiqueConfidentialitePage() {
             </section>
 
             {/* Pied de page article */}
-            <div className="rounded-card border border-warm-beige bg-white p-6">
+            <div className="rounded-card border border-warm-beige bg-surface p-6">
               <p className="text-sm text-stone-grey">
                 Pour toute question relative à vos données personnelles, contactez-nous à{' '}
                 <a
                   href="mailto:rgpd@thetiptop.fr"
-                  className="font-medium text-terracotta-600 underline underline-offset-2"
+                  className="font-medium text-accent underline underline-offset-2"
                 >
                   rgpd@thetiptop.fr
                 </a>
                 . Consultez également nos{' '}
                 <Link
                   href="/mentions-legales"
-                  className="font-medium text-terracotta-600 underline underline-offset-2"
+                  className="font-medium text-accent underline underline-offset-2"
                 >
                   Mentions légales
                 </Link>{' '}
                 et nos{' '}
                 <Link
                   href="/cgu"
-                  className="font-medium text-terracotta-600 underline underline-offset-2"
+                  className="font-medium text-accent underline underline-offset-2"
                 >
                   CGU
                 </Link>

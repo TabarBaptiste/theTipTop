@@ -8,7 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '@/prisma/prisma.service';
 import { RedisService } from '@/redis/redis.service';
-import { ConflictException, ForbiddenException } from '@nestjs/common';
+import { ForbiddenException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { UsersService } from '@/modules/users/users.service';
 
@@ -133,64 +133,6 @@ describe('AuthService', () => {
 
       const result = await service.validateUser('test@example.com', 'wrongpassword');
       expect(result).toBeNull();
-    });
-  });
-
-  // ===========================================
-  // register
-  // ===========================================
-  describe('register', () => {
-    const registerDto = {
-      email: 'new@example.com',
-      password: 'Password123!',
-      firstName: 'New',
-      lastName: 'User',
-      consentData: true,
-    };
-
-    it('should create a new user and return a token + user without password', async () => {
-      mockUsersService.findByEmail.mockResolvedValue(null);
-      mockPrismaService.user.create.mockResolvedValue({
-        id: '2',
-        email: registerDto.email,
-        password: 'hashed',
-        firstName: 'New',
-        lastName: 'User',
-        role: 'CLIENT',
-      });
-      mockPrismaService.refreshToken.create.mockResolvedValue({});
-
-      const result = await service.register(registerDto);
-
-      expect(result).toHaveProperty('user');
-      expect(result).toHaveProperty('accessToken', 'mock-token');
-      expect(result).toHaveProperty('refreshToken', 'mock-token');
-      expect(result).toHaveProperty('expiresIn');
-      expect(result.user).not.toHaveProperty('password');
-      expect(mockPrismaService.user.create).toHaveBeenCalled();
-    });
-
-    it('should hash the password before persisting', async () => {
-      mockUsersService.findByEmail.mockResolvedValue(null);
-      mockPrismaService.user.create.mockResolvedValue({
-        id: '2',
-        email: registerDto.email,
-        password: 'hashed',
-        role: 'CLIENT',
-      });
-      mockPrismaService.refreshToken.create.mockResolvedValue({});
-
-      await service.register(registerDto);
-
-      const createArg = mockPrismaService.user.create.mock.calls[0][0];
-      expect(createArg.data.password).not.toBe(registerDto.password);
-      expect(createArg.data.email).toBe('new@example.com');
-    });
-
-    it('should throw ConflictException if email already exists', async () => {
-      mockUsersService.findByEmail.mockResolvedValue({ id: '1' });
-
-      await expect(service.register(registerDto)).rejects.toThrow(ConflictException);
     });
   });
 

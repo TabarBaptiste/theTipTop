@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils';
 //
 // Hex explicites pour garantir la génération JIT (évite les problèmes avec les clés imbriquées)
 const tagVariants = cva(
-  'inline-flex items-center gap-2 rounded-pill px-[10px] py-1 font-functional text-[10px] font-semibold uppercase tracking-[2px] text-[#4A463E]',
+  'inline-flex items-center gap-2 rounded-pill px-[10px] py-1 font-functional text-[0.625rem] font-semibold uppercase tracking-[2px] text-[#4A463E]',
   {
     variants: {
       variant: {
@@ -44,8 +44,8 @@ const tagVariants = cva(
 );
 
 export interface TagProps
-  extends React.HTMLAttributes<HTMLSpanElement>,
-    VariantProps<typeof tagVariants> {}
+  extends Readonly<React.HTMLAttributes<HTMLSpanElement>>,
+    Readonly<VariantProps<typeof tagVariants>> {}
 
 function Tag({ className, variant, ...props }: TagProps) {
   return (

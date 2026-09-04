@@ -10,7 +10,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { User } from '@prisma/client';
-import { randomInt } from 'crypto';
+import { randomInt } from 'node:crypto';
 
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
