@@ -9,7 +9,17 @@
 import request from 'supertest';
 import { PrizeType } from '@prisma/client';
 
-import { Contexte, MARQUEUR, adresse, creerTicket, demarrer, nettoyer, ouvrirLeJeu } from './utils';
+import {
+  Contexte,
+  MARQUEUR,
+  adresse,
+  creerTicket,
+  demarrer,
+  inscrire,
+  nettoyer,
+  ouvrirLeJeu,
+  reinitialiserQuota,
+} from './utils';
 
 describe('UC-06 - Participation depuis l espace personnel', () => {
   let ctx: Contexte;
@@ -32,26 +42,18 @@ describe('UC-06 - Participation depuis l espace personnel', () => {
     }
   });
 
-  beforeEach(() => {
+  // Chaque scenario ouvre au moins un compte, et l'ouverture d'inscription est
+  // plafonnee a dix par heure et par IP (RG-03). Sans remise a zero, la suite
+  // s'arreterait en 429 avant d'avoir couvert la moitie des cas.
+  beforeEach(async () => {
+    await reinitialiserQuota(ctx);
     ctx.envois.length = 0;
   });
 
   /** Cree un compte client actif et retourne son jeton et son adresse. */
   async function client(prefixe: string) {
-    const email = adresse(prefixe);
-    const r = await http()
-      .post('/api/v1/auth/register')
-      .send({
-        email,
-        password: MOT_DE_PASSE,
-        firstName: 'Camille',
-        lastName: 'Martin',
-        birthDate: '1990-05-15',
-        consentData: true,
-      })
-      .expect(201);
-
-    return { email, jeton: r.body.accessToken as string };
+    const { email, accessToken } = await inscrire(ctx, adresse(prefixe), MOT_DE_PASSE);
+    return { email, jeton: accessToken };
   }
 
   // ===========================================

@@ -9,7 +9,7 @@
 import request from 'supertest';
 import { Role } from '@prisma/client';
 
-import { Contexte, adresse, demarrer, nettoyer } from './utils';
+import { Contexte, adresse, demarrer, inscrire, nettoyer, reinitialiserQuota } from './utils';
 
 describe('UC-01 / UC-02 - Comptes et controle d acces', () => {
   let ctx: Contexte;
@@ -29,6 +29,15 @@ describe('UC-01 / UC-02 - Comptes et controle d acces', () => {
     }
   });
 
+  // L'ouverture d'inscription est plafonnee a dix par heure et par IP (RG-03).
+  // Cette suite en enchaine bien davantage depuis l'adresse locale : sans
+  // remise a zero, la moitie des scenarios echouerait en 429 sans rien avoir
+  // prouve sur ce qu'ils couvrent.
+  beforeEach(async () => {
+    await reinitialiserQuota(ctx);
+    ctx.envois.length = 0;
+  });
+
   const inscription = (email: string) => ({
     email,
     password: MOT_DE_PASSE,
@@ -38,28 +47,42 @@ describe('UC-01 / UC-02 - Comptes et controle d acces', () => {
     consentData: true,
   });
 
-  /** Cree un compte et retourne ses jetons. */
+  /** Cree un compte utilisable et retourne sa session. */
   async function compte(prefixe: string) {
-    const email = adresse(prefixe);
-    const r = await http().post('/api/v1/auth/register').send(inscription(email)).expect(201);
-    return { email, ...r.body };
+    return inscrire(ctx, adresse(prefixe), MOT_DE_PASSE);
   }
 
   // ===========================================
   // Inscription
   // ===========================================
   describe('Inscription', () => {
-    it('cree un compte client et ouvre une session', async () => {
-      const email = adresse('inscription');
+    it('n ouvre aucun compte avant la confirmation du code', async () => {
+      const email = adresse('avant-confirmation');
 
       const r = await http().post('/api/v1/auth/register').send(inscription(email)).expect(201);
 
-      expect(r.body.accessToken).toEqual(expect.any(String));
-      expect(r.body.refreshToken).toEqual(expect.any(String));
-
+      // L'inscription emprunte desormais le tunnel de verification : elle
+      // ouvre un lead et envoie un code, sans creer de compte ni de session.
+      // Tant que l'adresse n'est pas prouvee, rien ne doit exister en base.
+      expect(r.body.leadId).toEqual(expect.any(String));
+      expect(r.body.accessToken).toBeUndefined();
+      expect(r.body.refreshToken).toBeUndefined();
+      // RG-09 : l'adresse revient masquee, jamais en clair.
+      expect(r.body.maskedEmail).not.toBe(email);
+      expect(r.body.maskedEmail).toContain('*');
       // Le mot de passe ne doit ressortir sous aucune forme, meme hachee.
       expect(JSON.stringify(r.body)).not.toContain(MOT_DE_PASSE);
-      expect(r.body.user?.password).toBeUndefined();
+
+      expect(await ctx.prisma.user.findUnique({ where: { email } })).toBeNull();
+    });
+
+    it('cree un compte client a la confirmation du code', async () => {
+      const email = adresse('inscription');
+
+      const session = await inscrire(ctx, email, MOT_DE_PASSE);
+
+      expect(session.accessToken).toEqual(expect.any(String));
+      expect(session.refreshToken).toEqual(expect.any(String));
 
       const enBase = await ctx.prisma.user.findUnique({ where: { email } });
       expect(enBase).not.toBeNull();
@@ -111,16 +134,18 @@ describe('UC-01 / UC-02 - Comptes et controle d acces', () => {
       await http().post('/api/v1/auth/register').send(sansConsentement).expect(400);
     });
 
-    it('refuse une adresse deja inscrite', async () => {
+    it('ne cree pas de second compte pour une adresse deja inscrite', async () => {
       const email = adresse('doublon');
-      await http().post('/api/v1/auth/register').send(inscription(email)).expect(201);
+      await inscrire(ctx, email, MOT_DE_PASSE);
 
-      const r = await http().post('/api/v1/auth/register').send(inscription(email));
-      expect(r.status).toBeGreaterThanOrEqual(400);
-      expect(r.status).toBeLessThan(500);
+      // RG-01, mode silencieux : la reponse est identique au parcours nominal.
+      // Un statut d'erreur revelerait a un tiers que cette adresse est
+      // inscrite, ce que la protection anti-enumeration interdit.
+      const r = await http().post('/api/v1/auth/register').send(inscription(email)).expect(201);
+      expect(r.body.leadId).toEqual(expect.any(String));
 
-      const comptes = await ctx.prisma.user.count({ where: { email } });
-      expect(comptes).toBe(1);
+      // Le silence porte sur la reponse, pas sur la base : aucun second compte.
+      expect(await ctx.prisma.user.count({ where: { email } })).toBe(1);
     });
   });
 
@@ -230,10 +255,11 @@ describe('UC-01 / UC-02 - Comptes et controle d acces', () => {
     /** Inscrit un compte puis le promeut : aucune route ne permet - et ne doit
      * permettre - de s'attribuer un role a soi-meme. */
     async function compteAvecRole(prefixe: string, role: Role) {
-      const email = adresse(prefixe);
-      await http().post('/api/v1/auth/register').send(inscription(email)).expect(201);
+      const { email } = await inscrire(ctx, adresse(prefixe), MOT_DE_PASSE);
       await ctx.prisma.user.update({ where: { email }, data: { role } });
 
+      // Reconnexion apres promotion : le jeton emis a l'inscription porte
+      // encore le role CLIENT.
       const connexion = await http()
         .post('/api/v1/auth/login')
         .send({ email, password: MOT_DE_PASSE })
