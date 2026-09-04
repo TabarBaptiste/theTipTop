@@ -4,8 +4,13 @@
 // Rejouable sans risque : chaque image part sous un identifiant stable avec
 // overwrite, donc un second passage remplace au lieu de dupliquer.
 //
-// Les fichiers restent dans webapp/src/img - ils servent de repli quand
-// Cloudinary est injoignable ou non configuré. Ce script n'en est qu'une copie.
+// Les fichiers restent dans webapp/src/img : c'est d'eux que part chaque envoi,
+// et ce script n'en est qu'une copie. Pour les visuels de lots, ils servent en
+// plus de repli quand Cloudinary est injoignable ou non configuré - la seed
+// enregistre alors null et l'interface les affiche. Les photographies de
+// l'accueil, elles, sont référencées par leur URL Cloudinary : leur copie
+// locale n'est plus qu'une source d'envoi. Ne pas la supprimer, sans quoi ce
+// script n'aurait plus rien à téléverser pour elles.
 //
 //   npm run images:upload
 
@@ -14,7 +19,11 @@ import { readFile } from 'fs/promises';
 import { basename, join } from 'path';
 import { config as loadEnv } from 'dotenv';
 
-import { PRIZE_IMAGE_PUBLIC_IDS, buildImageUrl } from '../src/common/cloudinary';
+import {
+  PRIZE_IMAGE_PUBLIC_IDS,
+  SITE_IMAGE_PUBLIC_IDS,
+  buildImageUrl,
+} from '../src/common/cloudinary';
 
 loadEnv({ path: join(__dirname, '..', '.env') });
 
@@ -92,13 +101,26 @@ async function upload(publicId: string): Promise<string> {
 
   console.log(`\nEnvoi vers le compte « ${CLOUD_NAME} »\n`);
 
-  for (const [code, publicId] of Object.entries(PRIZE_IMAGE_PUBLIC_IDS)) {
-    const fileName = await upload(publicId);
-    console.log(`  ${code.padEnd(14)} ${fileName}`);
-    console.log(`  ${' '.repeat(14)} ${buildImageUrl(CLOUD_NAME, publicId)}\n`);
+  const lots = Object.entries(PRIZE_IMAGE_PUBLIC_IDS);
+  const accueil = Object.entries(SITE_IMAGE_PUBLIC_IDS);
+
+  for (const [titre, entrees] of [
+    ['Visuels des lots', lots],
+    ["Photographies de l'accueil", accueil],
+  ] as [string, [string, string][]][]) {
+    console.log(`${titre}\n`);
+
+    for (const [code, publicId] of entrees) {
+      const fileName = await upload(publicId);
+      console.log(`  ${code.padEnd(14)} ${fileName}`);
+      console.log(`  ${' '.repeat(14)} ${buildImageUrl(CLOUD_NAME, publicId)}\n`);
+    }
   }
 
-  console.log('Terminé. Lancez « npm run prisma:seed » pour enregistrer ces URL.\n');
+  // Seuls les visuels de lots transitent par la base : les photographies de
+  // l'accueil sont référencées directement par les composants, la seed n'a
+  // rien à en faire.
+  console.log('Terminé. Lancez « npm run prisma:seed » pour enregistrer les URL des lots.\n');
 })().catch((error) => {
   console.error(error instanceof Error ? error.message : error);
   process.exit(1);

@@ -2,7 +2,12 @@
 // Tests unitaires - URL des images Cloudinary
 // ===========================================
 
-import { PRIZE_IMAGE_PUBLIC_IDS, buildImageUrl, buildPrizeImageUrl } from '@/common/cloudinary';
+import {
+  PRIZE_IMAGE_PUBLIC_IDS,
+  SITE_IMAGE_PUBLIC_IDS,
+  buildImageUrl,
+  buildPrizeImageUrl,
+} from '@/common/cloudinary';
 
 describe('cloudinary', () => {
   describe('buildImageUrl', () => {
@@ -51,6 +56,30 @@ describe('cloudinary', () => {
         'INFUSER',
         'TEA_DETOX',
         'TEA_SIGNATURE',
+      ]);
+    });
+  });
+
+  describe('SITE_IMAGE_PUBLIC_IDS', () => {
+    it('should cover the three home photographs', () => {
+      expect(Object.keys(SITE_IMAGE_PUBLIC_IDS).sort()).toEqual(['A_PROPOS', 'GRAND_PRIX', 'HERO']);
+    });
+
+    // Autre dossier que les lots : les regrouper rendrait le catalogue
+    // illisible au moment de remplacer un visuel depuis l'interface Cloudinary.
+    it('should file them apart from the prizes', () => {
+      for (const publicId of Object.values(SITE_IMAGE_PUBLIC_IDS)) {
+        expect(publicId).toMatch(/^thetiptop\/accueil\//);
+      }
+    });
+
+    // Le nom de fichier envoye est derive de l'identifiant : il doit
+    // correspondre a un fichier reellement present dans webapp/src/img.
+    it('should name each entry after its packaged file', () => {
+      expect(Object.values(SITE_IMAGE_PUBLIC_IDS)).toEqual([
+        'thetiptop/accueil/tasses_hero_panier',
+        'thetiptop/accueil/mains_bol_infusion',
+        'thetiptop/accueil/coffret_boites_lavande',
       ]);
     });
   });

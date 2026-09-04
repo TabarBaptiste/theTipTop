@@ -84,7 +84,17 @@ ciPipeline(
         // un secret : l'identifiant ne donne accès à rien sans la clé d'API.
         // Sans lui, les inscriptions restent enregistrées en base, en attente
         // de synchronisation.
-        BREVO_NEWSLETTER_LIST_ID: '9'
+        BREVO_NEWSLETTER_LIST_ID: '9',
+
+        // Compte Cloudinary servant les visuels des lots. Pas un secret non
+        // plus : le nom du compte figure dans chaque URL de livraison, et
+        // seules les clés d'API - absentes d'ici - permettent d'y envoyer.
+        //
+        // La seed s'en sert pour renseigner Prize.imageUrl. La chaîne de
+        // déploiement ne l'exécutant pas, les URL des environnements sont
+        // posées par la migration prize_image_urls : les deux doivent rester
+        // cohérentes.
+        CLOUDINARY_CLOUD_NAME: 'wummkrkc'
     ],
     // Les URL de retour OAuth ne figurent pas ici : les stratégies retombent
     // sur un chemin relatif, que Passport résout contre la requête entrante.
