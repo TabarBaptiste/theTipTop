@@ -113,6 +113,12 @@ export default function RootLayout({
   return (
     <html lang="fr" suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
+        {/* La photographie du bandeau est l'element LCP de l'accueil et vit sur
+            un domaine tiers. Sans cela, sa resolution DNS et sa negociation TLS
+            ne demarrent qu'une fois la balise decouverte, en plein chemin
+            critique ; ici elles se font pendant l'analyse du document. */}
+        <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
+
         {/* Avant tout rendu : sans cela, un visiteur en theme sombre recoit la
             page en clair puis la voit basculer a l'hydratation. */}
         <AmorcagePreferences />

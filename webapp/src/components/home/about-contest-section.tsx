@@ -1,7 +1,7 @@
 import Link from 'next/link';
-import Image from 'next/image';
 
-import mainsBolImg from '@/img/mains_bol_infusion.webp';
+import { PHOTOS_ACCUEIL } from '@/lib/cloudinary';
+import { PhotoCloudinary } from '@/components/ui/photo-cloudinary';
 import {
   GAME_START_DATE,
   GAME_END_DATE,
@@ -32,10 +32,9 @@ export function AboutContestSection() {
     <section className="border-b border-section-line bg-surface">
       <div className="grid items-center lg:grid-cols-2">
         <div className="relative h-72 w-full md:h-96 lg:h-[39.3125rem]">
-          <Image
-            src={mainsBolImg}
+          <PhotoCloudinary
+            src={PHOTOS_ACCUEIL.aPropos}
             alt=""
-            fill
             sizes="(max-width: 1024px) 100vw, 50vw"
             className="photo-attenuee object-cover"
           />

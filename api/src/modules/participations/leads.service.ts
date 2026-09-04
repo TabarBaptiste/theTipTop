@@ -199,8 +199,7 @@ export class LeadsService {
     // Message volontairement identique pour un lead inconnu, un code faux ou
     // un code expiré : distinguer les cas donnerait un oracle à un attaquant.
     if (
-      !lead ||
-      lead.status !== LeadStatus.EN_ATTENTE_VERIFICATION ||
+      lead?.status !== LeadStatus.EN_ATTENTE_VERIFICATION ||
       (lead.codeExpiresAt?.getTime() ?? 0) < Date.now()
     ) {
       throw new BadRequestException('Code invalide ou expiré');
@@ -352,7 +351,7 @@ export class LeadsService {
   async resend(dto: ResendCodeDto) {
     const lead = await this.prisma.lead.findUnique({ where: { id: dto.leadId } });
 
-    if (!lead || lead.status !== LeadStatus.EN_ATTENTE_VERIFICATION) {
+    if (lead?.status !== LeadStatus.EN_ATTENTE_VERIFICATION) {
       throw new NotFoundException('Demande introuvable ou déjà finalisée');
     }
 

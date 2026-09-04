@@ -1,9 +1,10 @@
 import Link from 'next/link';
 
-// Ces quatre arguments sont ceux de la maquette : ils portent sur la loyauté
-// du jeu-concours, pas sur la marque. Les précédents - bio, mélanges à la
-// main, provenance, éco-responsabilité - répondaient à une autre question que
-// celle posée par le titre de la section.
+// Ces arguments portent sur la loyauté du jeu-concours, pas sur la marque.
+// Les précédents - bio, mélanges à la main, provenance, éco-responsabilité -
+// répondaient à une autre question que celle posée par le titre de la section.
+// La disponibilité du service client a été retirée pour la même raison : elle
+// ne dit rien de l'équité du jeu, seul sujet de cette section.
 const reasons = [
   {
     number: '01',
@@ -17,10 +18,6 @@ const reasons = [
     number: '03',
     description: 'Tirage certifié par huissier de justice.',
   },
-  {
-    number: '04',
-    description: 'Service client disponible 7j/7 pour vous accompagner.',
-  },
 ];
 
 // L'id « why-us » est la cible du lien « À propos » du footer (/#why-us).
@@ -32,7 +29,7 @@ export function WhyUsSection() {
           Pourquoi nous ?
         </h2>
 
-        <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {reasons.map((reason) => (
             <div key={reason.number} className="flex flex-col gap-3">
               <span className="font-display text-[1.375rem] font-bold leading-[2.0625rem] text-accent">

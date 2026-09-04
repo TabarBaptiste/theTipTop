@@ -1,9 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
-import coffretsImg from '@/img/coffret_boites_lavande.webp';
+import { PHOTOS_ACCUEIL } from '@/lib/cloudinary';
+import { PhotoCloudinary } from '@/components/ui/photo-cloudinary';
 import { Button } from '@/components/ui/button';
 import { SemisDeDoodles, type DoodlePose } from '@/components/decor/botanical-doodles';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -93,10 +93,9 @@ export function GrandPrizeSection() {
     // rien qui le montre.
     <div className="grid lg:min-h-[29.1875rem] lg:grid-cols-2">
       <div className="relative h-64 md:h-96 lg:h-auto">
-        <Image
-          src={coffretsImg}
+        <PhotoCloudinary
+          src={PHOTOS_ACCUEIL.grandPrix}
           alt="Coffrets de thés Thé Tip Top"
-          fill
           sizes="(max-width: 1024px) 100vw, 50vw"
           className="photo-attenuee object-cover"
         />

@@ -297,13 +297,12 @@ export default function CGUPage() {
                   début du jeu-concours, sous le contrôle d&apos;un huissier de justice. La
                   répartition des lots est la suivante :
                 </p>
-                <div
+                <section
                   // Defilable plutot que coupe : a 375 px ces tableaux depassent
                   // le cadre, et overflow-hidden rendait la derniere colonne
                   // inatteignable. tabIndex rend la zone defilable au clavier,
                   // sans quoi son contenu resterait hors de portee sans souris.
                   tabIndex={0}
-                  role="region"
                   aria-label="Tableau, défilement horizontal au clavier"
                   className="overflow-x-auto rounded-card border border-warm-beige"
                 >
@@ -337,7 +336,7 @@ export default function CGUPage() {
                       ))}
                     </tbody>
                   </table>
-                </div>
+                </section>
                 <p className="text-sm text-stone-grey/80">
                   Les probabilités indiquées sont approximatives et données à titre indicatif. Le
                   résultat exact dépend du nombre total de tickets émis et de leur répartition.
