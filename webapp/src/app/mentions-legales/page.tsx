@@ -109,13 +109,12 @@ export default function MentionsLegalesPage() {
                   Le site internet accessible à l&apos;adresse{' '}
                   <strong>dsp5-archi-o24a-4-5-g1.fr</strong> est édité par :
                 </p>
-                <div
+                <section
                   // Defilable plutot que coupe : a 375 px ces tableaux depassent
                   // le cadre, et overflow-hidden rendait la derniere colonne
                   // inatteignable. tabIndex rend la zone defilable au clavier,
                   // sans quoi son contenu resterait hors de portee sans souris.
                   tabIndex={0}
-                  role="region"
                   aria-label="Tableau, défilement horizontal au clavier"
                   className="overflow-x-auto rounded-card border border-warm-beige bg-surface"
                 >
@@ -151,7 +150,7 @@ export default function MentionsLegalesPage() {
                       ))}
                     </tbody>
                   </table>
-                </div>
+                </section>
                 <p className="rounded-soft border border-gold-100 bg-gold-50 px-4 py-3 text-sm text-stone-grey">
                   <strong>Note :</strong> Conformément à l&apos;article 2 de la loi Toubon du
                   4 août 1994, les présentes mentions légales sont rédigées en langue française.
@@ -164,13 +163,12 @@ export default function MentionsLegalesPage() {
               <h2 className="font-display text-h2 text-ink">Article 2 - Hébergeur</h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
                 <p>Le site est hébergé par :</p>
-                <div
+                <section
                   // Defilable plutot que coupe : a 375 px ces tableaux depassent
                   // le cadre, et overflow-hidden rendait la derniere colonne
                   // inatteignable. tabIndex rend la zone defilable au clavier,
                   // sans quoi son contenu resterait hors de portee sans souris.
                   tabIndex={0}
-                  role="region"
                   aria-label="Tableau, défilement horizontal au clavier"
                   className="overflow-x-auto rounded-card border border-warm-beige bg-surface"
                 >
@@ -189,7 +187,7 @@ export default function MentionsLegalesPage() {
                       ))}
                     </tbody>
                   </table>
-                </div>
+                </section>
                 <p className="text-sm text-stone-grey/80">
                   OVHcloud garantit la mise à disposition de l&apos;infrastructure technique permettant
                   l&apos;hébergement du site ainsi que la sécurité et la disponibilité des données. Les

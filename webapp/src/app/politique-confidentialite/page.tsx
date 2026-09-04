@@ -108,13 +108,12 @@ export default function PolitiqueConfidentialitePage() {
               </h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
                 <p>Le responsable du traitement des données personnelles collectées sur ce site est :</p>
-                <div
+                <section
                   // Defilable plutot que coupe : a 375 px ces tableaux depassent
                   // le cadre, et overflow-hidden rendait la derniere colonne
                   // inatteignable. tabIndex rend la zone defilable au clavier,
                   // sans quoi son contenu resterait hors de portee sans souris.
                   tabIndex={0}
-                  role="region"
                   aria-label="Tableau, défilement horizontal au clavier"
                   className="overflow-x-auto rounded-card border border-warm-beige bg-surface"
                 >
@@ -153,7 +152,7 @@ export default function PolitiqueConfidentialitePage() {
                       ))}
                     </tbody>
                   </table>
-                </div>
+                </section>
                 <p className="text-sm text-stone-grey/80">
                   En l&apos;absence d&apos;un délégué à la protection des données (DPO) désigné
                   formellement, toute demande relative à la protection des données peut être
@@ -218,13 +217,12 @@ export default function PolitiqueConfidentialitePage() {
               </h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
                 <p>Vos données sont traitées pour les finalités suivantes :</p>
-                <div
+                <section
                   // Defilable plutot que coupe : a 375 px ces tableaux depassent
                   // le cadre, et overflow-hidden rendait la derniere colonne
                   // inatteignable. tabIndex rend la zone defilable au clavier,
                   // sans quoi son contenu resterait hors de portee sans souris.
                   tabIndex={0}
-                  role="region"
                   aria-label="Tableau, défilement horizontal au clavier"
                   className="overflow-x-auto rounded-card border border-warm-beige"
                 >
@@ -253,7 +251,7 @@ export default function PolitiqueConfidentialitePage() {
                       ))}
                     </tbody>
                   </table>
-                </div>
+                </section>
               </div>
             </section>
 
@@ -290,13 +288,12 @@ export default function PolitiqueConfidentialitePage() {
                 Article 5 - Durée de conservation
               </h2>
               <div className="mt-4 space-y-3 text-body text-stone-grey">
-                <div
+                <section
                   // Defilable plutot que coupe : a 375 px ces tableaux depassent
                   // le cadre, et overflow-hidden rendait la derniere colonne
                   // inatteignable. tabIndex rend la zone defilable au clavier,
                   // sans quoi son contenu resterait hors de portee sans souris.
                   tabIndex={0}
-                  role="region"
                   aria-label="Tableau, défilement horizontal au clavier"
                   className="overflow-x-auto rounded-card border border-warm-beige"
                 >
@@ -323,7 +320,7 @@ export default function PolitiqueConfidentialitePage() {
                       ))}
                     </tbody>
                   </table>
-                </div>
+                </section>
                 <p className="text-sm text-stone-grey/80">
                   Au-delà de ces délais, les données sont supprimées de manière sécurisée ou
                   anonymisées à des fins statistiques.

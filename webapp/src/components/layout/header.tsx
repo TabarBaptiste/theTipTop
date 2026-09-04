@@ -109,7 +109,10 @@ function AccountMenuDesktop({
   );
 }
 
-interface AccountMenuMobileProps extends AccountMenuProps {
+// Le prenom n'y figure pas : le menu mobile est deja deplie sous le nom du
+// compte, et l'heriter obligerait a declarer une prop que ce composant ne lit
+// jamais.
+interface AccountMenuMobileProps extends Omit<AccountMenuProps, 'firstName'> {
   readonly onNavigate: () => void;
 }
 
