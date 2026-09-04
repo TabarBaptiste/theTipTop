@@ -27,12 +27,25 @@ describe('Page d\'accueil', () => {
     cy.contains(/Temps restant pour participer|jeu-concours est termine/).should('exist');
   });
 
+  // Les sections de la page d'accueil n'apparaissent qu'au défilement : le
+  // composant `Reveal` les garde à `opacity: 0` tant qu'elles ne sont pas
+  // entrées dans l'écran, et Cypress tient un élément transparent pour
+  // invisible. Or `should('be.visible')` ne fait défiler la page de lui-même
+  // que pour les commandes d'action, jamais pour une assertion : sans
+  // `scrollIntoView`, ces titres restaient invisibles jusqu'à expiration du
+  // délai. Amener la section à l'écran est d'ailleurs ce que fait un visiteur.
+  //
+  // L'élément est cherché deux fois plutôt qu'enchaîné : la section se
+  // rerend en devenant visible, ce qui détache le noeud obtenu au défilement,
+  // et Cypress refuse de poursuivre une chaîne sur un élément détaché.
   it('affiche la section des lots à gagner', () => {
+    cy.contains('Les lots à gagner').scrollIntoView();
     cy.contains('Les lots à gagner').should('be.visible');
     cy.contains('100% des tickets sont gagnants').should('be.visible');
   });
 
   it('affiche les étapes de participation', () => {
+    cy.contains('Comment participer ?').scrollIntoView();
     cy.contains('Comment participer ?').should('be.visible');
     cy.contains('Trouve ton code').should('be.visible');
     cy.contains('Saisis ton code').should('be.visible');
