@@ -70,7 +70,12 @@ const nextConfig = {
   // le binaire ne pouvant pas s'installer derriere le proxy (cf. .npmrc).
   allowedDevOrigins: ['192.168.*.*', '10.*.*.*', '172.16.*.*', 'host.docker.internal'],
   images: {
-    qualities: [70, 75, 90],
+    // 85 : qualite de la photographie du bandeau d'accueil, seul element LCP
+    // de la page. Depuis Next 16, une qualite absente de cette liste declenche
+    // un avertissement a chaque rendu du composant - au build, dans les tests
+    // unitaires et dans la console du navigateur - et n'est pas garantie
+    // d'etre honoree.
+    qualities: [70, 75, 85, 90],
     remotePatterns: [
       {
         protocol: 'https',

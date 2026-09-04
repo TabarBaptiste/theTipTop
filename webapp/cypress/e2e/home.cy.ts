@@ -10,20 +10,42 @@ describe('Page d\'accueil', () => {
   it('affiche le titre principal', () => {
     // Le titre porte l'argument différenciant, pas une formule de bienvenue :
     // c'est ce qui remonte dans les résultats de recherche.
-    cy.get('h1').should('contain.text', 'Jeu-concours');
-    cy.get('h1').should('contain.text', '100 % des tickets gagnants');
+    //
+    // Le titre sépare « 100 » de « % » par une espace insécable, sans quoi la
+    // ligne se coupe entre les deux. Elle est normalisée avant comparaison :
+    // cette espace relève de la typographie et non du contenu, et l'écrire
+    // littéralement dans le spec y glisserait un caractère invisible que la
+    // relecture ne distingue pas d'une espace ordinaire.
+    cy.get('h1').should(($titre) => {
+      const texte = $titre.text().replace(/\u00a0/g, ' ');
+      expect(texte).to.contain('Jeu-concours');
+      expect(texte).to.contain('100 % des tickets gagnants');
+    });
   });
 
   it('affiche le bandeau de temps restant (ou de fin de jeu)', () => {
     cy.contains(/Temps restant pour participer|jeu-concours est termine/).should('exist');
   });
 
+  // Les sections de la page d'accueil n'apparaissent qu'au défilement : le
+  // composant `Reveal` les garde à `opacity: 0` tant qu'elles ne sont pas
+  // entrées dans l'écran, et Cypress tient un élément transparent pour
+  // invisible. Or `should('be.visible')` ne fait défiler la page de lui-même
+  // que pour les commandes d'action, jamais pour une assertion : sans
+  // `scrollIntoView`, ces titres restaient invisibles jusqu'à expiration du
+  // délai. Amener la section à l'écran est d'ailleurs ce que fait un visiteur.
+  //
+  // L'élément est cherché deux fois plutôt qu'enchaîné : la section se
+  // rerend en devenant visible, ce qui détache le noeud obtenu au défilement,
+  // et Cypress refuse de poursuivre une chaîne sur un élément détaché.
   it('affiche la section des lots à gagner', () => {
+    cy.contains('Les lots à gagner').scrollIntoView();
     cy.contains('Les lots à gagner').should('be.visible');
     cy.contains('100% des tickets sont gagnants').should('be.visible');
   });
 
   it('affiche les étapes de participation', () => {
+    cy.contains('Comment participer ?').scrollIntoView();
     cy.contains('Comment participer ?').should('be.visible');
     cy.contains('Trouve ton code').should('be.visible');
     cy.contains('Saisis ton code').should('be.visible');

@@ -34,6 +34,36 @@ export default defineConfig({
         config.env.API_URL = `${cible.origin}/api/v1`;
       }
 
+      /**
+       * Récapitule les échecs sur la sortie standard.
+       *
+       * Le pipeline impose `--reporter junit`, qui n'écrit que le fichier XML :
+       * le log Jenkins ne montre alors que le nombre d'échecs et le nom des
+       * captures d'écran, jamais le message d'erreur. Diagnostiquer un échec
+       * obligeait à rejouer la suite en local.
+       *
+       * L'option de ligne de commande l'emportant sur ce fichier de
+       * configuration, le reporter lui-même ne peut pas être changé d'ici. Ce
+       * point d'entrée, lui, s'exécute dans tous les cas : il écrit donc le
+       * récapitulatif à la main, en complément du XML.
+       */
+      on('after:spec', (spec, resultats) => {
+        const echecs = (resultats.tests ?? []).filter((test) => test.state === 'failed');
+        if (echecs.length === 0) {
+          return;
+        }
+
+        console.log(`\n=== ${echecs.length} echec(s) dans ${spec.relative} ===`);
+        for (const test of echecs) {
+          console.log(`  x ${test.title.join(' > ')}`);
+          const message = test.displayError ?? test.attempts?.at(-1)?.error?.message ?? '';
+          for (const ligne of String(message).split('\n').slice(0, 8)) {
+            console.log(`      ${ligne}`);
+          }
+        }
+        console.log('');
+      });
+
       return config;
     },
   },
