@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useId } from 'react';
 import { cn } from '@/lib/utils';
 
 function Skeleton({ className, ...props }: Readonly<React.HTMLAttributes<HTMLDivElement>>) {
@@ -12,19 +12,16 @@ function Skeleton({ className, ...props }: Readonly<React.HTMLAttributes<HTMLDiv
 
 // Placeholder pour une liste en cours de chargement : n blocs de meme hauteur.
 function SkeletonList({ count = 3, className }: Readonly<{ count?: number; className?: string }>) {
-  // Identifiants stables et independants de la position, plutot que l'index
-  // du tableau (S6479) - sans consequence ici (les blocs sont identiques et
-  // jamais reordonnes), mais evite d'y compter en cas d'evolution future.
-  // Math.random() plutot que crypto.randomUUID() : ce dernier n'existe pas
-  // dans l'environnement jsdom utilise par les tests Jest.
-  const ids = useMemo(
-    () => Array.from({ length: count }, () => Math.random().toString(36).slice(2)),
-    [count],
-  );
+  // Prefixe unique par instance, fourni par React et identique entre le rendu
+  // serveur et le rendu client. Math.random() y tirait deux valeurs distinctes
+  // - donc une divergence d'hydratation - et enfreignait la regle de purete du
+  // rendu (react-hooks/purity). Le rang complete le prefixe : les blocs sont
+  // interchangeables et jamais reordonnes, seule leur position les distingue.
+  const prefixe = useId();
   return (
     <div className="space-y-3">
-      {ids.map((id) => (
-        <Skeleton key={id} className={cn('h-20 w-full', className)} />
+      {Array.from({ length: count }, (_, rang) => (
+        <Skeleton key={`${prefixe}bloc${rang}`} className={cn('h-20 w-full', className)} />
       ))}
     </div>
   );

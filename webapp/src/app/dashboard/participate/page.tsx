@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -45,6 +45,12 @@ interface PrizeApi {
   percentage: number;
 }
 
+// Cles des quatre blocs du squelette de chargement des lots. Figees ici plutot
+// que tirees au sort au rendu : Math.random() donnait deux series differentes
+// entre le serveur et le client - donc une divergence d'hydratation - et
+// enfreignait la regle de purete du rendu (react-hooks/purity).
+const prizeSkeletonIds = ['lot-1', 'lot-2', 'lot-3', 'lot-4'];
+
 const rules = [
   { color: 'bg-moss', text: 'Le jeu-concours est ouvert a toute personne ayant effectué un achat supérieur a 49€ en magasin.' },
   { color: 'bg-terracotta-600', text: 'Les participants disposent de 30 jours après la fin du jeu pour réclamer leur lot.' },
@@ -54,13 +60,6 @@ const rules = [
 export default function ParticipatePage() {
   const queryClient = useQueryClient();
   const [result, setResult] = useState<ParticipationResult | null>(null);
-  // Identifiants stables pour les 4 blocs du squelette de chargement, plutot
-  // que l'index du tableau (S6479). Math.random() plutot que crypto.randomUUID() :
-  // ce dernier n'existe pas dans l'environnement jsdom utilise par les tests Jest.
-  const prizeSkeletonIds = useMemo(
-    () => Array.from({ length: 4 }, () => Math.random().toString(36).slice(2)),
-    [],
-  );
 
   // Chargement des lots depuis l'API (source de vérité en DB)
   const {
