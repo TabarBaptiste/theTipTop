@@ -13,6 +13,8 @@ import { Pagination } from '@/components/ui/pagination';
 import { DeliveredPrizesList } from '@/components/gains/delivered-prizes-list';
 import { api } from '@/lib/api';
 import { formatDateTime } from '@/lib/utils';
+import { trackRewardClaimedStore } from '@/lib/analytics';
+import { useAuthStore } from '@/lib/stores/auth-store';
 
 const PAGE_SIZE = 20;
 
@@ -70,6 +72,7 @@ interface SearchResult {
 
 export default function EmployeePage() {
   const queryClient = useQueryClient();
+  const vendeurId = useAuthStore((state) => state.user?.id);
   const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
   const [pendingPage, setPendingPage] = useState(1);
 
@@ -122,15 +125,20 @@ export default function EmployeePage() {
     },
   });
 
-  // Remettre le lot
+  // Remettre le lot.
+  //
+  // Le type de lot accompagne l'identifiant jusqu'ici : la reponse de l'API ne
+  // le renvoie pas, et le plan de marquage en fait une dimension de
+  // reward_claimed_store.
   const deliverMutation = useMutation({
-    mutationFn: async (participationId: string) => {
+    mutationFn: async ({ participationId }: { participationId: string; prizeType: string }) => {
       const response = await api.post(`/gains/${participationId}/deliver`, {
         deliveryMethod: 'IN_STORE',
       });
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
+      trackRewardClaimedStore(variables.prizeType, vendeurId ?? '');
       toast.success('Lot remis avec succès !');
       queryClient.invalidateQueries({ queryKey: ['pending-deliveries'] });
       // Une remise fait passer le lot d'une liste à l'autre : sans cette
@@ -191,7 +199,12 @@ export default function EmployeePage() {
                 size="sm"
                 variant="outline"
                 className="mt-1"
-                onClick={() => deliverMutation.mutate(delivery.id)}
+                onClick={() =>
+                  deliverMutation.mutate({
+                    participationId: delivery.id,
+                    prizeType: delivery.prizeType,
+                  })
+                }
                 disabled={deliverMutation.isPending}
               >
                 Remettre
@@ -323,7 +336,10 @@ export default function EmployeePage() {
                         <Button
                           className="mt-4 w-full"
                           onClick={() =>
-                            deliverMutation.mutate(searchResult.participation!.id)
+                            deliverMutation.mutate({
+                              participationId: searchResult.participation!.id,
+                              prizeType: searchResult.ticket.prizeType,
+                            })
                           }
                           disabled={deliverMutation.isPending}
                         >

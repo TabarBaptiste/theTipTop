@@ -14,6 +14,7 @@ import {
   trackParticipateSubmit,
   trackParticipateSuccess,
   trackParticipateFailure,
+  trackRewardClaimedStore,
   trackCTAClick,
 } from '@/lib/analytics';
 
@@ -63,6 +64,18 @@ describe('plan de marquage', () => {
     });
     expect(envoyer).toHaveBeenNthCalledWith(3, 'event', 'participate_failure', {
       reason: 'code_already_used',
+    });
+  });
+
+  // Le gain annonce a l'ecran et le gain retire au comptoir sont deux mesures
+  // distinctes : leur ecart est le taux de venue en boutique, indicateur central
+  // de l'operation.
+  it('mesure la remise physique du lot en boutique', () => {
+    trackRewardClaimedStore('SIGNATURE', 'vendeur-42');
+
+    expect(envoyer).toHaveBeenCalledWith('event', 'reward_claimed_store', {
+      reward_type: 'SIGNATURE',
+      vendeur_id: 'vendeur-42',
     });
   });
 

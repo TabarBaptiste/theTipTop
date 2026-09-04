@@ -51,6 +51,21 @@ export function trackParticipateFailure(reason: string) {
 }
 
 // -----------------------------------------------
+// Boutique - Remise physique du lot
+// -----------------------------------------------
+
+// Dernier maillon du plan de marquage du cahier des charges. Sans lui, on
+// mesure les lots annonces a l'ecran mais jamais les lots reellement retires :
+// le taux de transformation du jeu-concours en visite boutique - la raison
+// d'etre de l'operation pour l'ouverture de Nice - reste hors de portee.
+export function trackRewardClaimedStore(rewardType: string, vendeurId: string) {
+  sendGAEvent('event', 'reward_claimed_store', {
+    reward_type: rewardType,
+    vendeur_id: vendeurId,
+  });
+}
+
+// -----------------------------------------------
 // CTA - Clics sur les boutons d'action
 // -----------------------------------------------
 
