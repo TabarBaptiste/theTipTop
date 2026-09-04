@@ -302,8 +302,8 @@ export default function ParticipatePage() {
         <section className="mt-16">
           <h2 className="font-display text-h2 text-ink">Règlement du concours</h2>
           <div className="mt-6 space-y-3 rounded-card bg-terracotta-50 p-6">
-            {rules.map((rule, idx) => (
-              <div key={idx} className="flex items-start gap-3">
+            {rules.map((rule) => (
+              <div key={rule.text} className="flex items-start gap-3">
                 <div className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${rule.color}`} />
                 <p className="text-xs leading-relaxed text-ink">{rule.text}</p>
               </div>
