@@ -239,27 +239,21 @@ describe('Parcours complets', () => {
   });
 
   // ===========================================
-  // UC-01 / UC-02 - Créer un compte et s'en servir
+  // UC-01 - Ouvrir le tunnel d'inscription
+  //
+  // Le tunnel s'arrête ici : la suite réclame le code à 6 chiffres envoyé par
+  // email, que le navigateur ne peut pas lire sur un environnement déployé.
+  // La vérification et la création effective du compte sont couvertes par les
+  // tests fonctionnels de l'API, qui interceptent le courriel.
   // ===========================================
-  describe('Inscription puis espace personnel', () => {
+  describe('Inscription', () => {
     const email = `${MARQUEUR}@simulation.invalid`;
     const motDePasse = 'Motdepasse1!';
-    let idCree: string;
 
-    after(() => {
-      // Le compte créé est supprimé : une suite qui laisse des comptes
-      // derrière elle pollue les statistiques de l'opération.
-      if (idCree) {
-        cy.request({
-          method: 'DELETE',
-          url: `${API}/users/${idCree}`,
-          headers: { Authorization: `Bearer ${jetonAdmin}` },
-          failOnStatusCode: false,
-        });
-      }
-    });
-
-    it('cree un compte depuis le formulaire et ouvre la session', () => {
+    // Aucun nettoyage à prévoir : l'inscription se fait en deux temps et aucun
+    // compte n'est créé tant que le code reçu par email n'est pas saisi. Seul
+    // un lead en attente subsiste, que les tâches planifiées font expirer.
+    it('mene le formulaire jusqu a l etape de verification, sans creer de compte', () => {
       cy.visit('/auth/register');
 
       cy.get('#firstName', { timeout: HYDRATATION }).type('Camille');
@@ -274,9 +268,15 @@ describe('Parcours complets', () => {
         .should('not.be.disabled')
         .click();
 
-      // La session s'ouvre directement : c'est ce qui évite une seconde saisie.
-      cy.location('pathname', { timeout: HYDRATATION }).should('include', '/dashboard');
+      // Le formulaire cède la place à la saisie du code : la session ne s'ouvre
+      // qu'une fois l'adresse vérifiée, et non dès la soumission.
+      cy.contains('h1', 'Vérifiez votre email', { timeout: HYDRATATION }).should('be.visible');
+      cy.get('#verification-code').should('be.visible');
+      cy.contains('button', 'Créer mon compte').should('be.disabled');
 
+      // Et la règle tient jusqu'en base : tant que le code n'est pas saisi,
+      // aucun compte n'existe. C'est ce qui empêche d'accaparer une adresse
+      // dont on n'a pas la maîtrise.
       cy.request({
         url: `${API}/users?search=${encodeURIComponent(email)}`,
         headers: { Authorization: `Bearer ${jetonAdmin}` },
@@ -284,8 +284,7 @@ describe('Parcours complets', () => {
       }).then((r) => {
         const liste = Array.isArray(r.body) ? r.body : r.body.data;
         const compte = liste?.find((u: { email: string }) => u.email === email);
-        expect(compte, 'le compte doit exister en base').to.exist;
-        idCree = compte.id;
+        expect(compte, 'aucun compte ne doit exister avant verification').to.not.exist;
       });
     });
   });
