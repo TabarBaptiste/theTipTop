@@ -33,11 +33,24 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     profile: Profile,
     done: VerifyCallback,
   ): Promise<any> {
-    const { id, name, emails, photos } = profile;
+    const { id, name, emails, photos, displayName } = profile;
 
     const email = emails?.[0]?.value;
     if (!email) {
       return done(new Error('Email non fourni par Google'), false);
+    }
+
+    // Google ne découpe pas toujours le nom en prénom/nom (family_name absent),
+    // même quand le nom complet est bien transmis via `name`/displayName : on
+    // le reconstitue en retranchant le prénom déjà connu plutôt que de perdre
+    // l'information.
+    let lastName = name?.familyName;
+    if (!lastName && displayName && displayName !== name?.givenName) {
+      lastName = (
+        name?.givenName && displayName.startsWith(name.givenName)
+          ? displayName.slice(name.givenName.length)
+          : displayName
+      ).trim();
     }
 
     try {
@@ -48,7 +61,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         providerId: id,
         email,
         firstName: name?.givenName || 'Utilisateur',
-        lastName: name?.familyName || 'Google',
+        lastName: lastName || '',
         picture: photos?.[0]?.value,
       });
 
