@@ -12,6 +12,7 @@ import {
 import * as bcrypt from 'bcryptjs';
 import { UsersService } from '@/modules/users/users.service';
 import { PrismaService } from '@/prisma/prisma.service';
+import { TicketsService } from '@/modules/tickets/tickets.service';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -23,6 +24,13 @@ describe('UsersService', () => {
       update: jest.fn(),
       count: jest.fn(),
     },
+    participation: {
+      findMany: jest.fn(),
+    },
+  };
+
+  const mockTicketsService = {
+    getPrizesMap: jest.fn(),
   };
 
   const existingUser = {
@@ -35,7 +43,11 @@ describe('UsersService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [UsersService, { provide: PrismaService, useValue: mockPrismaService }],
+      providers: [
+        UsersService,
+        { provide: PrismaService, useValue: mockPrismaService },
+        { provide: TicketsService, useValue: mockTicketsService },
+      ],
     }).compile();
 
     service = module.get<UsersService>(UsersService);
@@ -80,6 +92,85 @@ describe('UsersService', () => {
       const where = mockPrismaService.user.findMany.mock.calls[0][0].where;
       expect(where.role).toBe('ADMIN');
       expect(where.OR).toHaveLength(3);
+    });
+
+    it('should also search on ticket codes when the input looks like a code', async () => {
+      mockPrismaService.user.findMany.mockResolvedValue([]);
+      mockPrismaService.user.count.mockResolvedValue(0);
+
+      await service.findAll({ search: 'ab23cd' });
+
+      const where = mockPrismaService.user.findMany.mock.calls[0][0].where;
+      expect(where.OR).toHaveLength(4);
+      expect(where.OR[3]).toEqual({
+        participations: { some: { ticket: { code: { contains: 'AB23CD' } } } },
+      });
+    });
+
+    it.each([
+      ['jean@email.fr', 'une adresse'],
+      ['jean', 'un prenom trop court'],
+      ['martin', "un nom contenant une lettre absente de l'alphabet des codes"],
+    ])('should not join on tickets for %s (%s)', async (search) => {
+      mockPrismaService.user.findMany.mockResolvedValue([]);
+      mockPrismaService.user.count.mockResolvedValue(0);
+
+      await service.findAll({ search });
+
+      expect(mockPrismaService.user.findMany.mock.calls[0][0].where.OR).toHaveLength(3);
+    });
+  });
+
+  describe('getGains', () => {
+    it('should throw NotFoundException for an unknown user', async () => {
+      mockPrismaService.user.findUnique.mockResolvedValue(null);
+
+      await expect(service.getGains('u1')).rejects.toThrow(NotFoundException);
+    });
+
+    it('should enrich each participation with its prize and count deliveries', async () => {
+      mockPrismaService.user.findUnique.mockResolvedValue({
+        id: 'u1',
+        firstName: 'Jean',
+        lastName: 'Dupont',
+        email: 'jean@email.fr',
+      });
+      mockPrismaService.participation.findMany.mockResolvedValue([
+        {
+          id: 'p1',
+          createdAt: new Date('2026-01-02'),
+          prizeDelivered: true,
+          prizeDeliveredAt: new Date('2026-01-03'),
+          deliveryMethod: 'IN_STORE',
+          ticket: { code: 'ABC1234567', prizeType: 'INFUSER' },
+        },
+        {
+          id: 'p2',
+          createdAt: new Date('2026-01-01'),
+          prizeDelivered: false,
+          prizeDeliveredAt: null,
+          deliveryMethod: null,
+          ticket: { code: 'XYZ7654321', prizeType: 'TEA_DETOX' },
+        },
+      ]);
+      mockTicketsService.getPrizesMap.mockResolvedValue({
+        INFUSER: { name: 'Infuseur à thé', description: 'Un infuseur', value: '12€' },
+        TEA_DETOX: { name: 'Thé détox', description: 'Boite 100g', value: '20€' },
+      });
+
+      const result = await service.getGains('u1');
+
+      expect(result.meta).toEqual({ total: 2, delivered: 1 });
+      expect(result.data[0]).toEqual(
+        expect.objectContaining({
+          id: 'p1',
+          code: 'ABC1234567',
+          prizeType: 'INFUSER',
+          prize: { name: 'Infuseur à thé', description: 'Un infuseur', value: '12€' },
+          prizeDelivered: true,
+        }),
+      );
+      expect(result.user.email).toBe('jean@email.fr');
     });
   });
 

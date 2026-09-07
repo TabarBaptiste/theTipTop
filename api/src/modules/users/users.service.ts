@@ -10,6 +10,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { TicketsService } from '../tickets/tickets.service';
 import { User, Role } from '@prisma/client';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
@@ -17,7 +18,17 @@ import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  // Un code de ticket fait 10 caracteres tires de l'alphabet de generation
+  // (prisma/seed.ts), qui ecarte I, O, 0 et 1 pour eviter les confusions de
+  // lecture. On accepte les fragments a partir de 6 caracteres : plus court,
+  // la saisie est presque toujours un debut de nom, et « jean » ou « paul »
+  // declencheraient la jointure pour rien.
+  private static readonly RESSEMBLE_A_UN_CODE = /^[A-HJ-NP-Za-hj-np-z2-9]{6,10}$/;
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly ticketsService: TicketsService,
+  ) {}
 
   /**
    * Recherche un utilisateur par email
@@ -76,6 +87,17 @@ export class UsersService {
         { firstName: { contains: search, mode: 'insensitive' } },
         { lastName: { contains: search, mode: 'insensitive' } },
       ];
+
+      // Recherche par code de ticket, en plus de l'identite. La jointure porte
+      // sur 500 000 tickets : on ne l'ajoute que si la saisie peut etre un
+      // code, sinon chaque frappe d'un debut de nom la declencherait pour rien.
+      if (UsersService.RESSEMBLE_A_UN_CODE.test(search.trim())) {
+        where.OR.push({
+          participations: {
+            some: { ticket: { code: { contains: search.trim().toUpperCase() } } },
+          },
+        });
+      }
     }
 
     const [users, total] = await Promise.all([
@@ -224,6 +246,60 @@ export class UsersService {
         facebookId: null,
       },
     });
+  }
+
+  /**
+   * Gains d'un utilisateur : ses participations, le lot associé à chaque code
+   * et l'état de la remise.
+   *
+   * Distinct de `exportData`, qui rend le dossier personnel complet au titre du
+   * RGPD : ici on ne veut que l'historique de jeu, enrichi des métadonnées du
+   * lot (nom, valeur) que la table tickets ne porte pas - elle n'en garde que
+   * le type.
+   */
+  async getGains(id: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: { id: true, firstName: true, lastName: true, email: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Utilisateur non trouvé');
+    }
+
+    const [participations, prizesMap] = await Promise.all([
+      this.prisma.participation.findMany({
+        where: { userId: id },
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          createdAt: true,
+          prizeDelivered: true,
+          prizeDeliveredAt: true,
+          deliveryMethod: true,
+          ticket: { select: { code: true, prizeType: true } },
+        },
+      }),
+      this.ticketsService.getPrizesMap(),
+    ]);
+
+    return {
+      user,
+      data: participations.map((p) => ({
+        id: p.id,
+        code: p.ticket.code,
+        prizeType: p.ticket.prizeType,
+        prize: prizesMap[p.ticket.prizeType],
+        participatedAt: p.createdAt,
+        prizeDelivered: p.prizeDelivered,
+        prizeDeliveredAt: p.prizeDeliveredAt,
+        deliveryMethod: p.deliveryMethod,
+      })),
+      meta: {
+        total: participations.length,
+        delivered: participations.filter((p) => p.prizeDelivered).length,
+      },
+    };
   }
 
   /**
