@@ -58,10 +58,10 @@ export function AuthenticatedParticipationForm({
   return (
     <>
       <h1 className="font-display text-h2 text-ink">Bonjour {firstName}</h1>
-      <p className="mt-2 text-sm text-stone-grey">
+      {/* <p className="mt-2 text-sm text-stone-grey">
         Vous êtes identifié avec <strong className="text-ink">{email}</strong>. Saisissez
         votre code : votre lot sera révélé immédiatement.
-      </p>
+      </p> */}
 
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
         <div>
