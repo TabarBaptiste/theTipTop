@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
-import { ArrowLeft, Gift, Loader2, Pencil, Search, Trash2, X } from 'lucide-react';
+import { ArrowLeft, Gift, Pencil, Search, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,7 +19,6 @@ import {
 import { UserGainsPanel } from '@/components/admin/user-gains-panel';
 import { api } from '@/lib/api';
 import { formatDate } from '@/lib/utils';
-import { useAuthStore } from '@/lib/stores/auth-store';
 
 const PAGE_SIZE = 20;
 
@@ -49,7 +48,6 @@ interface PaginatedUsers {
 
 export default function AdminUsersPage() {
   const queryClient = useQueryClient();
-  const currentUserId = useAuthStore((state) => state.user?.id);
 
   const [page, setPage] = useState(1);
   // Deux états distincts : la saisie en cours, et le terme effectivement
@@ -61,7 +59,6 @@ export default function AdminUsersPage() {
   const [role, setRole] = useState('');
 
   const [userEnEdition, setUserEnEdition] = useState<AdminUser | null>(null);
-  const [userASupprimer, setUserASupprimer] = useState<AdminUser | null>(null);
   const [gainsOuvertsPour, setGainsOuvertsPour] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery<PaginatedUsers>({
@@ -120,18 +117,6 @@ export default function AdminUsersPage() {
     },
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: async (id: string) => api.delete(`/users/${id}`),
-    onSuccess: () => {
-      toast.success('Compte anonymisé');
-      setUserASupprimer(null);
-      rafraichirListe();
-    },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'La suppression a échoué');
-    },
-  });
-
   const reinitialiserFiltres = () => {
     setTerme('');
     setRecherche('');
@@ -156,9 +141,8 @@ export default function AdminUsersPage() {
       <ul className="space-y-3">
         {users.map((user) => (
           <li key={user.id} className="rounded-card border border-warm-beige bg-surface p-4">
-            {/* Une colonne par défaut, deux à partir de sm. Les trois actions
-                côte à côte débordaient de l'écran : sur 375 px, « Supprimer »
-                sortait du cadre. */}
+            {/* Une colonne par défaut, deux à partir de sm : les actions
+                côte à côte débordaient de l'écran sur 375 px. */}
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">
                 <p className="truncate font-medium text-ink">
@@ -189,14 +173,6 @@ export default function AdminUsersPage() {
                   <Pencil className="mr-1 h-4 w-4" strokeWidth={1.5} />
                   Modifier
                 </Button>
-                {/* Un administrateur ne peut pas supprimer son propre compte :
-                    l'API le refuse, autant ne pas proposer le geste. */}
-                {user.id !== currentUserId && (
-                  <Button variant="outline" size="sm" onClick={() => setUserASupprimer(user)}>
-                    <Trash2 className="mr-1 h-4 w-4" strokeWidth={1.5} />
-                    Supprimer
-                  </Button>
-                )}
               </div>
             </div>
 
@@ -220,9 +196,9 @@ export default function AdminUsersPage() {
             Tableau de bord
           </Link>
           <h1 className="mt-2 font-display text-h1 text-ink">Gestion des utilisateurs</h1>
-          <p className="mt-2 text-stone-grey">
-            Rechercher, corriger et supprimer un compte, et consulter ses gains
-          </p>
+          {/* <p className="mt-2 text-stone-grey">
+            Rechercher, corriger un compte et consulter ses gains
+          </p> */}
         </div>
 
         {/* Sur mobile, la carte n'encadre rien : elle pose un second fond et
@@ -235,10 +211,10 @@ export default function AdminUsersPage() {
               <Search className="h-5 w-5" strokeWidth={1.5} />
               Utilisateurs
             </CardTitle>
-            <CardDescription>
+            {/* <CardDescription>
               La recherche porte sur le nom, le prénom, l&apos;adresse e-mail et le code d&apos;un
               ticket joué.
-            </CardDescription>
+            </CardDescription> */}
           </CardHeader>
           <CardContent className="px-0 sm:px-6">
             <form noValidate onSubmit={onSearch} className="space-y-2">
@@ -315,55 +291,6 @@ export default function AdminUsersPage() {
           onCancel={() => setUserEnEdition(null)}
           onSubmit={(form) => updateMutation.mutate({ id: userEnEdition.id, form })}
         />
-      )}
-
-      {userASupprimer && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 p-4">
-          <div
-            role="alertdialog"
-            aria-modal="true"
-            aria-labelledby="titre-suppression-utilisateur"
-            className="w-full max-w-md rounded-card bg-surface p-5 shadow-lg sm:p-6"
-          >
-            <h2 id="titre-suppression-utilisateur" className="font-display text-h3 text-ink">
-              Supprimer ce compte ?
-            </h2>
-            {/* Dire ce que fait réellement la politique de suppression : le
-                compte est anonymisé, pas effacé. Les participations restent,
-                sans quoi les compteurs du jeu-concours seraient faussés
-                a posteriori. */}
-            <p className="mt-3 text-sm text-stone-grey">
-              Les données personnelles de {userASupprimer.firstName} {userASupprimer.lastName} (
-              {userASupprimer.email}) seront effacées et le compte anonymisé, conformément au
-              droit à l&apos;effacement. Ses participations sont conservées de façon anonyme.
-              Cette action est irréversible.
-            </p>
-            {/* Le rouge du variant destructive, et non le terracotta de
-                l'action principale : une suppression irréversible ne doit pas
-                porter la même couleur qu'un « Participer ». Taille réduite,
-                sinon les deux boutons remplissent la largeur de la modale et
-                l'annulation pèse autant que la suppression. */}
-            <div className="mt-6 flex flex-wrap justify-end gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setUserASupprimer(null)}
-                disabled={deleteMutation.isPending}
-              >
-                Annuler
-              </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => deleteMutation.mutate(userASupprimer.id)}
-                disabled={deleteMutation.isPending}
-              >
-                {deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Supprimer définitivement
-              </Button>
-            </div>
-          </div>
-        </div>
       )}
     </div>
   );
