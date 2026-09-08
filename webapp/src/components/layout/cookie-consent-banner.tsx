@@ -24,7 +24,7 @@ export function CookieConsentBanner() {
     <dialog
       open
       aria-label="Gestion des cookies"
-      className="m-0 fixed inset-x-0 bottom-0 z-50 max-w-none border-t border-warm-beige bg-cream px-4 py-5 shadow-[0_-4px_20px_rgba(0,0,0,0.1)] sm:px-6"
+      className="m-0 fixed inset-x-0 bottom-0 z-50 w-full max-w-none border-t border-warm-beige bg-cream px-4 py-5 shadow-[0_-4px_20px_rgba(0,0,0,0.1)] sm:px-6"
     >
       <div className="mx-auto flex max-w-5xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-stone">
