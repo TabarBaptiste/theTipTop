@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SkeletonList } from '@/components/ui/skeleton';
 import { Pagination } from '@/components/ui/pagination';
 import { DeliveredPrizesList } from '@/components/gains/delivered-prizes-list';

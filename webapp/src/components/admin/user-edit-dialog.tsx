@@ -97,11 +97,15 @@ export function UserEditDialog({ user, isSaving, onSubmit, onCancel }: UserEditD
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 p-4">
-      <div
-        role="dialog"
+      <dialog
+        open
         aria-modal="true"
         aria-labelledby="titre-edition-utilisateur"
-        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-card bg-surface p-5 shadow-lg sm:p-6"
+        // static + m-0 : neutralise le position:absolute et le margin:auto
+        // par defaut de <dialog>, qui sortaient la modale du centrage flex de
+        // l'overlay. text-ink : <dialog> impose un texte noir que l'ancien div
+        // heritait de la page, illisible en theme sombre.
+        className="static m-0 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-card bg-surface p-5 text-ink shadow-lg sm:p-6"
       >
         <h2 id="titre-edition-utilisateur" className="font-display text-h3 text-ink">
           Modifier {user.firstName} {user.lastName}
@@ -187,7 +191,7 @@ export function UserEditDialog({ user, isSaving, onSubmit, onCancel }: UserEditD
             </Button>
           </div>
         </form>
-      </div>
+      </dialog>
     </div>
   );
 }
