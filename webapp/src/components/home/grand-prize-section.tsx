@@ -17,8 +17,8 @@ const SOCIAL_PROOF_THRESHOLD = 50;
 // Les trois objections que soulève un tirage au sort : faut-il s'inscrire,
 // faut-il multiplier les codes, et qui garantit le résultat.
 const ATOUTS = [
-  'Inscription automatique dès votre première participation',
-  'Une chance par personne, quel que soit le nombre de codes saisis',
+  'Inscription automatique dès la saisie de votre premier code.',
+  'Une seule chance par personne.',
   'Tirage sous le contrôle de Maître Arnaud Rick, huissier de justice',
 ];
 
@@ -120,7 +120,7 @@ export function GrandPrizeSection() {
 
         <p className="relative mt-5 text-body leading-[1.53125rem] text-white">
           Au-delà du lot garanti par votre ticket, chaque participation vous inscrit
-          automatiquement au tirage au sort final. Rien de plus à faire.
+          automatiquement au tirage au sort final.
         </p>
 
         <ul className="relative mt-5 list-disc space-y-0 pl-[21px] text-body leading-[1.53125rem] text-white">

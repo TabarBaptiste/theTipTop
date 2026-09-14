@@ -2,19 +2,18 @@ const steps = [
   {
     number: '01',
     title: 'Trouve ton code',
-    description:
-      'Cherche le code unique sur ton ticket de caisse auprès de ton vendeur Thé Tip Top.',
+    description: 'Repère le code unique imprimé sur ton ticket de caisse.',
   },
   {
     number: '02',
     title: 'Saisis ton code',
-    description: 'Entre ton code sur cette page et découvre instantanément ton résultat.',
+    description:
+      'En cliquant sur participer pour découvrir immédiatement ce que tu as gagné.',
   },
   {
     number: '03',
-    title: 'Récupère ton lot',
-    description:
-      'Présente-toi en boutique avec ton code pour retirer ton lot dans les meilleurs délais.',
+    title: 'Rends-toi en boutique avec ton code',
+    description: 'Notre équipe te remettra ton lot sur place.',
   },
 ];
 

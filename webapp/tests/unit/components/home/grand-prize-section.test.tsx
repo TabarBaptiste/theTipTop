@@ -49,7 +49,7 @@ describe('GrandPrizeSection', () => {
       render(<GrandPrizeSection />);
 
       expect(screen.getByText(/Inscription automatique/i)).toBeInTheDocument();
-      expect(screen.getByText(/Une chance par personne/i)).toBeInTheDocument();
+      expect(screen.getByText(/Une seule chance par personne/i)).toBeInTheDocument();
       expect(screen.getByText(/huissier de justice/i)).toBeInTheDocument();
     });
 

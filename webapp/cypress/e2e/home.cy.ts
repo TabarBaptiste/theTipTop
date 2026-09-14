@@ -19,7 +19,7 @@ describe('Page d\'accueil', () => {
     cy.get('h1').should(($titre) => {
       const texte = $titre.text().replace(/\u00a0/g, ' ');
       expect(texte).to.contain('Jeu-concours');
-      expect(texte).to.contain('100 % des tickets gagnants');
+      expect(texte).to.contain('tickets 100 % gagnants');
     });
   });
 
@@ -49,7 +49,7 @@ describe('Page d\'accueil', () => {
     cy.contains('Comment participer ?').should('be.visible');
     cy.contains('Trouve ton code').should('be.visible');
     cy.contains('Saisis ton code').should('be.visible');
-    cy.contains('Récupère ton lot').should('be.visible');
+    cy.contains('Rends-toi en boutique avec ton code').should('be.visible');
   });
 
   it('contient les liens de navigation', () => {

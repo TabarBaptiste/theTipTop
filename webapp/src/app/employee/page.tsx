@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SkeletonList } from '@/components/ui/skeleton';
 import { Pagination } from '@/components/ui/pagination';
 import { DeliveredPrizesList } from '@/components/gains/delivered-prizes-list';
@@ -255,9 +255,9 @@ export default function EmployeePage() {
                 <Search className="h-5 w-5" />
                 Rechercher
               </CardTitle>
-              <CardDescription>
+              {/* <CardDescription>
                 Un code de ticket, ou le nom, prénom ou e-mail du client s&apos;il ne l&apos;a pas
-              </CardDescription>
+              </CardDescription> */}
             </CardHeader>
             <CardContent>
               <form noValidate onSubmit={onSearch} className="space-y-2">
@@ -281,10 +281,10 @@ export default function EmployeePage() {
                     )}
                   </Button>
                 </div>
-                <p className="text-sm text-stone-grey">
+                {/* <p className="text-sm text-stone-grey">
                   Un code comporte dix caractères. Toute autre saisie est cherchée parmi les
                   clients.
-                </p>
+                </p> */}
               </form>
 
               {/* Résultat de recherche */}
@@ -425,9 +425,9 @@ export default function EmployeePage() {
                 <Package className="h-5 w-5" />
                 Lots en attente
               </CardTitle>
-              <CardDescription>
+              {/* <CardDescription>
                 Liste des participants en attente de remise de leur lot
-              </CardDescription>
+              </CardDescription> */}
             </CardHeader>
             <CardContent>
               {isLoading ? (
