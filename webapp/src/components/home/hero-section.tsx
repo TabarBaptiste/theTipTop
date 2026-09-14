@@ -75,17 +75,17 @@ export function HeroSection() {
               deux-points peut ouvrir une ligne. */}
           <h1 className="mx-auto mt-4 max-w-[782px] font-display text-display text-ink">
             Jeu-concours <span className="whitespace-nowrap text-accent">Thé Tip Top</span>&nbsp;:
-            un an de thé à gagner, 100&nbsp;% des tickets gagnants
+            un an de thé à gagner, tickets 100&nbsp;% gagnants
           </h1>
 
           {/* Le paragraphe court sur toute la largeur du contenu sur la
               maquette, et non sur celle du titre : deux lignes pleines plutôt
               que quatre lignes étroites. */}
           <p className="mt-[30px] text-body leading-[1.53125rem] text-ink/70">
-            À l&apos;occasion de l&apos;ouverture de notre 10<sup>e</sup> boutique à Nice, chaque
-            participation vous inscrit au tirage au sort d&apos;<strong className="font-bold text-ink">un an de thé</strong>, d&apos;une valeur de 360
-            €. Et vous ne repartez jamais les mains vides :{' '}
-            <strong className="font-bold text-ink">100 % des tickets sont gagnants</strong>.
+            Pour l&apos;ouverture de notre 10<sup>e</sup> boutique à Nice&nbsp;: participez pour
+            tenter de gagner <strong className="font-bold text-ink">un an de thé</strong> d&apos;une
+            valeur de 360&nbsp;€. Le bonus&nbsp;? Vous ne repartez jamais les mains vides,{' '}
+            <strong className="font-bold text-ink">100&nbsp;% des tickets sont gagnants</strong>.
           </p>
 
           <div className="flex justify-center">
