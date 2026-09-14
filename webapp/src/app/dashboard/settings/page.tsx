@@ -190,7 +190,7 @@ export default function SettingsPage() {
                   : "Votre compte a été créé via Google ou Facebook et n'a pas encore de mot de passe. En définir un vous permettra de vous connecter directement, sans passer par eux."}
               </p>
 
-              <form onSubmit={handlePasswordChange} className="mt-4 max-w-sm space-y-4">
+              <form method="post" onSubmit={handlePasswordChange} className="mt-4 max-w-sm space-y-4">
                 {aUnMotDePasse && (
                   <div>
                     <Label htmlFor="currentPassword">Mot de passe actuel</Label>

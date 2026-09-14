@@ -178,7 +178,7 @@ export function Footer() {
             <h2 className="font-functional text-ui uppercase tracking-[2px] text-white">
               Newsletter
             </h2>
-            <form onSubmit={handleNewsletterSubmit} className="mt-4 space-y-3">
+            <form method="post" onSubmit={handleNewsletterSubmit} className="mt-4 space-y-3">
               <div className="flex gap-2">
                 {/* Étiquette réelle plutôt que le seul placeholder : celui-ci
                     disparaît à la saisie et n'est pas annoncé de façon fiable

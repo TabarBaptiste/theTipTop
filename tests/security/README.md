@@ -25,9 +25,14 @@ lisible dans le répertoire monté.
 
 ### Le fichier de règles
 
-`zap-baseline.tsv` classe chaque règle en IGNORE, WARN ou FAIL, avec sa
+`zap-baseline.tsv` classe chaque règle en IGNORE, INFO, WARN ou FAIL, avec sa
 justification. Trois colonnes séparées par des **tabulations** - un fichier mal
 formé fait sortir ZAP en code 3 sans message explicite.
+
+Le pipeline Jenkins lit ce fichier via `zapConfigFile` dans le `Jenkinsfile`, et
+le passe à ZAP sans `-I` : les règles WARN et FAIL rendent le build UNSTABLE,
+les règles INFO et IGNORE sont sans effet, et une règle absente du fichier vaut
+WARN.
 
 Règle de tenue : une alerte n'est écartée qu'après avoir été comprise, et la
 raison est écrite. C'est la même discipline que `.trivyignore`.

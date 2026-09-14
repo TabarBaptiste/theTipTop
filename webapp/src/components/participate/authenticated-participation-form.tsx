@@ -63,7 +63,7 @@ export function AuthenticatedParticipationForm({
         votre code : votre lot sera révélé immédiatement.
       </p> */}
 
-      <form noValidate onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
+      <form method="post" noValidate onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
         <div>
           <Label htmlFor="code">Code du ticket *</Label>
           <Input
