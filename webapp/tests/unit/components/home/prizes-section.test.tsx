@@ -93,13 +93,14 @@ describe('PrizesSection', () => {
     expect(screen.getByText(/Lot inédit/)).toBeInTheDocument();
   });
 
-  it('affiche le pourcentage de chances de chaque lot', () => {
+  // La part de tickets qui donnent le lot se lisait comme une probabilite de
+  // gagner alors que tous les tickets gagnent : sur les lots rares, elle
+  // decourageait au lieu d'attirer.
+  it('n’affiche pas la part de tickets du lot', () => {
     reponse([LOT_DISTANT]);
     render(<PrizesSection />);
 
-    // Espace insecable entre le nombre et le signe pourcent, comme le veut la
-    // typographie francaise : la chaine exacte n'est plus « 60% ».
-    expect(screen.getByText(/60\s*%/)).toBeInTheDocument();
+    expect(screen.queryByText(/60\s*%/)).not.toBeInTheDocument();
   });
   // Le defilement automatique est du contenu qui se substitue tout seul : le
   // critere 2.2.2 impose de pouvoir l'arreter, et le survol n'y suffit pas -

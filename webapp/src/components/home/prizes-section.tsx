@@ -95,16 +95,16 @@ const DUREE_PAR_LOT = 6000;
 /**
  * Squelette affiche pendant le chargement des lots.
  *
- * Reprend la silhouette exacte du lot charge : memes trois colonnes, memes
- * marges, et la rangee de commandes en dessous. Il en decrivait deux,
- * heritees d'une version precedente : la colonne du pourcentage et les
- * commandes surgissaient d'un coup, et la section changeait de hauteur au
- * chargement - ce qu'un squelette existe precisement pour eviter.
+ * Reprend la silhouette exacte du lot charge : memes colonnes, memes marges,
+ * et la rangee de commandes en dessous. Une version precedente en omettait
+ * une partie : les commandes surgissaient d'un coup et la section changeait
+ * de hauteur au chargement - ce qu'un squelette existe precisement pour
+ * eviter.
  */
 function PrizesSkeleton() {
   return (
     <>
-      <div className="container relative mx-auto grid items-center gap-10 px-6 pb-8 pt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)_auto] lg:gap-12 lg:pt-16">
+      <div className="container relative mx-auto grid items-center gap-10 px-6 pb-8 pt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-12 lg:pt-16">
         <div>
           <Skeleton className="h-[0.9375rem] w-32 bg-ink/10" />
           <Skeleton className="mt-4 h-9 w-4/5 bg-ink/10" />
@@ -127,11 +127,6 @@ function PrizesSkeleton() {
             le maximum autorise. */}
         <div className="order-first flex justify-center lg:order-none">
           <Skeleton className="h-[13.75rem] w-full max-w-[420px] rounded-card bg-ink/5 md:h-[17.5rem] lg:h-[18.75rem]" />
-        </div>
-
-        <div className="flex flex-col gap-2 lg:items-end">
-          <Skeleton className="h-11 w-24 bg-ink/10" />
-          <Skeleton className="h-[0.9375rem] w-20 bg-ink/10" />
         </div>
       </div>
 
@@ -179,7 +174,12 @@ function PrizesCarousel({
 }: Readonly<PrizesCarouselProps>) {
   return (
     <>
-      <div className="container relative mx-auto grid items-center gap-10 px-6 pb-8 pt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)_auto] lg:gap-12 lg:pt-16">
+      {/* Une troisieme colonne portait la part de tickets qui donnent ce lot,
+          en gros caracteres, et la valeur du lot sous elle. Elle se lisait
+          comme une probabilite de gagner alors que tous les tickets gagnent :
+          sur les lots rares, l'argument de la page se retournait contre elle.
+          La valeur partait avec, mais elle figure deja dans le nom du lot. */}
+      <div className="container relative mx-auto grid items-center gap-10 px-6 pb-8 pt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-12 lg:pt-16">
         <div>
           {/* Ce surtitre a sa propre couleur : a 10 px le seuil est de 4,5:1
               et aucune nuance de la gamme ne le tient sur les deux themes. Le
@@ -210,19 +210,6 @@ function PrizesCarousel({
           )}
         </div>
 
-        <div className="lg:text-right">
-          <p className="whitespace-nowrap font-display text-[2.75rem] font-bold leading-none text-ink">
-            {activePrize.percentage}&nbsp;%
-          </p>
-          <p className="mt-2 font-functional text-[0.625rem] font-bold uppercase leading-[0.9375rem] tracking-[2px] text-stone-grey">
-            des tickets
-          </p>
-          {activePrize.value && (
-            <p className="mt-6 font-functional text-[0.625rem] font-bold uppercase leading-[0.9375rem] tracking-[2px] text-stone-grey">
-              Valeur {activePrize.value}
-            </p>
-          )}
-        </div>
       </div>
 
       {total > 1 && (
