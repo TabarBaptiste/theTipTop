@@ -226,6 +226,26 @@ export class UsersController {
   }
 
   // ===========================================
+  // GAINS D'UN UTILISATEUR
+  // ===========================================
+  @Get(':id/gains')
+  @ApiOperation({
+    summary: "Historique des participations et lots d'un utilisateur",
+    description:
+      "Rend les participations, le lot associé à chaque code et l'état de la remise. " +
+      'Un client ne peut consulter que les siens.',
+  })
+  @ApiResponse({ status: 200, description: "Gains de l'utilisateur" })
+  @ApiResponse({ status: 404, description: 'Utilisateur non trouvé' })
+  async getGains(@Param('id') id: string, @CurrentUser() currentUser: User) {
+    // Meme regle que l'export : seul un administrateur consulte le dossier
+    // d'autrui. Un employe voit les lots a remettre par /gains/pending, il n'a
+    // pas a parcourir l'historique de jeu d'un client.
+    const targetId = currentUser.role === 'ADMIN' ? id : currentUser.id;
+    return this.usersService.getGains(targetId);
+  }
+
+  // ===========================================
   // EXPORT DES DONNÉES (RGPD)
   // ===========================================
   @Get(':id/export')

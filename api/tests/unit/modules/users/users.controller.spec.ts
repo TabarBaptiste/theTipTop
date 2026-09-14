@@ -17,6 +17,7 @@ describe('UsersController', () => {
     changePassword: jest.fn(),
     delete: jest.fn(),
     exportData: jest.fn(),
+    getGains: jest.fn(),
     changeRole: jest.fn(),
     searchClients: jest.fn(),
   };
@@ -241,6 +242,20 @@ describe('UsersController', () => {
 
       expect(mockUsersService.delete).toHaveBeenCalledWith('u1');
     });
+  });
+
+  // Les gains d'autrui relevent de l'administration : un employe sert le
+  // comptoir depuis /gains/pending, pas depuis l'historique d'un client.
+  it.each([
+    ['an admin', () => admin, 'autre-id'],
+    ['an employee', () => employe, 'e1'],
+    ['a client', () => client, 'u1'],
+  ])('getGains should scope %s to the right account', async (_label, utilisateur, attendu) => {
+    mockUsersService.getGains.mockResolvedValue({ data: [] });
+
+    await controller.getGains('autre-id', utilisateur());
+
+    expect(mockUsersService.getGains).toHaveBeenCalledWith(attendu);
   });
 
   // L'export livre identite, telephone, date de naissance, genre, consentements

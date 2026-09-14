@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Users, Ticket, Gift, TrendingUp, Trophy,
@@ -275,9 +276,20 @@ export default function AdminPage() {
               Vue d&apos;ensemble du jeu-concours Thé Tip Top
             </p>
           </div>
-          <div className="flex items-center gap-2 text-sm text-stone-grey">
-            <RefreshCw className="h-4 w-4 animate-spin [animation-duration:3s]" strokeWidth={1.5} />
-            Actualisation automatique
+          <div className="flex flex-wrap items-center gap-4">
+            <Button asChild variant="outline">
+              <Link href="/admin/utilisateurs">
+                <Users className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                Gérer les utilisateurs
+              </Link>
+            </Button>
+            <div className="flex items-center gap-2 text-sm text-stone-grey">
+              <RefreshCw
+                className="h-4 w-4 animate-spin [animation-duration:3s]"
+                strokeWidth={1.5}
+              />
+              Actualisation automatique
+            </div>
           </div>
         </div>
 
