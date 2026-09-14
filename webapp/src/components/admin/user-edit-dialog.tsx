@@ -111,7 +111,7 @@ export function UserEditDialog({ user, isSaving, onSubmit, onCancel }: UserEditD
           Modifier {user.firstName} {user.lastName}
         </h2>
 
-        <form noValidate onSubmit={handleSubmit(onSubmit)} className="mt-4 space-y-4">
+        <form method="post" noValidate onSubmit={handleSubmit(onSubmit)} className="mt-4 space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="firstName">Prénom</Label>

@@ -71,7 +71,7 @@ export function ParticipationForm({ onSubmit, isSubmitting }: Props) {
   const birthDateRange = birthDateBounds();
 
   return (
-    <form noValidate onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
+    <form method="post" noValidate onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
       <div>
         <Label htmlFor="code">Code du ticket *</Label>
         <Input

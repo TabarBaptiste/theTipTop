@@ -16,6 +16,8 @@ ciPipeline(
     // Les specs vivent dans webapp/cypress/e2e (cf. webapp/cypress.config.ts)
     e2eFramework  : 'cypress',
     runZap        : true,   // scan OWASP ZAP baseline contre PREPROD
+    // Tri des alertes ZAP (INFO/IGNORE = risque accepté, justifié dans le fichier)
+    zapConfigFile : 'tests/security/zap-baseline.tsv',
 
     // Comité de pilotage (cf. cahier des charges)
     notifyRecipients: [

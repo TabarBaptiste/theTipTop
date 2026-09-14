@@ -92,6 +92,7 @@ export function VerificationStep({
       </div>
 
       <form
+        method="post"
         className="mt-6 space-y-4"
         onSubmit={(e) => {
           e.preventDefault();

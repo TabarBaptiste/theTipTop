@@ -347,8 +347,14 @@ configuration.
 
 Trois alertes y sont écartées, toutes imputables aux bundles de Next.js et
 React et non au code du projet : commentaires dits suspects, fonctions
-JavaScript dangereuses, contenu non stockable. Les autres restent visibles
-jusqu'à leur correction.
+JavaScript dangereuses, contenu non stockable. Six autres sont classées INFO :
+elles restent dans le rapport mais relèvent d'un risque accepté, justifié ligne
+à ligne - CSP encore en Report-Only, COEP incompatible avec les images tierces,
+faux positifs.
+
+Dans le pipeline, le `Jenkinsfile` passe ce fichier à ZAP via `zapConfigFile`.
+Toute règle qui n'y figure pas vaut WARN et rend le build UNSTABLE : une alerte
+nouvelle ne passe pas inaperçue.
 
 **La surface analysée varie d'une exécution à l'autre.** Le scan baseline
 s'appuie sur un parcours automatique du site, dont la profondeur dépend du
