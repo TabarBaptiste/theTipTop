@@ -2,26 +2,37 @@
 # Règles du scan OWASP ZAP baseline
 # ===========================================
 # Format attendu par zap-baseline.py, trois colonnes séparées par des
-# tabulations : identifiant de règle, action, commentaire.
-# Actions : IGNORE (silencieux), WARN (signalé, ne bloque pas), FAIL (bloque).
+# tabulations : identifiant de règle, action, commentaire. Une ligne mal formée
+# fait sortir ZAP en code 3, que le pipeline signale comme un scan non abouti.
 #
-# Même discipline que .trivyignore : on n'écarte une alerte qu'après l'avoir
-# comprise, et la raison est écrite. Une règle passée en IGNORE sans
+# Actions, et leur effet dans le pipeline Jenkins :
+#   IGNORE  alerte ni signalée ni comptée
+#   INFO    alerte signalée dans le rapport, sans effet sur le build
+#   WARN    alerte signalée, build UNSTABLE
+#   FAIL    alerte signalée, build UNSTABLE (le pipeline n'échoue jamais sur ZAP)
+# Une règle absente de ce fichier vaut WARN : une alerte nouvelle rend le build
+# UNSTABLE tant qu'elle n'a pas été triée ici.
+#
+# Même discipline que .trivyignore : on ne classe une alerte en INFO ou IGNORE
+# qu'après l'avoir comprise, et la raison est écrite. Une règle déclassée sans
 # justification est une régression de sécurité déguisée en configuration.
 #
-# Usage : zap-baseline.py -t <url> -c zap-baseline.tsv
-# (le fichier doit se trouver dans le répertoire monté sur /zap/wrk)
+# Le pipeline lit ce fichier via zapConfigFile (Jenkinsfile) et le passe à ZAP
+# en -c, relativement à la racine du dépôt, montée sur /zap/wrk.
+#
+# 10024 (informations sensibles dans l'URL) n'est volontairement pas listée :
+# elle est corrigée par method="post" sur les formulaires, et doit rester WARN
+# pour qu'une régression se voie.
 
-# --- Alertes écartées, imputables aux bundles du framework ---
+# --- Écartées : imputables aux bundles du framework ---
 10027	IGNORE	Commentaires suspects detectes dans les bundles Next.js et React, pas dans le code du projet
 10110	IGNORE	Fonctions JavaScript dangereuses situees dans les runtimes Next.js et React
 10049	IGNORE	Contenu non stockable : attendu, les pages du parcours sont dynamiques et personnalisees
 
-# --- Alertes maintenues, à traiter ---
-# En-têtes réellement absents de la réponse du front, et non artefacts d'outil.
-# Elles doivent rester visibles jusqu'à leur correction.
-10038	WARN	Content-Security-Policy absente des reponses du front Next.js
-10063	WARN	Permissions-Policy absente
-10037	WARN	X-Powered-By divulgue le framework
-90004	WARN	Cross-Origin-Embedder-Policy absente ou invalide
-10019	WARN	Content-Type manquant sur certaines reponses
+# --- Risque accepté : signalées dans le rapport, sans effet sur le build ---
+10038	INFO	CSP servie en Content-Security-Policy-Report-Only : le passage en mode bloquant reste a trancher (docs/05-PROTOCOLES-DE-TESTS.md)
+90004	INFO	COEP require-corp bloquerait les images et scripts tiers (Cloudinary, avatars Google et Facebook, Google Tag Manager)
+10019	INFO	Content-Type absent des seules redirections 307 du middleware vers la connexion : reponses sans corps
+10015	INFO	Cache-Control s-maxage pose par Next.js sur les pages prerendues statiques, sans donnee personnelle
+10111	INFO	Detection informative des formulaires de connexion et de participation, pas une faiblesse
+10031	INFO	Faux positif : les valeurs injectees (FEMALE, on) coincident avec des attributs statiques des formulaires, aucune reflexion constatee

@@ -114,6 +114,7 @@ export default function CompleteEmailPage() {
                 forcent le démontage. */}
             <form
               key="etape-email"
+              method="post"
               noValidate
               onSubmit={emailForm.handleSubmit(onSubmitEmail)}
               className="mt-8 space-y-5"
@@ -150,6 +151,7 @@ export default function CompleteEmailPage() {
 
             <form
               key="etape-code"
+              method="post"
               noValidate
               onSubmit={codeForm.handleSubmit(onSubmitCode)}
               className="mt-8 space-y-5"
