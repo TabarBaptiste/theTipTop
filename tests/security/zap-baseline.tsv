@@ -36,3 +36,4 @@
 10015	INFO	Cache-Control s-maxage pose par Next.js sur les pages prerendues statiques, sans donnee personnelle
 10111	INFO	Detection informative des formulaires de connexion et de participation, pas une faiblesse
 10031	INFO	Faux positif : les valeurs injectees (FEMALE, on) coincident avec des attributs statiques des formulaires, aucune reflexion constatee
+10202	INFO	Jetons anti-CSRF sans objet : l API s authentifie par en-tete Authorization pose en JavaScript, hors de portee d un formulaire tiers ; aucun cookie d authentification ni Server Action
