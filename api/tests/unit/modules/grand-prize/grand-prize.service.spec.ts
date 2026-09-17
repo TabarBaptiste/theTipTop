@@ -3,9 +3,11 @@
 // ===========================================
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { GrandPrizeService } from '@/modules/grand-prize/grand-prize.service';
 import { PrismaService } from '@/prisma/prisma.service';
+import { RedisService } from '@/redis/redis.service';
+import { STATS_CACHE_PATTERN } from '@/redis/cache-keys';
 
 describe('GrandPrizeService', () => {
   let service: GrandPrizeService;
@@ -26,6 +28,10 @@ describe('GrandPrizeService', () => {
     },
   };
 
+  const mockRedisService = {
+    delByPattern: jest.fn(),
+  };
+
   const endedGameConfig = {
     id: 'gc1',
     isActive: true,
@@ -35,7 +41,11 @@ describe('GrandPrizeService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [GrandPrizeService, { provide: PrismaService, useValue: mockPrismaService }],
+      providers: [
+        GrandPrizeService,
+        { provide: PrismaService, useValue: mockPrismaService },
+        { provide: RedisService, useValue: mockRedisService },
+      ],
     }).compile();
 
     service = module.get<GrandPrizeService>(GrandPrizeService);
@@ -135,6 +145,24 @@ describe('GrandPrizeService', () => {
       expect(mockPrismaService.auditLog.create).toHaveBeenCalled();
     });
 
+    it('should invalidate the stats cache so the back-office leaves the pre-draw state', async () => {
+      mockPrismaService.gameConfig.findFirst.mockResolvedValue(endedGameConfig);
+      mockPrismaService.participation.groupBy.mockResolvedValue([{ userId: 'u1' }]);
+      mockPrismaService.user.findUnique.mockResolvedValue({
+        id: 'u1',
+        email: 'jean@email.fr',
+        firstName: 'Jean',
+        lastName: 'Dupont',
+        phone: null,
+      });
+      mockPrismaService.gameConfig.updateMany.mockResolvedValue({ count: 1 });
+      mockPrismaService.auditLog.create.mockResolvedValue({});
+
+      await service.draw();
+
+      expect(mockRedisService.delByPattern).toHaveBeenCalledWith(STATS_CACHE_PATTERN);
+    });
+
     it('should throw if another draw happened concurrently (updateMany count = 0)', async () => {
       mockPrismaService.gameConfig.findFirst.mockResolvedValue(endedGameConfig);
       mockPrismaService.participation.groupBy.mockResolvedValue([{ userId: 'u1' }]);
@@ -192,6 +220,53 @@ describe('GrandPrizeService', () => {
       expect(result.winner?.lastName).toBe('D.');
       expect(result.winner?.email).not.toBe('jean.dupont@email.fr');
       expect(result.prize?.value).toBe('360€');
+    });
+  });
+
+  describe('getWinner', () => {
+    it('should report that no draw happened yet', async () => {
+      mockPrismaService.gameConfig.findFirst.mockResolvedValue(endedGameConfig);
+
+      expect(await service.getWinner()).toEqual({ drawn: false });
+    });
+
+    it('should return the winner contact details unmasked', async () => {
+      mockPrismaService.gameConfig.findFirst.mockResolvedValue({
+        ...endedGameConfig,
+        grandPrizeDrawn: true,
+        grandPrizeWinnerId: 'u1',
+        grandPrizeDrawnAt: new Date(),
+      });
+      mockPrismaService.user.findUnique.mockResolvedValue({
+        id: 'u1',
+        email: 'jean.dupont@email.fr',
+        firstName: 'Jean',
+        lastName: 'Dupont',
+        phone: '0600000000',
+      });
+      mockPrismaService.participation.groupBy.mockResolvedValue([{ userId: 'u1' }]);
+
+      const result = await service.getWinner();
+
+      expect(result.drawn).toBe(true);
+      // Contrairement à getDrawInfo, rien n'est masqué : le back-office doit
+      // pouvoir contacter le gagnant.
+      expect(result.winner?.email).toBe('jean.dupont@email.fr');
+      expect(result.winner?.lastName).toBe('Dupont');
+      expect(result.winner?.phone).toBe('0600000000');
+      expect(result.totalParticipants).toBe(1);
+    });
+
+    it('should throw when the winner account no longer exists', async () => {
+      mockPrismaService.gameConfig.findFirst.mockResolvedValue({
+        ...endedGameConfig,
+        grandPrizeDrawn: true,
+        grandPrizeWinnerId: 'u1',
+        grandPrizeDrawnAt: new Date(),
+      });
+      mockPrismaService.user.findUnique.mockResolvedValue(null);
+
+      await expect(service.getWinner()).rejects.toThrow(NotFoundException);
     });
   });
 });

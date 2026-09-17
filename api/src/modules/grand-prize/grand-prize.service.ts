@@ -2,13 +2,18 @@
 // Service Grand Prize (Tirage au sort)
 // ===========================================
 
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { RedisService } from '../../redis/redis.service';
+import { STATS_CACHE_PATTERN } from '../../redis/cache-keys';
 import { randomInt } from 'node:crypto';
 
 @Injectable()
 export class GrandPrizeService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly redis: RedisService,
+  ) {}
 
   /**
    * Vérifie si le tirage au sort peut être effectué
@@ -126,6 +131,11 @@ export class GrandPrizeService {
       },
     });
 
+    // /stats/global sert `game.grandPrizeDrawn` depuis le cache `stats:overview`
+    // (TTL 5 min). Sans cette invalidation, le back-office continue d'afficher
+    // l'état pré-tirage jusqu'à expiration, bouton de tirage compris.
+    await this.redis.delByPattern(STATS_CACHE_PATTERN);
+
     return {
       success: true,
       winner: {
@@ -206,6 +216,56 @@ export class GrandPrizeService {
             email: this.maskEmail(winner.email),
           }
         : null,
+      totalParticipants: participantsCount,
+      prize: {
+        name: 'Un an de thé',
+        value: '360€',
+      },
+    };
+  }
+
+  /**
+   * Récupère le gagnant en clair, pour le back-office.
+   *
+   * Contrairement à getDrawInfo(), qui est publique et masque le nom et
+   * l'email, cette méthode expose les coordonnées complètes : sans elles, un
+   * administrateur n'a aucun moyen de contacter le gagnant une fois la page
+   * rechargée, la réponse du tirage n'étant conservée nulle part.
+   */
+  async getWinner() {
+    const gameConfig = await this.prisma.gameConfig.findFirst({
+      where: { isActive: true },
+    });
+
+    if (!gameConfig?.grandPrizeDrawn) {
+      return { drawn: false as const };
+    }
+
+    if (!gameConfig.grandPrizeWinnerId) {
+      throw new NotFoundException('Tirage effectué mais aucun gagnant enregistré');
+    }
+
+    const winner = await this.prisma.user.findUnique({
+      where: { id: gameConfig.grandPrizeWinnerId },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        phone: true,
+      },
+    });
+
+    if (!winner) {
+      throw new NotFoundException('Compte du gagnant introuvable');
+    }
+
+    const participantsCount = (await this.prisma.participation.groupBy({ by: ['userId'] })).length;
+
+    return {
+      drawn: true as const,
+      drawnAt: gameConfig.grandPrizeDrawnAt,
+      winner,
       totalParticipants: participantsCount,
       prize: {
         name: 'Un an de thé',

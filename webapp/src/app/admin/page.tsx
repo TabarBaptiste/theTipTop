@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Users, Ticket, Gift, TrendingUp, Trophy,
   Loader2, Calendar, Download, PieChart, BarChart3,
-  Mail, ShieldCheck, Scale, RefreshCw,
+  Mail, Phone, ShieldCheck, Scale, RefreshCw, CircleCheck,
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -19,7 +19,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { DeliveredPrizesList } from '@/components/gains/delivered-prizes-list';
 import { api } from '@/lib/api';
-import { formatDate } from '@/lib/utils';
+import { formatDate, formatDateTime } from '@/lib/utils';
 
 // ===========================================
 // Types alignés sur les réponses réelles de l'API
@@ -73,6 +73,20 @@ interface CanDraw {
   canDraw: boolean;
   reason?: string;
   participantsCount?: number;
+}
+
+// GET /grand-prize/winner (Admin : coordonnées non masquées)
+interface GrandPrizeWinner {
+  drawn: boolean;
+  drawnAt?: string;
+  winner?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string | null;
+  };
+  totalParticipants?: number;
 }
 
 // GET /stats/emailing
@@ -206,6 +220,13 @@ export default function AdminPage() {
     refetchInterval: REFETCH_INTERVAL,
   });
 
+  // Gagnant du grand prix (coordonnées en clair, réservées à l'admin)
+  const { data: grandPrizeWinner } = useQuery<GrandPrizeWinner>({
+    queryKey: ['admin-grand-prize-winner'],
+    queryFn: async () => (await api.get('/grand-prize/winner')).data,
+    refetchInterval: REFETCH_INTERVAL,
+  });
+
   // Aperçu du segment emailing sélectionné (contacts consentants uniquement)
   const activeSegment = EMAILING_SEGMENTS.find((s) => s.key === segment) ?? EMAILING_SEGMENTS[0];
   const { data: emailingData, isFetching: loadingEmailing } = useQuery<EmailingData>({
@@ -222,6 +243,7 @@ export default function AdminPage() {
       );
       queryClient.invalidateQueries({ queryKey: ['admin-can-draw'] });
       queryClient.invalidateQueries({ queryKey: ['admin-stats-global'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-grand-prize-winner'] });
     },
     onError: (error: any) => {
       toast.error(error?.response?.data?.message || 'Le tirage au sort a échoué');
@@ -263,7 +285,9 @@ export default function AdminPage() {
 
   const tickets = globalStats?.tickets;
   const usageRate = tickets ? Number(tickets.usageRate) : 0;
-  const grandPrizeDrawn = globalStats?.game.grandPrizeDrawn ?? false;
+  // /stats/global passe par le cache Redis : l'endpoint gagnant, lui, lit la
+  // base directement et fait donc foi dès la seconde qui suit le tirage.
+  const grandPrizeDrawn = grandPrizeWinner?.drawn ?? globalStats?.game.grandPrizeDrawn ?? false;
 
   return (
     <div className="min-h-[calc(100vh-3.75rem)] bg-surface py-8">
@@ -605,29 +629,85 @@ export default function AdminPage() {
           <Card className="lg:col-span-2">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Trophy className="h-5 w-5 text-gold-500" strokeWidth={1.5} />
-                Grand Tirage au Sort
+                <Trophy className="h-5 w-5" strokeWidth={1.5} />
+                Grand tirage au sort
               </CardTitle>
               <CardDescription>
-                Tirage du grand prix : 1 an de thé gratuit (360€)
+                Tirage du grand prix : un an de thé d&apos;une valeur de 360&nbsp;€
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-col items-center justify-center gap-4 rounded-card bg-gradient-to-r from-gold-50 to-terracotta-50 p-8 text-center">
+              {/* Aplat de surface plutôt que le dégradé or → terracotta : seul
+                  dégradé du site, il se confondait avec le fond teinté de la
+                  carte. La surface suit le thème et détache le panneau. */}
+              <div className="flex flex-col items-center justify-center gap-4 rounded-card bg-surface p-8 text-center">
                 {globalStats?.game.endDate && (
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-gold-600" strokeWidth={1.5} />
-                    <span className="text-stone-grey">
+                  <div className="flex items-center gap-2 text-stone-grey">
+                    <Calendar className="h-5 w-5 shrink-0" strokeWidth={1.5} />
+                    <span>
                       Fin du jeu : <strong>{formatDate(globalStats.game.endDate)}</strong>
                     </span>
                   </div>
                 )}
                 <p className="text-stone-grey">
-                  {canDraw?.participantsCount ?? globalStats?.users.participants ?? 0} participants
-                  éligibles · 1 chance par participant
+                  {grandPrizeWinner?.totalParticipants ??
+                    canDraw?.participantsCount ??
+                    globalStats?.users.participants ??
+                    0}{' '}
+                  participants éligibles · 1 chance par participant
                 </p>
                 {grandPrizeDrawn ? (
-                  <p className="font-semibold text-moss">✓ Le tirage au sort a été effectué</p>
+                  <div className="flex w-full flex-col items-center gap-4">
+                    <p className="flex items-center gap-2 font-semibold text-moss">
+                      <CircleCheck className="h-5 w-5 shrink-0" strokeWidth={1.5} aria-hidden="true" />
+                      Le tirage au sort a été effectué
+                    </p>
+                    {grandPrizeWinner?.winner ? (
+                      // Crème et non blanc translucide : un blanc fixe restait
+                      // blanc en thème sombre, sous un nom passé en clair.
+                      <div className="w-full max-w-md rounded-card border border-warm-beige bg-cream p-6">
+                        <p className="font-functional text-ui uppercase tracking-[2px] text-accent">
+                          Gagnant
+                        </p>
+                        <p className="mt-2 font-display text-h3 italic text-ink">
+                          {grandPrizeWinner.winner.firstName} {grandPrizeWinner.winner.lastName}
+                        </p>
+                        {/* Liens directs : ces coordonnées n'existent sur la page
+                            que pour contacter le gagnant. */}
+                        <ul className="mt-4 flex flex-col items-center gap-2 text-body">
+                          <li>
+                            <a
+                              href={`mailto:${grandPrizeWinner.winner.email}`}
+                              className="inline-flex items-center gap-2 break-all font-semibold text-accent underline underline-offset-2"
+                            >
+                              <Mail className="h-4 w-4 shrink-0" strokeWidth={1.5} aria-hidden="true" />
+                              {grandPrizeWinner.winner.email}
+                            </a>
+                          </li>
+                          {grandPrizeWinner.winner.phone && (
+                            <li>
+                              <a
+                                href={`tel:${grandPrizeWinner.winner.phone}`}
+                                className="inline-flex items-center gap-2 font-semibold text-accent underline underline-offset-2"
+                              >
+                                <Phone className="h-4 w-4 shrink-0" strokeWidth={1.5} aria-hidden="true" />
+                                {grandPrizeWinner.winner.phone}
+                              </a>
+                            </li>
+                          )}
+                        </ul>
+                        {grandPrizeWinner.drawnAt && (
+                          <p className="mt-4 text-caption text-stone-grey">
+                            Tirage effectué le {formatDateTime(grandPrizeWinner.drawnAt)}
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-caption text-stone-grey">
+                        Coordonnées du gagnant indisponibles.
+                      </p>
+                    )}
+                  </div>
                 ) : (
                   <>
                     <Button
@@ -647,11 +727,11 @@ export default function AdminPage() {
                       Effectuer le tirage au sort
                     </Button>
                     {!canDraw?.canDraw && canDraw?.reason && (
-                      <p className="text-xs text-stone-grey">{canDraw.reason}</p>
+                      <p className="text-caption text-stone-grey">{canDraw.reason}</p>
                     )}
                   </>
                 )}
-                <div className="mt-2 flex items-center gap-2 text-xs text-stone-grey">
+                <div className="mt-2 flex items-center gap-2 text-caption text-stone-grey">
                   <Scale className="h-4 w-4 shrink-0" strokeWidth={1.5} />
                   <span>
                     Tirage effectué côté serveur, horodaté et archivé, sous le contrôle de Maître

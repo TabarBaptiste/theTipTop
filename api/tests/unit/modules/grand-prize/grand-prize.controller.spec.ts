@@ -12,6 +12,7 @@ describe('GrandPrizeController', () => {
     getDrawInfo: jest.fn(),
     canDraw: jest.fn(),
     draw: jest.fn(),
+    getWinner: jest.fn(),
   };
 
   beforeEach(() => {
@@ -29,6 +30,12 @@ describe('GrandPrizeController', () => {
     mockGrandPrizeService.canDraw.mockResolvedValue({ canDraw: true, participantsCount: 5 });
 
     expect(await controller.canDraw()).toEqual({ canDraw: true, participantsCount: 5 });
+  });
+
+  it('getWinner should delegate to the service', async () => {
+    mockGrandPrizeService.getWinner.mockResolvedValue({ drawn: true });
+
+    expect(await controller.getWinner()).toEqual({ drawn: true });
   });
 
   it('draw should delegate to the service', async () => {

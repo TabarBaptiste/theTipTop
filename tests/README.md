@@ -9,6 +9,7 @@ fait que les relier entre elles.
 | Unitaires API | [api/tests/unit/](../api/tests/unit/) (`*.spec.ts`, miroir de `api/src/`) | Jest | Stage `Unit Tests` du pipeline (`npx jest` dans `api/`), sur toute branche |
 | Unitaires Webapp | [webapp/tests/unit/](../webapp/tests/unit/) (`*.test.ts(x)`, miroir de `webapp/src/`) | Jest | Idem, dans `webapp/` |
 | Fonctionnels API (intégration) | [api/test/](../api/test/) (`*.e2e-spec.ts`) | Jest + Supertest | `npm run test:e2e:ci --workspace api`, en local ou manuellement - **pas encore branché au pipeline** (voir [api/test/README.md](../api/test/README.md)) |
+| Simulation du tirage au sort | [api/scripts/simulate-grand-prize-draw.ts](../api/scripts/simulate-grand-prize-draw.ts) | ts-node + PostgreSQL | `npm run draw:simulate --workspace api`, à la main - **hors pipeline** (voir [plus bas](#la-simulation-du-tirage-au-sort)) |
 | End-to-end Webapp | `webapp/cypress/e2e/*.cy.ts` (5 specs) | Cypress | Stage `E2E Tests` du pipeline, contre PREPROD, uniquement sur `main` |
 | Performance | [tests/performance/](performance/) | k6 | `Jenkinsfile.k6`, planifié chaque semaine contre PREPROD |
 | Sécurité (dynamique) | [tests/security/](security/) | OWASP ZAP | Stage `OWASP ZAP` du pipeline, contre PREPROD |
@@ -47,3 +48,41 @@ npm respectif car ils y sont fortement couplés :
 
 `tests/` à la racine reste donc l'emplacement des suites qui ne dépendent
 d'aucun des deux workspaces applicatifs : performance et sécurité.
+
+## La simulation du tirage au sort
+
+Les tests unitaires du module `grand-prize` simulent Prisma : ils vérifient que
+le service appelle la bonne requête, pas que PostgreSQL en renvoie le bon
+résultat. Or l'équité du tirage - une seule chance par participant, quel que
+soit son nombre de participations (RG-05) - repose précisément sur un `groupBy`
+exécuté par la base. Seule une vraie base peut la prouver : c'est l'objet de ce
+script, qui n'a donc pas sa place dans une suite Jest.
+
+Il construit une population volontairement déséquilibrée, de 1 à 40
+participations par personne, puis vérifie cinq garanties :
+
+| Garantie | Ce qui est mesuré |
+|---|---|
+| Une chance par personne | Le `groupBy` réduit les participations au nombre exact de participants créés |
+| Uniformité | Écart maximal de victoires sur 200 000 tirages, sous une tolérance de quatre écarts-types |
+| Aucun profil avantagé | Taux de victoire par personne pour chaque profil, à moins de 10 % de l'attendu |
+| Un seul gagnant en concurrence | 20 tirages simultanés : une seule écriture aboutit |
+| Cycle de vie | Sur le vrai service : refus avant la clôture, tirage après, refus d'un second tirage |
+
+Le script sort en code 1 dès qu'une garantie échoue. Le nombre de tirages
+s'ajuste en argument : `npm run draw:simulate --workspace api -- 500000`.
+
+**Rien n'est conservé.** La population et le cycle de vie tournent dans des
+transactions annulées ; la configuration créée pour le test de concurrence est
+inactive, donc invisible de l'application, et supprimée à la fin. Le cache Redis
+est remplacé par un bouchon inerte : un tirage fictif, jamais validé, ne doit
+pas purger le cache de statistiques réel.
+
+**Quand le lancer :** après toute modification de
+`api/src/modules/grand-prize/`, et avant le tirage réel sous contrôle de
+l'huissier.
+
+**Où le lancer :** il vise la base de `DATABASE_URL`. À réserver au poste local
+ou à un environnement de test : les écritures sont annulées, mais la
+transaction du cycle de vie verrouille la configuration du jeu pendant
+l'exécution.
