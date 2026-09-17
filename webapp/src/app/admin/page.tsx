@@ -75,6 +75,20 @@ interface CanDraw {
   participantsCount?: number;
 }
 
+// GET /grand-prize/winner (Admin : coordonnées non masquées)
+interface GrandPrizeWinner {
+  drawn: boolean;
+  drawnAt?: string;
+  winner?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string | null;
+  };
+  totalParticipants?: number;
+}
+
 // GET /stats/emailing
 interface EmailingData {
   count: number;
@@ -206,6 +220,13 @@ export default function AdminPage() {
     refetchInterval: REFETCH_INTERVAL,
   });
 
+  // Gagnant du grand prix (coordonnées en clair, réservées à l'admin)
+  const { data: grandPrizeWinner } = useQuery<GrandPrizeWinner>({
+    queryKey: ['admin-grand-prize-winner'],
+    queryFn: async () => (await api.get('/grand-prize/winner')).data,
+    refetchInterval: REFETCH_INTERVAL,
+  });
+
   // Aperçu du segment emailing sélectionné (contacts consentants uniquement)
   const activeSegment = EMAILING_SEGMENTS.find((s) => s.key === segment) ?? EMAILING_SEGMENTS[0];
   const { data: emailingData, isFetching: loadingEmailing } = useQuery<EmailingData>({
@@ -222,6 +243,7 @@ export default function AdminPage() {
       );
       queryClient.invalidateQueries({ queryKey: ['admin-can-draw'] });
       queryClient.invalidateQueries({ queryKey: ['admin-stats-global'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-grand-prize-winner'] });
     },
     onError: (error: any) => {
       toast.error(error?.response?.data?.message || 'Le tirage au sort a échoué');
@@ -263,7 +285,9 @@ export default function AdminPage() {
 
   const tickets = globalStats?.tickets;
   const usageRate = tickets ? Number(tickets.usageRate) : 0;
-  const grandPrizeDrawn = globalStats?.game.grandPrizeDrawn ?? false;
+  // /stats/global passe par le cache Redis : l'endpoint gagnant, lui, lit la
+  // base directement et fait donc foi dès la seconde qui suit le tirage.
+  const grandPrizeDrawn = grandPrizeWinner?.drawn ?? globalStats?.game.grandPrizeDrawn ?? false;
 
   return (
     <div className="min-h-[calc(100vh-3.75rem)] bg-surface py-8">
@@ -623,11 +647,39 @@ export default function AdminPage() {
                   </div>
                 )}
                 <p className="text-stone-grey">
-                  {canDraw?.participantsCount ?? globalStats?.users.participants ?? 0} participants
-                  éligibles · 1 chance par participant
+                  {grandPrizeWinner?.totalParticipants ??
+                    canDraw?.participantsCount ??
+                    globalStats?.users.participants ??
+                    0}{' '}
+                  participants éligibles · 1 chance par participant
                 </p>
                 {grandPrizeDrawn ? (
-                  <p className="font-semibold text-moss">✓ Le tirage au sort a été effectué</p>
+                  <div className="space-y-3">
+                    <p className="font-semibold text-moss">✓ Le tirage au sort a été effectué</p>
+                    {grandPrizeWinner?.winner ? (
+                      <div className="rounded-card bg-white/70 p-4 text-left">
+                        <p className="text-xs uppercase tracking-wide text-stone-grey">Gagnant</p>
+                        <p className="font-display text-h3 text-ink">
+                          {grandPrizeWinner.winner.firstName} {grandPrizeWinner.winner.lastName}
+                        </p>
+                        <p className="text-sm text-stone-grey">{grandPrizeWinner.winner.email}</p>
+                        {grandPrizeWinner.winner.phone && (
+                          <p className="text-sm text-stone-grey">
+                            {grandPrizeWinner.winner.phone}
+                          </p>
+                        )}
+                        {grandPrizeWinner.drawnAt && (
+                          <p className="mt-2 text-xs text-stone-grey">
+                            Tirage du {formatDate(grandPrizeWinner.drawnAt)}
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-stone-grey">
+                        Coordonnées du gagnant indisponibles.
+                      </p>
+                    )}
+                  </div>
                 ) : (
                   <>
                     <Button
