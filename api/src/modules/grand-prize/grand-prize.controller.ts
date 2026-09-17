@@ -66,6 +66,43 @@ export class GrandPrizeController {
   }
 
   // ===========================================
+  // GAGNANT EN CLAIR (BACK-OFFICE)
+  // ===========================================
+  @Get('winner')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: 'Coordonnées complètes du gagnant du grand prix (Admin)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Gagnant non masqué, ou drawn=false si le tirage n’a pas eu lieu',
+    schema: {
+      properties: {
+        drawn: { type: 'boolean' },
+        drawnAt: { type: 'string', format: 'date-time' },
+        winner: {
+          type: 'object',
+          properties: {
+            id: { type: 'string' },
+            firstName: { type: 'string' },
+            lastName: { type: 'string' },
+            email: { type: 'string' },
+            phone: { type: 'string', nullable: true },
+          },
+        },
+        totalParticipants: { type: 'number' },
+      },
+    },
+  })
+  @ApiResponse({ status: 403, description: 'Accès réservé aux administrateurs' })
+  @ApiResponse({ status: 404, description: 'Gagnant introuvable' })
+  async getWinner() {
+    return this.grandPrizeService.getWinner();
+  }
+
+  // ===========================================
   // EFFECTUER LE TIRAGE AU SORT
   // ===========================================
   @Post('draw')

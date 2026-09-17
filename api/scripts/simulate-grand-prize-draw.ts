@@ -22,8 +22,18 @@ import { randomInt } from 'node:crypto';
 
 import { GrandPrizeService } from '../src/modules/grand-prize/grand-prize.service';
 import { PrismaService } from '../src/prisma/prisma.service';
+import { RedisService } from '../src/redis/redis.service';
 
 const prisma = new PrismaClient();
+
+/**
+ * Cache inerte : la simulation tourne dans une transaction annulée. Purger le
+ * vrai cache de stats pour un tirage qui n'est jamais validé effacerait des
+ * clés de production au nom d'un résultat fictif.
+ */
+const redisInerte = {
+  delByPattern: async () => undefined,
+} as unknown as RedisService;
 
 /** Nombre de tirages simulés. Plus il est grand, plus l'écart toléré est fin. */
 const DRAWS = Number(process.argv[2]) || 200_000;
@@ -183,7 +193,7 @@ async function verifierCycleDeVie(): Promise<string[]> {
   try {
     await prisma.$transaction(
       async (tx) => {
-        const service = new GrandPrizeService(tx as unknown as PrismaService);
+        const service = new GrandPrizeService(tx as unknown as PrismaService, redisInerte);
 
         await tx.gameConfig.updateMany({ data: { isActive: false } });
 
