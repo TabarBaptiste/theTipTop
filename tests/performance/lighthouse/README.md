@@ -2,7 +2,7 @@
 
 Les tests k6 du dossier voisin mesurent ce que le serveur encaisse. Lighthouse
 mesure ce que le visiteur perçoit : le temps avant que la page soit lisible,
-puis utilisable. Les deux sont nécessaires et ne se remplacent pas — un backend
+puis utilisable. Les deux sont nécessaires et ne se remplacent pas - un backend
 qui tient 1600 utilisateurs simultanés peut servir une page qui met cinq
 secondes à s'afficher.
 
@@ -48,7 +48,7 @@ Relevé sur l'accueil, après la refonte, médiane de trois passes. La colonne
 | TBT | 720 ms | 854 ms |
 
 Les deux campagnes n'ont pas tourné sous la même version de Lighthouse, et la
-dev est hébergée sur un VPS partagé dont le temps de réponse varie — l'écart de
+dev est hébergée sur un VPS partagé dont le temps de réponse varie - l'écart de
 performance, quatre points, tient dans le bruit. Le CLS et les trois scores à
 100, eux, sont stables.
 
@@ -56,7 +56,7 @@ performance, quatre points, tient dans le bruit. Le CLS et les trois scores à
 
 La ligne LCP du tableau, 2,7 s puis 5,2 s, se lit comme une régression franche.
 Elle n'en est pas une. Vérification faite en construisant les deux versions du
-site — avant et après la refonte — et en les mesurant l'une après l'autre sur la
+site - avant et après la refonte - et en les mesurant l'une après l'autre sur la
 même machine :
 
 | | Avant | Après |
@@ -73,7 +73,7 @@ Deux choses en ressortent.
 d'une seule version. Le 2,7 s de l'audit initial était une passe favorable, pas
 un état à retrouver.
 
-**Le délai de rendu, lui, précède la refonte** — il est même un peu plus court
+**Le délai de rendu, lui, précède la refonte** - il est même un peu plus court
 après. Il vaut 3,8 à 4,5 s dans les deux versions et représente à lui seul plus
 de 80 % du LCP : la page est reçue vite, elle attend le fil principal pour
 s'afficher.
@@ -81,7 +81,7 @@ s'afficher.
 Ce qui a changé, c'est l'identité de l'élément mesuré. Avant, le plus grand bloc
 peint était le paragraphe d'accroche du héros ; depuis la refonte c'est la photo.
 Une photo doit être téléchargée avant d'être peinte, ce qui ajoute environ 400 ms
-que le texte ne payait pas — mais elle est aussi ce que le visiteur vient voir,
+que le texte ne payait pas - mais elle est aussi ce que le visiteur vient voir,
 et le LCP mesure désormais la bonne chose.
 
 ### Ce qui coûte réellement
@@ -94,7 +94,7 @@ Relevé du fil principal, identique dans les deux versions :
 | Évaluation du script | 1191 ms | 1552 ms |
 
 Le poste le plus lourd n'est pas le JavaScript, c'est le calcul de style et de
-mise en page — sur les deux versions. Le paquet livré n'a d'ailleurs presque pas
+mise en page - sur les deux versions. Le paquet livré n'a d'ailleurs presque pas
 bougé : 855 Ko avant, 870 Ko après, pour 18 scripts dans les deux cas.
 
 La piste, si l'on veut ce délai plus court : trois des huit sections de

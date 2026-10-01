@@ -203,9 +203,9 @@ Ce projet intègre une démarche RSE :
 
 ## 👥 Auteurs
 
-- **Baptiste Tabar Labonne** — [@TabarBaptiste](https://github.com/TabarBaptiste)
-- **Harena Andriamananjara Mandimby** — [@AndriamHarena](https://github.com/AndriamHarena)
-- **Ibrahima Elhadj Bah** — [@Ibrahima17](https://github.com/Ibrahima17)
+- **Baptiste Tabar Labonne** - [@TabarBaptiste](https://github.com/TabarBaptiste)
+- **Harena Andriamananjara Mandimby** - [@AndriamHarena](https://github.com/AndriamHarena)
+- **Ibrahima Elhadj Bah** - [@Ibrahima17](https://github.com/Ibrahima17)
 
 ## 📄 Licence
 
