@@ -149,6 +149,6 @@ ciPipeline(
     // production, et enverrait les participations des joueurs dans la base de
     // preproduction. Le front est donc reconstruit pour PROD ; l'API, elle,
     // lit toute sa configuration au demarrage et reste promue sans
-    // reconstruction. Voir docs/01-ecarts-vps-cst.md dans le depot infra.
+    // reconstruction.
     webappIsEnvSpecific: true
 )

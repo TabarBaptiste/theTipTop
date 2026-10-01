@@ -45,14 +45,12 @@ theTipTop/
 ├── 📂 docs/                           # Documentation technique
 │   ├── 📄 00-ONBOARDING.md
 │   ├── 📄 01-SPECIFICATIONS-TECHNIQUES.md
-│   ├── 📄 01-ecarts-vps-cst.md
 │   ├── 📄 02-ARCHITECTURE.md
 │   ├── 📄 03-GUIDE-DEPLOIEMENT.md
 │   ├── 📄 04-RGPD-ACCESSIBILITE.md
 │   ├── 📄 05-PROTOCOLES-DE-TESTS.md
 │   ├── 📄 06-TESTS-UTILISATEURS.md
-│   ├── 📄 07-AUDIT-DU-SITE.md
-│   └── 📂 context/                    # Cahiers des charges et contexte
+│   └── 📄 07-AUDIT-DU-SITE.md
 │
 ├── 📂 api/                            # Backend NestJS
 │   ├── 📄 package.json
@@ -162,16 +160,6 @@ npm run dev
 | API Docs | http://localhost:3001/api/docs | https://thetiptop-api.wk-archi-o24a-4-5-g1.fr/api/docs |
 | Adminer | http://localhost:8080 | - |
 
-## 🔐 Comptes de test
-
-Après le seed de la base de données :
-
-| Rôle | Email | Mot de passe |
-|------|-------|--------------|
-| Admin | admin@thetiptop.fr | Test1234! |
-| Employé | employe@thetiptop.fr | Test1234! |
-| Client | client@test.fr | Test1234! |
-
 ## 📝 Scripts disponibles
 
 ### API
@@ -198,7 +186,6 @@ npm run lint          # Vérification ESLint
 |----------|-------------|
 | [Onboarding](docs/00-ONBOARDING.md) | Installation et configuration d'un nouveau poste |
 | [Spécifications Techniques](docs/01-SPECIFICATIONS-TECHNIQUES.md) | Choix techniques et justifications |
-| [Écarts VPS / CST](docs/01-ecarts-vps-cst.md) | Journal des divergences entre le VPS et le CST |
 | [Architecture](docs/02-ARCHITECTURE.md) | Diagrammes et flux de données |
 | [Guide de Déploiement](docs/03-GUIDE-DEPLOIEMENT.md) | Instructions de mise en production |
 | [RGPD & Accessibilité](docs/04-RGPD-ACCESSIBILITE.md) | Conformité légale et WCAG 2.1 |
