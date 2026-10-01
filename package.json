@@ -2,7 +2,7 @@
   "name": "thetiptop",
   "version": "1.1.0",
   "description": "TheTipTop - Promotional Contest Platform",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "private": true,
   "workspaces": [
     "api",

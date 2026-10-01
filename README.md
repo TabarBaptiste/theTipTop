@@ -209,4 +209,4 @@ Ce projet intègre une démarche RSE :
 
 ## 📄 Licence
 
-Distribué sous licence MIT. Voir [LICENSE](LICENSE).
+Tous droits réservés. Ce dépôt est publié à titre de portfolio, pour consultation uniquement : toute copie ou réutilisation est interdite sans l'accord écrit des auteurs. Voir [LICENSE](LICENSE).
