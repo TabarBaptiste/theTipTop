@@ -243,7 +243,6 @@ dans `api/` et `webapp/` - **jamais à la racine**.
 | Fichier | Contenu |
 |---------|---------|
 | `.claude/CLAUDE.md` | Règles de travail (IA et humains) + conventions techniques |
-| `docs/context/` | Cahier des charges et specs client d'origine |
 | `.github/instructions/copilot-instructions.instructions.md` | Équivalent CLAUDE.md pour GitHub Copilot |
 
 ---
