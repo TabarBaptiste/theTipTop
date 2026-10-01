@@ -38,16 +38,21 @@ Application web complète pour le jeu-concours de Thé Tip Top, organisé à l'o
 ```
 theTipTop/
 ├── 📄 README.md                       # Ce fichier
-├── 📄 thetiptop.md                    # Cahier des charges original
 ├── 📄 Jenkinsfile                     # Pipeline CI/CD
 ├── 📄 docker-compose.yml              # Dev environment
 ├── 📄 docker-compose.prod.yml         # Production environment
 │
 ├── 📂 docs/                           # Documentation technique
+│   ├── 📄 00-ONBOARDING.md
 │   ├── 📄 01-SPECIFICATIONS-TECHNIQUES.md
+│   ├── 📄 01-ecarts-vps-cst.md
 │   ├── 📄 02-ARCHITECTURE.md
 │   ├── 📄 03-GUIDE-DEPLOIEMENT.md
-│   └── 📄 04-RGPD-ACCESSIBILITE.md
+│   ├── 📄 04-RGPD-ACCESSIBILITE.md
+│   ├── 📄 05-PROTOCOLES-DE-TESTS.md
+│   ├── 📄 06-TESTS-UTILISATEURS.md
+│   ├── 📄 07-AUDIT-DU-SITE.md
+│   └── 📂 context/                    # Cahiers des charges et contexte
 │
 ├── 📂 api/                            # Backend NestJS
 │   ├── 📄 package.json
@@ -82,18 +87,19 @@ theTipTop/
 ## 🛠️ Technologies
 
 ### Backend (API)
-- **Framework** : NestJS 10 avec TypeScript
-- **ORM** : Prisma avec PostgreSQL 16
+- **Framework** : NestJS 11 avec TypeScript 5
+- **ORM** : Prisma 5 avec PostgreSQL 16
 - **Auth** : Passport.js (JWT + OAuth2 Google/Facebook)
-- **Cache** : Redis
+- **Cache** : Redis (ioredis)
 - **Documentation** : Swagger/OpenAPI
+- **Tests** : Jest
 
 ### Frontend (WebApp)
-- **Framework** : Next.js 16 (App Router)
-- **Styling** : TailwindCSS + Shadcn/ui
+- **Framework** : Next.js 16 (App Router) avec React 18 et TypeScript 5
+- **Styling** : Tailwind CSS 3 + Shadcn/ui
 - **State** : Zustand + React Query
 - **Forms** : React Hook Form + Zod
-- **Tests** : Cypress E2E
+- **Tests** : Jest + Cypress E2E
 
 ### Infrastructure
 - **Containerisation** : Docker + Docker Compose
@@ -113,8 +119,8 @@ theTipTop/
 
 ```bash
 # Cloner le projet
-git clone https://votre-repo/thetiptop.git
-cd thetiptop
+git clone https://github.com/TabarBaptiste/theTipTop.git
+cd theTipTop
 
 # Copier les fichiers d'environnement
 cp api/.env.example api/.env
@@ -141,7 +147,7 @@ npx prisma db seed
 npm run start:dev
 
 # Frontend (nouveau terminal)
-cd webapp
+cd ../webapp
 npm install
 cp .env.example .env
 npm run dev
@@ -190,36 +196,15 @@ npm run lint          # Vérification ESLint
 
 | Document | Description |
 |----------|-------------|
+| [Onboarding](docs/00-ONBOARDING.md) | Installation et configuration d'un nouveau poste |
 | [Spécifications Techniques](docs/01-SPECIFICATIONS-TECHNIQUES.md) | Choix techniques et justifications |
+| [Écarts VPS / CST](docs/01-ecarts-vps-cst.md) | Journal des divergences entre le VPS et le CST |
 | [Architecture](docs/02-ARCHITECTURE.md) | Diagrammes et flux de données |
 | [Guide de Déploiement](docs/03-GUIDE-DEPLOIEMENT.md) | Instructions de mise en production |
-| [RGPD & Accessibilité](docs/04-RGPD-ACCESSIBILITE.md) | Conformité légale et WCAG 2.1
-
-## ⚡ Technologies
-
-### Backend (API)
-
-- **Framework** : NestJS 11
-- **Base de données** : PostgreSQL 16
-- **ORM** : Prisma
-- **Authentication** : Passport.js (JWT + OAuth2)
-- **Documentation** : Swagger/OpenAPI
-- **Tests** : Jest
-
-### Frontend (WebApp)
-
-- **Framework** : Next.js 16 (App Router)
-- **UI** : TailwindCSS + Shadcn/ui
-- **State** : Zustand
-- **Formulaires** : React Hook Form + Zod
-- **Tests** : Jest + Cypress
-
-### Infrastructure
-
-- **Conteneurisation** : Docker
-- **Reverse Proxy** : Traefik
-- **CI/CD** : Jenkins (workflow Furious Ducks)
-- **Monitoring** : Prometheus + Grafana
+| [RGPD & Accessibilité](docs/04-RGPD-ACCESSIBILITE.md) | Conformité légale et WCAG 2.1 |
+| [Protocoles de Tests](docs/05-PROTOCOLES-DE-TESTS.md) | Tests de charge, de régression et de sécurité |
+| [Tests Utilisateurs](docs/06-TESTS-UTILISATEURS.md) | Protocole de tests utilisateurs |
+| [Audit du Site](docs/07-AUDIT-DU-SITE.md) | Performance, SEO, accessibilité et sécurité |
 
 ## 🌿 Démarche RSE
 
@@ -229,8 +214,12 @@ Ce projet intègre une démarche RSE :
 - **Accessibilité** : WCAG 2.1 AA
 - **Performance** : Score Lighthouse > 90
 
-## 📝 Licence
+## 👥 Auteurs
 
-Projet développé par l'agence **Furious Ducks** pour **Thé Tip Top**.
+- **Baptiste Tabar Labonne** — [@TabarBaptiste](https://github.com/TabarBaptiste)
+- **Harena Andriamananjara Mandimby** — [@AndriamHarena](https://github.com/AndriamHarena)
+- **Ibrahima Elhadj Bah** — [@Ibrahima17](https://github.com/Ibrahima17)
 
-© 2026 - Tous droits réservés
+## 📄 Licence
+
+Distribué sous licence MIT. Voir [LICENSE](LICENSE).

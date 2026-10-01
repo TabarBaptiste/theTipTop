@@ -2,9 +2,9 @@
   "name": "thetiptop-api",
   "version": "1.1.0",
   "description": "API pour le jeu-concours Thé Tip Top",
+  "license": "MIT",
   "author": "Furious Ducks",
   "private": true,
-  "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"tests/**/*.ts\"",
